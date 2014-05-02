@@ -1,0 +1,17 @@
+body{
+    margin:0; padding:0;
+}
+
+/*default page*/
+#mainbox{
+/*    position:relative;*/
+}
+#map{
+    margin-top:4em;
+    position:absolute;
+    top:0; bottom:0; width:100%;left:0;right:0;
+}
+
+.navbar-inverse{
+    border-radius:0;
+}
