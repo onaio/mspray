@@ -1,6 +1,14 @@
+
+
 body{
     margin:0; padding:0;
+    font-family: 'Droid Sans', sans-serif;;
 }
+
+a {
+    color: #fff;
+}
+
 .percent{
     font-size:1.3em;
     font-weight:600;
@@ -20,6 +28,19 @@ body{
     width:100%;
 }
 
+.navbar-inverse .navbar-brand {
+color: #fff;
+}
+
+.navbar-inverse .navbar-nav>li>a {
+color: #FFF;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 22px;
+   
+}
 .navbar-inverse{
     background:#222222;
     border-radius:0;
@@ -48,7 +69,17 @@ body{
     padding-bottom:2px;
 }
 
+.sidebar-nav  {
+    color: #FFF;
+    font-weight: 700;
+}
+
 .toggle-sidebar{
     display:none;
     width:0;
 }
+
+#canvas .circle {
+            display: inline-block;
+            margin: 1em;
+        }
