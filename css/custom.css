@@ -73,6 +73,11 @@ color: #FFF;
     color: #FFF;
     font-weight: 700;
 }
+.sidebar-nav a:hover {
+    color: #000;
+    background: #AAAAAA;
+
+}
 
 .toggle-sidebar{
     display:none;
