@@ -8,15 +8,18 @@
 <script src="js/circles.js"></script>
 <script src='js/bootstrap.min.js'></script>
 
+
 <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.js'></script>
+<script src='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.js'></script>
 <script src='//cdnjs.cloudflare.com/ajax/libs/d3/3.4.6/d3.min.js'></script>
 <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
 <script type="text/javascript" src="js/google.js"></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.2/mapbox.css' rel='stylesheet' />
+
+<link href='//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-locatecontrol/v0.24.0/L.Control.Locate.css' rel='stylesheet' />
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
 <link href='http://fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="css/bootstrap.min.css"/>
-
 <link rel="stylesheet" href="css/custom.css"/>
 <script>
 $(document).ready(function(){
@@ -45,11 +48,26 @@ $("#menu-toggle").click(function(e) {
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
- 
 
           <ul class="nav navbar-nav pull-right">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Target Areas <b class="caret"></b></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Province<b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Central Province</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">District <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Chimbombo</a></li>
+                <li><a href="#">Kabwe</a></li>
+                <li><a href="#">Mumbwa</a></li>
+                <li><a href="#">Mukushi</a></li>
+                <li><a href="#">Serenje</a></li>
+              </ul>
+            </li>
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Target Area<b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="#">Chimbombo 1</a></li>
                 <li><a href="#">Chimbombo 2</a></li>
@@ -71,6 +89,21 @@ $("#menu-toggle").click(function(e) {
     
     <!-- Sidebar -->
     <div id="sidebar-wrapper" class="toggle-sidebar">
+
+<ul class="nav" >
+     <li class="dropdown">
+    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+      Sprayed <span class="caret"></span>
+    </a>
+    <ul class="dropdown-menu">
+              <li><a href="">Sprayed</a></li>
+              <li><a href="">Refused</a></li>
+              <li><a href="">Locked</a></li>
+              <li><a href="">Other</a></li>
+    </ul>
+  </li>
+</ul>
+   
       <ul class="nav" id="sidebar-nav">
               <li><a href="?day=0" >Day &nbsp;0</a></li>
               <li><a href="?day=1">Day &nbsp;1</a></li>
@@ -87,12 +120,12 @@ $("#menu-toggle").click(function(e) {
   </div>
 
   <script src="js/app.js"></script>
-
+     <br><br><br>
+     <center>
+      <a id="" href="#" class=""><i class="glyphicon glyphicon-download"></i> &nbsp; Download Data</a></center>
        
     </div>
 <div>
-
-
 
 
 

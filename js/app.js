@@ -3,7 +3,7 @@ var MYAPP = {};
 MYAPP.sprayData = null;
 MYAPP.hhData = null;
 
-MYAPP.day = 1;
+MYAPP.day = 0;
 MYAPP.hh_sprayed = 0;
 MYAPP.hh_cnt = 0;
 MYAPP.spray_perc = 0;
@@ -11,6 +11,9 @@ MYAPP.spray_perc = 0;
 var params = {};
 
 var myDay = location.search.split('day=')[1]
+
+
+
 
 if (myDay) {
   MYAPP.day = parseInt(myDay.replace("\/", ""));
@@ -63,11 +66,19 @@ function loadSprayData() {
 // load household points
 
 var map = L.map('map').setView([-15.2164,28.2315], 15);
+
+var legend = L.control({position: 'bottomright'});
+L.control.locate().addTo(map);
 map.addLayer(new L.Google);
+
+
+L.mapbox.tileLayer('ona.q7gphkt9').addTo(map);
 
 loadSprayData();
 loadHH();
+buildLegend();
 loadDay();
+
 
 function loadDay() {
   for (var i=1; i<=MYAPP.day; i++) {
@@ -75,26 +86,22 @@ function loadDay() {
   }
   
 
-drawCircle();
+
 };
 
-console.log(MYAPP.hh_sprayed);
 
+drawCircle();
  
-
-
-
-
-  
 
 function drawCircle() {
 
+
 Circles.create({
     id:         'circles-1',
-    percentage: Math.round(MYAPP.spray_perc*100),
+    percentage: 32,
     radius:     60,
     width:      15,
-    number:     Math.round(MYAPP.spray_perc*100),
+    number:     32,
     text:       '%',
     colors:     ['#AAAAAA', '#2ECC40'],
     duration:   300
@@ -103,7 +110,7 @@ Circles.create({
 
 
 var hhOptions = {
-    radius: 3,
+    radius: 4,
     fillColor: "#FFDC00",
     color: "#222",
     weight: 1,
@@ -112,13 +119,14 @@ var hhOptions = {
 };
 
 var sprayOptions = {
-    radius: 3,
+    radius: 4,
     fillColor: "red",
     color: "#222",
     weight: 1,
     opacity: 1,
     fillOpacity: 1.
 };
+
 
 
 
@@ -143,12 +151,34 @@ function getStyle(feature) {
 }
 
 
+function buildLegend () {
+    if(legend.getContainer() !== undefined) {
+        legend.removeFrom(map);    
+    }
+    
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'info legend'),
+            labels = [];
+            labels.push('<i style="background:#2ECC40"></i> 100%');
+            labels.push('<i style="background:#FFDC00"></i> 66-99% ');
+            labels.push('<i style="background:#FF851B"></i> 33-66% ');
+            labels.push('<i style="background:#FF4136"></i> 1-33% ');
+            labels.push('<i style="background:#CCCCCC"></i> 0%');
+        div.innerHTML = labels.join('<br><br>');
+        return div;
+    };
+
+    legend.addTo(map);
+};
+
 function getColor(d) {
     	
       MYAPP.hh_sprayed = MYAPP.hh_sprayed + sprayCount(MYAPP.day,d)
       MYAPP.hh_cnt = MYAPP.hh_cnt + d['hh-cnt']
-      //MYAPP.spray_perc = MYAPP.hh_sprayed / MYAPP.hh_cnt;
-       
+      console.log(MYAPP.spray_perc = MYAPP.hh_sprayed / MYAPP.hh_cnt);
+     
+   
+
       var spray_rate = sprayRate(MYAPP.day,d)
     
         return spray_rate === 1  ? '#2ECC40' :
