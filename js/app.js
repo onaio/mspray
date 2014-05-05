@@ -8,18 +8,18 @@ MYAPP.hh_sprayed = 0;
 MYAPP.hh_cnt = 0;
 MYAPP.spray_perc = 0;
 
+var geojson;
+var sprayLayer;  // buffer area
+
 var params = {};
 
 var myDay = location.search.split('day=')[1]
-
-
 
 
 if (myDay) {
   MYAPP.day = parseInt(myDay.replace("\/", ""));
 
 }
-
 
 
 function loadHH() {
@@ -48,7 +48,7 @@ function loadSprayData() {
 
     if (MYAPP.sprayData === null) {
         d3.json("data/chimbombo-1-spray.geojson", function (json) {
-                var sprayLayer = L.geoJson(json,  {
+                sprayLayer = L.geoJson(json,  {
       			style: getStyle,
       			onEachFeature: onEachFeature
 			}).addTo(map);
@@ -84,10 +84,8 @@ function loadDay() {
   for (var i=1; i<=MYAPP.day; i++) {
     loadSprayPoints(i);
   }
-  
-
-
 };
+
 
 
 drawCircle();
@@ -120,7 +118,7 @@ var hhOptions = {
 
 var sprayOptions = {
     radius: 4,
-    fillColor: "red",
+    fillColor: "#2ECC40",
     color: "#222",
     weight: 1,
     opacity: 1,
@@ -128,16 +126,66 @@ var sprayOptions = {
 };
 
 
+// add info controller 
+var info = L.control();
+
+info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'info');
+    this.update();
+    return this._div;
+};
 
 
+info.update = function (props) {
+        if (props) {
+        var sprayed = props['day1-cnt'] + props['day2-cnt'] + props['day3-cnt'] + props['day4-cnt'];
+        var spray_percent = Math.round((sprayed / props['hh-cnt'])*100);
+        var hh_sprayed = spray_percent + '% (' + sprayed + '/' + props['hh-cnt'] +') HH sprayed';
+        }
+        this._div.innerHTML = (props ?
+        '<b>'+ hh_sprayed +'</b>'
+        : '');
+        
+};
+
+info.addTo(map);
+
+function highlightFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 3,
+        color: '#fff',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    if (!L.Browser.ie && !L.Browser.opera) {
+        layer.bringToFront();
+    }
+    info.update(layer.feature.properties);
+};
+
+function resetHighlight(e) {
+    sprayLayer.resetStyle(e.target);
+    info.update();
+};
 
 
-/*
-var sprayLayer = L.geoJson(MYAPP.sprayData,  {
-      style: getStyle,
-      onEachFeature: onEachFeature
-}).addTo(map);
-*/
+ function zoomToFeature(e) {
+      map.fitBounds(e.target.getBounds());
+  }
+
+
+function onEachFeature(feature, layer) {
+      layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+      });
+}
+
+
 
 function getStyle(feature) {
       return {
@@ -175,7 +223,7 @@ function getColor(d) {
     	
       MYAPP.hh_sprayed = MYAPP.hh_sprayed + sprayCount(MYAPP.day,d)
       MYAPP.hh_cnt = MYAPP.hh_cnt + d['hh-cnt']
-      console.log(MYAPP.spray_perc = MYAPP.hh_sprayed / MYAPP.hh_cnt);
+      //console.log(MYAPP.spray_perc = MYAPP.hh_sprayed / MYAPP.hh_cnt);
      
    
 
@@ -214,24 +262,7 @@ function sprayCount(day,d) {
 
 
 
-/*
-L.geoJson(someGeojsonFeature, {
-    pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, geojsonMarkerOptions);
-    }
-}).addTo(map);
-*/
 
 
-  function onEachFeature(feature, layer) {
-      layer.on({
-          //mousemove: mousemove,
-          //mouseout: mouseout,
-          click: zoomToFeature
-      });
-  }
 
- function zoomToFeature(e) {
-      map.fitBounds(e.target.getBounds());
-  }
 
