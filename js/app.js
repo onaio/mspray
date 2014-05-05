@@ -138,7 +138,8 @@ info.onAdd = function (map) {
 
 info.update = function (props) {
         if (props) {
-        var sprayed = props['day1-cnt'] + props['day2-cnt'] + props['day3-cnt'] + props['day4-cnt'];
+          var sprayed = sprayCount(MYAPP.day,props)
+        //var sprayed = props['day1-cnt'] + props['day2-cnt'] + props['day3-cnt'] + props['day4-cnt'];
         var spray_percent = Math.round((sprayed / props['hh-cnt'])*100);
         var hh_sprayed = spray_percent + '% (' + sprayed + '/' + props['hh-cnt'] +') HH sprayed';
         }
