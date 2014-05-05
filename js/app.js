@@ -58,6 +58,7 @@ function loadSprayData() {
 
 
 function loadDay() {
+    
     for (var i = 1; i <= MYAPP.day; i++) {
         loadSprayPoints(i);
     }
@@ -98,7 +99,6 @@ loadSprayData();
 loadHH();
 loadDay();
 
-console.log(MYAPP.hh_sprayed)
 
 
 function drawCircle(percent) {
