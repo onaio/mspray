@@ -1,1 +1,2 @@
-from .target_area import *  # noqa
+from .target_area import TargetArea  # noqa
+from .household import Household  # noqa
