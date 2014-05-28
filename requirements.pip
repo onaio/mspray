@@ -1,0 +1,10 @@
+django
+psycopg2
+south
+django_nose
+
+# dev
+coverage
+flake8
+ipython
+ipdb
