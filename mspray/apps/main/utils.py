@@ -10,8 +10,8 @@ def load_layer_mapping(model, shp_file, mapping, verbose=False):
 
 
 def load_area_layer_mapping(shp_file, verbose=False):
-    load_layer_mapping(TargetArea, shp_file, targetarea_mapping)
+    load_layer_mapping(TargetArea, shp_file, targetarea_mapping, verbose)
 
 
 def load_household_layer_mapping(shp_file, verbose=False):
-    load_layer_mapping(Household, shp_file, household_mapping)
+    load_layer_mapping(Household, shp_file, household_mapping, verbose)

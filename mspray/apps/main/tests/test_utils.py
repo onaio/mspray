@@ -11,13 +11,13 @@ class TestUtils(TestBase):
     def test_import_area_shapefile(self):
         count = TargetArea.objects.count()
 
-        utils.load_area_layer_mapping(self.area_shp)
+        utils.load_area_layer_mapping(self.area_shp, verbose=True)
 
         self.assertTrue(count + 1 == TargetArea.objects.count())
 
     def test_import_household_shapefile(self):
         count = Household.objects.count()
 
-        utils.load_household_layer_mapping(self.households_shp)
+        utils.load_household_layer_mapping(self.households_shp, verbose=True)
 
         self.assertTrue(count + 502 == Household.objects.count())
