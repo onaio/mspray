@@ -5,6 +5,7 @@ from django.test import TestCase, RequestFactory
 
 from mspray.apps.main import utils
 from mspray.apps.main.models.target_area import TargetArea
+from mspray.apps.main.models.household import Household
 
 
 class TestBase(TestCase):
@@ -27,3 +28,8 @@ class TestBase(TestCase):
         count = TargetArea.objects.count()
         utils.load_area_layer_mapping(self.area_shp, verbose=True)
         self.assertTrue(count + 1 == TargetArea.objects.count())
+
+    def _load_household_shapefile(self):
+        count = Household.objects.count()
+        utils.load_household_layer_mapping(self.households_shp, verbose=True)
+        self.assertTrue(count + 502 == Household.objects.count())
