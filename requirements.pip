@@ -1,0 +1,12 @@
+django
+psycopg2
+south
+django_nose
+djangorestframework-gis
+django-cors-headers
+
+# dev
+coverage
+flake8
+ipython
+ipdb
