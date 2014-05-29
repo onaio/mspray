@@ -3,11 +3,12 @@ from rest_framework import routers
 from django.contrib import admin
 admin.autodiscover()
 
-from mspray.apps.main.views import target_area
+from mspray.apps.main.views import target_area, household
 
 router = routers.DefaultRouter(trailing_slash=False)
 
-router.register(r'targetarea', target_area.TargetAreaViewSet)
+router.register(r'targetareas', target_area.TargetAreaViewSet)
+router.register(r'households', household.HouseholdViewSet)
 
 urlpatterns = patterns(
     '',
