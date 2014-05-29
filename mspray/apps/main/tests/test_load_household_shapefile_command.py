@@ -1,6 +1,6 @@
 from django.core.management import call_command
 
-from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.tests.test_base import TestBase
 
 
@@ -9,8 +9,8 @@ class TestUtils(TestBase):
         super(TestUtils, self).setUp()
 
     def test_import_shapefile(self):
-        count = Household.objects.count()
+        count = SprayDay.objects.count()
 
-        call_command('load_household_shapefile', self.households_shp)
+        call_command('load_spraydays_shapefile', self.spraydays_shp)
 
-        self.assertTrue(count + 502 == Household.objects.count())
+        self.assertTrue(count + 491 == SprayDay.objects.count())

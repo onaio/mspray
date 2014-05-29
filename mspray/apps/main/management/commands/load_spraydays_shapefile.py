@@ -8,7 +8,7 @@ from mspray.apps.main import utils
 
 class Command(BaseCommand):
     args = '<path to shapefile>'
-    help = _(u"Load a household shapefile")
+    help = _(u"Load a sprayday shapefile")
 
     def handle(self, *args, **options):
         for path in args:
@@ -17,4 +17,4 @@ class Command(BaseCommand):
             except Exception as e:
                 raise CommandError(_(u"Error: %(msg)s" % {"msg": e}))
             else:
-                utils.load_household_layer_mapping(path, verbose=True)
+                utils.load_sprayday_layer_mapping(path, verbose=True)
