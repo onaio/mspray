@@ -3,6 +3,7 @@ psycopg2
 south
 django_nose
 djangorestframework-gis
+django-cors-headers
 
 # dev
 coverage
