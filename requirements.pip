@@ -2,6 +2,7 @@ django
 psycopg2
 south
 django_nose
+djangorestframework-gis
 
 # dev
 coverage

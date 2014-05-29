@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'django_nose',
+    'rest_framework',
     'south',
     'mspray.apps.main'
 )
