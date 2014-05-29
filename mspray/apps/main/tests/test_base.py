@@ -1,7 +1,10 @@
 import os
 import mspray
 
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
+
+from mspray.apps.main import utils
+from mspray.apps.main.models.target_area import TargetArea
 
 
 class TestBase(TestCase):
@@ -17,3 +20,10 @@ class TestBase(TestCase):
             os.path.join(data_dir, 'shapefiles', 'hh-chimbombo-1.shp'))
         self.spraydays_shp = os.path.abspath(
             os.path.join(data_dir, 'shapefiles', 'spray-days.shp'))
+
+        self.factory = RequestFactory()
+
+    def _load_area_shapefile(self):
+        count = TargetArea.objects.count()
+        utils.load_area_layer_mapping(self.area_shp, verbose=True)
+        self.assertTrue(count + 1 == TargetArea.objects.count())
