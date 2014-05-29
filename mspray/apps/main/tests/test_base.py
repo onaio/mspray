@@ -6,6 +6,7 @@ from django.test import TestCase, RequestFactory
 from mspray.apps.main import utils
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.spray_day import SprayDay
 
 
 class TestBase(TestCase):
@@ -33,3 +34,8 @@ class TestBase(TestCase):
         count = Household.objects.count()
         utils.load_household_layer_mapping(self.households_shp, verbose=True)
         self.assertTrue(count + 502 == Household.objects.count())
+
+    def _load_spraydays_shapefile(self):
+        count = SprayDay.objects.count()
+        utils.load_sprayday_layer_mapping(self.spraydays_shp, verbose=True)
+        self.assertTrue(count + 491 == SprayDay.objects.count())
