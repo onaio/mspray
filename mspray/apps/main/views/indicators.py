@@ -39,12 +39,22 @@ class NumberOfHouseholdsIndicatorView(views.APIView):
     queryset = Household.objects.all()
     serializer_class = HouseholdSerializer
 
+    def get_indicator(self, target_area):
+        return {
+            'number_of_households':
+            NumberOfHouseholdsInTargetArea(target_area.geom).get_value(),
+            'target_area': target_area.name
+        }
+
     def get(self, request, *args, **kwargs):
-        pk_target = request.QUERY_PARAMS.get('target', 1)
-        target_area = get_object_or_404(TargetArea, pk=pk_target)
-        data = {'number_of_households':
-                NumberOfHouseholdsInTargetArea(target_area.geom).get_value(),
-                'target_area': target_area.name
-                }
+        pk_target = request.QUERY_PARAMS.get('target', None)
+        data = []
+
+        if pk_target:
+            ta = get_object_or_404(TargetArea, pk=pk_target)
+            data = self.get_indicator(ta)
+        else:
+            for ta in TargetArea.objects.all():
+                data.append(self.get_indicator(ta))
 
         return Response(data)
