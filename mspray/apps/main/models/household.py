@@ -8,6 +8,7 @@ class Household(models.Model):
     descr = models.CharField(max_length=254)
     folder = models.CharField(max_length=100)
     geom = models.MultiPointField(srid=4326)
+    bgeom = models.PolygonField(srid=4326, null=True, blank=True)
 
     objects = models.GeoManager()
 

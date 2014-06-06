@@ -7,3 +7,9 @@ class HouseholdSerializer(serializers.GeoFeatureModelSerializer):
     class Meta:
         model = Household
         geo_field = 'geom'
+
+
+class BufferHouseholdSerializer(serializers.GeoFeatureModelSerializer):
+    class Meta:
+        model = Household
+        geo_field = 'bgeom'
