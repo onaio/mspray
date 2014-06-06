@@ -1,5 +1,6 @@
 var App = {
     SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    BUFFER_URI: "http://localhost:8000/households.json?buffer=true",
     TARGET_AREA_URI: "http://localhost:8000/targetareas.json",
     HOUSEHOLD_URI: "http://localhost:8000/households.json",
     hhOptions: {
@@ -63,6 +64,37 @@ var App = {
             .addTo(map);
         });
     },
+    loadBufferAreas: function(map) {
+        var hh_buffers = L.mapbox.featureLayer()
+            .loadURL(App.BUFFER_URI);
+
+        hh_buffers.on('ready', function(){
+            var geojson = hh_buffers.getGeoJSON();
+
+            L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.hhOptions);
+                },
+                onEachFeature: function(feature, layer){
+                    layer.on({
+                        mouseover: function(e){
+                            var layer = e.target;
+                            layer.setStyle({
+                                weight: 3,
+                                color: '#fff',
+                                dashArray: '',
+                                fillOpacity: 0.7
+                            });
+                        },
+                        mouseout: function(e){
+                            console.log(e.target);
+                        }
+                    });
+                }
+            })
+            .addTo(map);
+        });
+    },
     loadSprayPoints: function (map, day) {
         var url = App.SPRAY_DAYS_URI;
         if(day !== undefined){
@@ -91,8 +123,9 @@ var App = {
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
 
-        this.loadHouseholds(map);
-        this.loadSprayPoints(map, this.getDay());
+        // this.loadHouseholds(map);
+        this.loadBufferAreas(map);
+        // this.loadSprayPoints(map, this.getDay());
     }
 };
 
