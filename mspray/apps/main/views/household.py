@@ -32,8 +32,9 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
         if buffered == "true":
             self.object_list = self.filter_queryset(self.get_queryset())
             bf = MultiPolygon([item.bgeom for item in self.object_list])
+            data = [
+                json.loads(p.geojson) for p in bf.cascaded_union.simplify()]
 
-            return Response(
-                data=json.loads(bf.cascaded_union.simplify().geojson))
+            return Response(data=data)
 
         return super(HouseholdViewSet, self).list(request, *args, **kwargs)
