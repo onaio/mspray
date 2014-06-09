@@ -79,6 +79,7 @@ var App = {
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
+                            App.getHouseholdsFor(layer);
                             layer.setStyle({
                                 weight: 3,
                                 color: '#fff',
@@ -87,7 +88,7 @@ var App = {
                             });
                         },
                         mouseout: function(e){
-                            console.log(e.target);
+                            // console.log(e.target);
                         }
                     });
                 }
@@ -112,6 +113,14 @@ var App = {
                 }
             })
             .addTo(map);
+        });
+    },
+
+    getHouseholdsFor: function (layer) {
+        var uri = this.HOUSEHOLD_URI;
+        post_data = {in_bbox: layer.getBounds().toBBoxString()};
+        $.getJSON(uri, post_data, function(data){
+            console.log(data);
         });
     },
 
