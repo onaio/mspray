@@ -1,4 +1,5 @@
-from django.conf.urls import patterns, include, url
+from django.conf import settings
+from django.conf.urls import patterns, include, url, static
 from rest_framework import routers
 from django.contrib import admin
 admin.autodiscover()
@@ -22,4 +23,4 @@ urlpatterns = patterns(
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),
     url(r'^admin/', include(admin.site.urls)),
-)
+) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
