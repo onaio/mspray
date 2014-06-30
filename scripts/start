@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd /var/www/mspray
+python3 manage.py syncdb --noinput
+python3 manage.py migrate --noinput
+python3 manage.py collectstatic --noinput
+
+supervisord -n
