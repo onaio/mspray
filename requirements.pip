@@ -11,3 +11,6 @@ coverage
 flake8
 ipython
 ipdb
+
+# deployment
+uwsgi
