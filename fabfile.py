@@ -125,4 +125,3 @@ def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     sudo('chown -R ubuntu /var/log/uwsgi')
     sudo('mkdir -p /var/log/mspray')
     sudo('supervisorctl reload')
-    sudo('supervisorctl restart mspray')
