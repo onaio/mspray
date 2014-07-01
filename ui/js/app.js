@@ -1,8 +1,8 @@
 var App = {
-    SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
-    BUFFER_URI: "http://localhost:8000/households.json?buffer=true",
-    TARGET_AREA_URI: "http://localhost:8000/targetareas.json",
-    HOUSEHOLD_URI: "http://localhost:8000/households.json",
+    SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
+    BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
+    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
+    HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     hhOptions: {
         radius: 4,
         fillColor: "#FFDC00",
@@ -79,6 +79,7 @@ var App = {
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
+                            k = layer;
                             App.getHouseholdsFor(layer);
                             layer.setStyle({
                                 weight: 3,
