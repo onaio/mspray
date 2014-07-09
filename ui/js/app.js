@@ -135,6 +135,7 @@ var App = {
         
         //this.loadSprayPoints(map, this.getDay());
         this.loadHouseholds(map);
+        this.loadBufferAreas(map);
         
         $(document).ready(function(){
             var spray_lnk = $("#legend ul li a");
@@ -142,11 +143,7 @@ var App = {
             spray_lnk.click(function(e){
                 var spray_day = $(this).attr("href").slice(-1);
                 
-                //this.loadBufferAreas(map);
                 App.loadSprayPoints(map, spray_day);
-                
-                //alert(spray_day);
-                e.preventDefault();
             });
         });
     }
