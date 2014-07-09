@@ -150,6 +150,7 @@ var App = {
         this.loadTargetArea(map, targetid);
         this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map,targetid);
+        // this.loadSprayPoints(map, this.getDay());
     }
 };
 
