@@ -133,9 +133,9 @@ var App = {
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
 
-        // this.loadHouseholds(map);
-        this.loadBufferAreas(map);
-        // this.loadSprayPoints(map, this.getDay());
+        //this.loadHouseholds(map);
+        //this.loadBufferAreas(map);
+        this.loadSprayPoints(map, this.getDay());
     }
 };
 

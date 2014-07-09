@@ -1,2 +1,21 @@
-body { margin:0; padding:0; }
+body { margin:0; padding:0; font-family:Georgia; }
 #map { position:absolute; top:0; bottom:0; width:100%; }
+#legend{
+    background:rgba(0,0,0,0.6);
+    color:#FFF;
+    position:absolute;
+    top:0;right:0;
+    padding:0.6em;
+    width:5em;
+}
+#legend ul{
+    margin:0;
+    padding-left:1em;
+}
+#legend ul li a{
+    color:#fff;
+    display:block;
+    margin-bottom:1em;
+    text-decoration:none;
+}
+#legend ul li a:hover{ text-decoration:underline; }
