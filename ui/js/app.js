@@ -158,6 +158,7 @@ var App = {
 
         //this.loadSprayPoints(map, this.getDay());
         this.loadHouseholds(map);
+        this.loadBufferAreas(map);
 
         $(document).ready(function(){
             var spray_lnk = $("#legend ul li a");
@@ -167,6 +168,7 @@ var App = {
                 App.loadSprayPoints(map, spray_day);
                 //alert(spray_day);
                 e.preventDefault();
+=======
             });
         });
     }
