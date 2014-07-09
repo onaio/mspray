@@ -151,6 +151,22 @@ var App = {
         this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map,targetid);
         // this.loadSprayPoints(map, this.getDay());
+
+        var target_area = L.mapbox.featureLayer()
+            .loadURL(App.TARGET_AREA_URI)
+            .addTo(map);
+
+        $(document).ready(function(){
+            var spray_lnk = $("#legend ul li a");
+
+            spray_lnk.click(function(e){
+                var spray_day = $(this).attr("href").slice(-1);
+
+                console.log("Spray day: " + spray_day);
+
+                e.preventDefault();
+            });
+        });
     }
 };
 
