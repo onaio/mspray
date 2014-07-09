@@ -156,14 +156,16 @@ var App = {
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
 
+        //this.loadSprayPoints(map, this.getDay());
+        this.loadHouseholds(map);
+
         $(document).ready(function(){
             var spray_lnk = $("#legend ul li a");
 
             spray_lnk.click(function(e){
                 var spray_day = $(this).attr("href").slice(-1);
-
-                console.log("Spray day: " + spray_day);
-
+                App.loadSprayPoints(map, spray_day);
+                //alert(spray_day);
                 e.preventDefault();
             });
         });
