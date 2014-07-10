@@ -1,5 +1,1 @@
-static
-*.pyc
-__pycache__
-local_settings.py
-*.bak
+.project
