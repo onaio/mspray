@@ -168,7 +168,6 @@ var App = {
                 App.loadSprayPoints(map, spray_day);
                 //alert(spray_day);
                 e.preventDefault();
-=======
             });
         });
     }
