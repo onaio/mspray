@@ -139,6 +139,16 @@ var App = {
         });
     },
 
+    getSprayCount: function (day){
+        var counter = 0, i =0;
+        for (; i < points.features.length; i++){
+            if(points.features[i].properties.day === day) {
+                counter+=1;
+            }
+        }
+        return counter;
+    },
+
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
