@@ -3,3 +3,4 @@ static
 __pycache__
 local_settings.py
 *.bak
+data
