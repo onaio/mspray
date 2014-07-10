@@ -1,5 +1,7 @@
 import json
 
+from django.shortcuts import get_object_or_404
+
 from django.contrib.gis.geos import MultiPolygon
 
 from rest_framework import viewsets
@@ -7,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework_gis.filters import InBBOXFilter
 
 from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.household import (
     HouseholdSerializer, BufferHouseholdSerializer)
 
@@ -19,9 +22,14 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
     bbox_filter_include_overlapping = True  # Optional
 
     def filter_queryset(self, queryset):
-        distance = 0.00039
+        distance = 0.00009
 
         buffered = self.request.QUERY_PARAMS.get('buffer')
+        targetid = self.request.QUERY_PARAMS.get('target_area')
+
+        if targetid:
+            target = get_object_or_404(TargetArea, targetid=targetid)
+            queryset = queryset.filter(geom__contained=target.geom)
 
         if buffered == "true":
             self.serializer_class = BufferHouseholdSerializer
