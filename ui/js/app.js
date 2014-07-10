@@ -11,6 +11,12 @@ var App = {
         opacity: 1,
         fillOpacity: 1
     },
+    bufferOptions: {
+        weight: 3,
+        color: '#fff',
+        dashArray: '',
+        fillOpacity: 0.4
+    },
     sprayOptions: {
         radius: 4,
         fillColor: "#2ECC40",
@@ -76,25 +82,16 @@ var App = {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
-                style: App.hhOptions,
+                style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
                             k = layer;
-                            // App.getHouseholdsFor(layer);
-                            layer.setStyle({
-                                weight: 3,
-                                color: '#fff',
-                                dashArray: '',
-                                fillOpacity: 0.7
-                            });
+                            layer.setStyle( {fillOpacity: 0.7} );
                         },
                         mouseout: function(e){
-                            //mouseOut = { fillOpacity: 0, weight:0 };
-                            //areaLayer.setStyle(mouseOut);
-                            areaLayer.resetStyle(e.target);
-                            console.log("Hovered out!");
+                            areaLayer.setStyle(App.bufferOptions);
                         }
                     });
                 }
