@@ -52,10 +52,13 @@ var App = {
     },
     getDay: function () {
         return this.locationParams().day;
-	},
-    loadHouseholds: function(map) {
+    },
+    getTargetAreaId: function(){
+        return this.locationParams().target_area;
+    },
+    loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
-            .loadURL(App.HOUSEHOLD_URI);
+            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
@@ -68,10 +71,9 @@ var App = {
             .addTo(map);
         });
     },
-    
-    loadBufferAreas: function(map) {
+    loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI);
+            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
@@ -129,6 +131,18 @@ var App = {
     	
     },
 
+    loadGoogleMapLayer: function(){
+        var map = new google.maps.Map(document.getElementById('map'), {
+            center: new google.maps.LatLng(40.718217,-73.998284),
+            zoom: 13,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        });
+    },
+
+    clearMapLayers: function(layer){
+
+    },
+
     getHouseholdsFor: function (layer) {
         var uri = this.HOUSEHOLD_URI;
         post_data = {in_bbox: layer.getBounds().toBBoxString()};
@@ -137,25 +151,51 @@ var App = {
         });
     },
 
+    getSprayCount: function (day){
+        var counter = 0, i =0;
+        for (; i < points.features.length; i++){
+            if(points.features[i].properties.day === day) {
+                counter+=1;
+            }
+        }
+        return counter;
+    },
+
+    loadTargetArea: function(map, targetid) {
+        var target_area = L.mapbox.featureLayer()
+            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        target_area.on('ready', function(){
+            var bounds = target_area.getBounds();
+            map.fitBounds(bounds);
+        }).addTo(map);
+    },
+
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio')
-            .setView([-15.2164, 28.2315], 15);
+            ;//.setView([-14.2164, 29.2315], 10);
+
+        var targetid = this.getTargetAreaId();
+
+        if (targetid === undefined){
+            targetid = 1;
+        }
+
+        this.loadTargetArea(map, targetid);
+        this.loadHouseholds(map, targetid);
+        this.loadBufferAreas(map,targetid);
+        // this.loadSprayPoints(map, this.getDay());
 
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
-        
-        //this.loadSprayPoints(map, this.getDay()); // Loads default day in URL
-        this.loadHouseholds(map);
-        this.loadBufferAreas(map);
-        
+
         $(document).ready(function(){
             var spray_lnk = $("#legend ul li a");
             
             spray_lnk.click(function(e){
-                var spray_day = $(this).attr("href").slice(-1);
-                
                 App.loadSprayPoints(map, spray_day);
+                //alert(spray_day);
+                e.preventDefault();
             });
         });
     }
