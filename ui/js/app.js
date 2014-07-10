@@ -11,7 +11,6 @@ var App = {
         opacity: 1,
         fillOpacity: 1
     },
-
     sprayOptions: {
         radius: 4,
         fillColor: "#2ECC40",
@@ -21,7 +20,6 @@ var App = {
         fillOpacity: 1
     },
     sprayAltOptions: {
-
         weight: 2,
         opacity: 0.1,
         color: 'black',
@@ -64,6 +62,7 @@ var App = {
             .addTo(map);
         });
     },
+    
     loadBufferAreas: function(map) {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI);
@@ -71,16 +70,17 @@ var App = {
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
 
-            L.geoJson(geojson, {
+            var areaLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
+                style: App.hhOptions,
                 onEachFeature: function(feature, layer){
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
                             k = layer;
-                            App.getHouseholdsFor(layer);
+                            // App.getHouseholdsFor(layer);
                             layer.setStyle({
                                 weight: 3,
                                 color: '#fff',
@@ -89,7 +89,10 @@ var App = {
                             });
                         },
                         mouseout: function(e){
-                            // console.log(e.target);
+                        	//mouseOut = { fillOpacity: 0, weight:0 };
+                            //areaLayer.setStyle(mouseOut);
+                            areaLayer.resetStyle(e.target);
+                            console.log("Hovered out!");
                         }
                     });
                 }
@@ -112,9 +115,21 @@ var App = {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
                 }
-            })
+			})
             .addTo(map);
         });
+    },
+    
+    loadGoogleMapLayer: function(){
+    	var map = new google.maps.Map(document.getElementById('map'), {
+		    center: new google.maps.LatLng(40.718217,-73.998284),
+		    zoom: 13,
+		    mapTypeId: google.maps.MapTypeId.ROADMAP
+		});    	
+    },
+    
+    clearMapLayers: function(layer){
+    	
     },
 
     getHouseholdsFor: function (layer) {
@@ -133,7 +148,7 @@ var App = {
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
         
-        //this.loadSprayPoints(map, this.getDay());
+        //this.loadSprayPoints(map, this.getDay()); // Loads default day in URL
         this.loadHouseholds(map);
         this.loadBufferAreas(map);
         
