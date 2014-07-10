@@ -1,8 +1,8 @@
 var App = {
-    SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-    BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
-    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
-    HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
+    SPRAY_DAYS_URI: "http://127.0.0.1:8000/spraydays.json",
+    BUFFER_URI: "http://127.0.0.1:8000/households.json?buffer=true",
+    TARGET_AREA_URI: "http://127.0.0.1:8000/targetareas.json",
+    HOUSEHOLD_URI: "http://127.0.0.1:8000/households.json",
     hhOptions: {
         radius: 4,
         fillColor: "#FFDC00",
@@ -49,9 +49,12 @@ var App = {
     getDay: function () {
         return this.locationParams().day;
     },
-    loadHouseholds: function(map) {
+    getTargetAreaId: function(){
+        return this.locationParams().target_area;
+    },
+    loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
-            .loadURL(App.HOUSEHOLD_URI);
+            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
@@ -64,9 +67,9 @@ var App = {
             .addTo(map);
         });
     },
-    loadBufferAreas: function(map) {
+    loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI);
+            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
@@ -125,17 +128,28 @@ var App = {
         });
     },
 
+    loadTargetArea: function(map, targetid) {
+        var target_area = L.mapbox.featureLayer()
+            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        target_area.on('ready', function(){
+            var bounds = target_area.getBounds();
+            map.fitBounds(bounds);
+        }).addTo(map);
+    },
+
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio')
-            .setView([-15.2164, 28.2315], 15);
+            ;//.setView([-14.2164, 29.2315], 10);
 
-        var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI)
-            .addTo(map);
+        var targetid = this.getTargetAreaId();
 
-        // this.loadHouseholds(map);
-        this.loadBufferAreas(map);
-        // this.loadSprayPoints(map, this.getDay());
+        if (targetid === undefined){
+            targetid = 1;
+        }
+
+        this.loadTargetArea(map, targetid);
+        this.loadHouseholds(map, targetid);
+        this.loadBufferAreas(map,targetid);
     }
 };
 
