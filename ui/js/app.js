@@ -15,7 +15,7 @@ var App = {
         weight: 3,
         color: '#fff',
         dashArray: '',
-        fillOpacity: 0.4
+        fillOpacity: 0.3
     },
     sprayOptions: {
         radius: 4,
@@ -65,11 +65,10 @@ var App = {
 
             L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
-                    
                     return L.circleMarker(latlng, App.hhOptions);
                 },
                 onEachFeature: function(feature, layer){
-                    //bind popup
+                    
                     var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                         'HH_type: '+ feature.properties.hh_type;
                     layer.bindPopup(content, { closeButton:false });
@@ -84,14 +83,14 @@ var App = {
                     });
                 }
 			})
-            .addTo(map);
+            .addTo(map, { zIndexOffset: 100 });
         });
     },
     loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
 
-        hh_buffers.on('ready', function(e){
+        hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
             
             var areaLayer = L.geoJson(geojson, {
@@ -100,18 +99,24 @@ var App = {
                 },
                 style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
+                    
+                    var content = '<h4>Count: '+ feature.coordinates.length +'</h4>';
+                    layer.bindPopup(content, { closeButton:false });
+                    
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
                             k = layer;
                             layer.setStyle( {fillOpacity: 0.7} );
+                            //e.layer.openPopup();
                         },
                         mouseout: function(e){
                             areaLayer.setStyle(App.bufferOptions);
+                            //e.layer.closePopup();
                         }
                     });
                 }
-            }).addTo(map);
+            }).addTo(map, { zIndexOffset: -100 });
         });
     },
     loadSprayPoints: function (map, day) {
@@ -164,8 +169,8 @@ var App = {
     
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
-        this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map,targetid);
+        this.loadHouseholds(map, targetid);
     },
 
     init: function (){
