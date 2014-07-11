@@ -13,7 +13,7 @@ router = routers.DefaultRouter(trailing_slash=False)
 router.register(r'targetareas', target_area.TargetAreaViewSet)
 router.register(r'households', household.HouseholdViewSet)
 router.register(r'spraydays', sprayday.SprayDayViewSet)
-router.register(r'districts', districts.DistrictViewset)
+router.register(r'districts', districts.DistrictViewSet)
 
 urlpatterns = patterns(
     '',

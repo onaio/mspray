@@ -1,6 +1,7 @@
 import os
 
 from django.core.management import call_command
+from django.shortcuts import urlresolvers
 from django.test import TestCase, RequestFactory
 
 from mspray.apps.main.models.target_area import TargetArea
@@ -30,3 +31,9 @@ class TestDistrictViewSet(TestCase):
         self.assertEqual(len(response.data), 15)
         data = {'district_name': 'Chienge', 'num_target_areas': 3}
         self.assertIn(data, response.data)
+
+    def test_link(self):
+        try:
+            urlresolvers.resolve('/districts')
+        except:
+            self.fail("Cannot resolve url /districts")
