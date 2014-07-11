@@ -25,11 +25,24 @@ class TestDistrictViewSet(TestCase):
 
     def test_list(self):
         self.assertEqual(TargetArea.objects.count(), 45)
+        self.assertEqual(TargetArea.objects.filter(
+            targeted=TargetArea.TARGETED_VALUE).count(), 12)
 
         request = self.factory.get('/')
         response = self.view(request)
-        self.assertEqual(len(response.data), 15)
-        data = {'district_name': 'Chienge', 'num_target_areas': 3}
+        self.assertEqual(len(response.data), 7)
+        data = {'district_name': 'Mwansabombwe', 'num_target_areas': 3}
+        self.assertIn(data, response.data)
+
+    def test_targetareas_for_district(self):
+        self.assertEqual(TargetArea.objects.count(), 45)
+        data = {'district': 'Mwansabombwe'}
+
+        request = self.factory.get('/', data)
+        response = self.view(request)
+        self.assertEqual(len(response.data), 3)
+
+        data = {'targetid': 467.0, 'ranks': 243.0, 'houses': 29.0}
         self.assertIn(data, response.data)
 
     def test_link(self):

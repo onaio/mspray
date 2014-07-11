@@ -14,6 +14,8 @@ class TargetArea(models.Model):
     geom = models.MultiPolygonField(srid=4326)
     objects = models.GeoManager()
 
+    TARGETED_VALUE = 1
+
     class Meta:
         app_label = 'main'
 
