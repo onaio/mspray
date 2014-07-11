@@ -1,5 +1,28 @@
-body { margin:0; padding:0; font:13px Arial; }
-#map { position:absolute; top:0; bottom:0; width:100%; }
+body{
+    margin:0; padding:0; font:13px Arial;
+}
+
+.navbar{
+    border-radius:0;
+	min-height:4em;
+    z-index:100;
+}
+.leaflet-top{
+	margin-top:1em;
+}
+.navbar-brand, .navbar-nav > li > a{
+	color:#fff!important;
+}
+.dropdown-menu{
+	border-radius:0!important;
+}
+
+#map{
+	margin-top:4em;
+	position:absolute;
+	top:0; bottom:0;
+	width:100%;
+}
 #legend{
     background:rgba(0,0,0,0.6);
     color:#FFF;
