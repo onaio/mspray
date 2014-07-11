@@ -121,8 +121,6 @@ var App = {
     
     showPointData: function(layer_data,layer){
     	layerdata.eachLayer(function(layer){
-            console.log("Pop up on: ");
-            
             var district_name = 'Luano';
             var houses = 45;
             var house_ranks = '23423';
@@ -131,7 +129,6 @@ var App = {
                 '<p>Houses: ' + houses + '<br/>' +
                 'House ranks: ' + house_ranks + '</p>';
             layer.bindPopup(content);
-            console.log("Pop up on: "+district_name);
         });
     },
 
@@ -181,18 +178,15 @@ var App = {
 
         this.loadAreaData(map, targetid); //Default data load
 
-        var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI)
-            .addTo(map);
-
         $(document).ready(function(){
             var spray_lnk = $('#legend ul li a');
             
             spray_lnk.click(function(e){
                 var spray_day = $(this).attr('href');
-                spray_day = spray_day.slice(5, spray_day.length)
+                spray_day = spray_day.slice(5, spray_day.length);
                 
                 App.loadAreaData(map, spray_day);
+                //App.loadSprayPoints(map, 2);
             });
         });
     }
