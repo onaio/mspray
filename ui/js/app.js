@@ -3,6 +3,7 @@ var App = {
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
+    DISTRICT_URI: "http://api.mspray.onalabs.org/districts",
     hhOptions: {
         radius: 4,
         fillColor: "#FFDC00",
@@ -146,6 +147,20 @@ var App = {
             console.log(data);
         });
     },
+	
+	getDistricts: function(){
+		var uri = this.DISTRICT_URI;
+		$.getJSON(uri, function(data){
+			var d_list = document.getElementById('districts_list');
+			var d_child = document.createElement('li');
+			
+			for(var d=0; d<data.length; d++){
+				var list_data = data[d];
+				d_child.appendChild(document.createTextNode(list_data.district_name));
+				d_list.appendChild(d_child);
+			}
+		});
+	},
 
     getSprayCount: function (day){
         var counter = 0, i =0;
@@ -192,6 +207,7 @@ var App = {
                 var spray_day = $(this).attr('href');
                 spray_day = spray_day.slice(5, spray_day.length);
                 
+                //App.getDistricts();
                 App.loadAreaData(map, spray_day);
                 //App.loadSprayPoints(map, 2);
             });
