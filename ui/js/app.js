@@ -119,28 +119,20 @@ var App = {
         });
     },
     
-    loadGoogleMapLayer: function(){
-    	var map = new google.maps.Map(document.getElementById('map'), {
-		    center: new google.maps.LatLng(40.718217,-73.998284),
-		    zoom: 13,
-		    mapTypeId: google.maps.MapTypeId.ROADMAP
-		});    	
-    },
-    
-    clearMapLayers: function(layer){
-    	
-    },
-
-    loadGoogleMapLayer: function(){
-        var map = new google.maps.Map(document.getElementById('map'), {
-            center: new google.maps.LatLng(40.718217,-73.998284),
-            zoom: 13,
-            mapTypeId: google.maps.MapTypeId.ROADMAP
+    showPointData: function(layer_data,layer){
+    	layerdata.eachLayer(function(layer){
+            console.log("Pop up on: ");
+            
+            var district_name = 'Luano';
+            var houses = 45;
+            var house_ranks = '23423';
+            
+            var content = '<h4>'+ district_name +'</h4>' +
+                '<p>Houses: ' + houses + '<br/>' +
+                'House ranks: ' + house_ranks + '</p>';
+            layer.bindPopup(content);
+            console.log("Pop up on: "+district_name);
         });
-    },
-
-    clearMapLayers: function(layer){
-
     },
 
     getHouseholdsFor: function (layer) {
@@ -164,10 +156,17 @@ var App = {
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
         }).addTo(map);
+    },
+    
+    loadAreaData: function(map, targetid){
+        this.loadTargetArea(map, targetid);
+        this.loadHouseholds(map, targetid);
+        this.loadBufferAreas(map,targetid);
     },
 
     init: function (){
@@ -180,22 +179,20 @@ var App = {
             targetid = 1;
         }
 
-        this.loadTargetArea(map, targetid);
-        this.loadHouseholds(map, targetid);
-        this.loadBufferAreas(map,targetid);
-        // this.loadSprayPoints(map, this.getDay());
+        this.loadAreaData(map, targetid); //Default data load
 
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI)
             .addTo(map);
 
         $(document).ready(function(){
-            var spray_lnk = $("#legend ul li a");
+            var spray_lnk = $('#legend ul li a');
             
             spray_lnk.click(function(e){
-                App.loadSprayPoints(map, spray_day);
-                //alert(spray_day);
-                e.preventDefault();
+                var spray_day = $(this).attr('href');
+                spray_day = spray_day.slice(5, spray_day.length)
+                
+                App.loadAreaData(map, spray_day);
             });
         });
     }
