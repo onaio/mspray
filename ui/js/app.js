@@ -59,13 +59,29 @@ var App = {
     loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
-
+        
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
 
             L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
+                    
                     return L.circleMarker(latlng, App.hhOptions);
+                },
+                onEachFeature: function(feature, layer){
+                    //bind popup
+                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
+                        'HH_type: '+ feature.properties.hh_type;
+                    layer.bindPopup(content, { closeButton:false });
+                    
+                    layer.on({
+                        mouseover: function(e){
+                            e.layer.openPopup();
+                        },
+                        mouseout: function(e){
+                            e.layer.closePopup();
+                        }
+                    });
                 }
 			})
             .addTo(map);
@@ -75,9 +91,9 @@ var App = {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
 
-        hh_buffers.on('ready', function(){
+        hh_buffers.on('ready', function(e){
             var geojson = hh_buffers.getGeoJSON();
-
+            
             var areaLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
@@ -95,8 +111,7 @@ var App = {
                         }
                     });
                 }
-            })
-            .addTo(map);
+            }).addTo(map);
         });
     },
     loadSprayPoints: function (map, day) {
@@ -116,19 +131,6 @@ var App = {
                 }
 			})
             .addTo(map);
-        });
-    },
-    
-    showPointData: function(layer_data,layer){
-    	layerdata.eachLayer(function(layer){
-            var district_name = 'Luano';
-            var houses = 45;
-            var house_ranks = '23423';
-            
-            var content = '<h4>'+ district_name +'</h4>' +
-                '<p>Houses: ' + houses + '<br/>' +
-                'House ranks: ' + house_ranks + '</p>';
-            layer.bindPopup(content);
         });
     },
 
