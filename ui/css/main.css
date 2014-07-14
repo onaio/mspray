@@ -7,6 +7,9 @@ body{
 	min-height:4em;
     z-index:100;
 }
+.navbar-brand{
+    font-weight:bold;
+}
 .leaflet-top{
 	margin-top:1em;
 }
@@ -31,22 +34,11 @@ body{
 	top:0; bottom:0;
 	width:100%;
 }
-#legend{
-    background:rgba(0,0,0,0.6);
+.info-panel{
+    background:rgba(0,0,0,0.8);
     color:#FFF;
     position:absolute;
-    top:0;right:0;
-    padding:0.6em;
-    width:7.5em;
+    top:0;right:0;bottom:0;
+    padding:5em 1em 1em;
+    z-index:99;
 }
-#legend ul{
-    margin:0;
-    padding-left:1.5em;
-}
-#legend ul li a{
-    color:#fff;
-    display:block;
-    margin-bottom:1em;
-    text-decoration:none;
-}
-#legend ul li a:hover{ text-decoration:underline; }

@@ -137,6 +137,8 @@ var App = {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
         
+        households.bringToFront();
+        
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
 
@@ -145,7 +147,6 @@ var App = {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
                 onEachFeature: function(feature, layer){
-                    
                     var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                         'HH_type: '+ feature.properties.hh_type;
                     layer.bindPopup(content, { closeButton:false });
@@ -160,15 +161,12 @@ var App = {
                     });
                 }
 			})
-            .addTo(map, { zIndexOffset: 100 });
+            .addTo(map);
         });
     },
     loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
-            
-        
-        console.log("\nLOADED targetID: " + targetid);
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
@@ -188,15 +186,13 @@ var App = {
                             var layer = e.target;
                             k = layer;
                             layer.setStyle( {fillOpacity: 0.7} );
-                            //e.layer.openPopup();
                         },
                         mouseout: function(e){
                             areaLayer.setStyle(App.bufferOptions);
-                            //e.layer.closePopup();
                         }
                     });
                 }
-            }).addTo(map, { zIndexOffset: -100 });
+            }).addTo(map);
         });
     },
     loadSprayPoints: function (map, day) {
@@ -231,8 +227,8 @@ var App = {
     
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
-        this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
+        this.loadBufferAreas(map, targetid);
     },
 
     init: function (){
@@ -259,8 +255,6 @@ var App = {
                     
                 target_id = target_id.slice(1, target_id.length);
                 target_label.text(target_id);
-                
-                console.log("Loading targetID: " + target_id);
                 
                 App.loadAreaData(map, target_id);
             });
