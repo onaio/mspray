@@ -163,7 +163,7 @@ var App = {
 						dist_name = list_data.district_name,
 						num_targets = list_data.num_target_areas,
 						
-						dist_data = '<li><a href="#'+ num_targets +'">'+ dist_name +'</a></li>';
+						dist_data = '<li><a href="#'+ dist_name +'">'+ dist_name +'</a></li>';
 					
 					d_list.append(dist_data);
 				}
@@ -217,9 +217,7 @@ var App = {
                 var spray_day = $(this).attr('href');
                 spray_day = spray_day.slice(5, spray_day.length);
                 
-                
                 App.loadAreaData(map, spray_day);
-                //App.loadSprayPoints(map, 2);
             });
         });
     }
