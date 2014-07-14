@@ -1,6 +1,4 @@
 var App = {
-    map: L.mapbox.map('map', 'examples.map-i86nkdio'),
-    
     SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
@@ -59,6 +57,82 @@ var App = {
     getTargetAreaId: function(){
         return this.locationParams().target_area;
     },
+
+    getHouseholdsFor: function (layer) {
+        var uri = this.HOUSEHOLD_URI;
+        post_data = {in_bbox: layer.getBounds().toBBoxString()};
+        $.getJSON(uri, post_data, function(data){
+            console.log(data);
+        });
+    },
+    
+    getDistricts: function(){
+        var uri = this.DISTRICT_URI;
+        
+        $.ajax({
+            url: uri,
+            type: 'GET', 
+            success: function(data){
+                var d_list = $('#districts_list');
+
+                for(var d=0; d<data.length; d++){
+                    var list_data = data[d],
+                        dist_name = list_data.district_name,
+                        num_targets = list_data.num_target_areas,
+                        
+                        dist_data = '<li><a href="#'+ dist_name +'">'+ dist_name +'</a></li>';
+                    
+                    d_list.append(dist_data);
+                }
+                
+                var district = d_list.find('li a');
+            
+                district.click(function(e){
+                    var dist_name = $(this).attr('href'),
+                        dist_label = $('#dist_label'),
+                        target_label = $('#target_label');
+                        
+                    dist_name = dist_name.slice(1, dist_name.length);
+                    dist_label.text(dist_name);
+                    target_label.text('Target Areas');
+                    
+                    App.getTargetAreas(dist_name);
+                    //App.loadAreaData(map, dist_name);
+                });
+            }
+        });
+    },
+    getTargetAreas: function(district_name){
+        var uri = this.DISTRICT_URI + "?district=" + district_name;
+        
+        $.ajax({
+            url: uri,
+            type: 'GET', 
+            success: function(data){
+                var t_list = $('#target_areas_list');
+                t_list.empty();
+
+                for(var d=0; d<data.length; d++){
+                    var list_data = data[d],
+                        target_id = list_data.targetid,
+                        ranks = list_data.ranks,
+                        housess = list_data.houses,
+                        
+                    target_area = '<li><a href="#'+ target_id +'">'+ target_id +'</a></li>';
+                    t_list.append(target_area);
+                }
+            }
+        });
+    },
+    getSprayCount: function (day){
+        var counter = 0, i =0;
+        for (; i < points.features.length; i++){
+            if(points.features[i].properties.day === day) {
+                counter+=1;
+            }
+        }
+        return counter;
+    },
     loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
@@ -92,6 +166,9 @@ var App = {
     loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
+            
+        
+        console.log("\nLOADED targetID: " + targetid);
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
@@ -142,93 +219,6 @@ var App = {
         });
     },
 
-    getHouseholdsFor: function (layer) {
-        var uri = this.HOUSEHOLD_URI;
-        post_data = {in_bbox: layer.getBounds().toBBoxString()};
-        $.getJSON(uri, post_data, function(data){
-            console.log(data);
-        });
-    },
-	
-	getDistricts: function(){
-		var uri = this.DISTRICT_URI;
-		
-		$.ajax({
-			url: uri,
-			type: 'GET', 
-			success: function(data){
-				var d_list = $('#districts_list');
-
-				for(var d=0; d<data.length; d++){
-					var list_data = data[d],
-						dist_name = list_data.district_name,
-						num_targets = list_data.num_target_areas,
-						
-						dist_data = '<li><a href="#'+ dist_name +'">'+ dist_name +'</a></li>';
-					
-					d_list.append(dist_data);
-				}
-				
-				var district = d_list.find('li a');
-            
-            	district.click(function(e){
-	                var dist_name = $(this).attr('href'),
-	                	dist_label = $('#dist_label');
-	                	
-	                dist_name = dist_name.slice(1, dist_name.length);
-	                dist_label.text(dist_name);
-					
-					App.getTargetAreas(dist_name);
-					//App.loadAreaData(map, dist_name);
-	            });
-			}
-		});
-	},
-	getTargetAreas: function(district_name){
-		var uri = this.DISTRICT_URI + "?district=" + district_name;
-		
-		$.ajax({
-			url: uri,
-			type: 'GET', 
-			success: function(data){
-				var t_list = $('#target_areas_list');
-
-				for(var d=0; d<data.length; d++){
-					var list_data = data[d],
-						target_id = list_data.targetid,
-						ranks = list_data.ranks,
-						housess = list_data.houses,
-						
-						target_area = '<li><a href="#'+ target_id +'">'+ target_id +'</a></li>';
-					
-					t_list.append(target_area);
-				}
-				
-				var target_area = t_list.find('li a');
-        
-                target_area.click(function(e){
-                    var target_id = $(this).attr('href'),
-                        target_label = $('#target_label');
-                        
-                    target_id = target_id.slice(1, target_id.length);
-                    target_label.text(target_id);
-                    
-                    App.loadTargetArea(App.map, target_id);
-                    //App.loadAreaData(map, dist_name);
-                });
-			}
-		});
-	},
-    getSprayCount: function (day){
-        var counter = 0, i =0;
-        for (; i < points.features.length; i++){
-            if(points.features[i].properties.day === day) {
-                counter+=1;
-            }
-        }
-        return counter;
-    },
-
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
@@ -240,24 +230,41 @@ var App = {
     },
     
     loadAreaData: function(map, targetid){
-        //this.loadTargetArea(map, targetid);
-        this.loadBufferAreas(map,targetid);
+        this.loadTargetArea(map, targetid);
+        this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
     },
 
     init: function (){
-        //var map = L.mapbox.map('map', 'examples.map-i86nkdio')
-            //;//.setView([-14.2164, 29.2315], 10);
+        var map = L.mapbox.map('map', 'examples.map-i86nkdio');
+            //.setView([-14.2164, 29.2315], 10);
 
-        var targetid = this.getTargetAreaId();
+        var target_id = this.getTargetAreaId();
 
-        if (targetid === undefined){
-            targetid = 1;
+        if (target_id === undefined){
+            target_id = 4;
         }
 
-        this.loadAreaData(map, targetid); //Default data load
-		App.getDistricts();
-		
+        this.loadAreaData(map, target_id); //Default data load
+        this.getDistricts();
+        
+        // carry on with map loading functions
+        $(document).ajaxComplete(function(){
+            
+            var target_area = $('#target_areas_list li a');
+    
+            target_area.click(function(e){
+                var target_id = $(this).attr('href'),
+                    target_label = $('#target_label');
+                    
+                target_id = target_id.slice(1, target_id.length);
+                target_label.text(target_id);
+                
+                console.log("Loading targetID: " + target_id);
+                
+                App.loadAreaData(map, target_id);
+            });
+        });
     }
 };
 
