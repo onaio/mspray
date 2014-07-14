@@ -1,10 +1,12 @@
 import json
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import ugettext as _
 
 from django.contrib.gis.geos import MultiPolygon
 
 from rest_framework import viewsets
+from rest_framework import exceptions
 from rest_framework.response import Response
 from rest_framework_gis.filters import InBBOXFilter
 
@@ -28,8 +30,14 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            target = get_object_or_404(TargetArea, targetid=targetid)
-            queryset = queryset.filter(geom__contained=target.geom)
+            try:
+                targetid = float(targetid)
+            except ValueError:
+                raise exceptions.ParseError(
+                    _("Invalid targetid %s" % targetid))
+            else:
+                target = get_object_or_404(TargetArea, targetid=targetid)
+                queryset = queryset.filter(geom__contained=target.geom)
 
         if buffered == "true":
             self.serializer_class = BufferHouseholdSerializer
