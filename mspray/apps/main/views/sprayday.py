@@ -1,5 +1,6 @@
 import json
 
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from rest_framework import filters
 from rest_framework import status
@@ -7,14 +8,32 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
 
 
 class SprayDayViewSet(viewsets.ModelViewSet):
+    """
+    List of households that have been sprayed.
+
+    Query Parameters:
+    - `day` - filter list of sprayed points for a specific day
+    - `target_area` - filter spray points for a specific target
+    """
     queryset = SprayDay.objects.all()
     serializer_class = SprayDaySerializer
     filter_backends = (filters.DjangoFilterBackend, )
     filter_fields = ('day',)
+
+    def filter_queryset(self, queryset):
+        targetid = self.request.QUERY_PARAMS.get('target_area')
+
+        if targetid:
+            target = get_object_or_404(TargetArea, targetid=targetid,
+                                       targeted=TargetArea.TARGETED_VALUE)
+            queryset = queryset.filter(geom__contained=target.geom)
+
+        return super(SprayDayViewSet, self).filter_queryset(queryset)
 
     def create(self, request, *args, **kwargs):
         has_id = request.DATA.get('_id')
