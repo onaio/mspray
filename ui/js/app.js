@@ -166,10 +166,45 @@ var App = {
 					
 					d_list.append(dist_data);
 				}
+				
+				var districts = $('#districts_list li a');
+            
+            	districts.click(function(e){
+	                var dist_name = $(this).attr('href');
+	                dist_name = dist_name.slice(1, dist_name.length);
+					
+	                console.log('Clicked: '+dist_name+ ': now loading..');
+					
+					// load relevant data
+					App.getTargetAreas(dist_name);
+					App.loadAreaData(map, dist_name);
+	            });
 			}
 		});
 	},
+	getTargetAreas: function(district_name){
+		var uri = this.DISTRICT_URI + "?district=" + district_name;
+		console.log('Getting target areas for: ' + uri);
+		
+		$.ajax({
+			url: uri,
+			type: 'GET', 
+			success: function(data){
+				var t_list = $('#target_areas_list');
 
+				for(var d=0; d<data.length; d++){
+					var list_data = data[d],
+						target_id = list_data.targetid,
+						ranks = list_data.ranks,
+						housess = list_data.houses,
+						
+						target_area = '<li><a href="#'+ target_id +'">'+ target_id +'</a></li>';
+					
+					t_list.append(target_area);
+				}
+			}
+		});
+	},
     getSprayCount: function (day){
         var counter = 0, i =0;
         for (; i < points.features.length; i++){
@@ -208,18 +243,7 @@ var App = {
 
         this.loadAreaData(map, targetid); //Default data load
 		App.getDistricts();
-
-        $(document).ready(function(){
-            var spray_lnk = $('#districts_list li a');
-            
-            spray_lnk.click(function(e){
-                var spray_day = $(this).attr('href');
-                spray_day = spray_day.slice(5, spray_day.length);
-                
-                //App.getDistricts();
-                App.loadAreaData(map, spray_day);
-            });
-        });
+		
     }
 };
 

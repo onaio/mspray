@@ -17,6 +17,8 @@ body{
 	border-radius:0!important;
 	padding-bottom:0;
 	padding-top:0;
+	max-height:40em;
+	overflow-y:auto;
 }
 .dropdown-menu li a{
 	padding:0.5em 1em;
