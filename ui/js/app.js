@@ -84,7 +84,7 @@ var App = {
                     });
                 }
 			})
-            .addTo(map);
+            .addTo(map, { zIndexOffset: 100 });
         });
     },
     loadBufferAreas: function(map, targetid) {
@@ -117,7 +117,7 @@ var App = {
                         }
                     });
                 }
-            }).addTo(map);
+            }).addTo(map, { zIndexOffset: -100 });
         });
     },
     loadSprayPoints: function (map, day) {
@@ -150,7 +150,6 @@ var App = {
 	
 	getDistricts: function(){
 		var uri = this.DISTRICT_URI;
-		console.log('Getting districts from :'+uri);
 		
 		$.ajax({
 			url: uri,
@@ -217,6 +216,7 @@ var App = {
                 var spray_day = $(this).attr('href');
                 spray_day = spray_day.slice(5, spray_day.length);
                 
+                //App.getDistricts();
                 App.loadAreaData(map, spray_day);
             });
         });
