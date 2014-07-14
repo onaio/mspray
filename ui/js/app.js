@@ -89,8 +89,8 @@ var App = {
             
                 district.click(function(e){
                     var dist_name = $(this).attr('href'),
-                        dist_label = $('#dist_label'),
-                        target_label = $('#target_label');
+                        dist_label = $('.dist_label'),
+                        target_label = $('.target_label');
                         
                     dist_name = dist_name.slice(1, dist_name.length);
                     dist_label.text(dist_name);
@@ -178,7 +178,7 @@ var App = {
                 style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
                     
-                    var content = '<h4>Count: '+ feature.coordinates.length +'</h4>';
+                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
                     layer.bindPopup(content, { closeButton:false });
                     
                     layer.on({
@@ -241,7 +241,7 @@ var App = {
             target_id = 4;
         }
 
-        this.loadAreaData(map, target_id); //Default data load
+        //this.loadAreaData(map, target_id); //Default data load
         this.getDistricts();
         
         // carry on with map loading functions
@@ -251,7 +251,7 @@ var App = {
     
             target_area.click(function(e){
                 var target_id = $(this).attr('href'),
-                    target_label = $('#target_label');
+                    target_label = $('.target_label');
                     
                 target_id = target_id.slice(1, target_id.length);
                 target_label.text(target_id);

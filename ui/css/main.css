@@ -20,7 +20,7 @@ body{
 	border-radius:0!important;
 	padding-bottom:0;
 	padding-top:0;
-	max-height:30em;
+	max-height:35em;
 	overflow-y:auto;
 }
 .dropdown-menu li a{
@@ -35,7 +35,7 @@ body{
 	width:100%;
 }
 .info-panel{
-    background:rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.9);
     color:#FFF;
     position:absolute;
     top:0;right:0;bottom:0;
