@@ -1,4 +1,5 @@
 django
+jsonfield
 psycopg2
 south
 django_nose

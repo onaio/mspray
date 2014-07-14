@@ -1,10 +1,12 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
+from jsonfield import JSONField
 
 
 class SprayDay(models.Model):
     day = models.IntegerField()
     geom = models.PointField(srid=4326)
+    data = JSONField(default={})
 
     objects = models.GeoManager()
 
