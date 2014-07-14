@@ -1,7 +1,9 @@
 var App = {
+    map: L.mapbox.map('map', 'examples.map-i86nkdio'),
+    
     SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
-//    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
+    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
     hhOptions: {
@@ -167,11 +169,14 @@ var App = {
 					d_list.append(dist_data);
 				}
 				
-				var districts = $('#districts_list li a');
+				var district = d_list.find('li a');
             
-            	districts.click(function(e){
-	                var dist_name = $(this).attr('href');
+            	district.click(function(e){
+	                var dist_name = $(this).attr('href'),
+	                	dist_label = $('#dist_label');
+	                	
 	                dist_name = dist_name.slice(1, dist_name.length);
+	                dist_label.text(dist_name);
 					
 					App.getTargetAreas(dist_name);
 					//App.loadAreaData(map, dist_name);
@@ -198,6 +203,19 @@ var App = {
 					
 					t_list.append(target_area);
 				}
+				
+				var target_area = t_list.find('li a');
+        
+                target_area.click(function(e){
+                    var target_id = $(this).attr('href'),
+                        target_label = $('#target_label');
+                        
+                    target_id = target_id.slice(1, target_id.length);
+                    target_label.text(target_id);
+                    
+                    App.loadTargetArea(App.map, target_id);
+                    //App.loadAreaData(map, dist_name);
+                });
 			}
 		});
 	},
@@ -228,8 +246,8 @@ var App = {
     },
 
     init: function (){
-        var map = L.mapbox.map('map', 'examples.map-i86nkdio')
-            ;//.setView([-14.2164, 29.2315], 10);
+        //var map = L.mapbox.map('map', 'examples.map-i86nkdio')
+            //;//.setView([-14.2164, 29.2315], 10);
 
         var targetid = this.getTargetAreaId();
 

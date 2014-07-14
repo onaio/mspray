@@ -17,10 +17,11 @@ body{
 	border-radius:0!important;
 	padding-bottom:0;
 	padding-top:0;
-	max-height:40em;
+	max-height:30em;
 	overflow-y:auto;
 }
 .dropdown-menu li a{
+	font-size:0.9em;
 	padding:0.5em 1em;
 }
 
