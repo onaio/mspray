@@ -173,18 +173,14 @@ var App = {
 	                var dist_name = $(this).attr('href');
 	                dist_name = dist_name.slice(1, dist_name.length);
 					
-	                console.log('Clicked: '+dist_name+ ': now loading..');
-					
-					// load relevant data
 					App.getTargetAreas(dist_name);
-					App.loadAreaData(map, dist_name);
+					//App.loadAreaData(map, dist_name);
 	            });
 			}
 		});
 	},
 	getTargetAreas: function(district_name){
 		var uri = this.DISTRICT_URI + "?district=" + district_name;
-		console.log('Getting target areas for: ' + uri);
 		
 		$.ajax({
 			url: uri,
