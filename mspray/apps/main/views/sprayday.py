@@ -21,7 +21,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         geolocation = request.DATA.get('_geolocation')
 
         if not has_id and not geolocation:
-            data = {"error": _(u"Not a valid submission")}
+            data = {"error": _("Not a valid submission")}
             status_code = status.HTTP_400_BAD_REQUEST
         else:
             geolocation = [float(p) for p in geolocation]
@@ -30,7 +30,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
             SprayDay.objects.create(day=1,
                                     data=json_data, geom=point)
-            data = {"success": _(u"Successfully imported submission with"
+            data = {"success": _("Successfully imported submission with"
                                  " submission id %(submission_id)s."
                                  % {'submission_id': has_id})}
             status_code = status.HTTP_201_CREATED
