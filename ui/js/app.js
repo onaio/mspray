@@ -1,9 +1,9 @@
 var App = {
     SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
-    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
+//    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
-    DISTRICT_URI: "http://api.mspray.onalabs.org/districts",
+    DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
     hhOptions: {
         radius: 4,
         fillColor: "#FFDC00",
@@ -84,7 +84,7 @@ var App = {
                     });
                 }
 			})
-            .addTo(map, { zIndexOffset: 100 });
+            .addTo(map);
         });
     },
     loadBufferAreas: function(map, targetid) {
@@ -117,7 +117,7 @@ var App = {
                         }
                     });
                 }
-            }).addTo(map, { zIndexOffset: -100 });
+            }).addTo(map);
         });
     },
     loadSprayPoints: function (map, day) {
@@ -150,14 +150,23 @@ var App = {
 	
 	getDistricts: function(){
 		var uri = this.DISTRICT_URI;
-		$.getJSON(uri, function(data){
-			var d_list = document.getElementById('districts_list');
-			var d_child = document.createElement('li');
-			
-			for(var d=0; d<data.length; d++){
-				var list_data = data[d];
-				d_child.appendChild(document.createTextNode(list_data.district_name));
-				d_list.appendChild(d_child);
+		console.log('Getting districts from :'+uri);
+		
+		$.ajax({
+			url: uri,
+			type: 'GET', 
+			success: function(data){
+				var d_list = $('#districts_list');
+
+				for(var d=0; d<data.length; d++){
+					var list_data = data[d],
+						dist_name = list_data.district_name,
+						num_targets = list_data.num_target_areas,
+						
+						dist_data = '<li><a href="#'+ num_targets +'">'+ dist_name +'</a></li>';
+					
+					d_list.append(dist_data);
+				}
 			}
 		});
 	},
@@ -183,7 +192,7 @@ var App = {
     },
     
     loadAreaData: function(map, targetid){
-        this.loadTargetArea(map, targetid);
+        //this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map,targetid);
         this.loadHouseholds(map, targetid);
     },
@@ -199,15 +208,16 @@ var App = {
         }
 
         this.loadAreaData(map, targetid); //Default data load
+		App.getDistricts();
 
         $(document).ready(function(){
-            var spray_lnk = $('#legend ul li a');
+            var spray_lnk = $('#districts_list li a');
             
             spray_lnk.click(function(e){
                 var spray_day = $(this).attr('href');
                 spray_day = spray_day.slice(5, spray_day.length);
                 
-                //App.getDistricts();
+                
                 App.loadAreaData(map, spray_day);
                 //App.loadSprayPoints(map, 2);
             });
