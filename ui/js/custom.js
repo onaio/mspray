@@ -2,29 +2,34 @@ var myApp = angular.module('myApp', []);
 
 myApp.controller('TargetCtrl', ['$scope', '$http', function($scope, $http){
     
-    $scope.targetURI = 'http://api.mspray.onalabs.org/districts.json';
+    $scope.districtsURI = 'http://api.mspray.onalabs.org/districts.json';
     $scope.filterText = '';
+    $scope.districtData={};
+    $scope.targetData={};
     
-    // $scope.targetData = [
-        // {
-            // 'targetid': '1',
-            // 'ranks': '155',
-            // 'houses': 't41',
-        // },
-        // {
-            // 'targetid': '2',
-            // 'ranks': '193',
-            // 'houses': 't97',
-        // }
-    // ];
-    $scope.targetData={}; 
-    
-    var getTargetAreas = $http.get($scope.targetURI + '?district=Serenje');
+    // get districts
+    var getDistricts = $http.get($scope.districtsURI);
 
-    getTargetAreas.success(function(data, status, headers, config) {
-        $scope.targetData = data;
+    getDistricts.success(function(data, status, headers, config) {
+        $scope.districtData = data;
     });
-    getTargetAreas.error(function(data, status, headers, config) {
-        console.log('Could not retrieve data.');
+    getDistricts.error(function(data, status, headers, config) {
+        console.log('Sorry, could not retrieve districts.');
     });
+    
+    // get target areas
+    $scope.getTargetAreas = function(district){
+        var districtUrl = $scope.districtsURI + '?district=' + district.toString();
+        
+        var targetAreas = $http.get(districtUrl);
+        
+        console.log("District: " + districtUrl);
+
+        targetAreas.success(function(data, status, headers, config) {
+            $scope.targetData = data;
+        });
+        targetAreas.error(function(data, status, headers, config) {
+            console.log('Sorry, could not retrieve target areas.');
+        });
+    };
 }]);
