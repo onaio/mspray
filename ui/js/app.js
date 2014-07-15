@@ -109,17 +109,28 @@ var App = {
             url: uri,
             type: 'GET', 
             success: function(data){
-                var t_list = $('#target_areas_list');
+                var t_list = $('#target_areas_list'),
+                    target_table = $('.target_table tbody');
+                
                 t_list.empty();
 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
                         target_id = list_data.targetid,
                         ranks = list_data.ranks,
-                        housess = list_data.houses,
+                        houses = list_data.houses;
                         
                     target_area = '<li><a href="#'+ target_id +'">'+ target_id +'</a></li>';
                     t_list.append(target_area);
+                    
+                    //Create a table
+                    target_table.append(
+                        '<tr>'+ 
+                            '<td>' + target_id + '</td>' +
+                            '<td>' + ranks + '</td>' +
+                            '<td>' + houses + '</td>' +
+                        '</tr>'
+                    );
                 }
             }
         });
