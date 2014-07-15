@@ -1,17 +1,21 @@
 var myApp = angular.module('myApp', []);
 
-myApp.controller('TargetCtrl', ['$scope', function($scope){
+myApp.controller('TargetCtrl', ['$scope', '$http', function($scope, $http){
     
     $scope.targetURI = 'http://api.mspray.onalabs.org/targetareas.json';
-    $scope.filterText = '2';
+    $scope.filterText = '';
     
-    $.ajax({
-        url: $scope.targetURI,
-        type: 'GET',
-        success: function(data){
-            // pass data to table, filter on demand
-            
+    $scope.targetData = [
+        {
+            'targetId': '1',
+            'ranks': '155',
+            'houses': 't41',
+        },
+        {
+            'targetId': '2',
+            'ranks': '193',
+            'houses': 't97',
         }
-    });
+    ];
     
 }]);

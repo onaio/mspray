@@ -57,13 +57,19 @@
     </form><br/>
     
     <div class="table-wrap">
-        <table class="target_table table table-bordered">
+        <table class="targe_table table table-bordered">
         <thead>
             <tr>
                 <td>Target ID</td> <td>Ranks</td> <td>Houses</td>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+            <tr ng-repeat="targets in targetData | filter:filterText">
+                <td>{{ targets.targetId }}</td>
+                <td>{{ targets.ranks }}</td>
+                <td>{{ targets.houses }}</td>
+            </tr>
+        </tbody>
         <tfoot>
             <tr><td colspan="3">Total</td></tr>
          </tfoot>
