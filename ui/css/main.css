@@ -8,6 +8,10 @@ body{
     height:auto;
     padding:0.5em!important;
 }
+.target_filter{
+    display:block!important;
+    width:100%!important;
+}
 
 .navbar{
     border-radius:0;
