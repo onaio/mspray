@@ -9,7 +9,7 @@
 <link href='css/boostrap.min.css' rel='stylesheet' />
 <link href='css/main.css' rel='stylesheet' />
 </head>
-<body>
+<body ng-app="myApp">
 <header class="navbar navbar-inverse" role="navigation">
 	<div class="container-fluid">
 		<div class="navbar-header">
@@ -45,9 +45,12 @@
 	</div>
 </header>
 
-<section class="info-panel col-md-2">
+<section class="info-panel col-md-2" ng-controller="TargetCtrl">
     <h4>District: <span class="dist_label"> </span></h4>
     <h4>Target Area: <span class="target_label"> </span></h4>
+    <p>
+        URL: {{ targetURI }}
+    </p>
     
     <form action="/" method="POST" class="form-inline">
         <input type="text" name="target_filter" class="form-control"/>
@@ -71,7 +74,9 @@
 <div id='map'></div>
 
 <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="js/angular.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
 <script src="js/app.js"></script>
+<script src="js/custom.js"></script>
 </body>
 </html>
