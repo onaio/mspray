@@ -19,11 +19,9 @@ myApp.controller('TargetCtrl', ['$scope', '$http', function($scope, $http){
     
     // get target areas
     $scope.getTargetAreas = function(district){
-        var districtUrl = $scope.districtsURI + '?district=' + district.toString();
+        var districtUrl = $scope.districtsURI + '?district=' + district;
         
         var targetAreas = $http.get(districtUrl);
-        
-        console.log("District: " + districtUrl);
 
         targetAreas.success(function(data, status, headers, config) {
             $scope.targetData = data;
