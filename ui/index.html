@@ -49,21 +49,23 @@
     <h4>District: <span class="dist_label"> </span></h4>
     <h4>Target Area: <span class="target_label"> </span></h4>
     
-    <form action="/" method="POST">
-        <input type="text" name="target_filter"/>
-    </form>
+    <form action="/" method="POST" class="form-inline">
+        <input type="text" name="target_filter" class="form-control"/>
+    </form><br/>
     
-    <table class="target_table table table-bordered">
-    <thead>
-        <tr>
-            <td>Target ID</td> <td>Ranks</td> <td>Houses</td>
-        </tr>
-    </thead>
-    <tbody></tbody>
-    <tfoot>
-        <tr><td colspan="3">Total</td></tr>
-     </tfoot>
-    </table>
+    <div class="table-wrap">
+        <table class="target_table table table-bordered">
+        <thead>
+            <tr>
+                <td>Target ID</td> <td>Ranks</td> <td>Houses</td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr><td colspan="3">Total</td></tr>
+         </tfoot>
+        </table>
+    </div>
 </section>
 
 <div id='map'></div>
