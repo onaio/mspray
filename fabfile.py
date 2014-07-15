@@ -125,3 +125,29 @@ def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     sudo('chown -R ubuntu /var/log/uwsgi')
     sudo('mkdir -p /var/log/mspray')
     sudo('supervisorctl reload')
+
+
+def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
+    setup_env(deployment_name)
+
+    with cd(env.home):
+        run('cd mspray && git fetch && git checkout origin/master')
+
+    data = {
+        'venv': env.virtualenv, 'project': env.project
+    }
+    with prefix('WORKON_HOME=%(venv)s' % data):
+        run('source `which virtualenvwrapper.sh`'
+            ' && WORKON_HOME=%(venv)s workon %(project)s' % data)
+
+        with cd(env.code_src):
+            run_in_virtualenv('pip3 install -r requirements.pip')
+            run_in_virtualenv("python3 manage.py syncdb --noinput"
+                              " --settings='%s'" % env.django_module)
+            run_in_virtualenv("python3 manage.py migrate --settings='%s'"
+                              % env.django_module)
+            run_in_virtualenv("python3 manage.py collectstatic --noinput"
+                              " --settings='%s'" % env.django_module)
+
+    sudo('/etc/init.d/nginx restart')
+    sudo('supervisorctl reload')
