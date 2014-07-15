@@ -8,7 +8,6 @@ from django.contrib.gis.geos import MultiPolygon
 from rest_framework import viewsets
 from rest_framework import exceptions
 from rest_framework.response import Response
-from rest_framework_gis.filters import InBBOXFilter
 
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.target_area import TargetArea
@@ -20,7 +19,6 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Household.objects.all()
     serializer_class = HouseholdSerializer
     bbox_filter_field = 'geom'
-    filter_backends = (InBBOXFilter, )
     bbox_filter_include_overlapping = True  # Optional
 
     def filter_queryset(self, queryset):
@@ -37,7 +35,7 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
                     _("Invalid targetid %s" % targetid))
             else:
                 target = get_object_or_404(TargetArea, targetid=targetid)
-                queryset = queryset.filter(geom__contained=target.geom)
+                queryset = queryset.filter(geom__coveredby=target.geom)
 
         if buffered == "true":
             self.serializer_class = BufferHouseholdSerializer
