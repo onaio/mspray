@@ -141,7 +141,7 @@ def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
             ' && WORKON_HOME=%(venv)s workon %(project)s' % data)
 
         with cd(env.code_src):
-            run_in_virtualenv('pip3 install -r requirements.pip')
+            run_in_virtualenv('pip3 install -r requirements.pip --upgrade')
             run_in_virtualenv("python3 manage.py syncdb --noinput"
                               " --settings='%s'" % env.django_module)
             run_in_virtualenv("python3 manage.py migrate --settings='%s'"
@@ -149,5 +149,5 @@ def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
             run_in_virtualenv("python3 manage.py collectstatic --noinput"
                               " --settings='%s'" % env.django_module)
 
-    sudo('/etc/init.d/nginx restart')
+    sudo('/etc/init.d/nginx reload')
     sudo('supervisorctl reload')
