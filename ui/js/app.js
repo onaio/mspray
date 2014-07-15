@@ -74,13 +74,13 @@ var App = {
         }
         return counter;
     },
-    
+
     loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
-        
+
         households.bringToFront();
-        
+
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
 
@@ -92,7 +92,7 @@ var App = {
                     var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                         'HH_type: '+ feature.properties.hh_type;
                     layer.bindPopup(content, { closeButton:false });
-                    
+
                     layer.on({
                         mouseover: function(e){
                             e.layer.openPopup();
@@ -112,17 +112,17 @@ var App = {
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
-            
+
             var areaLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
                 style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
-                    
+
                     var content = '<h4>'+ feature.coordinates.length +' households</h4>';
                     layer.bindPopup(content, { closeButton:false });
-                    
+
                     layer.on({
                         mouseover: function(e){
                             var layer = e.target;
@@ -160,13 +160,13 @@ var App = {
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
-        
+
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
         }).addTo(map);
     },
-    
+
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
         this.loadHouseholds(map, targetid);
@@ -183,7 +183,7 @@ var App = {
             target_id = 4;
         }
 
-        //this.loadAreaData(map, target_id); //Default data load
+        this.loadAreaData(map, target_id); //Default data load
         this.getDistricts();
     }
 };
