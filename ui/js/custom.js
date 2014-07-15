@@ -25,6 +25,25 @@ myApp.controller('TargetCtrl', ['$scope', '$http', function($scope, $http){
 
         targetAreas.success(function(data, status, headers, config) {
             $scope.targetData = data;
+            
+            // carry on with map loading functions
+            $(document).ready(function(){
+                console.log("ajax has completed");
+                
+                var target_area = $('.target_table a');
+        
+                target_area.click(function(e){
+                    alert("Clicked");
+                    
+                    var target_id = $(this).attr('href'),
+                        target_label = $('.target_label');
+                        
+                    target_id = target_id.slice(1, target_id.length);
+                    target_label.text(target_id);
+                    
+                    App.loadAreaData(map, target_id);
+                });
+            });
         });
         targetAreas.error(function(data, status, headers, config) {
             console.log('Sorry, could not retrieve target areas.');

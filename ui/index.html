@@ -64,7 +64,7 @@
     </form><br/>
     
     <div class="table-wrap">
-        <table class="targe_table table table-bordered">
+        <table class="target_table table table-bordered">
         <thead>
             <tr>
                 <td>Target ID</td> <td>Ranks</td> <td>Houses</td>
@@ -72,7 +72,7 @@
         </thead>
         <tbody>
             <tr ng-repeat="targets in targetData | filter:filterText">
-                <td>{{ targets.targetid }}</td>
+                <td><a href="#{{ targets.targetid }}">{{ targets.targetid }}</a></td>
                 <td>{{ targets.ranks }}</td>
                 <td>{{ targets.houses }}</td>
             </tr>
