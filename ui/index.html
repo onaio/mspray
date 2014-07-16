@@ -6,7 +6,7 @@
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
 <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet' />
-<link href='css/boostrap.min.css' rel='stylesheet' />
+<link href='css/bootstrap.min.css' rel='stylesheet' />
 <link href='css/main.css' rel='stylesheet' />
 </head>
 <body ng-app="myApp">
@@ -58,7 +58,7 @@
 		</div>
 	</header>
 
-	<section class="info-panel col-md-2">
+	<section class="info-panel col-md-3">
 		<h4>District: <span class="dist_label">{{ districtLabel }} </span></h4>
 		<h4>Target Area: <span class="target_label">{{ targetLabel }} </span></h4>
 
@@ -72,19 +72,20 @@
 			<table class="target_table table table-bordered">
 			<thead>
 				<tr>
-					<td>Target ID</td> <td>Ranks</td> <td>Houses</td>
+					<td>ID</td> <td>Structures</td> <td>Sprayed</td> <td>% Sprayed</td>
 				</tr>
 			</thead>
 			<tbody>
 				<tr ng-repeat="targets in targetData | filter:filterText">
 					<td><a href="#{{ targets.targetid }}"
 						ng-click="loadAreaData(targets.targetid)">{{ targets.targetid }}</a></td>
-					<td>{{ targets.ranks }}</td>
 					<td>{{ targets.houses }}</td>
+					<td></td>
+					<td></td>
 				</tr>
 			</tbody>
 			<tfoot>
-				<tr><td colspan="3">Total</td></tr>
+				<tr><td colspan="4">Total</td></tr>
 			 </tfoot>
 			</table>
 		</div>

@@ -52,6 +52,7 @@ body{
     top:0;right:0;bottom:0;
     padding:5em 1em 1em;
     z-index:99;
+	max-width:20%;
 }
 .table-wrap{
     /*border:1px solid #888;*/
