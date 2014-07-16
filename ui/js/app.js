@@ -167,43 +167,30 @@ var App = {
         }).addTo(map);
     },
     
-    loadAreaData: function(map, targetid){
-        this.loadTargetArea(map, targetid);
-        this.loadHouseholds(map, targetid);
-        this.loadBufferAreas(map, targetid);
+    loadAreaData: function(map){
+        var targetid = this.getCurrentTargetArea();
+        
+        if(isNaN(targetid) || targetid == undefined){
+            targetid=4;
+        }
+        
+        App.loadTargetArea(map, targetid);
+        App.loadHouseholds(map, targetid);
+        App.loadBufferAreas(map, targetid);
+    },
+    
+    getCurrentTargetArea: function(){
+        var url = document.URL;
+        var target_id = url.substring(url.indexOf('#') + 1, url.length);
+        
+        return target_id;
     },
 
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
-
-        //get current url state
-        var url = document.URL;
-        var target_id = url.substring(url.indexOf('#') + 1, url.length);
-         
-        console.log('CurrentID: #'+target_id);
         
-        App.loadAreaData(map, 4); // load default
-        
-        $(document).ready(function(){
-            var target_area = $('.target_table a');
-            
-            console.dir(target_area);
-            
-            target_area.click(function(e){
-                
-                var target_id = $(this).attr('href'),
-                    target_label = $('.target_label');
-                    
-                target_id = target_id.slice(1, target_id.length);
-                target_label.text(target_id);
-                
-                App.loadAreaData(map, target_id);
-            });
-        });
-        
-        this.loadAreaData(map, target_id); //Default data load
-        this.getDistricts();
+        App.loadAreaData(map); // load default
     }
 };
 
