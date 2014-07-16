@@ -177,14 +177,31 @@ var App = {
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
 
-        var target_id = this.getTargetAreaId();
-
-        if (target_id === undefined){
-            target_id = 4;
-        }
+        //get current url state
+        var url = document.URL;
+        var target_id = url.substring(url.indexOf('#') + 1, url.length);
+         
+        console.log('CurrentID: #'+target_id);
         
-        // var targets = $().
-
+        App.loadAreaData(map, 4); // load default
+        
+        $(document).ready(function(){
+            var target_area = $('.target_table a');
+            
+            console.dir(target_area);
+            
+            target_area.click(function(e){
+                
+                var target_id = $(this).attr('href'),
+                    target_label = $('.target_label');
+                    
+                target_id = target_id.slice(1, target_id.length);
+                target_label.text(target_id);
+                
+                App.loadAreaData(map, target_id);
+            });
+        });
+        
         this.loadAreaData(map, target_id); //Default data load
         this.getDistricts();
     }
