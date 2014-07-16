@@ -178,7 +178,7 @@ var App = {
         App.loadHouseholds(map, targetid);
         App.loadBufferAreas(map, targetid);
     },
-    
+	
     getCurrentTargetArea: function(){
         var url = document.URL;
         var target_id = url.substring(url.indexOf('#') + 1, url.length);
