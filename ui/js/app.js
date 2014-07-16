@@ -182,6 +182,8 @@ var App = {
         if (target_id === undefined){
             target_id = 4;
         }
+        
+        // var targets = $().
 
         this.loadAreaData(map, target_id); //Default data load
         this.getDistricts();
