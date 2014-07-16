@@ -190,7 +190,16 @@ var App = {
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
         
-        App.loadAreaData(map); // load default
+        App.loadAreaData(map);
+        
+        // some few effects
+        $(document).ready(function(){
+            $("a.toggle-infopanel").click(function(){
+                
+                $(".info-panel").toggle();
+                e.preventDefault();
+            });
+        });
     }
 };
 

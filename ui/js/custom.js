@@ -36,10 +36,8 @@ myApp.controller('TargetCtrl', ['$scope', '$http', function($scope, $http){
     };
     
     $scope.loadAreaData = function(targetid){
-        //loadAreaData(map);
-        
         $scope.targetLabel = targetid;
         
-        console.log('TARGET: '+ $scope.targetLabel);
+        //loadAreaData(map);
     };
 }]);
