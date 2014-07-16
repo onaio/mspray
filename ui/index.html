@@ -54,8 +54,8 @@
 	</header>
 
 	<section class="info-panel col-md-2">
-		<h4>District: <span class="dist_label"> </span></h4>
-		<h4>Target Area: <span class="target_label"> </span></h4>
+		<h4>District: <span class="dist_label">{{ districtLabel }} </span></h4>
+		<h4>Target Area: <span class="target_label">{{ targetLabel }} </span></h4>
 
 		<form action="/" method="POST" class="form-inline">
 			<input type="text" name="target_filter" class="target_filter form-control" 
@@ -63,6 +63,7 @@
 		</form><br/>
 
 		<div class="table-wrap">
+		    <ul id="target_areas_list"></ul>
 			<table class="target_table table table-bordered">
 			<thead>
 				<tr>
@@ -72,7 +73,7 @@
 			<tbody>
 				<tr ng-repeat="targets in targetData | filter:filterText">
 					<td><a href="#{{ targets.targetid }}"
-						ng-click="">{{ targets.targetid }}</a></td>
+						ng-click="loadAreaData(targets.targetid)">{{ targets.targetid }}</a></td>
 					<td>{{ targets.ranks }}</td>
 					<td>{{ targets.houses }}</td>
 				</tr>
