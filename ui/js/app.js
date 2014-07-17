@@ -150,6 +150,13 @@ var App = {
             }
         });
     },
+    
+    getCurrentTargetArea: function(){
+        var url = document.URL;
+        var target_id = url.substring(url.indexOf('#') + 1, url.length);
+        
+        return target_id;
+    },
 
     loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
@@ -244,7 +251,7 @@ var App = {
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
-
+            
             var sprayPointLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
@@ -257,8 +264,16 @@ var App = {
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
-
-        target_area.clearLayers();
+        
+        
+        if(App.current_target_area != null){
+            console.log('This layer already exists. Removing it..');
+            map.removeLayer(target_area);
+            App.current_target_area = target_area;
+        }
+        else{
+            
+        }
         
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
@@ -278,21 +293,15 @@ var App = {
         App.loadHouseholds(map, targetid);
         App.loadBufferAreas(map, targetid);
     },
-    
-    getCurrentTargetArea: function(){
-        var url = document.URL;
-        var target_id = url.substring(url.indexOf('#') + 1, url.length);
-        
-        return target_id;
-    },
 
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
         
-        var target_id = App.getCurrentTargetArea();
+        var default_target_id = App.getCurrentTargetArea();
+        App.current_target_area = null;
         
-        App.loadAreaData(map, target_id); // load data by default
+        App.loadAreaData(map, default_target_id); // load data by default
         
         this.getDistricts();
         
@@ -307,11 +316,19 @@ var App = {
                 target_area.click(function(e){
                     var target_id = $(this).attr('href'),
                         target_label = $('.target_label');
-                        
+                    
                     target_id = target_id.slice(1, target_id.length);
                     target_label.text(target_id);
                     
-                    App.loadAreaData(map, target_id);
+                    if(target_id != default_target_id){
+                        App.loadAreaData(map, target_id);
+                        
+                        // prevent multiple layering of one area
+                        default_target_id = target_id;
+                    }
+                    else{
+                        console.log("This map is already loaded");
+                    }
                 });
             });
             
