@@ -185,15 +185,124 @@ var App = {
         
         return target_id;
     },
+    
+    getDistricts: function(){
+        var uri = this.DISTRICT_URI;
+        
+        console.log('Fetching districts...');
+        
+        $.ajax({
+            url: uri,
+            type: 'GET', 
+            success: function(data){
+                var d_list = $('#districts_list');
+
+                for(var d=0; d<data.length; d++){
+                    var list_data = data[d],
+                        dist_name = list_data.district_name,
+                        num_targets = list_data.num_target_areas,
+                        
+                        dist_data = '<li><a href="#'+ dist_name +'">'+ dist_name +'</a></li>';
+                    
+                    d_list.append(dist_data);
+                }
+                
+                var district = d_list.find('li a');
+            
+                district.click(function(e){
+                    var dist_name = $(this).attr('href'),
+                        dist_label = $('.dist_label');
+                        // target_label = $('.target_label');
+                        
+                    dist_name = dist_name.slice(1, dist_name.length);
+                    dist_label.text(dist_name);
+                    // target_label.text('Target Areas');
+                    
+                    App.getTargetAreas(dist_name);
+                    //App.loadAreaData(map, dist_name);
+                });
+            },
+            error: function(){
+                console.log('Sorry, could not retrieve districts');
+            }
+        });
+    },
+    
+    getTargetAreas: function(district_name){
+        var uri = this.DISTRICT_URI + "?district=" + district_name;
+        
+        $.ajax({
+            url: uri,
+            type: 'GET', 
+            success: function(data){
+                var target_table = $('.target_table tbody');
+                
+                target_table.empty();
+
+                for(var d=0; d<data.length; d++){
+                    var list_data = data[d],
+                        target_id = list_data.targetid,
+                        ranks = list_data.ranks,
+                        houses = list_data.houses;
+                    
+                    //Create a table
+                    target_table.append(
+                        '<tr>'+ 
+                            '<td><a href="#' + target_id + '">'+ target_id +'</a></td>' +
+                            '<td>' + houses + '</td>' +
+                            '<td></td>' +
+                            '<td></td>' +
+                        '</tr>'
+                    );
+                }
+            }
+        });
+    },
 
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
         
+        this.getDistricts();
         App.loadAreaData(map);
         
         // some few effects
         $(document).ready(function(){
+            
+             // after ajax-call complete
+            $(document).ajaxComplete(function(){
+                
+                var target_area = $('.target_table a');
+        
+                target_area.click(function(e){
+                    var target_id = $(this).attr('href'),
+                        target_label = $('.target_label');
+                        
+                    target_id = target_id.slice(1, target_id.length);
+                    target_label.text(target_id);
+                    
+                    App.loadAreaData(map, target_id);
+                });
+            });
+            
+            // filter table results
+            $(".target_filter").keyup(function(){
+                
+                var filterText = $(this).val();
+                if(filterText != ""){
+                    
+                    $(".target_table tbody>tr").hide();
+                    $(".target_table td").filter(function(){
+                           return $(this).text().toLowerCase().indexOf(filterText) >-1; 
+                    }).parent("tr").show();
+                }
+                else{
+                    // When there is no input or clean again, show everything back
+                    $(".target_table tbody>tr").show();
+                }
+            });
+            
+            // toggle sidebar
             $("a.toggle-infopanel").click(function(){
                 
                 $(".info-panel").toggle();

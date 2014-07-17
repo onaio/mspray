@@ -9,8 +9,7 @@
 <link href='css/bootstrap.min.css' rel='stylesheet' />
 <link href='css/main.css' rel='stylesheet' />
 </head>
-<body ng-app="myApp">
-	<div ng-controller="TargetCtrl">
+<body>
 	<header class="navbar navbar-inverse" role="navigation">
 		<div class="container-fluid">
 			<div class="navbar-header">
@@ -31,14 +30,14 @@
 							<span class="dist_label">Districts</span> 
 							<b class="caret"></b>
 						</a>
-						<!-- <ul class="dropdown-menu" id="districts_list"></ul> -->
-						<ul class="dropdown-menu">
+						<ul class="dropdown-menu" id="districts_list"></ul>
+						<!-- <ul class="dropdown-menu">
 							<li ng-repeat="district in districtData | orderBy: 'district_name':false">
 								<a ng-click="getTargetAreas(district.district_name)" href="#{{ district.district_name }}">
 									{{ district.district_name }}
 								 </a>
 							</li>
-						</ul>
+						</ul> -->
 					</li>
                     <li class="dropdown">
                         <a href="#" class="toggle-infopanel">
@@ -59,31 +58,23 @@
 	</header>
 
 	<section class="info-panel col-md-3">
-		<h4>District: <span class="dist_label">{{ districtLabel }} </span></h4>
-		<h4>Target Area: <span class="target_label">{{ targetLabel }} </span></h4>
+		<h4>District: <span class="dist_label"> </span></h4>
+		<h4>Target Area: <span class="target_label"> </span></h4>
 
 		<form action="/" method="POST" class="form-inline">
 			<input type="text" name="target_filter" class="target_filter form-control" 
-				placeholder="Filter target areas" ng-model="filterText"/>
+				placeholder="Filter target areas"/>
 		</form><br/>
 
 		<div class="table-wrap">
-		    <ul id="target_areas_list"></ul>
+		    <ul id="target_areas_list"> </ul>
 			<table class="target_table table table-bordered">
 			<thead>
 				<tr>
 					<td>ID</td> <td>Structures</td> <td>Sprayed</td> <td>% Sprayed</td>
 				</tr>
 			</thead>
-			<tbody>
-				<tr ng-repeat="targets in targetData | filter:filterText">
-					<td><a href="#{{ targets.targetid }}"
-						ng-click="loadAreaData(targets.targetid)">{{ targets.targetid }}</a></td>
-					<td>{{ targets.houses }}</td>
-					<td></td>
-					<td></td>
-				</tr>
-			</tbody>
+			<tbody> </tbody>
 			<tfoot>
 				<tr><td colspan="4">Total</td></tr>
 			 </tfoot>
@@ -91,14 +82,13 @@
 		</div>
 	</section>
 
-	<div id='map'></div>
+	<div id='map'> </div>
 
 	<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
-	<script src="js/angular.min.js"></script>
+	<!-- <script src="js/angular.min.js"></script> -->
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/app.js"></script>
-	<script src="js/custom.js"></script>
+	<!-- <script src="js/custom.js"></script> -->
 	
-</div>
 </body>
 </html>
