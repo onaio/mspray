@@ -155,12 +155,10 @@ var App = {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
-        households.bringToFront();
-
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
 
-            L.geoJson(geojson, {
+            var hh_Layer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
@@ -220,15 +218,14 @@ var App = {
             url = url += "?day=" + day;
         }
         
-        console.log("Sprayday " + day);
-        
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url);
+        
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
 
-            L.geoJson(geojson, {
+            var sprayDayLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
                 }
@@ -248,7 +245,7 @@ var App = {
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
 
-            L.geoJson(geojson, {
+            var sprayPointLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
                 }
@@ -261,14 +258,16 @@ var App = {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
 
+        target_area.clearLayers();
+        
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
         }).addTo(map);
     },
 	
-    loadAreaData: function(map){
-        var targetid = this.getCurrentTargetArea();
+    loadAreaData: function(map, targetid){
+        // var targetid = this.getCurrentTargetArea();
         
         if(isNaN(targetid) || targetid == undefined){
             // targetid=4;
@@ -291,9 +290,11 @@ var App = {
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
         
+        var target_id = App.getCurrentTargetArea();
+        
+        App.loadAreaData(map, target_id); // load data by default
+        
         this.getDistricts();
-        App.loadAreaData(map); // load data by default
-        App.loadSprayDays(map, App.getDay);
         
         // some few effects
         $(document).ready(function(){
@@ -322,7 +323,7 @@ var App = {
                     
                     $(".target_table tbody>tr").hide();
                     $(".target_table td").filter(function(){
-                           return $(this).text().toLowerCase().indexOf(filterText) >-1; 
+                        return $(this).text().toLowerCase().indexOf(filterText) >-1; 
                     }).parent("tr").show();
                 }
                 else{
