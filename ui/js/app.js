@@ -74,117 +74,6 @@ var App = {
         }
         return counter;
     },
-
-    loadHouseholds: function(map, targetid) {
-        var households = L.mapbox.featureLayer()
-            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
-
-        households.bringToFront();
-
-        households.on('ready', function(){
-            var geojson = households.getGeoJSON();
-
-            L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.hhOptions);
-                },
-                onEachFeature: function(feature, layer){
-                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
-                        'HH_type: '+ feature.properties.hh_type;
-                    layer.bindPopup(content, { closeButton:false });
-
-                    layer.on({
-                        mouseover: function(e){
-                            e.layer.openPopup();
-                        },
-                        mouseout: function(e){
-                            e.layer.closePopup();
-                        }
-                    });
-                }
-			})
-            .addTo(map);
-        });
-    },
-    loadBufferAreas: function(map, targetid) {
-        var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
-
-        hh_buffers.on('ready', function(){
-            var geojson = hh_buffers.getGeoJSON();
-
-            var areaLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.hhOptions);
-                },
-                style: App.bufferOptions,
-                onEachFeature: function(feature, layer){
-
-                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
-                    layer.bindPopup(content, { closeButton:false });
-
-                    layer.on({
-                        mouseover: function(e){
-                            var layer = e.target;
-                            k = layer;
-                            layer.setStyle( {fillOpacity: 0.7} );
-                        },
-                        mouseout: function(e){
-                            areaLayer.setStyle(App.bufferOptions);
-                        }
-                    });
-                }
-            }).addTo(map);
-        });
-    },
-    loadSprayPoints: function (map, day) {
-        var url = App.SPRAY_DAYS_URI;
-        if(day !== undefined){
-            url = url += "?day=" + day;
-        }
-        var sprayed = L.mapbox.featureLayer()
-            .loadURL(url);
-
-        sprayed.on('ready', function(){
-            var geojson = sprayed.getGeoJSON();
-
-            L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.sprayOptions);
-                }
-			})
-            .addTo(map);
-        });
-    },
-
-    loadTargetArea: function(map, targetid) {
-        var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
-
-        target_area.on('ready', function(){
-            var bounds = target_area.getBounds();
-            map.fitBounds(bounds);
-        }).addTo(map);
-    },
-	
-    loadAreaData: function(map){
-        var targetid = this.getCurrentTargetArea();
-        
-        if(isNaN(targetid) || targetid == undefined){
-            targetid=4;
-        }
-        
-        App.loadTargetArea(map, targetid);
-        App.loadHouseholds(map, targetid);
-        App.loadBufferAreas(map, targetid);
-    },
-	
-    getCurrentTargetArea: function(){
-        var url = document.URL;
-        var target_id = url.substring(url.indexOf('#') + 1, url.length);
-        
-        return target_id;
-    },
     
     getDistricts: function(){
         var uri = this.DISTRICT_URI;
@@ -262,12 +151,149 @@ var App = {
         });
     },
 
+    loadHouseholds: function(map, targetid) {
+        var households = L.mapbox.featureLayer()
+            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
+
+        households.bringToFront();
+
+        households.on('ready', function(){
+            var geojson = households.getGeoJSON();
+
+            L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.hhOptions);
+                },
+                onEachFeature: function(feature, layer){
+                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
+                        'HH_type: '+ feature.properties.hh_type;
+                    layer.bindPopup(content, { closeButton:false });
+
+                    layer.on({
+                        mouseover: function(e){
+                            e.layer.openPopup();
+                        },
+                        mouseout: function(e){
+                            e.layer.closePopup();
+                        }
+                    });
+                }
+			})
+            .addTo(map);
+        });
+    },
+    loadBufferAreas: function(map, targetid) {
+        var hh_buffers = L.mapbox.featureLayer()
+            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
+
+        hh_buffers.on('ready', function(){
+            var geojson = hh_buffers.getGeoJSON();
+
+            var areaLayer = L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.hhOptions);
+                },
+                style: App.bufferOptions,
+                onEachFeature: function(feature, layer){
+
+                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
+                    layer.bindPopup(content, { closeButton:false });
+
+                    layer.on({
+                        mouseover: function(e){
+                            var layer = e.target;
+                            k = layer;
+                            layer.setStyle( {fillOpacity: 0.7} );
+                        },
+                        mouseout: function(e){
+                            areaLayer.setStyle(App.bufferOptions);
+                        }
+                    });
+                }
+            }).addTo(map);
+        });
+    },
+    
+    loadSprayDays: function (map, day) {
+        var url = App.SPRAY_DAYS_URI;
+        if(day !== undefined){
+            url = url += "?day=" + day;
+        }
+        
+        console.log("Sprayday " + day);
+        
+        var sprayed = L.mapbox.featureLayer()
+            .loadURL(url);
+
+        sprayed.on('ready', function(){
+            var geojson = sprayed.getGeoJSON();
+
+            L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.sprayOptions);
+                }
+            })
+            .addTo(map);
+        });
+    },
+    
+    loadSprayPoints: function (map, day) {
+        var url = App.SPRAY_DAYS_URI;
+        if(day !== undefined){
+            url = url += "?day=" + day;
+        }
+        var sprayed = L.mapbox.featureLayer()
+            .loadURL(url);
+
+        sprayed.on('ready', function(){
+            var geojson = sprayed.getGeoJSON();
+
+            L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.sprayOptions);
+                }
+            })
+            .addTo(map);
+        });
+    },
+
+    loadTargetArea: function(map, targetid) {
+        var target_area = L.mapbox.featureLayer()
+            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+
+        target_area.on('ready', function(){
+            var bounds = target_area.getBounds();
+            map.fitBounds(bounds);
+        }).addTo(map);
+    },
+	
+    loadAreaData: function(map){
+        var targetid = this.getCurrentTargetArea();
+        
+        if(isNaN(targetid) || targetid == undefined){
+            // targetid=4;
+            console.log('Could not load for targetid: ' + targetid);
+        }
+        
+        App.loadTargetArea(map, targetid);
+        App.loadHouseholds(map, targetid);
+        App.loadBufferAreas(map, targetid);
+    },
+    
+    getCurrentTargetArea: function(){
+        var url = document.URL;
+        var target_id = url.substring(url.indexOf('#') + 1, url.length);
+        
+        return target_id;
+    },
+
     init: function (){
         var map = L.mapbox.map('map', 'examples.map-i86nkdio');
             //.setView([-14.2164, 29.2315], 10);
         
         this.getDistricts();
-        App.loadAreaData(map);
+        App.loadAreaData(map); // load data by default
+        App.loadSprayDays(map, App.getDay);
         
         // some few effects
         $(document).ready(function(){
