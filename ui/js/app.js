@@ -99,6 +99,8 @@ var App = {
                 var district = d_list.find('li a');
             
                 district.click(function(e){
+                    e.preventDefault();
+                    
                     var dist_name = $(this).attr('href'),
                         dist_label = $('.dist_label');
                         // target_label = $('.target_label');
@@ -183,7 +185,7 @@ var App = {
                         }
                     });
                 }
-			})
+            })
             .addTo(map);
         });
     },
@@ -280,7 +282,7 @@ var App = {
             map.fitBounds(bounds);
         }).addTo(map);
     },
-	
+    
     loadAreaData: function(map, targetid){
         // var targetid = this.getCurrentTargetArea();
         
