@@ -101,16 +101,12 @@ var App = {
                 district.click(function(e){
                     e.preventDefault();
                     
-                    var dist_name = $(this).attr('href'),
-                        dist_label = $('.dist_label');
-                        // target_label = $('.target_label');
+                    var dist_name = $(this).attr('href');
                         
                     dist_name = dist_name.slice(1, dist_name.length);
-                    dist_label.text(dist_name);
-                    // target_label.text('Target Areas');
+                    $('.dist_label').text(dist_name);
                     
                     App.getTargetAreas(dist_name);
-                    //App.loadAreaData(map, dist_name);
                 });
             },
             error: function(){
@@ -127,9 +123,11 @@ var App = {
             type: 'GET', 
             success: function(data){
                 var target_table = $('.target_table tbody');
-                
                 target_table.empty();
-
+                
+                // on selection of a district, show data for first target area
+                $('.target_label').text(data[0].targetid);
+                
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
                         target_id = list_data.targetid,
