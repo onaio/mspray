@@ -255,6 +255,9 @@ var App = {
                         '</tr>'
                     );
                 }
+            },
+            error: function(){
+                console.log('Sorry, could not retrieve target areas');
             }
         });
     },

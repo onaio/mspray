@@ -52,7 +52,7 @@ body{
     top:0;right:0;bottom:0;
     padding:5em 1em 1em;
     z-index:99;
-	max-width:20%;
+	width:23em;
 }
 .table-wrap{
     /*border:1px solid #888;*/
@@ -61,5 +61,10 @@ body{
     overflow-y:auto;
     padding:0 1em 0;
     position:absolute;
+}
+
+.target_table tr th:hover{
+    background:pink;
+    cursor:pointer!important;
 }
 
