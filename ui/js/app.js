@@ -1,6 +1,6 @@
 var App = {
-    // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-    SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    // SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
@@ -226,10 +226,10 @@ var App = {
         });
     },
     
-    loadSprayPoints: function (map, day) {
+    loadSprayPoints: function (map, day, targetid) {
         var url = App.SPRAY_DAYS_URI;
         if(day !== undefined){
-            url = url += "?day=" + day;
+            url = url += "?day=" + day + "&target_area=" + targetid;
         }
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url);
@@ -266,7 +266,7 @@ var App = {
     },
     
     loadAreaData: function(map, targetid){
-        var targetid = this.getCurrentTargetArea();
+        // var targetid = this.getCurrentTargetArea();
         
         if(isNaN(targetid) || targetid == undefined){
             targetid=4;
@@ -340,7 +340,7 @@ var App = {
                 var sprayday = $(this).attr('href');
                 sprayday = sprayday.slice(4, sprayday.length);
                 
-                App.loadSprayPoints(map, sprayday);
+                App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
                 $('.day_label').text('Day ' + sprayday);
                 
                 e.preventDefault();
