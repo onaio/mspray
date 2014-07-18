@@ -293,6 +293,8 @@ var App = {
         
         map.addLayer(new L.Google);
         
+        L.control.locate().addTo(map);
+        
         var default_target_id = App.getCurrentTargetArea();
         App.current_target_area = null;
         
