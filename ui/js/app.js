@@ -153,16 +153,22 @@ var App = {
     
     getCurrentDistrict: function(){
         var url = document.location.hash;
-        var fragment = url.split('/')[0];  
+        var fragment = url.split('/')[0];
+        var district = fragment.substring(2, fragment.length);   
         
-        return fragment.substring(2, fragment.length);
+        console.log('FN-Current district: ' + district);
+        
+        return district;
     },
     
     getCurrentTargetArea: function(){
         var url = document.location.hash;
-        // var target_id = url.substring(url.indexOf('#') + 1, url.length);
+        // var target_id = url.substring(url.indexOf('#') + 1, url.length);   
+        var target_id = url.split('/')[1];
         
-        return url.split('/')[1];
+        console.log('FN-Current Target : ' + target_id);
+        
+        return target_id;
     },
 
     loadHouseholds: function(map, targetid) {
@@ -265,23 +271,13 @@ var App = {
         }).addTo(map);
     },
     
-    loadAreaData: function(map, targetid){
-        // var targetid = this.getCurrentTargetArea();
-        
-        if(isNaN(targetid) || targetid == undefined){
-            targetid=4;
-        }
-        
+    loadAreaData: function(map, targetid){        
         this.loadTargetArea(map, targetid);
         this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map, targetid);
     },
     
-    restorePageState: function(){
-        // if the page is reloaded, restore same page state
-        var current_district = this.getCurrentDistrict();
-        var current_target_area = this.getCurrentTargetArea();
-        
+    restorePageState: function(current_district, current_target_area){
         this.getTargetAreas(current_district);
         
         $('.dist_label').text(current_district);
@@ -293,16 +289,26 @@ var App = {
         map.addLayer(new L.Google);
         L.control.locate().addTo(map);
         
-        //Counters
-        var houseHolds = 0;
+        // if the page is reloaded, restore same page state
+        var current_district = this.getCurrentDistrict();
+        var current_target_area = this.getCurrentTargetArea();
         
-        this.restorePageState();
+        // set defaults (Chienge, 839)
+        if(current_district == ''){
+            current_district = 'Chienge';
+        }
+        if(current_target_area == '' || current_target_area == 'undefined'){
+            current_target_area = 839;
+        }
+        
+        console.log("INIT: " + current_district + ":" + current_target_area);
+        
+        
+        this.restorePageState(current_district, current_target_area);
         this.getDistricts();
         
-        var default_target_id = App.getCurrentTargetArea();
-        App.current_target_area = null;
-        
-        App.loadAreaData(map, default_target_id);
+        // var default_target_id = App.getCurrentTargetArea();        
+        App.loadAreaData(map, current_target_area);
         
         $(document).ajaxComplete(function(){
             
