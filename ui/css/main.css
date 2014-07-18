@@ -40,11 +40,34 @@ body{
 }
 
 #map{
-	margin-top:4em;
+	margin-top:3em;
 	position:absolute;
 	top:0; bottom:0;
 	width:100%;
 }
+#map-legend{
+    background:rgba(255, 255, 255, 0.9);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position:absolute;
+    bottom:0; left:0;
+    margin:0.8em 0.8em 2em;
+    padding:1em;
+    text-align:center;
+}
+.circle{
+    border:12px solid #00D2B8;
+    border-radius:20em;
+    display:block;
+    font-size:3em;
+    padding:0.7em 0.3em;
+    height:3em;width:3em;
+    margin-bottom:0.2em;
+}
+.day_label{
+    font-weight:bold;
+}
+
 .info-panel{
     background:rgba(0,0,0,0.8);
     color:#FFF;
@@ -52,7 +75,7 @@ body{
     top:0;right:0;bottom:0;
     padding:5em 1em 1em;
     z-index:99;
-	max-width:20%;
+	width:25em;
 }
 .table-wrap{
     /*border:1px solid #888;*/
@@ -61,5 +84,10 @@ body{
     overflow-y:auto;
     padding:0 1em 0;
     position:absolute;
+}
+
+.target_table tr th:hover{
+    background:pink;
+    cursor:pointer!important;
 }
 
