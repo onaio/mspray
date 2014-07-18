@@ -156,8 +156,6 @@ var App = {
         var fragment = url.split('/')[0];
         var district = fragment.substring(2, fragment.length);   
         
-        console.log('FN-Current district: ' + district);
-        
         return district;
     },
     
@@ -166,7 +164,9 @@ var App = {
         // var target_id = url.substring(url.indexOf('#') + 1, url.length);   
         var target_id = url.split('/')[1];
         
-        console.log('FN-Current Target : ' + target_id);
+        if(target_id == '' || target_id=='undefined'){
+            targetid = 839;
+        }
         
         return target_id;
     },
@@ -262,16 +262,13 @@ var App = {
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
         
         target_area.on('ready', function(){
-            
             var bounds = target_area.getBounds();
-            console.dir(map);
-          
             map.fitBounds(bounds);
            
         }).addTo(map);
     },
     
-    loadAreaData: function(map, targetid){        
+    loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
         this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map, targetid);
@@ -297,12 +294,6 @@ var App = {
         if(current_district == ''){
             current_district = 'Chienge';
         }
-        if(current_target_area == '' || current_target_area == 'undefined'){
-            current_target_area = 839;
-        }
-        
-        console.log("INIT: " + current_district + ":" + current_target_area);
-        
         
         this.restorePageState(current_district, current_target_area);
         this.getDistricts();
