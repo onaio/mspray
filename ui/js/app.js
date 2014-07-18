@@ -295,8 +295,9 @@ var App = {
     },
 
     init: function (){
-        var map = L.mapbox.map('map', 'examples.map-i86nkdio');
+        var map = L.mapbox.map('map'); //'examples.map-i86nkdio'
             //.setView([-14.2164, 29.2315], 10);
+        map.addLayer(new L.Google);
         
         var default_target_id = App.getCurrentTargetArea();
         App.current_target_area = null;
