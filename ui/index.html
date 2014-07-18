@@ -21,43 +21,41 @@
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#msp-collapse">
 					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
+					<span class="icon-bar"> </span>
+					<span class="icon-bar"> </span>
+					<span class="icon-bar"> </span>
 				</button>
 				<a class="navbar-brand" href="#">mSpray</a>
 			</div>
 
 			<div class="collapse navbar-collapse" id="msp-collapse">
 				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" 
-						   data-toggle="dropdown">
-							<span class="dist_label">Districts</span> 
-							<b class="caret"></b>
-						</a>
-						<ul class="dropdown-menu" id="districts_list"></ul>
-						<!-- <ul class="dropdown-menu">
-							<li ng-repeat="district in districtData | orderBy: 'district_name':false">
-								<a ng-click="getTargetAreas(district.district_name)" href="#{{ district.district_name }}">
-									{{ district.district_name }}
-								 </a>
-							</li>
-						</ul> -->
-					</li>
                     <li class="dropdown">
-                        <a href="#" class="toggle-infopanel">
+                        <a href="#" class="dropdown-toggle" 
+                           data-toggle="dropdown">
+                            <span class="dist_label">Districts</span> 
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu" id="districts_list"> </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" 
+                           data-toggle="dropdown">
+                            <span class="dist_label">Spray Days</span> 
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu" id="spraydays_list">
+                            <li><a href="#">Day 1</a></li>
+                            <li><a href="#">Day 2</a></li>
+                            <li><a href="#">Day 3</a></li>
+                            <li><a href="#">Day 4</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="toggle-infopanel dropdown-toggle">
                             <span class="glyphicon glyphicon-tasks"> </span>&nbsp; View Data
                         </a>
                     </li>
-					<!-- <li class="dropdown">
-						<a href="#" class="dropdown-toggle" 
-						   data-toggle="dropdown">
-							<span class="target_label">Target Areas</span> 
-							<b class="caret"></b>
-						</a>
-						<ul id="target_areas_list" class="dropdown-menu"></ul>
-					</li> -->
 				</ul>
 			</div>
 		</div>

@@ -265,15 +265,11 @@ var App = {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
         
-        
         if(App.current_target_area != null){
-            console.log('This layer already exists. Removing it..');
             map.removeLayer(target_area);
             App.current_target_area = target_area;
         }
-        else{
-            
-        }
+        else{ /**/ }
         
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
