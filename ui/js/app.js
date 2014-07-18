@@ -253,9 +253,7 @@ var App = {
 
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid).addTo(map);
-        
-        console.log('LOADING TARGET: ...');
+            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
         
         target_area.on('ready', function(){
             
@@ -264,7 +262,7 @@ var App = {
           
             map.fitBounds(bounds);
            
-        });
+        }).addTo(map);
     },
     
     loadAreaData: function(map, targetid){
