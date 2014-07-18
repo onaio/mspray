@@ -45,6 +45,25 @@ body{
 	top:0; bottom:0;
 	width:100%;
 }
+#map-legend{
+    background:rgba(255, 255, 255, 0.8);
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    position:absolute;
+    bottom:0; left:0;
+    margin:0.8em 0.8em 2em;
+    padding:1em;
+    text-align:center;
+}
+.circle{
+    border:12px solid #00D2B8;
+    border-radius:20em;
+    display:block;
+    font-size:3em;
+    padding:0.7em 0.3em;
+    margin-bottom:0.4em;
+}
+
 .info-panel{
     background:rgba(0,0,0,0.8);
     color:#FFF;

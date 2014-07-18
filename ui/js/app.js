@@ -227,7 +227,6 @@ var App = {
         
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url);
-        
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
@@ -278,11 +277,10 @@ var App = {
     },
     
     loadAreaData: function(map, targetid){
-        // var targetid = this.getCurrentTargetArea();
+        var targetid = this.getCurrentTargetArea();
         
         if(isNaN(targetid) || targetid == undefined){
-            // targetid=4;
-            console.log('Could not load for targetid: ' + targetid);
+            targetid=4;
         }
         
         App.loadTargetArea(map, targetid);
@@ -291,45 +289,42 @@ var App = {
     },
 
     init: function (){
-        var map = L.mapbox.map('map'); //'examples.map-i86nkdio'
-            //.setView([-14.2164, 29.2315], 10);
+        var map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
+        
         map.addLayer(new L.Google);
         
         var default_target_id = App.getCurrentTargetArea();
         App.current_target_area = null;
         
-        App.loadAreaData(map, default_target_id); // load data by default
+        App.loadAreaData(map, default_target_id);
         
         this.getDistricts();
         
-        // some few effects
+        $(document).ajaxComplete(function(){
+            
+            var target_area = $('.target_table a');
+    
+            target_area.click(function(e){
+                var target_id = $(this).attr('href'),
+                    target_label = $('.target_label');
+                
+                target_id = target_id.slice(1, target_id.length);
+                target_label.text(target_id);
+                
+                if(target_id != default_target_id){
+                    App.loadAreaData(map, target_id);
+                    
+                    // prevent multiple layering of one area
+                    default_target_id = target_id;
+                }
+                else{
+                    console.log("This map is already loaded");
+                }
+            });
+        });
+        
         $(document).ready(function(){
             
-             // after ajax-call complete
-            $(document).ajaxComplete(function(){
-                
-                var target_area = $('.target_table a');
-        
-                target_area.click(function(e){
-                    var target_id = $(this).attr('href'),
-                        target_label = $('.target_label');
-                    
-                    target_id = target_id.slice(1, target_id.length);
-                    target_label.text(target_id);
-                    
-                    if(target_id != default_target_id){
-                        App.loadAreaData(map, target_id);
-                        
-                        // prevent multiple layering of one area
-                        default_target_id = target_id;
-                    }
-                    else{
-                        console.log("This map is already loaded");
-                    }
-                });
-            });
-            
-            // filter table results
             $(".target_filter").keyup(function(){
                 
                 var filterText = $(this).val();
@@ -341,12 +336,11 @@ var App = {
                     }).parent("tr").show();
                 }
                 else{
-                    // When there is no input or clean again, show everything back
                     $(".target_table tbody>tr").show();
                 }
             });
             
-            // toggle sidebar
+            // sidebar
             $("a.toggle-infopanel").click(function(){
                 
                 $(".info-panel").toggle();
