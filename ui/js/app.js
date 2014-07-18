@@ -162,8 +162,6 @@ var App = {
         var url = document.location.hash;
         // var target_id = url.substring(url.indexOf('#') + 1, url.length);
         
-        console.log("Current target area: "+url.split('/')[1]);
-        
         return url.split('/')[1];
     },
 
@@ -255,23 +253,18 @@ var App = {
 
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid).addTo(map);
         
-        
-                
-                console.log('START LOADING: ...');
-        
-        if(App.current_target_area != null){
-            map.removeLayer(target_area);
-            App.current_target_area = target_area;
-        }
-        else{ /**/ }
+        console.log('LOADING TARGET: ...');
         
         target_area.on('ready', function(){
+            
             var bounds = target_area.getBounds();
-            console.log(map);
-           map.fitBounds(bounds);
-        }).addTo(map);
+            console.dir(map);
+          
+            map.fitBounds(bounds);
+           
+        });
     },
     
     loadAreaData: function(map, targetid){
@@ -298,7 +291,7 @@ var App = {
     },
 
     init: function (){
-        var map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
+        window.map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
         map.addLayer(new L.Google);
         L.control.locate().addTo(map);
         
@@ -323,7 +316,7 @@ var App = {
                 target_id = target_id.split('/')[1];
                 $('.target_label').text(target_id);
                 
-                App.loadAreaData(App.map, target_id);
+               App.loadAreaData(map, target_id);
             });
         });
         
