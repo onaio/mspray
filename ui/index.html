@@ -50,10 +50,10 @@
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu" id="spraydays_list">
-                            <li><a href="#">Day 1</a></li>
-                            <li><a href="#">Day 2</a></li>
-                            <li><a href="#">Day 3</a></li>
-                            <li><a href="#">Day 4</a></li>
+                            <li><a href="#day1">Day 1</a></li>
+                            <li><a href="#day2">Day 2</a></li>
+                            <li><a href="#day3">Day 3</a></li>
+                            <li><a href="#day4">Day 4</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -99,8 +99,10 @@
 	<div id='map'> </div>
     
     <div id="map-legend">
-        <span class="circle clearfix">23%</span>
-        <p>% sprayed in day 1</p>
+        <span class="circle clearfix">
+            <span class="perc_label">0</span>
+        </span>
+        <p>Households sprayed<br/><span class="day_label">Day 0</span></p>
     </div>
 
 	<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>

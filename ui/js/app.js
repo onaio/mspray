@@ -1,5 +1,6 @@
 var App = {
-    SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
+    // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
+    SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
     BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
@@ -91,7 +92,7 @@ var App = {
                         dist_name = list_data.district_name,
                         num_targets = list_data.num_target_areas,
                         
-                        dist_data = '<li><a href="#'+ dist_name +'">'+ dist_name +'</a></li>';
+                        dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
                     
                     d_list.append(dist_data);
                 }
@@ -99,11 +100,10 @@ var App = {
                 var district = d_list.find('li a');
             
                 district.click(function(e){
-                    e.preventDefault();
                     
                     var dist_name = $(this).attr('href');
                         
-                    dist_name = dist_name.slice(1, dist_name.length);
+                    dist_name = dist_name.slice(2, dist_name.length);
                     $('.dist_label').text(dist_name);
                     
                     App.getTargetAreas(dist_name);
@@ -137,7 +137,7 @@ var App = {
                     //Create a table
                     target_table.append(
                         '<tr>'+ 
-                            '<td><a href="#' + target_id + '">'+ target_id +'</a></td>' +
+                            '<td><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
                             '<td>' + houses + '</td>' +
                             '<td></td>' +
                             '<td></td>' +
@@ -151,11 +151,20 @@ var App = {
         });
     },
     
-    getCurrentTargetArea: function(){
-        var url = document.URL;
-        var target_id = url.substring(url.indexOf('#') + 1, url.length);
+    getCurrentDistrict: function(){
+        var url = document.location.hash;
+        var fragment = url.split('/')[0];  
         
-        return target_id;
+        return fragment.substring(2, fragment.length);
+    },
+    
+    getCurrentTargetArea: function(){
+        var url = document.location.hash;
+        // var target_id = url.substring(url.indexOf('#') + 1, url.length);
+        
+        console.log("Current target area: "+url.split('/')[1]);
+        
+        return url.split('/')[1];
     },
 
     loadHouseholds: function(map, targetid) {
@@ -164,7 +173,7 @@ var App = {
 
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
-
+            
             var hh_Layer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
@@ -173,7 +182,7 @@ var App = {
                     var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                         'HH_type: '+ feature.properties.hh_type;
                     layer.bindPopup(content, { closeButton:false });
-
+                    
                     layer.on({
                         mouseover: function(e){
                             e.layer.openPopup();
@@ -219,27 +228,6 @@ var App = {
         });
     },
     
-    loadSprayDays: function (map, day) {
-        var url = App.SPRAY_DAYS_URI;
-        if(day !== undefined){
-            url = url += "?day=" + day;
-        }
-        
-        var sprayed = L.mapbox.featureLayer()
-            .loadURL(url);
-
-        sprayed.on('ready', function(){
-            var geojson = sprayed.getGeoJSON();
-
-            var sprayDayLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.sprayOptions);
-                }
-            })
-            .addTo(map);
-        });
-    },
-    
     loadSprayPoints: function (map, day) {
         var url = App.SPRAY_DAYS_URI;
         if(day !== undefined){
@@ -250,10 +238,15 @@ var App = {
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
+            var count = 0;
             
             var sprayPointLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
+                },
+                onEachFeature: function(){
+                    count++;
+                    $('.perc_label').text(count);
                 }
             })
             .addTo(map);
@@ -264,6 +257,10 @@ var App = {
         var target_area = L.mapbox.featureLayer()
             .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
         
+        
+                
+                console.log('START LOADING: ...');
+        
         if(App.current_target_area != null){
             map.removeLayer(target_area);
             App.current_target_area = target_area;
@@ -272,7 +269,8 @@ var App = {
         
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
-            map.fitBounds(bounds);
+            console.log(map);
+           map.fitBounds(bounds);
         }).addTo(map);
     },
     
@@ -283,52 +281,56 @@ var App = {
             targetid=4;
         }
         
-        App.loadTargetArea(map, targetid);
-        App.loadHouseholds(map, targetid);
-        App.loadBufferAreas(map, targetid);
+        this.loadTargetArea(map, targetid);
+        this.loadHouseholds(map, targetid);
+        this.loadBufferAreas(map, targetid);
+    },
+    
+    restorePageState: function(){
+        // if the page is reloaded, restore same page state
+        var current_district = this.getCurrentDistrict();
+        var current_target_area = this.getCurrentTargetArea();
+        
+        this.getTargetAreas(current_district);
+        
+        $('.dist_label').text(current_district);
+        $('.target_label').text(current_target_area);
     },
 
     init: function (){
         var map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
-        
         map.addLayer(new L.Google);
-        
         L.control.locate().addTo(map);
+        
+        //Counters
+        var houseHolds = 0;
+        
+        this.restorePageState();
+        this.getDistricts();
         
         var default_target_id = App.getCurrentTargetArea();
         App.current_target_area = null;
         
         App.loadAreaData(map, default_target_id);
         
-        this.getDistricts();
-        
         $(document).ajaxComplete(function(){
             
             var target_area = $('.target_table a');
-    
+            
             target_area.click(function(e){
-                var target_id = $(this).attr('href'),
-                    target_label = $('.target_label');
+                var target_id = $(this).attr('href');
                 
-                target_id = target_id.slice(1, target_id.length);
-                target_label.text(target_id);
+                target_id = target_id.split('/')[1];
+                $('.target_label').text(target_id);
                 
-                if(target_id != default_target_id){
-                    App.loadAreaData(map, target_id);
-                    
-                    // prevent multiple layering of one area
-                    default_target_id = target_id;
-                }
-                else{
-                    console.log("This map is already loaded");
-                }
+                App.loadAreaData(App.map, target_id);
             });
         });
         
         $(document).ready(function(){
             
+            // load target-buffer areas
             $(".target_filter").keyup(function(){
-                
                 var filterText = $(this).val();
                 if(filterText != ""){
                     
@@ -340,6 +342,17 @@ var App = {
                 else{
                     $(".target_table tbody>tr").show();
                 }
+            });
+            
+            // load spraydays
+            $('#spraydays_list li a').click(function(e){
+                var sprayday = $(this).attr('href');
+                sprayday = sprayday.slice(4, sprayday.length);
+                
+                App.loadSprayPoints(map, sprayday);
+                $('.day_label').text('Day ' + sprayday);
+                
+                e.preventDefault();
             });
             
             // sidebar
