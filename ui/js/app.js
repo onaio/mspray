@@ -100,11 +100,10 @@ var App = {
                 var district = d_list.find('li a');
             
                 district.click(function(e){
-                    
                     var dist_name = $(this).attr('href');
                         
                     dist_name = dist_name.slice(2, dist_name.length);
-                    $('.dist_label').text(dist_name);
+                    $('.dist_label').text('District: ' + dist_name);
                     
                     App.getTargetAreas(dist_name);
                 });
@@ -276,7 +275,7 @@ var App = {
     restorePageState: function(current_district, current_target_area){
         this.getTargetAreas(current_district);
         
-        $('.dist_label').text(current_district);
+        $('.dist_label').text('District: ' + current_district);
         $('.target_label').text(current_target_area);
     },
 
@@ -337,16 +336,30 @@ var App = {
                 sprayday = sprayday.slice(4, sprayday.length);
                 
                 App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
+                $('.sprayday_label').text('Date: Day ' + sprayday);
                 $('.day_label').text('Day ' + sprayday);
                 
                 e.preventDefault();
             });
             
-            // sidebar
-            $("a.toggle-infopanel").click(function(){
+            // sidebar toggle
+            $(".info-toggle").click(function(){
+                var infopanel = $(".info-panel"),
+                    infotoggle = $('.info-toggle'),
+                    panelbtn = $('.panel-state');
+                    
+                if(infopanel.hasClass('open')){
+                    infotoggle.removeClass('open');
+                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Table');
+                    infopanel.hide();
+                }
+                else{
+                    infotoggle.addClass('open');
+                    panelbtn.html('<span class="glyphicon glyphicon-remove"> </span>');
+                    infopanel.show();
+                }
                 
-                $(".info-panel").toggle();
-                e.preventDefault();
+                infopanel.toggleClass('open');
             });
         });
     }

@@ -75,8 +75,27 @@ body{
     top:0;right:0;bottom:0;
     padding:5em 1em 1em;
     z-index:99;
-	width:25em;
 }
+.info-holder, .info-toggle{
+    float:left;
+}
+.info-holder{
+    width:25em;
+}
+.info-toggle{
+    background:rgba(0,0,0,0.8);
+    color:#FFF;
+    cursor:pointer;
+    margin-left:-9.2em;
+    padding:1em;
+    position:absolute;
+    right:0;
+    z-index:100;
+}
+.info-toggle.open{
+    margin-right:27em;
+}
+
 .table-wrap{
     padding:0 1em;
     position:absolute;
