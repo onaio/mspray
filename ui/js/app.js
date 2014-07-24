@@ -5,6 +5,12 @@ var App = {
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
+    targetOptions: {
+        fillColor: '#999999',
+        color: '#FFFFFF',
+        weight: 3,
+        fillOpacity: 0.4
+    },
     hhOptions: {
         radius: 4,
         fillColor: "#FFDC00",
@@ -172,6 +178,8 @@ var App = {
     loadHouseholds: function(map, targetid) {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
+        
+        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "&target_area=" + targetid);
 
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
@@ -201,7 +209,9 @@ var App = {
     loadBufferAreas: function(map, targetid) {
         var hh_buffers = L.mapbox.featureLayer()
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
-
+        
+        console.log('BUFFER_URI: ' + App.BUFFER_URI + "&target_area=" + targetid);
+        
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
 
@@ -236,6 +246,8 @@ var App = {
         }
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url);
+        
+        console.log('SPRAYPOINT_URI: ' + url);
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
@@ -255,13 +267,16 @@ var App = {
     },
 
     loadTargetArea: function(map, targetid) {
-        var target_area = L.mapbox.featureLayer()
-            .loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        var target_area = L.mapbox.featureLayer().
+            loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        
+        console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
         
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
-           
+            
+            target_area.setStyle(App.targetOptions);
         }).addTo(map);
     },
     
@@ -282,6 +297,8 @@ var App = {
         window.map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
         map.addLayer(new L.Google);
         L.control.locate().addTo(map);
+        
+        var sprayLayer, targetLayer, hhLayer, bufferLayer;
         
         // if the page is reloaded, restore same page state
         var current_district = this.getCurrentDistrict();
