@@ -125,7 +125,7 @@ var App = {
                 target_table.empty();
                 
                 // on selection of a district, show data for first target area
-                $('.target_label').text(data[0].targetid);
+                $('.target_label').text('Target Area: ' + data[0].targetid);
                 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
@@ -276,7 +276,7 @@ var App = {
         this.getTargetAreas(current_district);
         
         $('.dist_label').text('District: ' + current_district);
-        $('.target_label').text(current_target_area);
+        $('.target_label').text('Target Area: ' + current_target_area);
     },
 
     init: function (){
@@ -307,7 +307,7 @@ var App = {
                 var target_id = $(this).attr('href');
                 
                 target_id = target_id.split('/')[1];
-                $('.target_label').text(target_id);
+                $('.target_label').text('Target Area: ' + target_id);
                 
                App.loadAreaData(map, target_id);
             });

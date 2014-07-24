@@ -1,5 +1,6 @@
 body{
-    margin:0; padding:0; font:13px Arial;
+    margin:0; padding:0; 
+    font:12px 'Open Sans', Arial;
 }
 
 .form-control{
@@ -21,6 +22,12 @@ body{
 .navbar-brand{
     font-weight:bold;
 }
+.navbar-nav li > span{
+    color:#FFFFFF;
+    display:block;
+    padding:1.4em 1em;
+}
+
 .leaflet-top{
 	margin-top:1em;
 }
@@ -33,6 +40,7 @@ body{
 	padding-top:0;
 	max-height:35em;
 	overflow-y:auto;
+	z-index:102;
 }
 .dropdown-menu li a{
 	font-size:0.9em;
@@ -90,7 +98,7 @@ body{
     padding:1em;
     position:absolute;
     right:0;
-    z-index:100;
+    z-index:10!important;
 }
 .info-toggle.open{
     margin-right:27em;
@@ -123,13 +131,13 @@ body{
 
 /* thead */
 .target_table thead td.c1{ width:6.7em; }
-.target_table thead td.c2{ width:6.3em; }
+.target_table thead td.c2{ width:6.7em; }
 .target_table thead td.c3{ width:7em; }
 .target_table thead td.c4{ width:8em; }
 
 /* tbody */
-.target_table td.c1{ width:4.8em; }
+.target_table td.c1{ width:5.5em; }
 .target_table td.c2{ width:5.6em; }
-.target_table td.c3{ width:6.8em; }
-.target_table td.c4{ width:7em; }
+.target_table td.c3{ width:6.4em; }
+.target_table td.c4{ width:6em; }
 

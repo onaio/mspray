@@ -4,6 +4,7 @@
 <meta charset=utf-8 />
 <title>mSpray</title>
 <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
 
 <script src='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet'/>
@@ -43,6 +44,11 @@
                         </a>
                         <ul class="dropdown-menu" id="districts_list"> </ul>
                     </li>
+                    <li>
+                        <span>
+                            <span class="target_label">Target Area: </span>
+                        </span>
+                    </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" 
                            data-toggle="dropdown">
@@ -55,9 +61,6 @@
                             <li><a href="#day3">Day 3</a></li>
                             <li><a href="#day4">Day 4</a></li>
                         </ul>
-                    </li>
-                    <li class="dropdown">
-                        
                     </li>
 				</ul>
 			</div>
@@ -73,7 +76,7 @@
 	<section class="info-panel open">
 	    <div class="info-holder">
 	        <h4><span class="dist_label"> </span></h4>
-            <h4>Target Area: <span class="target_label"> </span></h4>
+            <h4></h4>
     
             <form action="/" method="POST" class="form-inline">
                 <input type="text" name="target_filter" class="target_filter form-control" 
