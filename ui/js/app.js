@@ -137,10 +137,10 @@ var App = {
                     //Create a table
                     target_table.append(
                         '<tr>'+ 
-                            '<td><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
-                            '<td>' + houses + '</td>' +
-                            '<td></td>' +
-                            '<td></td>' +
+                            '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
+                            '<td class="c2">' + houses + '</td>' +
+                            '<td class="c3"></td>' +
+                            '<td class="c4"></td>' +
                         '</tr>'
                     );
                 }
@@ -213,7 +213,6 @@ var App = {
                 },
                 style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
-
                     var content = '<h4>'+ feature.coordinates.length +' households</h4>';
                     layer.bindPopup(content, { closeButton:false });
 
