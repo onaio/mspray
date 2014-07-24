@@ -17,7 +17,7 @@ body{
 .navbar{
     border-radius:0;
 	min-height:4em;
-    z-index:100;
+    z-index:1020;
 }
 .navbar-brand{
     font-weight:bold;
@@ -40,7 +40,7 @@ body{
 	padding-top:0;
 	max-height:35em;
 	overflow-y:auto;
-	z-index:102;
+	z-index:1030;
 }
 .dropdown-menu li a{
 	font-size:0.9em;
@@ -88,7 +88,7 @@ body{
     position:absolute;
     top:0;right:0;bottom:0;
     padding:5em 1em 1em;
-    z-index:99;
+    z-index:1015;
 }
 .info-holder, .info-toggle{
     float:left;
@@ -104,7 +104,7 @@ body{
     padding:1em;
     position:absolute;
     right:0;
-    z-index:10!important;
+    z-index:1015!important;
 }
 .info-toggle.open{
     margin-right:27em;
