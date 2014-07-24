@@ -160,7 +160,6 @@ var App = {
     
     getCurrentTargetArea: function(){
         var url = document.location.hash;
-        // var target_id = url.substring(url.indexOf('#') + 1, url.length);   
         var target_id = url.split('/')[1];
         
         if(target_id == '' || target_id=='undefined'){

@@ -49,6 +49,7 @@ body{
 
 #search_drop li{
     background:#FFFFFF;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     padding:0.4em;
     width:21em;
 }
@@ -60,7 +61,7 @@ body{
 	width:100%;
 }
 #map-legend{
-    background:rgba(255, 255, 255, 0.9);
+    background:rgba(255, 255, 255, 0.7);
     border-radius: 3px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     position:absolute;
@@ -74,7 +75,7 @@ body{
     border-radius:20em;
     display:block;
     font-size:3em;
-    padding:0.7em 0.3em;
+    padding:0.5em 0.3em 1em;
     height:3em;width:3em;
     margin-bottom:0.2em;
 }
@@ -95,6 +96,9 @@ body{
 }
 .info-holder{
     width:25em;
+}
+.info-holder h4{
+    margin-top:1.3em;
 }
 .info-toggle{
     background:rgba(0,0,0,0.8);
@@ -133,6 +137,7 @@ body{
 
 .target_table tr td{
     box-sizing:border-box!important;
+    background:#FFFFFF;
 }
 
 /* thead */
