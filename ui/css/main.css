@@ -47,6 +47,12 @@ body{
 	padding:0.5em 1em;
 }
 
+#search_drop li{
+    background:#FFFFFF;
+    padding:0.4em;
+    width:21em;
+}
+
 #map{
 	margin-top:3em;
 	position:absolute;
