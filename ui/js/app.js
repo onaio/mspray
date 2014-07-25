@@ -5,6 +5,16 @@ var App = {
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
+    
+    defaultDistrict: 'Chienge',
+    defaultTargetArea: 843,
+    sprayLayer: [], 
+    targetLayer: [], 
+    hhLayer: [], 
+    bufferLayer: [], 
+    housesCount: 0, 
+    sprayCount: 0,
+            
     targetOptions: {
         fillColor: '#999999',
         color: '#FFFFFF',
@@ -132,11 +142,11 @@ var App = {
                 target_list.empty();
                 
                 // on selection of a district, show data for first target area
-                var default_area = data[0].targetid;
+                App.defaltTargetArea = data[0].targetid;
                 
-                App.loadAreaData(map, default_area);
+                App.loadAreaData(map, App.defaltTargetArea);
                 
-                $('.target_label').text('Target Area : ' + default_area);
+                $('.target_label').text('Target Area : ' + App.defaltTargetArea);
                 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
@@ -169,7 +179,7 @@ var App = {
         var target_id = url.split('/')[1];
         
         if(target_id == '' || target_id=='undefined'){
-            targetid = 839;
+            targetid = App.defaltTargetArea;
         }
         
         return target_id;
@@ -189,6 +199,9 @@ var App = {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
                 onEachFeature: function(feature, layer){
+                    // increment no. of households
+                    App.housesCount++;
+                    
                     var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                         'HH_type: '+ feature.properties.hh_type;
                     layer.bindPopup(content, { closeButton:false });
@@ -251,18 +264,20 @@ var App = {
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
-            var count = 0;
             
             var sprayPointLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
                 },
                 onEachFeature: function(){
-                    count++;
-                    $('.perc_label').text(count);
+                    App.sprayCount++;
                 }
             })
             .addTo(map);
+            
+            $('.perc_label').text(App.sprayCount);
+            
+            // update circle with this data
         });
     },
 
@@ -309,16 +324,23 @@ var App = {
         this.loadHouseholds(map, targetid);
     },
     
+    filterByOperator: function(){
+        // filter according to spray operator
+    },
+    
+    searchAllArea: function(){
+        // search data from the table
+    },
+    
     getPageState: function(){
         var current_district = this.getCurrentDistrict();
         var current_target_area = this.getCurrentTargetArea();
         
         this.getTargetAreas(current_district);
+        this.loadAreaData(map, current_target_area);
         
         $('.dist_label').text('District : ' + current_district);
-        $('.target_label').text('Target Area : ' + current_target_area);
-        
-        this.loadAreaData(map, current_target_area);
+        $('.target_label').text('Target Area : ' + current_target_area);  
     },
 
     init: function (){
@@ -326,12 +348,8 @@ var App = {
         map.addLayer(new L.Google);
         L.control.locate().addTo(map);
         
+        // load page info
         this.getDistricts();
-        
-        // variables
-        var sprayLayer=[], targetLayer=[], hhLayer=[], bufferLayer=[], sprayCount=0;
-        
-        // load page state
         this.getPageState();
         
         $(document).ajaxComplete(function(){
@@ -372,6 +390,9 @@ var App = {
                 App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
                 $('.sprayday_label').text('Date: Day ' + sprayday);
                 $('.day_label').text('Day ' + sprayday);
+        
+                console.log('SPRAYCOUNT-AREA: ' + App.sprayCount);
+                console.log('HOUSEHOLDS: ' + App.housesCount);
                 
                 e.preventDefault();
             });
