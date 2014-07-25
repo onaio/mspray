@@ -245,7 +245,10 @@ var App = {
                             k = layer;
                             layer.setStyle( {fillOpacity: 0.7} );
                         },
-                        mouseout: function(e){
+                        mouseout: function(e){            
+                            if (!L.Browser.ie && !L.Browser.opera) {
+                                // e.target.bringToFront();
+                            }
                             areaLayer.setStyle(App.bufferOptions);
                         }
                     });
@@ -266,6 +269,7 @@ var App = {
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
+            App.sprayCount = 0; // reset counter
             
             var sprayPointLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
