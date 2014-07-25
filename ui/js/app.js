@@ -127,8 +127,8 @@ var App = {
             url: uri,
             type: 'GET', 
             success: function(data){
-                var target_table = $('.target_table tbody');
-                target_table.empty();
+                var target_list = $('#target_areas_list');
+                target_list.empty();
                 
                 // on selection of a district, show data for first target area
                 $('.target_label').text('Target Area: ' + data[0].targetid);
@@ -139,14 +139,9 @@ var App = {
                         ranks = list_data.ranks,
                         houses = list_data.houses;
                     
-                    //Create a table
-                    target_table.append(
-                        '<tr>'+ 
-                            '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
-                            '<td class="c2">' + houses + '</td>' +
-                            '<td class="c3"></td>' +
-                            '<td class="c4"></td>' +
-                        '</tr>'
+                    target_list.append(
+                        '<li><a href="#!'+ district_name + "/" + 
+                            target_id + '">'+ target_id +'</a></li>'
                     );
                 }
             },
@@ -260,6 +255,17 @@ var App = {
                 onEachFeature: function(){
                     count++;
                     $('.perc_label').text(count);
+                    
+                    //Create a table
+                    // target_table.append(
+                        // '<tr>'+ 
+                            // '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
+                            // '<td class="c2">' + houses + '</td>' +
+                            // '<td class="c3"></td>' +
+                            // '<td class="c4"></td>' +
+                        // '</tr>'
+                    // );
+                    
                 }
             })
             .addTo(map);
@@ -328,7 +334,7 @@ var App = {
         
         $(document).ajaxComplete(function(){
             
-            var target_area = $('.target_table a');
+            var target_area = $('#target_areas_list li a');
             
             target_area.click(function(e){
                 var target_id = $(this).attr('href');
