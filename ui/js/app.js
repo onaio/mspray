@@ -187,113 +187,6 @@ var App = {
         return target_id;
     },
 
-    loadHouseholds: function(map, targetid) {
-        var households = L.mapbox.featureLayer()
-            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
-        
-        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "&target_area=" + targetid);
-
-        households.on('ready', function(){
-            var geojson = households.getGeoJSON();
-            
-            var hh_Layer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.hhOptions);
-                },
-                onEachFeature: function(feature, layer){
-                    // increment no. of households
-                    App.housesCount++;
-                    
-                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
-                        'HH_type: '+ feature.properties.hh_type;
-                    layer.bindPopup(content, { closeButton:false });
-                    
-                    layer.on({
-                        mouseover: function(e){
-                            e.layer.openPopup();
-                        },
-                        mouseout: function(e){
-                            e.layer.closePopup();
-                        }
-                    });
-                }
-            })
-            .addTo(map);
-        });
-    },
-    loadBufferAreas: function(map, targetid) {
-        var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
-        
-        console.log('BUFFER_URI: ' + App.BUFFER_URI + "&target_area=" + targetid);
-        
-        hh_buffers.on('ready', function(){
-            var geojson = hh_buffers.getGeoJSON();
-
-            var areaLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.hhOptions);
-                },
-                style: App.bufferOptions,
-                onEachFeature: function(feature, layer){
-                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
-                    layer.bindPopup(content, { closeButton:false });
-
-                    layer.on({
-                        mouseover: function(e){
-                            var layer = e.target;
-                            k = layer;
-                            layer.setStyle( {fillOpacity: 0.7} );
-                        },
-                        mouseout: function(e){            
-                            if (!L.Browser.ie && !L.Browser.opera) {
-                                // e.target.bringToFront();
-                            }
-                            areaLayer.setStyle(App.bufferOptions);
-                        }
-                    });
-                }
-            }).addTo(map);
-        });
-    },
-    
-    loadSprayPoints: function (map, day, targetid) {
-        var url = App.SPRAY_DAYS_URI;
-        if(day !== undefined){
-            url = url += "?day=" + day + "&target_area=" + targetid;
-        }
-        var sprayed = L.mapbox.featureLayer()
-            .loadURL(url);
-        
-        console.log('SPRAYPOINT_URI: ' + url);
-
-        sprayed.on('ready', function(){
-            var geojson = sprayed.getGeoJSON();
-            App.sprayCount = 0; // reset counter
-            
-            var sprayPointLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.sprayOptions);
-                },
-                onEachFeature: function(){
-                    App.sprayCount++;
-                }
-            })
-            .addTo(map);
-            
-            $('.perc_label').text(App.sprayCount);
-            
-            // update circle with this data
-            var percentage = 0; 
-            percentage = (App.sprayCount / App.housesCount) * 100;
-            
-            console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount + 
-                        ' = ' + percentage);
-            
-            App.drawCircle(Math.round(percentage));
-        });
-    },
-
     loadTargetArea: function(map, targetid) {
         var target_area = L.mapbox.featureLayer().
             loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
@@ -305,7 +198,7 @@ var App = {
             map.fitBounds(bounds);
             var geojson = target_area.getGeoJSON();
             
-            target_layer = L.geoJson(geojson, {
+            this.targetLayer = L.geoJson(geojson, {
                 onEachFeature: function(feature, layer){
                     var props = feature.properties;
                     var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
@@ -325,13 +218,143 @@ var App = {
                     // );
                 }
             });
+            this.targetLayer.setZIndex(50);
             
             target_area.setStyle(App.targetOptions);
             
         }).addTo(map);
     },
     
+    loadBufferAreas: function(map, targetid) {
+        var hh_buffers = L.mapbox.featureLayer()
+            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
+        
+        console.log('BUFFER_URI: ' + App.BUFFER_URI + "&target_area=" + targetid);
+        
+        hh_buffers.on('ready', function(){
+            var geojson = hh_buffers.getGeoJSON();
+
+            this.bufferLayer = L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.hhOptions);
+                },
+                style: App.bufferOptions,
+                onEachFeature: function(feature, layer){
+                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
+                    layer.bindPopup(content, { closeButton:true });
+
+                    layer.on({
+                        mouseover: function(e){
+                            var layer = e.target;
+                            k = layer;
+                            layer.setStyle( {fillOpacity: 0.7} );
+                        },
+                        mouseout: function(e){
+                            e.target.setStyle(App.bufferOptions);
+                        }
+                    });
+                }
+            }).addTo(map);
+            
+            this.bufferLayer.setZIndex(60);
+        });
+    },
+
+    loadHouseholds: function(map, targetid) {
+        var households = L.mapbox.featureLayer()
+            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
+        
+        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "&target_area=" + targetid);
+
+        households.on('ready', function(){
+            var geojson = households.getGeoJSON();
+            
+            this.hhLayer = L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.hhOptions);
+                },
+                onEachFeature: function(feature, layer){
+                    // increment no. of households
+                    App.housesCount++;
+                    
+                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
+                        'HH_type: '+ feature.properties.hh_type;
+                    layer.bindPopup(content, { closeButton:true });
+                    
+                    layer.on({
+                        mouseover: function(e){
+                            e.layer.openPopup();
+                        },
+                        mouseout: function(e){
+                            e.layer.closePopup();
+                        }
+                    });
+                }
+            })
+            .addTo(map);
+            
+            this.hhLayer.setZIndex(70);
+        });
+    },
+    
+    loadSprayPoints: function (map, day, targetid) {
+        var url = App.SPRAY_DAYS_URI;
+        if(day !== undefined){
+            url = url += "?day=" + day + "&target_area=" + targetid;
+        }
+        var sprayed = L.mapbox.featureLayer()
+            .loadURL(url);
+        
+        console.log('SPRAYPOINT_URI: ' + url);
+
+        sprayed.on('ready', function(){
+            var geojson = sprayed.getGeoJSON();
+            App.sprayCount = 0; // reset counter
+            
+            this.sprayLayer = L.geoJson(geojson, {
+                pointToLayer: function (feature, latlng) {
+                    return L.circleMarker(latlng, App.sprayOptions);
+                },
+                onEachFeature: function(){
+                    App.sprayCount++;
+                }
+            })
+            .addTo(map);
+            
+            this.sprayLayer.setZIndex(80);
+            
+            $('.perc_label').text(App.sprayCount);
+            
+            // update circle with this data
+            var percentage = 0; 
+            percentage = (App.sprayCount / App.housesCount) * 100;
+            
+            console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount + 
+                        ' = ' + percentage);
+            
+            App.drawCircle(Math.round(percentage));
+        });
+    },
+    
     loadAreaData: function(map, targetid){
+        // reset current layers
+        map.removeLayer(this.targetLayer);
+        
+        this.bufferLayer.forEach(function(layer){
+            layer.clearLayers();
+        });
+        this.hhLayer.forEach(function(layer){
+            layer.clearLayers();
+        });
+        this.sprayLayer.forEach(function(layer){
+            layer.clearLayers();
+        });
+        
+        this.targetLayer = [];
+        this.bufferLayer = [];
+        this.hhLayer = [];
+        this.sprayLayer = [];
+        
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
@@ -363,7 +386,6 @@ var App = {
         var current_target_area = this.getCurrentTargetArea();
         
         this.getTargetAreas(current_district);
-        this.loadAreaData(map, current_target_area);
         
         $('.dist_label').text('District : ' + current_district);
         $('.target_label').text('Target Area : ' + current_target_area);  
