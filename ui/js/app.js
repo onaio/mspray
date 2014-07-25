@@ -275,6 +275,17 @@ var App = {
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
+            var geojson = target_area.getGeoJSON();
+            
+            target_layer = L.geoJson(geojson, {
+                onEachFeature: function(feature, layer){
+                    var props = feature.properties;
+                    var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
+                                  'Houses: ' + props.houses;
+                                  
+                    layer.bindPopup(content, { closeButton:true });
+                }
+            });
             
             target_area.setStyle(App.targetOptions);
         }).addTo(map);
@@ -282,8 +293,8 @@ var App = {
     
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
-        this.loadHouseholds(map, targetid);
         this.loadBufferAreas(map, targetid);
+        this.loadHouseholds(map, targetid);
     },
     
     restorePageState: function(current_district, current_target_area){
