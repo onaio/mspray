@@ -38,7 +38,7 @@ body{
 	border-radius:0!important;
 	padding-bottom:0;
 	padding-top:0;
-	max-height:35em;
+	max-height:30em;
 	overflow-y:auto;
 	z-index:1030;
 }
@@ -84,7 +84,7 @@ body{
 }
 
 .info-panel{
-    background:rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.7);
     color:#FFF;
     position:absolute;
     top:0;right:0;bottom:0;
@@ -101,7 +101,7 @@ body{
     margin-top:1.3em;
 }
 .info-toggle{
-    background:rgba(0,0,0,0.8);
+    background:rgba(0,0,0,0.7);
     color:#FFF;
     cursor:pointer;
     margin-left:-9.2em;

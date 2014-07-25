@@ -72,6 +72,7 @@ var App = {
             console.log(data);
         });
     },
+    
     getSprayCount: function (day){
         var counter = 0, i =0;
         for (; i < points.features.length; i++){
@@ -109,7 +110,7 @@ var App = {
                     var dist_name = $(this).attr('href');
                         
                     dist_name = dist_name.slice(2, dist_name.length);
-                    $('.dist_label').text('District: ' + dist_name);
+                    $('.dist_label').text('District : ' + dist_name);
                     
                     App.getTargetAreas(dist_name);
                 });
@@ -131,7 +132,11 @@ var App = {
                 target_list.empty();
                 
                 // on selection of a district, show data for first target area
-                $('.target_label').text('Target Area: ' + data[0].targetid);
+                var default_area = data[0].targetid;
+                
+                App.loadAreaData(map, default_area);
+                
+                $('.target_label').text('Target Area : ' + default_area);
                 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
@@ -255,17 +260,6 @@ var App = {
                 onEachFeature: function(){
                     count++;
                     $('.perc_label').text(count);
-                    
-                    //Create a table
-                    // target_table.append(
-                        // '<tr>'+ 
-                            // '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
-                            // '<td class="c2">' + houses + '</td>' +
-                            // '<td class="c3"></td>' +
-                            // '<td class="c4"></td>' +
-                        // '</tr>'
-                    // );
-                    
                 }
             })
             .addTo(map);
@@ -290,10 +284,22 @@ var App = {
                                   'Houses: ' + props.houses;
                                   
                     layer.bindPopup(content, { closeButton:true });
+                    
+                    console.log('Spray Data: ' + props.houses);
+                    //Create a table
+                    // target_table.append(
+                        // '<tr>'+ 
+                            // '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
+                            // '<td class="c2">' + houses + '</td>' +
+                            // '<td class="c3"></td>' +
+                            // '<td class="c4"></td>' +
+                        // '</tr>'
+                    // );
                 }
             });
             
             target_area.setStyle(App.targetOptions);
+            
         }).addTo(map);
     },
     
@@ -303,44 +309,39 @@ var App = {
         this.loadHouseholds(map, targetid);
     },
     
-    restorePageState: function(current_district, current_target_area){
-        this.getTargetAreas(current_district);
-        
-        $('.dist_label').text('District: ' + current_district);
-        $('.target_label').text('Target Area: ' + current_target_area);
-    },
-
-    init: function (){
-        window.map = L.mapbox.map('map'); //'examples.map-i86nkdio'//.setView([-14.2164, 29.2315], 10);
-        map.addLayer(new L.Google);
-        L.control.locate().addTo(map);
-        
-        var sprayLayer, targetLayer, hhLayer, bufferLayer;
-        
-        // if the page is reloaded, restore same page state
+    getPageState: function(){
         var current_district = this.getCurrentDistrict();
         var current_target_area = this.getCurrentTargetArea();
         
-        // set defaults (Chienge, 839)
-        if(current_district == ''){
-            current_district = 'Chienge';
-        }
+        this.getTargetAreas(current_district);
         
-        this.restorePageState(current_district, current_target_area);
+        $('.dist_label').text('District : ' + current_district);
+        $('.target_label').text('Target Area : ' + current_target_area);
+        
+        this.loadAreaData(map, current_target_area);
+    },
+
+    init: function (){
+        window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+        map.addLayer(new L.Google);
+        L.control.locate().addTo(map);
+        
         this.getDistricts();
         
-        // var default_target_id = App.getCurrentTargetArea();        
-        App.loadAreaData(map, current_target_area);
+        // variables
+        var sprayLayer=[], targetLayer=[], hhLayer=[], bufferLayer=[], sprayCount=0;
+        
+        // load page state
+        this.getPageState();
         
         $(document).ajaxComplete(function(){
-            
             var target_area = $('#target_areas_list li a');
             
             target_area.click(function(e){
                 var target_id = $(this).attr('href');
                 
                 target_id = target_id.split('/')[1];
-                $('.target_label').text('Target Area: ' + target_id);
+                $('.target_label').text('Target Area : ' + target_id);
                 
                App.loadAreaData(map, target_id);
             });
