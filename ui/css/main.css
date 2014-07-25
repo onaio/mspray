@@ -115,6 +115,7 @@ body{
 }
 
 .table-wrap{
+    display:none;
     padding:0 1em;
     position:absolute;
     bottom:0;left:0;right:0;

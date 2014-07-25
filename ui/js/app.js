@@ -142,11 +142,13 @@ var App = {
                 target_list.empty();
                 
                 // on selection of a district, show data for first target area
-                App.defaltTargetArea = data[0].targetid;
+                App.loadAreaData(map, data[0].targetid);
                 
-                App.loadAreaData(map, App.defaltTargetArea);
+                if(App.defaultTargetArea==843){ // still default?
+                    $('.target_label').text('Target Area : ' + data[0].targetid);
+                }
                 
-                $('.target_label').text('Target Area : ' + App.defaltTargetArea);
+                App.defaultTargetArea = data[0].targetid;
                 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
@@ -178,7 +180,7 @@ var App = {
         var url = document.location.hash;
         var target_id = url.split('/')[1];
         
-        if(target_id == '' || target_id=='undefined'){
+        if(target_id == '' || target_id == 'undefined'){
             targetid = App.defaltTargetArea;
         }
         
@@ -278,6 +280,13 @@ var App = {
             $('.perc_label').text(App.sprayCount);
             
             // update circle with this data
+            var percentage = 0; 
+            percentage = (App.sprayCount / App.housesCount) * 100;
+            
+            console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount + 
+                        ' = ' + percentage);
+            
+            App.drawCircle(Math.round(percentage));
         });
     },
 
@@ -322,6 +331,19 @@ var App = {
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
+    },
+    
+    drawCircle: function(percent) {
+        Circles.create({
+            id: 'spray-circle',
+            percentage: percent,
+            radius: 60,
+            width: 15,
+            number: percent,
+            text: '%',
+            colors: ['#AAAAAA', '#2ECC40'],
+            duration: 200
+        });
     },
     
     filterByOperator: function(){
@@ -390,9 +412,6 @@ var App = {
                 App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
                 $('.sprayday_label').text('Date: Day ' + sprayday);
                 $('.day_label').text('Day ' + sprayday);
-        
-                console.log('SPRAYCOUNT-AREA: ' + App.sprayCount);
-                console.log('HOUSEHOLDS: ' + App.housesCount);
                 
                 e.preventDefault();
             });
