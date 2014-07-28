@@ -385,11 +385,13 @@ var App = {
 			var filterText = $(this).val();
 			
 			if(filterText != ""){
-				
 				$("#search_autocomplete li").hide();
 				$("#search_autocomplete li a").filter(function(){
 					return $(this).text().toLowerCase().indexOf(filterText) >-1; 
 				}).parent("li").show();
+			}
+			else if(filterText == ""){
+				$("#search_autocomplete li").hide();
 			}
 			else{
 				$("#search_autocomplete li").show();
