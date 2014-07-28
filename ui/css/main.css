@@ -11,7 +11,7 @@ body{
 }
 .target_filter{
     display:block!important;
-    width:100%!important;
+    width:94%!important;
 }
 
 .navbar{
@@ -47,11 +47,29 @@ body{
 	padding:0.5em 1em;
 }
 
-#search_drop li{
+#search_drop > li{
     background:#FFFFFF;
+	box-sizing:border-box;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
     padding:0.4em;
+	overflow-x:hidden;
     width:21em;
+}
+#search_form{
+	
+}
+#search_autocomplete{
+	margin:0;
+	padding-left:0;
+	width:90%;
+}
+#search_autocomplete li{
+	display:inline;
+	list-style:none;
+}
+#search_autocomplete li a{
+	display:block;
+	padding:0.6em;
 }
 
 #map{

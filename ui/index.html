@@ -73,10 +73,11 @@
                         </a>
                         <ul class="dropdown-menu" id="search_drop">
                             <li>
-                                <form action="/" method="post" class="form-inline">
+                                <form action="/" method="post" class="form-inline" id="search_form">
                                     <input type="text" name="target_filter" class="target_filter form-control" 
                                         placeholder="Filter target areas"/>
                                 </form>
+								<ul id="search_autocomplete"></ul>
                             </li>
                         </ul>
                     </li>
@@ -95,8 +96,6 @@
 	    <div class="info-holder">
 	        <h4><span class="dist_label"> </span></h4>
 	        
-	        
-    
             <div class="table-wrap">
                 <table class="target_table table table-bordered tablesaw" 
                       data-sortable>

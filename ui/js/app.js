@@ -96,13 +96,11 @@ var App = {
     getDistricts: function(){
         var uri = this.DISTRICT_URI;
         
-        console.log('Fetching districts...');
-        
         $.ajax({
             url: uri,
             type: 'GET', 
             success: function(data){
-                var d_list = $('#districts_list');
+                var d_list = $('#districts_list, #search_autocomplete');
 
                 for(var d=0; d<data.length; d++){
                     var list_data = data[d],
@@ -365,8 +363,6 @@ var App = {
 			fillColor = '#31A354';
 		}
 		
-		console.log('fillColor: ' + fillColor);
-		
         Circles.create({
             id: 'spray-circle',
             percentage: percent,
@@ -383,8 +379,22 @@ var App = {
         // filter according to spray operator
     },
     
-    searchAllArea: function(){
-        // search data from the table
+    searchInit: function(){
+        
+		$(".target_filter").keyup(function(){
+			var filterText = $(this).val();
+			
+			if(filterText != ""){
+				
+				$("#search_autocomplete li").hide();
+				$("#search_autocomplete li a").filter(function(){
+					return $(this).text().toLowerCase().indexOf(filterText) >-1; 
+				}).parent("li").show();
+			}
+			else{
+				$("#search_autocomplete li").show();
+			}
+		});
     },
     
     getPageState: function(){
@@ -408,9 +418,12 @@ var App = {
         this.getDistricts();
         this.getPageState();
 		this.drawCircle(0);
+		this.searchInit();
         
         $(document).ajaxComplete(function(){
             var target_area = $('#target_areas_list li a');
+			
+			App.drawCircle(0);
             
             target_area.click(function(e){
                 var target_id = $(this).attr('href');
@@ -423,21 +436,6 @@ var App = {
         });
         
         $(document).ready(function(){
-            
-            // load target-buffer areas
-            $(".target_filter").keyup(function(){
-                var filterText = $(this).val();
-                if(filterText != ""){
-                    
-                    $(".target_table tbody>tr").hide();
-                    $(".target_table td").filter(function(){
-                        return $(this).text().toLowerCase().indexOf(filterText) >-1; 
-                    }).parent("tr").show();
-                }
-                else{
-                    $(".target_table tbody>tr").show();
-                }
-            });
             
             // load spraydays
             $('#spraydays_list li a').click(function(e){
