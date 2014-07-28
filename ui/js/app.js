@@ -407,6 +407,7 @@ var App = {
         // load page info
         this.getDistricts();
         this.getPageState();
+		this.drawCircle(0);
         
         $(document).ajaxComplete(function(){
             var target_area = $('#target_areas_list li a');
