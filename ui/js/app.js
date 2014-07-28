@@ -142,11 +142,7 @@ var App = {
                 target_list.empty();
                 
                 // on selection of a district, show data for first target area
-                App.loadAreaData(map, data[0].targetid);
-                
-                if(App.defaultTargetArea==843){ // still default?
-                    $('.target_label').text('Target Area : ' + data[0].targetid);
-                }
+                // App.loadAreaData(map, data[0].targetid);
                 
                 App.defaultTargetArea = data[0].targetid;
                 
@@ -192,11 +188,13 @@ var App = {
             loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
         
         console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
-        
+		
         target_area.on('ready', function(){
             var bounds = target_area.getBounds();
             map.fitBounds(bounds);
             var geojson = target_area.getGeoJSON();
+			
+			this.targetLayer = [];
             
             this.targetLayer = L.geoJson(geojson, {
                 onEachFeature: function(feature, layer){
@@ -230,6 +228,8 @@ var App = {
             .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
         
         console.log('BUFFER_URI: ' + App.BUFFER_URI + "&target_area=" + targetid);
+		
+        this.bufferLayer = [];
         
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
@@ -265,6 +265,8 @@ var App = {
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
         
         console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "&target_area=" + targetid);
+		
+        this.hhLayer = []; //reset layer
 
         households.on('ready', function(){
             var geojson = households.getGeoJSON();
@@ -306,6 +308,8 @@ var App = {
             .loadURL(url);
         
         console.log('SPRAYPOINT_URI: ' + url);
+		
+        this.sprayLayer = []; // reset layer
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
@@ -337,30 +341,32 @@ var App = {
     },
     
     loadAreaData: function(map, targetid){
-        // reset current layers
-        map.removeLayer(this.targetLayer);
-        
-        this.bufferLayer.forEach(function(layer){
-            layer.clearLayers();
-        });
-        this.hhLayer.forEach(function(layer){
-            layer.clearLayers();
-        });
-        this.sprayLayer.forEach(function(layer){
-            layer.clearLayers();
-        });
-        
-        this.targetLayer = [];
-        this.bufferLayer = [];
-        this.hhLayer = [];
-        this.sprayLayer = [];
-        
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
     },
     
     drawCircle: function(percent) {
+		var fillColor;
+		
+		if(percent < 30){
+			fillColor = 'orange';
+		}
+		else if(percent < 30){
+			fillColor = '#FFFFCC';
+		}
+		else if(percent < 40){
+			fillColor = '#C2E699';
+		}
+		else if(percent < 80){
+			fillColor = '#78C679';
+		}
+		else if(percent >= 80){
+			fillColor = '#31A354';
+		}
+		
+		console.log('fillColor: ' + fillColor);
+		
         Circles.create({
             id: 'spray-circle',
             percentage: percent,
@@ -368,7 +374,7 @@ var App = {
             width: 15,
             number: percent,
             text: '%',
-            colors: ['#AAAAAA', '#2ECC40'],
+            colors: ['#AAAAAA', fillColor],
             duration: 200
         });
     },
@@ -389,6 +395,8 @@ var App = {
         
         $('.dist_label').text('District : ' + current_district);
         $('.target_label').text('Target Area : ' + current_target_area);  
+		
+		App.loadAreaData(map, current_target_area);
     },
 
     init: function (){
