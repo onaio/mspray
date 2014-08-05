@@ -19,11 +19,15 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     Query Parameters:
     - `day` - filter list of sprayed points for a specific day
     - `target_area` - filter spray points for a specific target
+    - `ordering` - you can order by day field e.g `ordering=day` or \
+    `ordering=-day`
     """
     queryset = SprayDay.objects.all()
     serializer_class = SprayDaySerializer
-    filter_backends = (filters.DjangoFilterBackend, )
+    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('day',)
+    ordering_fields = ('day',)
+    ordering = ('day',)
 
     def filter_queryset(self, queryset):
         targetid = self.request.QUERY_PARAMS.get('target_area')
