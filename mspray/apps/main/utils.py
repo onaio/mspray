@@ -34,4 +34,8 @@ def create_households_buffer():
         bf = MultiPolygon(hh_buffers)
 
         for b in bf.cascaded_union.simplify():
-            HouseholdsBuffer.objects.get_or_create(geom=b, target_area=ta)
+            obj, created = \
+                HouseholdsBuffer.objects.get_or_create(geom=b, target_area=ta)
+            obj.num_households = \
+                Household.objects.filter(geom__coveredby=b).count()
+            obj.save()
