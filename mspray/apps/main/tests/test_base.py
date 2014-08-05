@@ -7,6 +7,7 @@ from django.test import TestCase, RequestFactory
 from mspray.apps.main import utils
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_day import SprayDay
 
 
@@ -49,3 +50,11 @@ class TestBase(TestCase):
         for fixture in fixtures:
             call_command('loaddata',
                          os.path.join(self.fixtures_dir, '%s.json' % fixture))
+
+    def _create_households_buffer(self):
+        self._loaddata_fixtures(['848_target_area', '848_households'])
+        self.assertEqual(Household.objects.count(), 377)
+        count = HouseholdsBuffer.objects.count()
+        utils.create_households_buffer()
+
+        self.assertEqual(HouseholdsBuffer.objects.count(), count + 183)

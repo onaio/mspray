@@ -1,7 +1,3 @@
-import os
-
-from django.core.management import call_command
-
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.views.household import HouseholdViewSet
 

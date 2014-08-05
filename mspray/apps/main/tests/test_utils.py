@@ -1,7 +1,6 @@
 from mspray.apps.main import utils
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.household import Household
-from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.tests.test_base import TestBase
 
@@ -35,9 +34,4 @@ class TestUtils(TestBase):
         self.assertTrue(count + 491 == SprayDay.objects.count())
 
     def test_create_households_buffer(self):
-        self._loaddata_fixtures(['848_target_area', '848_households'])
-        self.assertEqual(Household.objects.count(), 377)
-        count = HouseholdsBuffer.objects.count()
-        utils.create_households_buffer()
-
-        self.assertEqual(HouseholdsBuffer.objects.count(), count + 183)
+        self._create_households_buffer()
