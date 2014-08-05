@@ -1,6 +1,7 @@
 from rest_framework_gis import serializers
 
 from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 
 class HouseholdSerializer(serializers.GeoFeatureModelSerializer):
@@ -9,7 +10,7 @@ class HouseholdSerializer(serializers.GeoFeatureModelSerializer):
         geo_field = 'geom'
 
 
-class BufferHouseholdSerializer(serializers.GeoFeatureModelSerializer):
+class HouseholdsBufferSerializer(serializers.GeoFeatureModelSerializer):
     class Meta:
-        model = Household
-        geo_field = 'bgeom'
+        model = HouseholdsBuffer
+        geo_field = 'geom'

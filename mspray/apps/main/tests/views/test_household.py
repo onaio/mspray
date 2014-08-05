@@ -38,21 +38,3 @@ class TestHouseholdViewSet(TestBase):
         request = self.factory.get('/', data)
         response = self.view(request)
         self.assertEqual(response.status_code, 400)
-
-    def test_household_list_view_get_buffers(self):
-        self.fixtures = [
-            '848_households', '848_target_area', '848_spraypoints']
-        self._loaddata_fixtures(self.fixtures)
-        data = {'target_area': 848}
-        request = self.factory.get('/', data)
-        response = self.view(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertIn('features', response.data)
-        self.assertEqual(len(response.data['features']), 377)
-
-        data = {'target_area': 848, 'buffer': 'true'}
-        request = self.factory.get('/', data)
-        response = self.view(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 183)
-        self.assertEqual(response.data[0]['type'], 'Polygon')

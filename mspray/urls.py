@@ -5,15 +5,16 @@ from django.contrib import admin
 admin.autodiscover()
 
 from mspray.apps.main.views import (
-    target_area, household, sprayday, indicators, districts
+    target_area, household, household_buffer, sprayday, indicators, districts
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
 
-router.register(r'targetareas', target_area.TargetAreaViewSet)
+router.register(r'buffers', household_buffer.HouseholdBufferViewSet)
+router.register(r'districts', districts.DistrictViewSet)
 router.register(r'households', household.HouseholdViewSet)
 router.register(r'spraydays', sprayday.SprayDayViewSet)
-router.register(r'districts', districts.DistrictViewSet)
+router.register(r'targetareas', target_area.TargetAreaViewSet)
 
 urlpatterns = patterns(
     '',

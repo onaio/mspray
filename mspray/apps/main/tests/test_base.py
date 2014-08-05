@@ -51,8 +51,9 @@ class TestBase(TestCase):
             call_command('loaddata',
                          os.path.join(self.fixtures_dir, '%s.json' % fixture))
 
-    def _create_households_buffer(self):
-        self._loaddata_fixtures(['848_target_area', '848_households'])
+    def _create_households_buffer(self, fixtures=['848_target_area',
+                                                  '848_households']):
+        self._loaddata_fixtures(fixtures)
         self.assertEqual(Household.objects.count(), 377)
         count = HouseholdsBuffer.objects.count()
         utils.create_households_buffer()

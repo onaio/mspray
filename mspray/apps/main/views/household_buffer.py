@@ -3,14 +3,15 @@ from django.utils.translation import ugettext as _
 
 from rest_framework import viewsets
 from rest_framework import exceptions
-from mspray.apps.main.models.household import Household
+
+from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.target_area import TargetArea
-from mspray.apps.main.serializers.household import HouseholdSerializer
+from mspray.apps.main.serializers.household import HouseholdsBufferSerializer
 
 
-class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Household.objects.all()
-    serializer_class = HouseholdSerializer
+class HouseholdBufferViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = HouseholdsBuffer.objects.all()
+    serializer_class = HouseholdsBufferSerializer
     bbox_filter_field = 'geom'
     bbox_filter_include_overlapping = True  # Optional
 
@@ -24,7 +25,7 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
                 raise exceptions.ParseError(
                     _("Invalid targetid %s" % targetid))
             else:
-                target = get_object_or_404(TargetArea, targetid=targetid)
-                queryset = queryset.filter(geom__coveredby=target.geom)
+                target_area = get_object_or_404(TargetArea, targetid=targetid)
+                queryset = queryset.filter(target_area=target_area)
 
         return queryset
