@@ -11,6 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'HouseholdsBuffer'
         db.create_table('main_householdsbuffer', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('target_area', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.TargetArea'])),
             ('geom', self.gf('django.contrib.gis.db.models.fields.PolygonField')()),
         ))
         db.send_create_signal('main', ['HouseholdsBuffer'])
@@ -24,7 +25,7 @@ class Migration(SchemaMigration):
     models = {
         'main.household': {
             'Meta': {'object_name': 'Household'},
-            'bgeom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'blank': 'True', 'null': 'True'}),
+            'bgeom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'}),
             'comment': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
             'comment_1': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
             'descr': ('django.db.models.fields.CharField', [], {'max_length': '254'}),
@@ -39,7 +40,8 @@ class Migration(SchemaMigration):
         'main.householdsbuffer': {
             'Meta': {'object_name': 'HouseholdsBuffer'},
             'geom': ('django.contrib.gis.db.models.fields.PolygonField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'target_area': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['main.TargetArea']"})
         },
         'main.sprayday': {
             'Meta': {'object_name': 'SprayDay'},
