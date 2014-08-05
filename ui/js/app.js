@@ -247,11 +247,15 @@ var App = {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
-                style: App.bufferOptions,
+                style: function(feature) {
+                    App.bufferOptions.fillColor = feature.style.fillColor;
+
+                    return App.bufferOptions;
+                },
                 onEachFeature: function(feature, layer){
-                    var content = '<h4>'+ feature.properties.num_households +' households</h4>';
-                    content += '<h4>'+ feature.properties.spray_points +' spray points</h4>';
-                    content += '<h4>'+ feature.properties.percentage_sprayed +'% sprayed</h4>';
+                    var content = '<h4>'+ feature.properties.num_households + ' households</h4>';
+                    content += '<h4>'+ feature.properties.spray_points + ' spray points</h4>';
+                    content += '<h4>'+ feature.properties.percentage_sprayed + '% sprayed</h4>';
                     layer.bindPopup(content, { closeButton:true });
 
                     layer.on({
@@ -261,7 +265,7 @@ var App = {
                             layer.setStyle( {fillOpacity: 0.7} );
                         },
                         mouseout: function(e){
-                            e.target.setStyle(App.bufferOptions);
+                            e.target.setStyle({fillOpacity: 0.3});
                         }
                     });
                 }

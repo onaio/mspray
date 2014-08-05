@@ -5,6 +5,12 @@ from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_day import SprayDay
 
+ZERO_COLOR = '#CCCCC'
+_1_COLOR = '#FF4136'
+_33_COLOR = '#FF851B'
+_66_COLOR = '#FFDC00'
+_100_COLOR = '#2ECC40'
+
 
 class HouseholdSerializer(GeoFeatureModelSerializer):
     class Meta:
@@ -37,3 +43,27 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
 
             return round(
                 (self.get_spray_points(obj) / obj.num_households) * 100, 2)
+
+    def _get_color(self, obj):
+        if obj:
+            perc = self.get_perc_sprayed(obj)
+            color = ZERO_COLOR
+
+            if perc > 99:
+                color = _100_COLOR
+            if perc > 66:
+                color = _66_COLOR
+            elif perc > 33:
+                color = _33_COLOR
+            elif perc > 0:
+                color = _1_COLOR
+
+            return color
+
+    def to_native(self, obj):
+        ret = super(HouseholdsBufferSerializer, self).to_native(obj)
+
+        if 'style' not in ret and obj is not None:
+            ret['style'] = {'fillColor': self._get_color(obj)}
+
+        return ret
