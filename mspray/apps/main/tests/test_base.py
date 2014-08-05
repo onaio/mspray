@@ -1,6 +1,7 @@
 import os
 import mspray
 
+from django.core.management import call_command
 from django.test import TestCase, RequestFactory
 
 from mspray.apps.main import utils
@@ -22,6 +23,9 @@ class TestBase(TestCase):
             os.path.join(data_dir, 'shapefiles', 'hh-chimbombo-1.shp'))
         self.spraydays_shp = os.path.abspath(
             os.path.join(data_dir, 'shapefiles', 'spray-days.shp'))
+        self.fixtures_dir = os.path.join(
+            os.path.dirname(__file__), 'fixtures'
+        )
 
         self.factory = RequestFactory()
 
@@ -40,3 +44,8 @@ class TestBase(TestCase):
         count = SprayDay.objects.count()
         utils.load_sprayday_layer_mapping(self.spraydays_shp, verbose=True)
         self.assertTrue(count + 491 == SprayDay.objects.count())
+
+    def _loaddata_fixtures(self, fixtures):
+        for fixture in fixtures:
+            call_command('loaddata',
+                         os.path.join(self.fixtures_dir, '%s.json' % fixture))
