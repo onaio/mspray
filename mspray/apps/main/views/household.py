@@ -37,7 +37,8 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
                 target = get_object_or_404(TargetArea, targetid=targetid)
                 queryset = queryset.filter(geom__coveredby=target.geom)
 
-        if buffered == "true":
+        if buffered and isinstance(buffered, str) and \
+                buffered.lower() == "true":
             self.serializer_class = BufferHouseholdSerializer
             for hh in queryset:
                 hh.bgeom = hh.geom.buffer(distance)
