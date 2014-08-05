@@ -1,13 +1,13 @@
 var App = {
-    // SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-    BUFFER_URI: "http://api.mspray.onalabs.org/households.json?buffer=true",
+    BUFFER_URI: "http://api.mspray.onalabs.org/buffers.json",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
 
     defaultDistrict: 'Chienge',
-    defaultTargetArea: 843,
+    defaultTargetArea: 848,
     sprayLayer: [],
     targetLayer: [],
     hhLayer: [],
@@ -234,9 +234,9 @@ var App = {
             return;
         }
         var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI + "&target_area=" + targetid);
+            .loadURL(App.BUFFER_URI + "?target_area=" + targetid);
 
-        console.log('BUFFER_URI: ' + App.BUFFER_URI + "&target_area=" + targetid);
+        console.log('BUFFER_URI: ' + App.BUFFER_URI + "?target_area=" + targetid);
 
         this.bufferLayer = [];
 
@@ -249,7 +249,9 @@ var App = {
                 },
                 style: App.bufferOptions,
                 onEachFeature: function(feature, layer){
-                    var content = '<h4>'+ feature.coordinates.length +' households</h4>';
+                    var content = '<h4>'+ feature.properties.num_households +' households</h4>';
+                    content += '<h4>'+ feature.properties.spray_points +' spray points</h4>';
+                    content += '<h4>'+ feature.properties.percentage_sprayed +'% sprayed</h4>';
                     layer.bindPopup(content, { closeButton:true });
 
                     layer.on({
@@ -276,7 +278,7 @@ var App = {
         var households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
-        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "&target_area=" + targetid);
+        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
         this.hhLayer = []; //reset layer
 
