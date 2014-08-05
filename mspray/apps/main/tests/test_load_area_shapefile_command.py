@@ -9,6 +9,7 @@ class TestUtils(TestBase):
         super(TestUtils, self).setUp()
 
     def test_import_shapefile(self):
+        self.skipTest("Model changed no longer applicable.")
         count = TargetArea.objects.count()
 
         call_command('load_area_shapefile', self.area_shp)

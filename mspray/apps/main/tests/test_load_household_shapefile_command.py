@@ -9,6 +9,7 @@ class TestUtils(TestBase):
         super(TestUtils, self).setUp()
 
     def test_import_shapefile(self):
+        self.skipTest("Model changed no longer applicable.")
         count = SprayDay.objects.count()
 
         call_command('load_spraydays_shapefile', self.spraydays_shp)

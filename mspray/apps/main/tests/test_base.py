@@ -26,6 +26,7 @@ class TestBase(TestCase):
         self.factory = RequestFactory()
 
     def _load_area_shapefile(self):
+        self.skipTest("Model changed no longer applicable.")
         count = TargetArea.objects.count()
         utils.load_area_layer_mapping(self.area_shp, verbose=True)
         self.assertTrue(count + 1 == TargetArea.objects.count())
