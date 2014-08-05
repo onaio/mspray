@@ -2,7 +2,7 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.views.indicators import NumberOfHouseholdsIndicatorView
 
 
-class TestHouseholdViewSet(TestBase):
+class TestIndicatorViewSet(TestBase):
     def test_household_list_view(self):
         self._load_area_shapefile()
         self._load_household_shapefile()
