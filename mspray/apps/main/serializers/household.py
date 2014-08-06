@@ -51,7 +51,7 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
 
             if perc > 99:
                 color = _100_COLOR
-            if perc > 66:
+            elif perc > 66:
                 color = _66_COLOR
             elif perc > 33:
                 color = _33_COLOR
