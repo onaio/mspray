@@ -1,4 +1,4 @@
-from django.contrib.gis.geos import MultiPolygon
+from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
 
 from mspray.apps.main.models.target_area import TargetArea, targetarea_mapping
@@ -24,8 +24,9 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def create_households_buffer():
-    distance = 0.00009
+def create_households_buffer(distance=0.00009, recreate=False):
+    if recreate:
+        HouseholdsBuffer.objects.all().delete()
 
     for ta in TargetArea.objects.all():
         hh_buffers = [
@@ -34,6 +35,8 @@ def create_households_buffer():
         bf = MultiPolygon(hh_buffers)
 
         for b in bf.cascaded_union.simplify():
+            if not isinstance(b, Polygon):
+                continue
             obj, created = \
                 HouseholdsBuffer.objects.get_or_create(geom=b, target_area=ta)
             obj.num_households = \
