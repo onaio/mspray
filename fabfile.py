@@ -151,3 +151,17 @@ def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
 
     sudo('/etc/init.d/nginx reload')
     sudo('supervisorctl reload')
+
+
+def create_buffers(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
+    setup_env(deployment_name)
+    data = {
+        'venv': env.virtualenv, 'project': env.project
+    }
+    with prefix('WORKON_HOME=%(venv)s' % data):
+        run('source `which virtualenvwrapper.sh`'
+            ' && WORKON_HOME=%(venv)s workon %(project)s' % data)
+
+        with cd(env.code_src):
+            run_in_virtualenv("python3 manage.py create_household_buffers"
+                              " --settings='%s'" % env.django_module)
