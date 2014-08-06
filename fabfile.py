@@ -165,5 +165,5 @@ def create_buffers(deployment_name, distance=15, dbuser='dbuser',
 
         with cd(env.code_src):
             run_in_virtualenv("python3 manage.py create_household_buffers"
-                              "-d %s -f true --settings='%s'"
+                              " -d %s -f true --settings='%s'"
                               % (distance, env.django_module))
