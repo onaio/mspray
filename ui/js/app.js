@@ -403,7 +403,6 @@ var App = {
     },
 
     searchInit: function(){
-
         $(".target_filter").keyup(function(){
             var filterText = $(this).val();
 

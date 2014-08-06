@@ -175,3 +175,29 @@ body{
 .target_table td.c3{ width:6.4em; }
 .target_table td.c4{ width:6em; }
 
+/*modals*/
+.absolutes{
+    position:absolute;
+    top:0;bottom:0;left:0;right:0;
+}
+.modal-fade{
+    background:rgba(0, 0, 0, 0.6);
+    position:absolute;
+    z-index:1000!important;
+}
+.modal-box{
+    background:rgba(255, 255, 255, 0.9);
+    -webkit-box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
+    -moz-box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
+    box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
+    height:40em;
+    width:64em;
+    margin:auto;
+    padding:1em 2em 2em;
+    z-index:1050!important;
+}
+.modal-box table tbody{
+    height:21em;
+}
+
+
