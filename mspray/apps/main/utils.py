@@ -24,15 +24,14 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def create_households_buffer(distance=0.00009, recreate=False):
+def create_households_buffer(recreate=False):
     if recreate:
         HouseholdsBuffer.objects.all().delete()
 
     for ta in TargetArea.objects.all():
-        hh_buffers = [
-            h.geom.buffer(distance)
-            for h in Household.objects.filter(geom__coveredby=ta.geom)]
-        bf = MultiPolygon(hh_buffers)
+        hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
+            .values_list('bgeom', flat=True)
+        bf = MultiPolygon([hhb for hhb in hh_buffers])
 
         for b in bf.cascaded_union.simplify():
             if not isinstance(b, Polygon):

@@ -153,7 +153,8 @@ def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     sudo('supervisorctl reload')
 
 
-def create_buffers(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
+def create_buffers(deployment_name, distance=15, dbuser='dbuser',
+                   dbpass="dbpwd"):
     setup_env(deployment_name)
     data = {
         'venv': env.virtualenv, 'project': env.project
@@ -164,4 +165,5 @@ def create_buffers(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
 
         with cd(env.code_src):
             run_in_virtualenv("python3 manage.py create_household_buffers"
-                              " --settings='%s'" % env.django_module)
+                              "-d %s -f true --settings='%s'"
+                              % (distance, env.django_module))
