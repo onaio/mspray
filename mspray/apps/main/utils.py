@@ -1,5 +1,6 @@
+import gc
+
 from django.db import connection
-from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
 
@@ -7,6 +8,25 @@ from mspray.apps.main.models.target_area import TargetArea, targetarea_mapping
 from mspray.apps.main.models.household import Household, household_mapping
 from mspray.apps.main.models.spray_day import SprayDay, sprayday_mapping
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+
+
+def queryset_iterator(queryset, chunksize=100):
+    '''''
+    Iterate over a Django Queryset.
+
+    This method loads a maximum of chunksize (default: 100) rows in
+    its memory at the same time while django normally would load all
+    rows in its memory. Using the iterator() method only causes it to
+    not preload all the classes.
+    '''
+    start = 0
+    end = chunksize
+    while start < queryset.count():
+        for row in queryset[start:end]:
+            yield row
+        start += chunksize
+        end += chunksize
+        gc.collect()
 
 
 def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
@@ -29,18 +49,6 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def load_target_area_shapefile(shp_file):
-    ds = DataSource(shp_file)
-
-    for c in range(ds.layer_count):
-        layer = ds[c]
-
-        for feat in layer:
-            import ipdb
-            ipdb.set_trace()
-            TargetArea.objects.get_or_create(geom=feat.geom.geos)
-
-
 def set_household_buffer(self, distance=15):
     cursor = connection.cursor()
 
@@ -55,7 +63,7 @@ def create_households_buffer(distance=15, recreate=False):
     if recreate:
         HouseholdsBuffer.objects.all().delete()
 
-    for ta in TargetArea.objects.all():
+    for ta in queryset_iterator(TargetArea.objects.all(), 10):
         hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
             .values_list('bgeom', flat=True)
         bf = MultiPolygon([hhb for hhb in hh_buffers])
