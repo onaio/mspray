@@ -121,6 +121,9 @@ var App = {
                     $('.dist_label').text('District : ' + dist_name);
                     
                     App.getTargetAreas(dist_name);
+                    
+                    //Show districts modal
+                    $('.modal-div').fadeIn(300);
                 });
             },
             error: function(){
@@ -137,9 +140,15 @@ var App = {
         $.ajax({
             url: uri,
             type: 'GET',
+            beforeSend: function() {
+                $('.loader').show();
+            },
             success: function(data){
                 var target_list = $('#target_areas_list'), c,
                     target_table = $('#target_table tbody');
+                
+                $('.loader').hide();
+                
                 target_list.empty();
                 target_table.empty();
 
@@ -148,7 +157,16 @@ var App = {
 
                 //App.defaultTargetArea = data[0].properties.targetid;
                 console.log(data.features[0].properties.targetid);
-
+                
+                /*<li>
+                                <form action="/" method="post" class="form-inline" id="search_form">
+                                    <input type="text" name="target_filter" class="target_filter form-control" placeholder="Search..."/>
+                                </form>
+								<ul id="search_autocomplete"></ul>
+                            </li>*/
+                
+                //target_list.append($('li', { text: "form comes here"}));
+                
                 for(c = 0; c < data.features.length; c++){
                     var list_data = data.features[c].properties,
                         target_id = list_data.targetid,
@@ -431,18 +449,19 @@ var App = {
     searchInit: function(){
         $(".target_filter").keyup(function(){
             var filterText = $(this).val();
+            var targetAreasList = $("#target_areas_list li");
 
             if(filterText != ""){
-                $("#search_autocomplete li").hide();
-                $("#search_autocomplete li a").filter(function(){
+                targetAreasList.hide();
+                targetAreasList.children("a").filter(function(){
                     return $(this).text().toLowerCase().indexOf(filterText) >-1;
                 }).parent("li").show();
             }
-            else if(filterText == ""){
-                $("#search_autocomplete li").hide();
-            }
+        /*    else if(filterText == ""){
+                targetAreasList.hide();
+            } */
             else{
-                $("#search_autocomplete li").show();
+                targetAreasList.show();
             }
         });
     },
@@ -482,7 +501,9 @@ var App = {
 
                 target_id = target_id.split('/')[1];
                 $('.target_label').text('Target Area : ' + target_id);
-
+                
+               //Hide the modal
+               $('.modal-div').fadeOut(300);
                App.loadAreaData(map, target_id);
             });
         });

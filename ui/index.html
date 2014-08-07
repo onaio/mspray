@@ -50,7 +50,14 @@
                             <span class="target_label">Target Area: Select</span>
                             <b class="caret"></b>
                         </a>
-                        <ul class="dropdown-menu" id="target_areas_list"> </ul>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form action="/" method="post" class="form-inline" id="search_form">
+                                    <input type="text" name="target_filter" class="target_filter form-control" placeholder="Search..."/>
+                                </form>
+								<ul id="target_areas_list"></ul>
+                            </li>
+                        </ul>
                     </li>
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" 
@@ -63,21 +70,6 @@
                             <li><a href="#day2">Day 2</a></li>
                             <li><a href="#day3">Day 3</a></li>
                             <li><a href="#day4">Day 4</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" 
-                           data-toggle="dropdown">
-                            <span class="glyphicon glyphicon-search"> </span> 
-                            <!-- <b class="caret"></b> -->
-                        </a>
-                        <ul class="dropdown-menu" id="search_drop">
-                            <li>
-                                <form action="/" method="post" class="form-inline" id="search_form">
-                                    <input type="text" name="target_filter" class="target_filter form-control" placeholder="Search..."/>
-                                </form>
-								<ul id="search_autocomplete"></ul>
-                            </li>
                         </ul>
                     </li>
 				</ul>
@@ -107,7 +99,7 @@
                         <td class="c4" data-sortable-col>% Sprayed</td>
                     </tr>
                 </thead>
-                <tbody> </tbody>
+                <tbody></tbody>
                 <!-- <tfoot>
                     <tr><td colspan="4">Total</td></tr>
                  </tfoot> -->
@@ -126,9 +118,12 @@
         <p>Households sprayed<br/><span class="day_label">Day 0</span></p>
     </div>
     
-    <div class="absolutes modal-fade"></div>
+    <div class="absolutes modal-fade modal-div"></div>
     
-    <div class="absolutes modal-box">
+    <div class="absolutes modal-box modal-div">
+        <a class="pull-right" id="close-modal" title="Close">
+            <span class="glyphicon glyphicon-remove"> </span>
+        </a>
         <h2 class="dist_label">District: </h2>
         
         <div class="modal-body">
@@ -146,6 +141,11 @@
             </thead>
             <tbody></tbody>
             </table>
+            
+            <div class="loader">
+                <img src="img/loading.gif"/>
+                <p>Loading Target Areas info... </p>
+            </div>
         </div>
         
         <div class="notes">

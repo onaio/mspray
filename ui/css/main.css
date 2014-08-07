@@ -212,4 +212,24 @@ body{
     font-weight:bold;
     padding-top:0.6em;
 }
+#close-modal{
+    background:#eee;
+    margin-right:-2em;
+    margin-top:-1em;
+    padding:0.8em;
+}
+.loader{
+    display:hidden;
+    color:#bfbfbf;
+    font-size:2em;
+    font-weight:bold;
+    width:100%;
+    text-align:center;
+}
+.loader img{
+    height:4em;
+    margin-top:1em;
+    margin-bottom:0.4em;
+    opacity:0.6;
+}
 
