@@ -40,12 +40,10 @@ class TestDistrictViewSet(TestCase):
 
         request = self.factory.get('/', data)
         response = self.view(request)
-        self.assertIn('features', response.data)
-        self.assertEqual(len(response.data['features']), 3)
+        self.assertEqual(len(response.data), 3)
 
         data = {'targetid': 467.0, 'structures': 29.0}
-        properties = [
-            i for i in response.data['features'][0]['properties'].items()]
+        properties = [i for i in response.data[0].items()]
 
         for item in data.items():
             self.assertIn(item, properties)
