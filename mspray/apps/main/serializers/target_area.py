@@ -15,7 +15,7 @@ class TargetAreaSerializer(GeoFeatureModelSerializer):
     not_visited = serializers.SerializerMethodField('get_not_visited')
 
     class Meta:
-        fields = ('structures', 'visited_total', 'visited_sprayed',
+        fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
                   'visited_refused', 'visited_other', 'not_visited')
         model = TargetArea
         geo_field = 'geom'

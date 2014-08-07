@@ -4,8 +4,8 @@ from rest_framework import viewsets
 
 
 from mspray.apps.main.models import TargetArea
-from mspray.apps.main.serializers.district import (
-    DistrictSerializer, DistrictAreasSerializer)
+from mspray.apps.main.serializers.district import DistrictSerializer
+from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
 class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
@@ -18,7 +18,7 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
         district = self.request.QUERY_PARAMS.get('district')
 
         if district:
-            return DistrictAreasSerializer
+            return TargetAreaSerializer
 
         return super(DistrictViewSet, self).get_serializer_class()
 
