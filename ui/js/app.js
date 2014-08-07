@@ -168,19 +168,6 @@ var App = {
         });
     },
     
-    getTargetAreaInfo: function(targetId){
-       /* var 
-        
-        
-                        
-                        structures: 53,
-                        visited_total: 46,
-                        visited_sprayed: 46,
-                        visited_refused: 7,
-                        visited_other: 7,
-                        not_visited: 7 */
-    },
-
     getCurrentDistrict: function(){
         var url = document.location.hash;
 
@@ -231,11 +218,17 @@ var App = {
                     console.log("Spray data: " + props.structures);
                 }
             });
-            this.targetLayer.setZIndex(50);
-
+            
             target_area.setStyle(App.targetOptions);
-
         }).addTo(map);
+            
+        // Load data into circles 
+        var perc_visited = 20;
+        var perc_not_sprayed = 40;
+        
+        this.drawCircle(perc_visited, 'circle-visited', 40);
+        this.drawCircle(perc_visited, 'circle-not-sprayed', 40);
+            
     },
 
     loadBufferAreas: function(map, targetid) {
@@ -365,8 +358,8 @@ var App = {
 
             console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount +
                         ' = ' + percentage);
-
-            App.drawCircle(Math.round(percentage));
+            
+            App.drawCircle(Math.round(percentage), 'circle-sprayed', 70);
         });
     },
 
@@ -376,7 +369,7 @@ var App = {
         this.loadHouseholds(map, targetid);
     },
 
-    drawCircle: function(percent) {
+    drawCircle: function(percent, circle_id, radius) {
         var fillColor;
 
         if(percent < 30){
@@ -394,12 +387,12 @@ var App = {
         else if(percent >= 80){
             fillColor = '#31A354';
         }
-
+        
         Circles.create({
-            id: 'spray-circle',
-            percentage: percent,
-            radius: 60,
-            width: 15,
+            id: circle_id,
+            percentage: parseInt(" "+percent),
+            radius: radius,
+            width: 12,
             number: percent,
             text: '%',
             colors: ['#AAAAAA', fillColor],
@@ -453,7 +446,11 @@ var App = {
         // load page info
         this.getDistricts();
         this.getPageState();
-        this.drawCircle(0);
+        
+        this.drawCircle(0, 'circle-sprayed', 70);
+        this.drawCircle(0, 'circle-visited', 40);
+        this.drawCircle(0, 'circle-not-sprayed', 40);
+        
         this.searchInit();
 
         $(document).ajaxComplete(function(){

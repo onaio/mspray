@@ -77,6 +77,8 @@ body{
 	top:0; bottom:0;
 	width:100%;
 }
+
+/*legends*/
 #map-legend{
     background:rgba(255, 255, 255, 0.7);
     border-radius: 3px;
@@ -87,6 +89,31 @@ body{
     padding:1em;
     text-align:center;
 }
+.legend{
+    float:left;
+    width:15em;
+}
+.legend.big{
+    padding-top:1.6em;
+}
+.legend.big p{
+    padding-top:0.4em;
+}
+
+.legend .circles-text-wrp *{
+    font-size:0.9em;
+}
+.legend.small{
+    border-bottom:1px dotted #AFAFAF;
+    width:12em;
+}
+.legend.small svg path{
+    stroke-width:8px;
+}
+.legend:last-child{
+    border:0;
+}
+
 .circle{
     border:12px solid #00D2B8;
     border-radius:20em;
@@ -174,6 +201,9 @@ body{
 .absolutes{
     position:absolute;
     top:0;bottom:0;left:0;right:0;
+}
+.modal-div{
+    display:none;
 }
 .modal-fade{
     background:rgba(0, 0, 0, 0.6);
