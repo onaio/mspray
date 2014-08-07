@@ -49,31 +49,6 @@ var App = {
         color: 'black',
         fillOpacity: 0.4
     },
-    locationParams: function () {
-        var i, params = location.search.substring(1).split("&");
-        obj = {};
-
-        for(i = 0; i < params.length; i++){
-            var param = params[i].split("=");
-
-            if(param.length > 1){
-                var key = param[0], val = param[1];
-
-                if(val.length > 1 && val[val.length - 1] == "/"){
-                    val = val.slice(0, val.length - 1);
-                }
-                obj[key] = val;
-            }
-        }
-
-        return obj;
-    },
-    getDay: function () {
-        return this.locationParams().day;
-    },
-    getTargetAreaId: function(){
-        return this.locationParams().target_area;
-    },
 
     getHouseholdsFor: function (layer) {
         var uri = this.HOUSEHOLD_URI;
