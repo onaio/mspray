@@ -119,7 +119,7 @@ var App = {
 
                     dist_name = dist_name.slice(2, dist_name.length);
                     $('.dist_label').text('District : ' + dist_name);
-
+                    
                     App.getTargetAreas(dist_name);
                 });
             },
@@ -131,28 +131,50 @@ var App = {
 
     getTargetAreas: function(district_name){
         var uri = this.DISTRICT_URI + "?district=" + district_name;
+        
+        console.log('DISTRICT_URI: ' + uri);
 
         $.ajax({
             url: uri,
             type: 'GET',
             success: function(data){
-                var target_list = $('#target_areas_list'), c;
+                var target_list = $('#target_areas_list'), c,
+                    target_table = $('#target_table tbody');
                 target_list.empty();
+                target_table.empty();
 
                 // on selection of a district, show data for first target area
                 // App.loadAreaData(map, data[0].targetid);
 
-                App.defaultTargetArea = data[0].targetid;
+                //App.defaultTargetArea = data[0].properties.targetid;
+                console.log(data.features[0].properties.targetid);
 
-                for(c = 0; c < data.length; c++){
-                    var list_data = data[c],
+                for(c = 0; c < data.features.length; c++){
+                    var list_data = data.features[c].properties,
                         target_id = list_data.targetid,
-                        ranks = list_data.ranks,
-                        houses = list_data.houses;
+                        structures = list_data.structures,
+                        visited_total = list_data.visited_total;
+                        visited_sprayed = list_data.visited_sprayed;
+                        visited_refused = list_data.visited_refused;
+                        visited_other = list_data.visited_other;
+                        not_visited = list_data.not_visited;
 
                     target_list.append(
                         '<li><a href="#!'+ district_name + "/" +
                             target_id + '">'+ target_id +'</a></li>'
+                    );
+                    
+                    //Create a table
+                    target_table.append(
+                        '<tr>'+
+                            '<td><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</aq></td>' +
+                            '<td>' + structures + '</td>' +
+                            '<td>' + visited_total + '</td>' +
+                            '<td>' + visited_sprayed + '</td>' +
+                            '<td>' + visited_refused + '</td>' +
+                            '<td>' + visited_other + '</td>' +
+                            '<td>' + not_visited + '</td>' +
+                        '</tr>'
                     );
                 }
             },
@@ -160,6 +182,19 @@ var App = {
                 console.log('Sorry, could not retrieve target areas');
             }
         });
+    },
+    
+    getTargetAreaInfo: function(targetId){
+       /* var 
+        
+        
+                        
+                        structures: 53,
+                        visited_total: 46,
+                        visited_sprayed: 46,
+                        visited_refused: 7,
+                        visited_other: 7,
+                        not_visited: 7 */
     },
 
     getCurrentDistrict: function(){
@@ -206,20 +241,11 @@ var App = {
                 onEachFeature: function(feature, layer){
                     var props = feature.properties;
                     var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
-                                  'Houses: ' + props.houses;
+                                  'Structures: ' + props.structures;
 
                     layer.bindPopup(content, { closeButton:true });
 
-                    console.log('Spray Data: ' + props.houses);
-                    //Create a table
-                    // target_table.append(
-                        // '<tr>'+
-                            // '<td class="c1"><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></td>' +
-                            // '<td class="c2">' + houses + '</td>' +
-                            // '<td class="c3"></td>' +
-                            // '<td class="c4"></td>' +
-                        // '</tr>'
-                    // );
+                    console.log("Spray data: " + props.structures);
                 }
             });
             this.targetLayer.setZIndex(50);
@@ -447,7 +473,7 @@ var App = {
         this.searchInit();
 
         $(document).ajaxComplete(function(){
-            var target_area = $('#target_areas_list li a');
+            var target_area = $('#target_areas_list li a, #target_table a');
 
             App.drawCircle(0);
 

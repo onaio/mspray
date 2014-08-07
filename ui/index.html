@@ -91,7 +91,7 @@
         </div>
     </div>
     
-	<section class="info-panel open">
+	<section class="info-panel">
 	    <div class="info-holder">
 	        <h4><span class="dist_label"> </span></h4>
 	        
@@ -130,36 +130,29 @@
     
     <div class="absolutes modal-box">
         <h2 class="dist_label">District: </h2>
-    	<table class="table table-bordered">
-        <thead>
-        <tr>
-            <th>Target Area</th>
-            <th># Structures</th>
-            <th>Visited Total</th>
-            <th>Visited: Sprayed</th>
-            <th>Visited: Refused</th>
-            <th>Visited: Other</th>
-            <th>Not Visited Yet</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        </tbody>
-        </table>
         
-        <p>
+        <div class="modal-body">
+            <table class="table table-bordered" id="target_table">
+            <thead>
+            <tr>
+                <th>Target Area</th>
+                <th># Structures</th>
+                <th>Visited Total</th>
+                <th>Visited: Sprayed</th>
+                <th>Visited: Refused</th>
+                <th>Visited: Other</th>
+                <th>Not Visited Yet</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+            </table>
+        </div>
+        
+        <div class="notes">
             <h4>Notes</h4>
             Sprayed % is based on total # structures<br/>
             Refused % is based # structures.  ie) 5/100 for target area 240.
-        </p>
+        </div>
     </div>
 
 	<script src="//code.jquery.com/jquery-2.1.1.min.js"></script>

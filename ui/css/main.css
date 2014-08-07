@@ -17,7 +17,7 @@ body{
 .navbar{
     border-radius:0;
 	min-height:4em;
-    z-index:1020;
+    z-index:1960;
 }
 .navbar-brand{
     font-weight:bold;
@@ -183,7 +183,7 @@ body{
 .modal-fade{
     background:rgba(0, 0, 0, 0.6);
     position:absolute;
-    z-index:1000!important;
+    z-index:1900!important;
 }
 .modal-box{
     background:rgba(255, 255, 255, 0.9);
@@ -194,10 +194,22 @@ body{
     width:64em;
     margin:auto;
     padding:1em 2em 2em;
-    z-index:1050!important;
+    z-index:1950!important;
+}
+.modal-box h2{
+    margin:0.5em 0;
+}
+.modal-body{
+    height:24em;
+    padding:0;
 }
 .modal-box table tbody{
-    height:21em;
+    max-height:20em;
+    overflow-y:auto;
 }
-
+.notes{
+    border-top:1px dashed #ddd;
+    font-weight:bold;
+    padding-top:0.6em;
+}
 
