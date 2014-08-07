@@ -5,3 +5,4 @@ local_settings.py
 *.bak
 data
 .project
+ui/bower_components

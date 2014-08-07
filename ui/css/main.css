@@ -168,7 +168,6 @@ body{
 }
 .table-wrap table{
     margin-top:0;
-    height:97%;
     width:100%!important;
 }
 
@@ -211,27 +210,27 @@ body{
     z-index:1900!important;
 }
 .modal-box{
-    background:rgba(255, 255, 255, 0.9);
+    background:rgba(255, 255, 255, 0.98);
     -webkit-box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
     -moz-box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
     box-shadow:1px 0px 16px 0px rgba(0, 0, 2, 0.43);
-    height:40em;
-    width:64em;
+    max-height:54em;
+    width:77em;
     margin:auto;
     padding:1em 2em 2em;
     z-index:1950!important;
 }
 .modal-box h2{
+    font-size:27px;
     margin:0.5em 0;
 }
 .modal-body{
-    height:24em;
+    height:39em;
     padding:0;
+    position:relative;
+    overflow:hidden;
 }
-.modal-box table tbody{
-    max-height:20em;
-    overflow-y:auto;
-}
+
 .notes{
     border-top:1px dashed #ddd;
     font-weight:bold;

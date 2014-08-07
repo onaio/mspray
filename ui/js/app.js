@@ -131,10 +131,11 @@ var App = {
                 // on selection of a district, show data for first target areas
                 //App.defaultTargetArea = data[0].properties.targetid;
                 
-                console.log(data.features[0].properties.targetid);
+                //console.log(data.features[0].properties.targetid);
+                console.log(data);
                 
-                for(c = 0; c < data.features.length; c++){
-                    var list_data = data.features[c].properties,
+                for(c = 0; c < data.length; c++){
+                    var list_data = data[c],
                         target_id = list_data.targetid,
                         structures = list_data.structures,
                         visited_total = list_data.visited_total;
@@ -161,6 +162,9 @@ var App = {
                         '</tr>'
                     );
                 }
+                
+                // initialize datatables
+                $('#target_table').dataTable();
             },
             error: function(){
                 console.log('Sorry, could not retrieve target areas');
