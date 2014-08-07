@@ -1,3 +1,4 @@
+from django.db import connection
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
 
@@ -24,7 +25,17 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def create_households_buffer(recreate=False):
+def set_household_buffer(self, distance=15):
+    cursor = connection.cursor()
+
+    cursor.execute(
+        "UPDATE main_household SET bgeom = ST_GeomFromText(ST_AsText("
+        "ST_Buffer(geography(geom), %s)), 4326);" % distance)
+
+
+def create_households_buffer(distance=15, recreate=False):
+    set_household_buffer(distance)
+
     if recreate:
         HouseholdsBuffer.objects.all().delete()
 

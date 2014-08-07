@@ -40,10 +40,15 @@ class TestDistrictViewSet(TestCase):
 
         request = self.factory.get('/', data)
         response = self.view(request)
-        self.assertEqual(len(response.data), 3)
+        self.assertIn('features', response.data)
+        self.assertEqual(len(response.data['features']), 3)
 
-        data = {'targetid': 467.0, 'ranks': 243.0, 'houses': 29.0}
-        self.assertIn(data, response.data)
+        data = {'targetid': 467.0, 'structures': 29.0}
+        properties = [
+            i for i in response.data['features'][0]['properties'].items()]
+
+        for item in data.items():
+            self.assertIn(item, properties)
 
     def test_link(self):
         try:

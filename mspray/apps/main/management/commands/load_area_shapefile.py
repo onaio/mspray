@@ -17,4 +17,5 @@ class Command(BaseCommand):
             except Exception as e:
                 raise CommandError(_('Error: %(msg)s' % {"msg": e}))
             else:
-                utils.load_area_layer_mapping(path, verbose=True)
+                # utils.load_area_layer_mapping(path, verbose=True)
+                utils.load_target_area_shapefile(path)

@@ -10,4 +10,4 @@ class TestCreateHouseholdBuffers(TestBase):
         self._loaddata_fixtures(['848_target_area', '848_households'])
         call_command('create_household_buffers')
 
-        self.assertEqual(HouseholdsBuffer.objects.count(), count + 183)
+        self.assertEqual(HouseholdsBuffer.objects.count(), count + 36)
