@@ -1,4 +1,5 @@
 from django.db import connection
+from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
 
@@ -8,21 +9,36 @@ from mspray.apps.main.models.spray_day import SprayDay, sprayday_mapping
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 
-def load_layer_mapping(model, shp_file, mapping, verbose=False):
-    lm = LayerMapping(model, shp_file, mapping, transform=False)
+def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
+    lm = LayerMapping(model, shp_file, mapping, transform=False, unique=unique)
     lm.save(strict=True, verbose=verbose)
 
 
 def load_area_layer_mapping(shp_file, verbose=False):
-    load_layer_mapping(TargetArea, shp_file, targetarea_mapping, verbose)
+    unique = ('ranks', 'targetid')
+    load_layer_mapping(TargetArea, shp_file, targetarea_mapping, verbose,
+                       unique)
 
 
 def load_household_layer_mapping(shp_file, verbose=False):
-    load_layer_mapping(Household, shp_file, household_mapping, verbose)
+    unique = 'orig_fid'
+    load_layer_mapping(Household, shp_file, household_mapping, verbose, unique)
 
 
 def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
+
+
+def load_target_area_shapefile(shp_file):
+    ds = DataSource(shp_file)
+
+    for c in range(ds.layer_count):
+        layer = ds[c]
+
+        for feat in layer:
+            import ipdb
+            ipdb.set_trace()
+            TargetArea.objects.get_or_create(geom=feat.geom.geos)
 
 
 def set_household_buffer(self, distance=15):
