@@ -119,6 +119,7 @@ var App = {
 
                     dist_name = dist_name.slice(2, dist_name.length);
                     $('.dist_label').text('District : ' + dist_name);
+                    $('.target_label').text('Target Area: Select');
                     
                     App.getTargetAreas(dist_name);
                     
@@ -133,7 +134,13 @@ var App = {
     },
 
     getTargetAreas: function(district_name){
-        var uri = this.DISTRICT_URI + "?district=" + district_name;
+        var uri = this.DISTRICT_URI + "?district=" + district_name,
+            target_list = $('#target_areas_list'), c,
+            target_table = $('#target_table tbody');
+        
+            // reset containers
+            target_list.empty();
+            target_table.empty();
         
         console.log('DISTRICT_URI: ' + uri);
 
@@ -144,28 +151,12 @@ var App = {
                 $('.loader').show();
             },
             success: function(data){
-                var target_list = $('#target_areas_list'), c,
-                    target_table = $('#target_table tbody');
-                
                 $('.loader').hide();
-                
-                target_list.empty();
-                target_table.empty();
 
-                // on selection of a district, show data for first target area
-                // App.loadAreaData(map, data[0].targetid);
-
+                // on selection of a district, show data for first target areas
                 //App.defaultTargetArea = data[0].properties.targetid;
+                
                 console.log(data.features[0].properties.targetid);
-                
-                /*<li>
-                                <form action="/" method="post" class="form-inline" id="search_form">
-                                    <input type="text" name="target_filter" class="target_filter form-control" placeholder="Search..."/>
-                                </form>
-								<ul id="search_autocomplete"></ul>
-                            </li>*/
-                
-                //target_list.append($('li', { text: "form comes here"}));
                 
                 for(c = 0; c < data.features.length; c++){
                     var list_data = data.features[c].properties,
@@ -225,13 +216,12 @@ var App = {
         var fragment = url.split('/')[0];
 
         return fragment.substring(2, fragment.length);
-
     },
 
     getCurrentTargetArea: function(){
         var url = document.location.hash;
         var target_id = url.split('/')[1];
-
+        
         if(target_id === undefined){
             target_id = App.defaultTargetArea;
         }
