@@ -50,6 +50,18 @@ var App = {
         fillOpacity: 0.4
     },
 
+    populateTargetAreasTable: function(doc_location_hash) {
+        console.log("Document Location Hash: ", doc_location_hash)
+        console.log("Retrieving Chienge Target Areas...");
+        var district_name = "";
+        if (doc_location_hash === "")
+            district_name = 'Chienge';
+        else 
+            district_name = doc_location_hash.substring(2, doc_location_hash.length);
+
+        App.getTargetAreas(district_name);
+    },
+
     getHouseholdsFor: function (layer) {
         var uri = this.HOUSEHOLD_URI;
         post_data = {in_bbox: layer.getBounds().toBBoxString()};
@@ -82,7 +94,8 @@ var App = {
                         dist_name = list_data.district_name,
                         num_targets = list_data.num_target_areas,
 
-                        dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
+                        // dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
+                        dist_data = '<li><a href=/ui/#!' + dist_name +'>'+ dist_name +'</a></li>';
 
                     d_list.append(dist_data);
                 }
@@ -90,16 +103,17 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
-                    var dist_name = $(this).attr('href');
+                    window.location.href = "http://stackoverflow.com";
+                    // var dist_name = $(this).attr('href');
 
-                    dist_name = dist_name.slice(2, dist_name.length);
-                    $('.dist_label').text('District : ' + dist_name);
-                    $('.target_label').text('Target Area: Select');
+                    // dist_name = dist_name.slice(2, dist_name.length);
+                    // $('.dist_label').text('District : ' + dist_name);
+                    // $('.target_label').text('Target Area: Select');
                     
-                    App.getTargetAreas(dist_name);
+                    // App.getTargetAreas(dist_name);
                     
-                    //Show districts modal
-                    $('.modal-div').fadeIn(300);
+                    // //Show districts modal
+                    // $('.modal-div').fadeIn(300);
                 });
             },
             error: function(){
@@ -108,10 +122,15 @@ var App = {
         });
     },
 
+    calcaulatePercentage: function(numerator, denominator) {
+        return Math.round((numerator/denominator) * 100) + "%";
+    },
+
     getTargetAreas: function(district_name){
         var uri = this.DISTRICT_URI + "?district=" + district_name,
             target_list = $('#target_areas_list'), c,
-            target_table = $('#target_table tbody');
+            target_table = $('#target_table tbody'),
+            target_list_content = target_table_content = "" ;
         
             // reset containers
             target_list.empty();
@@ -133,38 +152,60 @@ var App = {
                 
                 //console.log(data.features[0].properties.targetid);
                 console.log(data);
-                
-                for(c = 0; c < data.length; c++){
-                    var list_data = data[c],
-                        target_id = list_data.targetid,
-                        structures = list_data.structures,
-                        visited_total = list_data.visited_total;
-                        visited_sprayed = list_data.visited_sprayed;
-                        visited_refused = list_data.visited_refused;
-                        visited_other = list_data.visited_other;
-                        not_visited = list_data.not_visited;
 
-                    target_list.append(
-                        '<li><a href="#!'+ district_name + "/" +
-                            target_id + '">'+ target_id +'</a></li>'
-                    );
+                var list_data, target_id, structures, visited_total,
+                    visited_sprayed, visited_refused, visited_other,
+                    not_visited, 
+                    agg_structures = agg_visited_total = agg_visited_sprayed = agg_visited_refused =  agg_visited_other = agg_not_visited = 0;
                     
-                    //Create a table
-                    target_table.append(
-                        '<tr>'+
-                            '<td><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</aq></td>' +
+                for(c = 0; c < data.length; c++){
+                    list_data = data[c],
+                    target_id = list_data.targetid,
+                    structures = list_data.structures,
+                    visited_total = list_data.visited_total;
+                    visited_sprayed = list_data.visited_sprayed;
+                    visited_refused = list_data.visited_refused;
+                    visited_other = list_data.visited_other;
+                    not_visited = list_data.not_visited;
+
+                    agg_structures += parseInt(structures);
+                    agg_visited_total += parseInt(visited_total);
+                    agg_visited_sprayed += parseInt(visited_sprayed);
+                    agg_visited_refused += parseInt(visited_refused);
+                    agg_visited_other += parseInt(visited_other);
+                    agg_not_visited += parseInt(not_visited);
+
+                    target_list_content += '<li><a href="#!'+ district_name + "/" +
+                            target_id + '">'+ target_id +'</a></li>';
+                    
+                    target_table_content += '<tr>'+
+                            '<th><a href="target-area-map.html#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' + structures + '</td>' +
-                            '<td>' + visited_total + '</td>' +
-                            '<td>' + visited_sprayed + '</td>' +
-                            '<td>' + visited_refused + '</td>' +
-                            '<td>' + visited_other + '</td>' +
-                            '<td>' + not_visited + '</td>' +
+                            '<td>' + visited_total + ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
+                            '<td>' + visited_sprayed + ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
+                            '<td>' + visited_refused + ' (' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
+                            '<td>' + visited_other + ' (' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
+                            '<td>' + not_visited + ' (' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>'
-                    );
+                    //Create a table
+
                 }
-                
-                // initialize datatables
-                $('#target_table').dataTable();
+                target_list.append(target_list_content);
+                target_table.append(target_table_content);
+                $('table#target-areas tbody')
+                    .append(target_table_content)
+                $('table#target-areas tfoot').append(
+                    "<tr><td> Totals </td>" +
+                    "<td>" + agg_structures + "</td>" +
+                    "<td>" + agg_visited_total + "</td>" +
+                    "<td>" + agg_visited_sprayed + "</td>" +
+                    "<td>" + agg_visited_refused + "</td>" +
+                    "<td>" + agg_visited_other + "</td>" +
+                    "<td>" + agg_not_visited + "</td></tr>"
+                );
+                $('table#target-areas').table().data( "table" ).refresh();
+
+                $('h1#district-name').text("District:" + district_name)
             },
             error: function(){
                 console.log('Sorry, could not retrieve target areas');
