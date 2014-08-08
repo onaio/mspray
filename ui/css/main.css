@@ -257,3 +257,44 @@ body{
     opacity:0.6;
 }
 
+/*target list table*/
+/*table#target-areas {
+    border-collapse: collapse;
+    width: 100%;
+}
+#target-areas thead {
+    text-align:left;
+    display: table;
+    float: left;
+    width: 100%;
+}
+#target-areas thead tr {
+    display: table-row;
+    width: 100%;
+}
+#target-areas tbody {
+    display: block;
+    height: 120px;
+    overflow: auto;
+    float: left;
+    width: 100%;
+}
+#target-areas tbody tr {
+    display: table;
+    width: 100%;
+}
+#target-areas tbody tr {
+    height: 18px;
+}
+#target-areas tbody td {
+    padding:1px 8px;
+}
+#target-areas th, #target-areas td {
+    width: 25%;
+}
+
+#target-areas tr:after{
+    content: ".";
+    visibility: hidden;
+}*/
+
