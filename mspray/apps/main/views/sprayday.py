@@ -1,13 +1,17 @@
 import json
 
+from datetime import datetime
+
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+
 from rest_framework import filters
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.submission import Submission
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
 
@@ -47,12 +51,25 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             data = {"error": _("Not a valid submission")}
             status_code = status.HTTP_400_BAD_REQUEST
         else:
-            geolocation = [float(p) for p in geolocation]
-            point = json.dumps({'type': 'point', 'coordinates': geolocation})
-            json_data = json.dumps(request.DATA)
+            submission_data = json.dumps(request.DATA)
+            submission = Submission.objects.create(data=submission_data)
+            spray_date = request.DATA.get('parent_from/date')
+            spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
 
-            SprayDay.objects.create(day=1,
-                                    data=json_data, geom=point)
+            structure_form = request.DATA.get('structure_form')
+            if structure_form:
+                for structure in structure_form:
+                    geolocation = structure.get('structure_form/structure_gps')
+
+                    geolocation = [float(p) for p in geolocation.split()[:2]]
+                    point = json.dumps(
+                        {'type': 'point', 'coordinates': geolocation})
+                    json_data = json.dumps(structure)
+
+                    SprayDay.objects.create(
+                        submission=submission,
+                        spray_date=spray_date,
+                        data=json_data, geom=point)
             data = {"success": _("Successfully imported submission with"
                                  " submission id %(submission_id)s."
                                  % {'submission_id': has_id})}

@@ -1,4 +1,7 @@
+import os
+
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.submission import Submission
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.views.sprayday import SprayDayViewSet
 
@@ -33,12 +36,16 @@ class TestSprayDayViewSet(TestBase):
                          4)
 
     def test_recieve_json_post(self):
-        count = SprayDay.objects.count()
-        data = '{"_id": 2, "name": "submission",'\
-            '"_geolocation": ["-1.29434849", "36.78712536"]}'
-        request = self.factory.post('/', data, 'application/json')
         view = SprayDayViewSet.as_view({'post': 'create'})
-        response = view(request)
+        count = Submission.objects.count()
+        scount = SprayDay.objects.count()
+        path = os.path.join(self.fixtures_dir, 'submission.json')
 
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(count + 1, SprayDay.objects.count())
+        with open(path) as f:
+            data = f.read()
+            request = self.factory.post('/', data, 'application/json')
+            response = view(request)
+
+            self.assertEqual(response.status_code, 201)
+            self.assertEqual(count + 1, Submission.objects.count())
+            self.assertEqual(count + 3, SprayDay.objects.count())

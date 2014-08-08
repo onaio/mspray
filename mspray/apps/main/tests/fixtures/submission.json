@@ -1,0 +1,88 @@
+{
+  "parent_from/team_leader_code": "12",
+  "_xform_id_string": "parent_daily_spray_operator",
+  "formhub/uuid": "8927aa60fb4d427f961f8ab37b926b92",
+  "parent_from/health_facility": "Chipungu Rural Health Centre",
+  "imei": "356619053167679",
+  "parent_from/district": "Chienge",
+  "parent_from/date": "2014-08-07",
+  "_bamboo_dataset_id": "",
+  "_notes": [
+    
+  ],
+  "supervisor_name": "Chienge",
+  "_submission_time": "2014-08-08T06:55:47",
+  "_geolocation": [
+    null,
+    null
+  ],
+  "structure_form": [
+    {
+      "structure_form/sprayed/mosquito_nets/total_nets_available": "1",
+      "structure_form/sprayed/mosquito_nets/no_women_sleeping_uNet": "1",
+      "structure_form/sprayed/eligible_rooms/rooms_found": "5",
+      "structure_form/sprayed/eligible_rooms/rooms_sprayed": "5",
+      "structure_form/sprayed/mosquito_nets/no_children_u5_sleeping_uNet": "0",
+      "structure_form/sprayed/was_sprayed": "yes",
+      "structure_form/sprayed/pregnant_women": "1",
+      "structure_form/sprayed/children_u5": "1",
+      "structure_form/irs_sticker_num": "1",
+      "structure_form/actelic_bottles": "1",
+      "structure_form/sprayed/total_pop": "5",
+      "structure_form/structure_head_name": "Tree",
+      "structure_form/sprayed/male_population": "2",
+      "structure_form/structure_gps": "-1.2940904 36.7872392 0.0 31.891",
+      "structure_form/sprayed/female_population": "3"
+    },
+    {
+      "structure_form/sprayed/mosquito_nets/total_nets_available": "0",
+      "structure_form/sprayed/mosquito_nets/no_women_sleeping_uNet": "0",
+      "structure_form/sprayed/eligible_rooms/rooms_found": "4",
+      "structure_form/sprayed/eligible_rooms/rooms_sprayed": "4",
+      "structure_form/sprayed/mosquito_nets/no_children_u5_sleeping_uNet": "1",
+      "structure_form/sprayed/was_sprayed": "yes",
+      "structure_form/sprayed/pregnant_women": "0",
+      "structure_form/sprayed/children_u5": "1",
+      "structure_form/irs_sticker_num": "2",
+      "structure_form/actelic_bottles": "1",
+      "structure_form/sprayed/total_pop": "6",
+      "structure_form/structure_head_name": "Mali",
+      "structure_form/sprayed/male_population": "2",
+      "structure_form/structure_gps": "-1.29432811 36.78713851 1786.5 13.0",
+      "structure_form/sprayed/female_population": "4"
+    },
+    {
+      "structure_form/unsprayed/unsprayed_pregnant_women": "0",
+      "structure_form/unsprayed/unsprayed_children_u5": "0",
+      "structure_form/unsprayed/unsprayed_mosquito_nets/unsprayed_total_nets": "0",
+      "structure_form/unsprayed/unsprayed_female_population": "2",
+      "structure_form/unsprayed/reason": "4",
+      "structure_form/unsprayed/unsprayed_mosquito_nets/unsprayed_childrn_u5_sleeping_uNet": "0",
+      "structure_form/unsprayed/unsprayed_male_population": "1",
+      "structure_form/irs_sticker_num": "3",
+      "structure_form/actelic_bottles": "0",
+      "structure_form/unsprayed/unsprayed_total_pop": "3",
+      "structure_form/structure_head_name": "Bria",
+      "structure_form/structure_gps": "-1.2940796 36.7872047 0.0 31.588",
+      "structure_form/unsprayed/unsprayed_mosquito_nets/unsprayed_women_sleeping_uNet": "0",
+      "structure_form/sprayed/was_sprayed": "no"
+    }
+  ],
+  "_userform_id": "ukanga_parent_daily_spray_operator",
+  "meta/instanceID": "uuid:08752a93-e7e0-4823-b730-05366bac7e34",
+  "_uuid": "08752a93-e7e0-4823-b730-05366bac7e34",
+  "parent_from/province": "Luapula",
+  "parent_from/compound_village": "Ingo",
+  "_attachments": [
+    
+  ],
+  "_status": "submitted_via_web",
+  "_tags": [
+    
+  ],
+  "parent_from/team_leader": "Tremio",
+  "start": "2014-08-07T16:35:28.747+03",
+  "_id": 88034,
+  "_submitted_by": null,
+  "end": "2014-08-07T17:06:05.125+03"
+}
