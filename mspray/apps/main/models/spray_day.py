@@ -4,9 +4,10 @@ from jsonfield import JSONField
 
 
 class SprayDay(models.Model):
-    day = models.IntegerField()
+    spray_date = models.DateField()
     geom = models.PointField(srid=4326)
     data = JSONField(default={})
+    submission = models.ForeignKey('Submission')
 
     objects = models.GeoManager()
 
@@ -14,10 +15,9 @@ class SprayDay(models.Model):
         app_label = 'main'
 
     def __str__(self):
-        return 'day %s' % self.day
+        return self.date.isoformat()
 
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {
-    'day': 'day',
     'geom': 'POINT25D',
 }
