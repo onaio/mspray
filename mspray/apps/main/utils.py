@@ -49,7 +49,7 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def set_household_buffer(self, distance=15):
+def set_household_buffer(distance=15):
     cursor = connection.cursor()
 
     cursor.execute(
