@@ -7,7 +7,7 @@ var App = {
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
 
     defaultDistrict: 'Chienge',
-    defaultTargetArea: 848,
+    defaultTargetArea: 475,
     sprayLayer: [],
     targetLayer: [],
     hhLayer: [],
