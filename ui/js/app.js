@@ -95,7 +95,7 @@ var App = {
                         num_targets = list_data.num_target_areas,
 
                         // dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
-                        dist_data = '<li><a href="/#!' + dist_name +'">'+ dist_name +'</a></li>';
+                        dist_data = '<li><a href="ta.html#!' + dist_name +'">'+ dist_name +'</a></li>';
 
                     d_list.append(dist_data);
                 }
@@ -176,7 +176,7 @@ var App = {
                             target_id + '">'+ target_id +'</a></li>';
 
                     target_table_content += '<tr>'+
-                            '<th><a href="target-area-map.html#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
+                            '<th><a href="ta.html#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' + structures + '</td>' +
                             '<td>' + visited_total + ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
                             '<td>' + visited_sprayed + ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
