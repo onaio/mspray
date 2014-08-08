@@ -103,7 +103,11 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
+                    $("#map, #map-legend").hide();
+                    $("#district_table").show();
+
                     var dist_name = this.href.split('#!')[1];
+
                     $('.dist_label').text('District : ' + dist_name);
                     $('.target_label').text('Target Area: Select');
 
@@ -172,11 +176,11 @@ var App = {
                     agg_visited_other += parseInt(visited_other);
                     agg_not_visited += parseInt(not_visited);
 
-                    target_list_content += '<li><a href="/ta.html#!'+ district_name + "/" +
+                    target_list_content += '<li><a href="#!'+ district_name + "/" +
                             target_id + '">'+ target_id +'</a></li>';
 
                     target_table_content += '<tr>'+
-                            '<th><a href="/ta.html#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
+                            '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' + structures + '</td>' +
                             '<td>' + visited_total + ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
                             '<td>' + visited_sprayed + ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
@@ -189,9 +193,9 @@ var App = {
                 }
                 target_list.append(target_list_content);
                 target_table.append(target_table_content);
-                $('table#target-areas tbody').empty()
+                $('table#target_areas tbody').empty()
                     .append(target_table_content)
-                $('table#target-areas tfoot').empty().append(
+                $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
                     "<td>" + agg_structures + "</td>" +
                     "<td>" + agg_visited_total + "</td>" +
@@ -200,7 +204,7 @@ var App = {
                     "<td>" + agg_visited_other + "</td>" +
                     "<td>" + agg_not_visited + "</td></tr>"
                 );
-                $('table#target-areas').table().data( "table" ).refresh();
+                $('table#target_areas').table().data( "table" ).refresh();
 
                 $('h1#district-name').text("District:" + district_name)
             },
@@ -488,38 +492,42 @@ var App = {
     },
 
     init: function (){
-        // window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-        // map.addLayer(new L.Google);
-        // L.control.locate().addTo(map);
-
-        // load page info
-        this.getDistricts();
-        this.getPageState();
-
-        this.drawCircle(0, 'circle-sprayed', 70);
-        this.drawCircle(0, 'circle-visited', 40);
-        this.drawCircle(0, 'circle-not-sprayed', 40);
-
-        this.searchInit();
-
-        $(document).ajaxComplete(function(){
-            var target_area = $('#target_areas_list li a, #target_table a');
-
-            App.drawCircle(0);
-
-            target_area.click(function(e){
-                var target_id = $(this).attr('href');
-
-                target_id = target_id.split('/')[1];
-                $('.target_label').text('Target Area : ' + target_id);
-
-               //Hide the modal
-               $('.modal-div').fadeOut(300);
-               App.loadAreaData(map, target_id);
-            });
-        });
-
         $(document).ready(function(){
+            window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+            map.addLayer(new L.Google);
+            L.control.locate().addTo(map);
+            $('#map, #map-legend').hide()
+
+            // load page info
+            App.getDistricts();
+            App.getPageState();
+
+            App.drawCircle(0, 'circle-sprayed', 70);
+            App.drawCircle(0, 'circle-visited', 40);
+            App.drawCircle(0, 'circle-not-sprayed', 40);
+
+            App.searchInit();
+
+            $(document).ajaxComplete(function(){
+                var target_area = $('#target_areas_list li a, #target_areas a');
+
+                App.drawCircle(0);
+
+                target_area.click(function(e){
+                    $("#map, #map-legend").show();
+                    $("#district_table").hide();
+                    var target_id = this.href.split('#!')[1];
+                    console.error(target_id);
+
+                    target_id = target_id.split('/')[1];
+                    $('.target_label').text('Target Area : ' + target_id);
+
+                    //Hide the modal
+                    $('.modal-div').fadeOut(300);
+                    App.loadAreaData(map, target_id);
+                });
+            });
+
 
             // load spraydays
             $('#spraydays_list li a').click(function(e){

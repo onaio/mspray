@@ -78,10 +78,10 @@
 			</div>
 		</header>
 
-		<div class="container">
+		<div class="container" id="district_table">
 			<h1 id="district-name"></h1>
 			<div "col-sm-12">
-				<table id="target-areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap>
+				<table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap>
 					<thead>
 						<tr>
 							<th data-priority="persist">Target Area</th>
@@ -98,6 +98,29 @@
 				</table>
 			</div>
 		</div>
+
+        <div id="map"></div>
+
+    <div id="map-legend">
+        <div class="legend big">
+            <div id="circle-sprayed"> </div>
+            <p>Households Sprayed<br/></p>
+
+            <h1><span class="day_label">Day 0</span></h1>
+        </div>
+
+        <div class="legend small" >
+            <div id="circle-visited"> </div>
+            <p>Households Visited</p>
+            <hr/>
+
+            <div id="circle-not-sprayed"> </div>
+            <p>Households Not Sprayed</p>
+        </div>
+        <!--<span class="circle clearfix">
+            <span class="perc_label">0</span>
+        </span>-->
+    </div>
 
 
 		<section id="js-scripts">
