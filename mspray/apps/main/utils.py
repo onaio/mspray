@@ -30,7 +30,7 @@ def queryset_iterator(queryset, chunksize=100):
 
 
 def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
-    lm = LayerMapping(model, shp_file, mapping, transform=False, unique=unique)
+    lm = LayerMapping(model, shp_file, mapping, transform=True, unique=unique)
     lm.save(strict=True, verbose=verbose)
 
 
@@ -41,7 +41,7 @@ def load_area_layer_mapping(shp_file, verbose=False):
 
 
 def load_household_layer_mapping(shp_file, verbose=False):
-    unique = 'orig_fid'
+    unique = None  # 'orig_fid'
     load_layer_mapping(Household, shp_file, household_mapping, verbose, unique)
 
 
@@ -66,6 +66,8 @@ def create_households_buffer(distance=15, recreate=False):
     for ta in queryset_iterator(TargetArea.objects.all(), 10):
         hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
             .values_list('bgeom', flat=True)
+        if len(hh_buffers) == 0:
+            continue
         bf = MultiPolygon([hhb for hhb in hh_buffers])
 
         for b in bf.cascaded_union.simplify():
