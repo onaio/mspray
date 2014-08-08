@@ -6,3 +6,4 @@ local_settings.py
 data
 .project
 ui/bower_components
+.DS_Store

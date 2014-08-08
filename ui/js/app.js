@@ -533,12 +533,18 @@ var App = {
                 e.preventDefault();
             });
 
+
+            var infopanel = $(".info-panel"),
+                infotoggle = $('.info-toggle'),
+                panelbtn = $('.panel-state');
+
+            //hide panel by default
+            infotoggle.removeClass('open');
+            panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Table');
+            infopanel.hide();
+
             // sidebar toggle
             $(".info-toggle").click(function(){
-                var infopanel = $(".info-panel"),
-                    infotoggle = $('.info-toggle'),
-                    panelbtn = $('.panel-state');
-
                 if(infopanel.hasClass('open')){
                     infotoggle.removeClass('open');
                     panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Table');
