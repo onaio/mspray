@@ -56,7 +56,7 @@ var App = {
         var district_name = "";
         if (doc_location_hash === "")
             district_name = 'Chienge';
-        else 
+        else
             district_name = doc_location_hash.substring(2, doc_location_hash.length);
 
         App.getTargetAreas(district_name);
@@ -95,7 +95,7 @@ var App = {
                         num_targets = list_data.num_target_areas,
 
                         // dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
-                        dist_data = '<li><a href=/ui/#!' + dist_name +'>'+ dist_name +'</a></li>';
+                        dist_data = '<li><a href="/#!' + dist_name +'">'+ dist_name +'</a></li>';
 
                     d_list.append(dist_data);
                 }
@@ -103,16 +103,13 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
-                    window.location.href = "http://stackoverflow.com";
-                    // var dist_name = $(this).attr('href');
+                    var dist_name = this.href.split('#!')[1];
+                    $('.dist_label').text('District : ' + dist_name);
+                    $('.target_label').text('Target Area: Select');
 
-                    // dist_name = dist_name.slice(2, dist_name.length);
-                    // $('.dist_label').text('District : ' + dist_name);
-                    // $('.target_label').text('Target Area: Select');
-                    
-                    // App.getTargetAreas(dist_name);
-                    
-                    // //Show districts modal
+                    App.getTargetAreas(dist_name);
+
+                    //Show districts modal
                     // $('.modal-div').fadeIn(300);
                 });
             },
@@ -131,11 +128,11 @@ var App = {
             target_list = $('#target_areas_list'), c,
             target_table = $('#target_table tbody'),
             target_list_content = target_table_content = "" ;
-        
+
             // reset containers
             target_list.empty();
             target_table.empty();
-        
+
         console.log('DISTRICT_URI: ' + uri);
 
         $.ajax({
@@ -149,15 +146,15 @@ var App = {
 
                 // on selection of a district, show data for first target areas
                 //App.defaultTargetArea = data[0].properties.targetid;
-                
+
                 //console.log(data.features[0].properties.targetid);
                 console.log(data);
 
                 var list_data, target_id, structures, visited_total,
                     visited_sprayed, visited_refused, visited_other,
-                    not_visited, 
+                    not_visited,
                     agg_structures = agg_visited_total = agg_visited_sprayed = agg_visited_refused =  agg_visited_other = agg_not_visited = 0;
-                    
+
                 for(c = 0; c < data.length; c++){
                     list_data = data[c],
                     target_id = list_data.targetid,
@@ -177,7 +174,7 @@ var App = {
 
                     target_list_content += '<li><a href="#!'+ district_name + "/" +
                             target_id + '">'+ target_id +'</a></li>';
-                    
+
                     target_table_content += '<tr>'+
                             '<th><a href="target-area-map.html#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' + structures + '</td>' +
@@ -192,9 +189,9 @@ var App = {
                 }
                 target_list.append(target_list_content);
                 target_table.append(target_table_content);
-                $('table#target-areas tbody')
+                $('table#target-areas tbody').empty()
                     .append(target_table_content)
-                $('table#target-areas tfoot').append(
+                $('table#target-areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
                     "<td>" + agg_structures + "</td>" +
                     "<td>" + agg_visited_total + "</td>" +
@@ -212,7 +209,7 @@ var App = {
             }
         });
     },
-    
+
     getCurrentDistrict: function(){
         var url = document.location.hash;
 
@@ -228,7 +225,7 @@ var App = {
     getCurrentTargetArea: function(){
         var url = document.location.hash;
         var target_id = url.split('/')[1];
-        
+
         if(target_id === undefined){
             target_id = App.defaultTargetArea;
         }
@@ -263,17 +260,17 @@ var App = {
                     console.log("Spray data: " + props.structures);
                 }
             });
-            
+
             target_area.setStyle(App.targetOptions);
         }).addTo(map);
-            
-        // Load data into circles 
+
+        // Load data into circles
         var perc_visited = 20;
         var perc_not_sprayed = 40;
-        
+
         this.drawCircle(perc_visited, 'circle-visited', 40);
         this.drawCircle(perc_visited, 'circle-not-sprayed', 40);
-            
+
     },
 
     loadBufferAreas: function(map, targetid) {
@@ -403,7 +400,7 @@ var App = {
 
             console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount +
                         ' = ' + percentage);
-            
+
             App.drawCircle(Math.round(percentage), 'circle-sprayed', 70);
         });
     },
@@ -416,11 +413,11 @@ var App = {
 
     drawCircle: function(percent, circle_id, radius) {
         var fillColor;
-
+        // FIXME: invalid if statements
         if(percent < 30){
             fillColor = 'orange';
         }
-        else if(percent < 30){
+        else if(percent > 30){
             fillColor = '#FFFFCC';
         }
         else if(percent < 40){
@@ -432,7 +429,7 @@ var App = {
         else if(percent >= 80){
             fillColor = '#31A354';
         }
-        
+
         Circles.create({
             id: circle_id,
             percentage: parseInt(" "+percent),
@@ -475,27 +472,34 @@ var App = {
 
         console.log("District", current_district.length);
         console.log("TA", current_target_area);
-        this.getTargetAreas(current_district);
 
         $('.dist_label').text('District : ' + current_district);
         $('.target_label').text('Target Area : ' + current_target_area);
 
-        App.loadAreaData(map, current_target_area);
+        if(current_target_area != this.defaultTargetArea){
+            window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+            map.addLayer(new L.Google);
+            L.control.locate().addTo(map);
+            App.loadAreaData(map, current_target_area);
+        } else {
+            this.getTargetAreas(current_district);
+        }
+
     },
 
     init: function (){
-        window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-        map.addLayer(new L.Google);
-        L.control.locate().addTo(map);
+        // window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+        // map.addLayer(new L.Google);
+        // L.control.locate().addTo(map);
 
         // load page info
         this.getDistricts();
         this.getPageState();
-        
+
         this.drawCircle(0, 'circle-sprayed', 70);
         this.drawCircle(0, 'circle-visited', 40);
         this.drawCircle(0, 'circle-not-sprayed', 40);
-        
+
         this.searchInit();
 
         $(document).ajaxComplete(function(){
@@ -508,7 +512,7 @@ var App = {
 
                 target_id = target_id.split('/')[1];
                 $('.target_label').text('Target Area : ' + target_id);
-                
+
                //Hide the modal
                $('.modal-div').fadeOut(300);
                App.loadAreaData(map, target_id);
