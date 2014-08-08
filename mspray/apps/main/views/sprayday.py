@@ -33,7 +33,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            target = get_object_or_404(TargetArea, targetid=targetid,
+            target = get_object_or_404(TargetArea, ranks=targetid,
                                        targeted=TargetArea.TARGETED_VALUE)
             queryset = queryset.filter(geom__contained=target.geom)
 

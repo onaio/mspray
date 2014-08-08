@@ -42,7 +42,7 @@ class TestDistrictViewSet(TestCase):
         response = self.view(request)
         self.assertEqual(len(response.data), 3)
 
-        data = {'targetid': 467.0, 'structures': 29.0}
+        data = {'targetid': 243.0, 'structures': 29.0}
         properties = [i for i in response.data[0].items()]
 
         for item in data.items():

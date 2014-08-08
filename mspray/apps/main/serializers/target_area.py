@@ -34,6 +34,7 @@ class TargetAreaMixin(object):
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
+    targetid = serializers.Field(source='ranks')
     structures = serializers.Field(source='houses')
     visited_total = serializers.SerializerMethodField('get_visited_total')
     visited_sprayed = serializers.SerializerMethodField('get_visited_sprayed')
@@ -48,6 +49,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
 
 
 class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
+    targetid = serializers.Field(source='ranks')
     structures = serializers.Field(source='houses')
     visited_total = serializers.SerializerMethodField('get_visited_total')
     visited_sprayed = serializers.SerializerMethodField('get_visited_sprayed')

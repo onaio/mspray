@@ -24,7 +24,7 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
                 raise exceptions.ParseError(
                     _("Invalid targetid %s" % targetid))
             else:
-                target = get_object_or_404(TargetArea, targetid=targetid)
+                target = get_object_or_404(TargetArea, ranks=targetid)
                 queryset = queryset.filter(geom__coveredby=target.geom)
 
         return queryset

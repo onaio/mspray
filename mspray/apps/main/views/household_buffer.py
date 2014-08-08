@@ -25,7 +25,7 @@ class HouseholdBufferViewSet(viewsets.ReadOnlyModelViewSet):
                 raise exceptions.ParseError(
                     _("Invalid targetid %s" % targetid))
             else:
-                target_area = get_object_or_404(TargetArea, targetid=targetid)
+                target_area = get_object_or_404(TargetArea, ranks=targetid)
                 queryset = queryset.filter(target_area=target_area)
 
         return queryset

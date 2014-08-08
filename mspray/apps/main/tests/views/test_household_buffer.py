@@ -15,7 +15,7 @@ class TestHouseholdBufferViewSet(TestBase):
         self.fixtures = [
             '848_households', '848_target_area', '848_spraypoints']
         self._create_households_buffer(self.fixtures)
-        data = {'target_area': 848}
+        data = {'target_area': 382}
         request = self.factory.get('/', data)
         response = self.view(request)
         self.assertEqual(response.status_code, 200)

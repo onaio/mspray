@@ -18,7 +18,7 @@ class TestHouseholdViewSet(TestBase):
 
     def test_household_list_view_filter_by_target_area(self):
         self._loaddata_fixtures(self.fixtures)
-        data = {'target_area': 277}
+        data = {'target_area': 69}
         request = self.factory.get('/', data)
         response = self.view(request)
         self.assertEqual(response.status_code, 200)
