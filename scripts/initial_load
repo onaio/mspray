@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# target area shap files, includes the district info
+python manage.py load_area_shapefile data/testarea2/Abt\ Test\ Site\ Boundary.shp
+python manage.py load_area_shapefile data/testarea1/Test\ Target\ Areas\ Boundaries.shp
+python manage.py load_area_shapefile data/testarea1/Test\ Site\ 1\ Boundary.shp
+
+# household target areas
+python manage.py load_household_shapefile data/testarea1/Test\ Site\ 1\ Points.shp
+python manage.py load_household_shapefile data/testarea1/Test\ Target\ Areas\ Points.shp
+python manage.py load_household_shapefile data/testarea2/Abt\ Test\ Site\ Points.shp
+
+# create buffers around households, 13 meters
+python manage.py create_household_buffers -d 13 -f true
+
