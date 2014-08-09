@@ -183,12 +183,12 @@ var App = {
 
                     target_table_content += '<tr>'+
                             '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
-                            '<td>' + structures + '</td>' +
-                            '<td>' + visited_total + ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
-                            '<td>' + visited_sprayed + ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
-                            '<td>' + visited_refused + ' (' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
-                            '<td>' + visited_other + ' (' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
-                            '<td>' + not_visited + ' (' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
+                            '<td>' + '<b>' + structures + '</b> ' + '</td>' +
+                            '<td>' + '<b>' + visited_total + '</b> ' + '(' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
+                            '<td>' + '<b>' + visited_sprayed + '</b> ' + '(' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
+                            '<td>' + '<b>' + visited_refused + '</b> ' + '(' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
+                            '<td>' + '<b>' + visited_other + '</b> ' + '(' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
+                            '<td>' + '<b>' + not_visited + '</b> ' + '(' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
                     //Create a table
 
@@ -198,12 +198,12 @@ var App = {
                 $('table#target_areas tbody').empty().append(target_table_content);
                 $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
-                    "<td>" + agg_structures + "</td>" +
-                    "<td>" + agg_visited_total + "</td>" +
-                    "<td>" + agg_visited_sprayed + "</td>" +
-                    "<td>" + agg_visited_refused + "</td>" +
-                    "<td>" + agg_visited_other + "</td>" +
-                    "<td>" + agg_not_visited + "</td></tr>"
+                    "<td><b>" + agg_structures + "</b></td>" +
+                    "<td><b>" + agg_visited_total + "</b></td>" +
+                    "<td><b>" + agg_visited_sprayed + "</b></td>" +
+                    "<td><b>" + agg_visited_refused + "</b></td>" +
+                    "<td><b>" + agg_visited_other + "</b></td>" +
+                    "<td><b>" + agg_not_visited + "</b></td></tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
                 $('h1#district-name').text("District:" + district_name);
