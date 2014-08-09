@@ -410,7 +410,7 @@ var App = {
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
-        //this.loadHouseholds(map, targetid);
+        this.loadHouseholds(map, targetid);
     },
 
     drawCircle: function(percent, circle_id, radius) {
