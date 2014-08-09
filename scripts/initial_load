@@ -1,5 +1,8 @@
 #!/bin/bash
 
+python manage.py syncdb --noinput
+python manage.py migrate --noinput
+
 # target area shap files, includes the district info
 python manage.py load_area_shapefile data/testarea2/Abt\ Test\ Site\ Boundary.shp
 python manage.py load_area_shapefile data/testarea1/Test\ Target\ Areas\ Boundaries.shp

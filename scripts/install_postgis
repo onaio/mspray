@@ -1,4 +1,24 @@
 #!/bin/bash
-psql -c "CREATE DATABASE $1;" -U $2 -h $3
-psql -c "CREATE EXTENSION IF NOT EXISTS postgis;" -d $1 -U $2 -h $3
-psql -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;" -d $1 -U $2 -h $3
+
+if [[ $# -gt 4 && $5 = "DROP" ]]; then
+    read -p "Are you sure you want to drop database $1 and user $1? (NOTE: This is irreversible)[y/N]" -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        psql -c "DROP DATABASE IF EXISTS $1;" -U $3 -h $4
+        psql -c "DROP DATABASE IF EXISTS test_$1;" -U $3 -h $4
+        psql -c "DROP USER IF EXISTS $1;" -U $3 -h $4
+    fi
+fi
+
+if [ $# -gt 3 ]; then
+    USER_EXTRA=""
+    if [ $# -gt 5 ]; then
+        USER_EXTRA=$6
+    fi
+    psql -c "CREATE USER $1 WITH $USER_EXTRA PASSWORD '$2';" -U $3 -h $4
+    psql -c "CREATE DATABASE $1 WITH OWNER $1;" -U $3 -h $4
+    psql -c "CREATE DATABASE test_$1 WITH OWNER $1;" -U $3 -h $4
+    psql -c "CREATE EXTENSION IF NOT EXISTS postgis;" -d $1 -U $3 -h $4
+    psql -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;" -d $1 -U $3 -h $4
+fi
