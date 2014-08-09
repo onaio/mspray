@@ -8,6 +8,22 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'Household'
+        db.create_table('main_household', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('hh_id', self.gf('django.db.models.fields.IntegerField')()),
+            ('hh_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
+            ('comment', self.gf('django.db.models.fields.CharField')(max_length=60)),
+            ('type_1', self.gf('django.db.models.fields.CharField')(max_length=1)),
+            ('comment_1', self.gf('django.db.models.fields.CharField')(max_length=60)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=254)),
+            ('descr', self.gf('django.db.models.fields.CharField')(max_length=254)),
+            ('orig_fid', self.gf('django.db.models.fields.IntegerField')()),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.MultiPointField')()),
+            ('bgeom', self.gf('django.contrib.gis.db.models.fields.PolygonField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('main', ['Household'])
+
         # Adding model 'TargetArea'
         db.create_table('main_targetarea', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -23,26 +39,19 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('main', ['TargetArea'])
 
-        # Adding model 'Household'
-        db.create_table('main_household', (
+        # Adding model 'HouseholdsBuffer'
+        db.create_table('main_householdsbuffer', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('hh_id', self.gf('django.db.models.fields.IntegerField')()),
-            ('hh_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('comment', self.gf('django.db.models.fields.CharField')(max_length=60)),
-            ('type_1', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('comment_1', self.gf('django.db.models.fields.CharField')(max_length=60)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=254)),
-            ('descr', self.gf('django.db.models.fields.CharField')(max_length=254)),
-            ('orig_fid', self.gf('django.db.models.fields.IntegerField')()),
-            ('geom', self.gf('django.contrib.gis.db.models.fields.MultiPointField')()),
-            ('bgeom', self.gf('django.contrib.gis.db.models.fields.PolygonField')(blank=True, null=True)),
+            ('target_area', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['main.TargetArea'])),
+            ('num_households', self.gf('django.db.models.fields.IntegerField')(default=0)),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.PolygonField')()),
         ))
-        db.send_create_signal('main', ['Household'])
+        db.send_create_signal('main', ['HouseholdsBuffer'])
 
         # Adding model 'SprayDay'
         db.create_table('main_sprayday', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('day', self.gf('django.db.models.fields.IntegerField')()),
+            ('spray_date', self.gf('django.db.models.fields.DateField')()),
             ('geom', self.gf('django.contrib.gis.db.models.fields.PointField')()),
             ('data', self.gf('jsonfield.fields.JSONField')(default={})),
         ))
@@ -50,11 +59,14 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'Household'
+        db.delete_table('main_household')
+
         # Deleting model 'TargetArea'
         db.delete_table('main_targetarea')
 
-        # Deleting model 'Household'
-        db.delete_table('main_household')
+        # Deleting model 'HouseholdsBuffer'
+        db.delete_table('main_householdsbuffer')
 
         # Deleting model 'SprayDay'
         db.delete_table('main_sprayday')
@@ -63,7 +75,7 @@ class Migration(SchemaMigration):
     models = {
         'main.household': {
             'Meta': {'object_name': 'Household'},
-            'bgeom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'blank': 'True', 'null': 'True'}),
+            'bgeom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'}),
             'comment': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
             'comment_1': ('django.db.models.fields.CharField', [], {'max_length': '60'}),
             'descr': ('django.db.models.fields.CharField', [], {'max_length': '254'}),
@@ -75,12 +87,19 @@ class Migration(SchemaMigration):
             'orig_fid': ('django.db.models.fields.IntegerField', [], {}),
             'type_1': ('django.db.models.fields.CharField', [], {'max_length': '1'})
         },
+        'main.householdsbuffer': {
+            'Meta': {'object_name': 'HouseholdsBuffer'},
+            'geom': ('django.contrib.gis.db.models.fields.PolygonField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'num_households': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'target_area': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['main.TargetArea']"})
+        },
         'main.sprayday': {
             'Meta': {'object_name': 'SprayDay'},
             'data': ('jsonfield.fields.JSONField', [], {'default': '{}'}),
-            'day': ('django.db.models.fields.IntegerField', [], {}),
             'geom': ('django.contrib.gis.db.models.fields.PointField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'spray_date': ('django.db.models.fields.DateField', [], {})
         },
         'main.targetarea': {
             'Meta': {'object_name': 'TargetArea'},
