@@ -495,7 +495,7 @@ var App = {
     init: function (){
         $(document).ready(function(){
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
-            window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19}); //.setView([-14.2164, 29.2315], 13);
+            window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19});
             map.addLayer(new L.Google());
             L.control.locate().addTo(map);
             $('#map, #map-legend').hide();
