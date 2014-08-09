@@ -392,7 +392,7 @@ var App = {
         }
         var url = App.SPRAY_DAYS_URI;
         if(day !== undefined){
-            url = url += "?day=" + day + "&target_area=" + targetid;
+            url = url += "?spray_date=" + day + "&target_area=" + targetid;
         }
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url);
@@ -580,11 +580,13 @@ var App = {
     },
 
     load_spray_days_by_date: function(event){
-        console.log(event);
-        console.log(this);
         event.preventDefault();
-        var sprayday = this.href.split('#')[1];
+        var sprayday = this.href.split('#')[1], dt, dt_label;
         App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
+        dt = new Date(sprayday);
+        dt_label = "Date: " + dt.toLocaleDateString();
+        $('.sprayday_label').text(dt_label);
+        $('.day_label').text(dt_label);
     }
 };
 
