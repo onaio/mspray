@@ -19,7 +19,7 @@ var App = {
         fillColor: '#999999',
         color: '#FFFFFF',
         weight: 3,
-        fillOpacity: 0.4
+        fillOpacity: 0.1
     },
     hhOptions: {
         radius: 4,
@@ -46,7 +46,7 @@ var App = {
     sprayAltOptions: {
         weight: 2,
         opacity: 0.1,
-        color: 'black',
+        color: '#000000',
         fillOpacity: 0.4
     },
 
@@ -412,7 +412,7 @@ var App = {
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
-        this.loadHouseholds(map, targetid);
+        //this.loadHouseholds(map, targetid);
     },
 
     drawCircle: function(percent, circle_id, radius) {
@@ -421,7 +421,7 @@ var App = {
         if(percent < 30){
             fillColor = 'orange';
         }
-        else if(percent > 30){
+        else if(percent > 33){
             fillColor = '#FFFFCC';
         }
         else if(percent < 40){
@@ -495,7 +495,7 @@ var App = {
     init: function (){
         $(document).ready(function(){
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
-            window.map = L.mapbox.map('map','ona.j6c49d56'); //.setView([-14.2164, 29.2315], 13);
+            window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19}); //.setView([-14.2164, 29.2315], 13);
             map.addLayer(new L.Google());
             L.control.locate().addTo(map);
             $('#map, #map-legend').hide();
