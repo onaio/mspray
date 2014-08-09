@@ -2,6 +2,7 @@ import datetime
 import random
 
 from django.core.management.base import BaseCommand
+from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import TargetArea, Household, SprayDay
@@ -26,8 +27,12 @@ class Command(BaseCommand):
         for target in TargetArea.objects.all():
             random_households = Household.objects.filter(
                 geom__coveredby=target.geom).order_by('?')
-
             count = random_households.count()
+
+            query = "SELECT id, RandomPoint(bgeom) as rp FROM main_household"\
+                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
+                " ORDER BY RANDOM()" % target.geom
+            random_households = Household.objects.raw(query)
             sprayed_num = int((random.uniform(4, 9) / 10) * count)
             random_households = random_households[:sprayed_num]
 
@@ -43,7 +48,7 @@ class Command(BaseCommand):
                 end = split[day.day] if start != end else sprayed_num
 
                 for h in random_households[start: end]:
-                    geom = h.geom.pop()
+                    geom = GEOSGeometry(h.rp)
 
                     if geom in used:
                         continue

@@ -15,7 +15,7 @@ class SprayDay(models.Model):
         app_label = 'main'
 
     def __str__(self):
-        return self.date.isoformat()
+        return self.spray_date.isoformat()
 
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {
