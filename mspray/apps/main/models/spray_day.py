@@ -4,7 +4,8 @@ from jsonfield import JSONField
 
 
 class SprayDay(models.Model):
-    spray_date = models.DateField()
+    submission_id = models.PositiveIntegerField(unique=True)
+    spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326)
     data = JSONField(default={})
 

@@ -27,14 +27,14 @@ class Migration(SchemaMigration):
         # Adding model 'TargetArea'
         db.create_table('main_targetarea', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('houses', self.gf('django.db.models.fields.FloatField')()),
+            ('houses', self.gf('django.db.models.fields.FloatField')(db_index=True)),
             ('targetid', self.gf('django.db.models.fields.FloatField')()),
             ('predicted', self.gf('django.db.models.fields.FloatField')()),
             ('predinc', self.gf('django.db.models.fields.FloatField')()),
-            ('ranks', self.gf('django.db.models.fields.FloatField')()),
+            ('ranks', self.gf('django.db.models.fields.FloatField')(db_index=True)),
             ('houseranks', self.gf('django.db.models.fields.FloatField')()),
-            ('targeted', self.gf('django.db.models.fields.FloatField')()),
-            ('district_name', self.gf('django.db.models.fields.CharField')(max_length=254)),
+            ('targeted', self.gf('django.db.models.fields.FloatField')(db_index=True)),
+            ('district_name', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=254)),
             ('geom', self.gf('django.contrib.gis.db.models.fields.MultiPolygonField')()),
         ))
         db.send_create_signal('main', ['TargetArea'])
@@ -51,7 +51,8 @@ class Migration(SchemaMigration):
         # Adding model 'SprayDay'
         db.create_table('main_sprayday', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('spray_date', self.gf('django.db.models.fields.DateField')()),
+            ('submission_id', self.gf('django.db.models.fields.PositiveIntegerField')(unique=True)),
+            ('spray_date', self.gf('django.db.models.fields.DateField')(db_index=True)),
             ('geom', self.gf('django.contrib.gis.db.models.fields.PointField')()),
             ('data', self.gf('jsonfield.fields.JSONField')(default={})),
         ))
@@ -99,19 +100,20 @@ class Migration(SchemaMigration):
             'data': ('jsonfield.fields.JSONField', [], {'default': '{}'}),
             'geom': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'spray_date': ('django.db.models.fields.DateField', [], {})
+            'spray_date': ('django.db.models.fields.DateField', [], {'db_index': 'True'}),
+            'submission_id': ('django.db.models.fields.PositiveIntegerField', [], {'unique': 'True'})
         },
         'main.targetarea': {
             'Meta': {'object_name': 'TargetArea'},
-            'district_name': ('django.db.models.fields.CharField', [], {'max_length': '254'}),
+            'district_name': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '254'}),
             'geom': ('django.contrib.gis.db.models.fields.MultiPolygonField', [], {}),
             'houseranks': ('django.db.models.fields.FloatField', [], {}),
-            'houses': ('django.db.models.fields.FloatField', [], {}),
+            'houses': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'predicted': ('django.db.models.fields.FloatField', [], {}),
             'predinc': ('django.db.models.fields.FloatField', [], {}),
-            'ranks': ('django.db.models.fields.FloatField', [], {}),
-            'targeted': ('django.db.models.fields.FloatField', [], {}),
+            'ranks': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
+            'targeted': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
             'targetid': ('django.db.models.fields.FloatField', [], {})
         }
     }

@@ -3,14 +3,14 @@ from django.contrib.gis.db import models
 
 
 class TargetArea(models.Model):
-    houses = models.FloatField()
+    houses = models.FloatField(db_index=True)
     targetid = models.FloatField()
     predicted = models.FloatField()
     predinc = models.FloatField()
-    ranks = models.FloatField()
+    ranks = models.FloatField(db_index=True)
     houseranks = models.FloatField()
-    targeted = models.FloatField()
-    district_name = models.CharField(max_length=254)
+    targeted = models.FloatField(db_index=True)
+    district_name = models.CharField(db_index=True, max_length=254)
     geom = models.MultiPolygonField(srid=4326)
     objects = models.GeoManager()
 
