@@ -1,6 +1,7 @@
 var App = {
     // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
     SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
+    DATES_URI: "http://api.mspray.onalabs.org/spraydays.json?dates_only=true",
     BUFFER_URI: "http://api.mspray.onalabs.org/buffers.json",
     TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
@@ -102,7 +103,7 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
-                    $("#map, #map-legend").hide();
+                    $("#map, #spray_date_picker, #map-legend").hide();
                     $("#district_table").show();
 
                     var dist_name = this.href.split('#!')[1];
@@ -120,6 +121,26 @@ var App = {
                 console.log('Sorry, could not retrieve districts');
             }
         });
+    },
+    getDates: function() {
+        if(App._dates !== undefined){
+            return App._dates;
+        }
+        var dates = [];
+
+        $.getJSON(App.DATES_URI, function(data){
+            var i, date_list = $("#spraydays_list");
+            date_list.empty();
+
+            for(i=0; i < data.length; i++){
+                var li = '<li><a href="#' + data[i] + '">' + data[i] + '</a></li>';
+                date_list.append(li);
+                date_list.find('li a').click(App.load_spray_days_by_date);
+            }
+            App._dates = data;
+        });
+
+       return dates;
     },
 
     calcaulatePercentage: function(numerator, denominator) {
@@ -484,7 +505,7 @@ var App = {
             // window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
             // map.addLayer(new L.Google());
             // L.control.locate().addTo(map);
-            $('#map, #map-legend').show();
+            $('#map, #spray_date_picker, #map-legend').show();
             App.loadAreaData(map, current_target_area);
         } else {
             this.getTargetAreas(current_district);
@@ -498,10 +519,11 @@ var App = {
             window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19});
             map.addLayer(new L.Google());
             L.control.locate().addTo(map);
-            $('#map, #map-legend').hide();
+            $('#map, #spray_date_picker, #map-legend').hide();
 
             // load page info
             App.getDistricts();
+            App.getDates();
             App.getPageState();
 
             App.drawCircle(0, 'circle-sprayed', 70);
@@ -516,7 +538,7 @@ var App = {
                 App.drawCircle(0);
 
                 target_area.click(function(e){
-                    $("#map, #map-legend").show();
+                    $("#map, #spray_date_picker, #map-legend").show();
                     $("#district_table").hide();
                     var target_id = this.href.split('#!')[1];
                     console.error(target_id);
@@ -529,20 +551,6 @@ var App = {
                     App.loadAreaData(map, target_id);
                 });
             });
-
-
-            // load spraydays
-            $('#spraydays_list li a').click(function(e){
-                var sprayday = $(this).attr('href');
-                sprayday = sprayday.slice(4, sprayday.length);
-
-                App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
-                $('.sprayday_label').text('Date: Day ' + sprayday);
-                $('.day_label').text('Day ' + sprayday);
-
-                e.preventDefault();
-            });
-
 
             var infopanel = $(".info-panel"),
                 infotoggle = $('.info-toggle'),
@@ -569,6 +577,14 @@ var App = {
                 infopanel.toggleClass('open');
             });
         });
+    },
+
+    load_spray_days_by_date: function(event){
+        console.log(event);
+        console.log(this);
+        event.preventDefault();
+        var sprayday = this.href.split('#')[1];
+        App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
     }
 };
 
