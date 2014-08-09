@@ -1,3 +1,4 @@
+import datetime
 import random
 
 from django.core.management.base import BaseCommand
@@ -18,6 +19,10 @@ class Command(BaseCommand):
     help = _('Create random spray points for testing')
 
     def handle(self, *args, **options):
+        k = 1
+
+        SprayDay.objects.all().delete()
+
         for target in TargetArea.objects.all():
             random_households = Household.objects.filter(
                 geom__coveredby=target.geom).order_by('?')
@@ -32,10 +37,20 @@ class Command(BaseCommand):
             start = 0
             split = get_split(sprayed_num, *random_range)
             end = sprayed_num
-
-            for day in range(1, 4):
-                end = split[day] if start != end else sprayed_num
+            dates = [datetime.date(2014, 8, d) for d in range(1, 4)]
+            used = []
+            for day in dates:
+                end = split[day.day] if start != end else sprayed_num
 
                 for h in random_households[start: end]:
-                    SprayDay.objects.create(day=day, geom=h.geom.pop())
-                start = split[day]
+                    geom = h.geom.pop()
+
+                    if geom in used:
+                        continue
+                    else:
+                        used.append(geom)
+
+                    SprayDay.objects.create(
+                        spray_date=day, geom=geom, submission_id=k)
+                    k += 1
+                start = split[day.day]
