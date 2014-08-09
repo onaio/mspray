@@ -10,12 +10,25 @@ class TestSprayDayViewSet(TestBase):
     def setUp(self):
         super(TestSprayDayViewSet, self).setUp()
         self.fixtures = ['848_spraypoints']
+        self.view = SprayDayViewSet.as_view({
+            'post': 'create',
+            'get': 'list'
+        })
+
+    def test_spraydays_dates_only_view(self):
+        self._loaddata_fixtures(self.fixtures)
+        data = {'dates_only': 'true'}
+        request = self.factory.get('/', data)
+        response = self.view(request)
+        self.assertEqual(response.status_code, 200)
+        date = datetime.date(2014, 8, 8)
+        self.assertIn(date, response.data)
+        self.assertEqual(len(response.data), 3)
 
     def test_spraydays_list_view(self):
         self._loaddata_fixtures(self.fixtures)
-        view = SprayDayViewSet.as_view({'get': 'list'})
         request = self.factory.get('/')
-        response = view(request)
+        response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('features', response.data)
         date = datetime.date(2014, 8, 8)
@@ -24,9 +37,8 @@ class TestSprayDayViewSet(TestBase):
 
     def test_spraydays_list_view_ordering(self):
         self._loaddata_fixtures(self.fixtures)
-        view = SprayDayViewSet.as_view({'get': 'list'})
         request = self.factory.get('/')
-        response = view(request)
+        response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('features', response.data)
         date = datetime.date(2014, 8, 8)
@@ -35,7 +47,7 @@ class TestSprayDayViewSet(TestBase):
         # reverse order
         data = {'ordering': '-spray_date'}
         request = self.factory.get('/', data)
-        response = view(request)
+        response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('features', response.data)
         date = datetime.date(2014, 8, 10)
@@ -43,21 +55,20 @@ class TestSprayDayViewSet(TestBase):
             response.data['features'][0]['properties']['spray_date'], date)
 
     def test_recieve_json_post(self):
-        view = SprayDayViewSet.as_view({'post': 'create'})
         count = SprayDay.objects.count()
         path = os.path.join(self.fixtures_dir, '88037_submission.json')
 
         with open(path) as f:
             data = f.read()
             request = self.factory.post('/', data, 'application/json')
-            response = view(request)
+            response = self.view(request)
 
             self.assertEqual(response.status_code, 201)
             self.assertEqual(count + 1, SprayDay.objects.count())
 
             # test double entry, should not add
             request = self.factory.post('/', data, 'application/json')
-            response = view(request)
+            response = self.view(request)
 
             self.assertEqual(count + 1, SprayDay.objects.count())
             self.assertEqual(response.status_code, 201)

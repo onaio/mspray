@@ -76,3 +76,12 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             geom=geom)
         sprayday.data = submission_data
         sprayday.save()
+
+    def list(self, request, *args, **kwargs):
+        if request.QUERY_PARAMS.get('dates_only') == 'true':
+            data = SprayDay.objects\
+                .values_list('spray_date', flat=True).distinct()
+
+            return Response(data)
+
+        return super(SprayDayViewSet, self).list(request, *args, **kwargs)
