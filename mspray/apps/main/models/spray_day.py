@@ -7,7 +7,6 @@ class SprayDay(models.Model):
     spray_date = models.DateField()
     geom = models.PointField(srid=4326)
     data = JSONField(default={})
-    submission = models.ForeignKey('Submission')
 
     objects = models.GeoManager()
 
