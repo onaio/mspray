@@ -65,11 +65,14 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         return Response(data, status=status_code)
 
     def _process_single_form(self, request):
+        submission_id = request.DATA.get('_id')
         spray_date = request.DATA.get('date')
         spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
         submission_data = json.dumps(request.DATA)
         geom = geojson_from_gps_string(request.DATA.get('structure_gps'))
-        SprayDay.objects.create(
+        sprayday, created = SprayDay.objects.get_or_create(
+            submission_id=submission_id,
             spray_date=spray_date,
-            data=submission_data,
             geom=geom)
+        sprayday.data = submission_data
+        sprayday.save()

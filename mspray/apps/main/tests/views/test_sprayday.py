@@ -54,3 +54,10 @@ class TestSprayDayViewSet(TestBase):
 
             self.assertEqual(response.status_code, 201)
             self.assertEqual(count + 1, SprayDay.objects.count())
+
+            # test double entry, should not add
+            request = self.factory.post('/', data, 'application/json')
+            response = view(request)
+
+            self.assertEqual(count + 1, SprayDay.objects.count())
+            self.assertEqual(response.status_code, 201)
