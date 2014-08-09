@@ -7,7 +7,7 @@ var App = {
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
 
-    defaultDistrict: 'Chienge',
+    defaultDistrict: 'Test Target Areas Boundaries',
     defaultTargetArea: 0,
     sprayLayer: [],
     targetLayer: [],
@@ -270,7 +270,8 @@ var App = {
         console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
 
         target_area.on('ready', function(){
-            var bounds = target_area.getBounds();
+            bounds = target_area.getBounds();
+            console.log(bounds);
             map.fitBounds(bounds);
             var geojson = target_area.getGeoJSON();
 
@@ -502,11 +503,12 @@ var App = {
         $('.target_label').text('Target Area : ' + current_target_area);
 
         if(current_target_area != this.defaultTargetArea){
-            // window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-            // map.addLayer(new L.Google());
-            // L.control.locate().addTo(map);
+            App.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+            App.map.addLayer(new L.Google());
+            L.control.locate().addTo(App.map);
             $('#map, #spray_date_picker, #map-legend').show();
-            App.loadAreaData(map, current_target_area);
+            App.loadAreaData(App.map, current_target_area);
+            console.log("Loading map for target", current_target_area);
         } else {
             this.getTargetAreas(current_district);
         }
@@ -516,9 +518,9 @@ var App = {
     init: function (){
         $(document).ready(function(){
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
-            window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19});
-            map.addLayer(new L.Google());
-            L.control.locate().addTo(map);
+            // window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19});
+            // map.addLayer(new L.Google());
+            // L.control.locate().addTo(map);
             $('#map, #spray_date_picker, #map-legend').hide();
 
             // load page info
@@ -539,16 +541,21 @@ var App = {
 
                 target_area.click(function(e){
                     $("#map, #spray_date_picker, #map-legend").show();
+                    if(App.map === undefined){
+                        App.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+                        App.map.addLayer(new L.Google());
+                        L.control.locate().addTo(App.map);
+                    }
                     $("#district_table").hide();
                     var target_id = this.href.split('#!')[1];
-                    console.error(target_id);
 
                     target_id = target_id.split('/')[1];
                     $('.target_label').text('Target Area : ' + target_id);
 
                     //Hide the modal
                     $('.modal-div').fadeOut(300);
-                    App.loadAreaData(map, target_id);
+                    App.loadAreaData(App.map, target_id);
+                    console.log("Loading map for target", target_id);
                 });
             });
 
@@ -582,7 +589,7 @@ var App = {
     load_spray_days_by_date: function(event){
         event.preventDefault();
         var sprayday = this.href.split('#')[1], dt, dt_label;
-        App.loadSprayPoints(map, sprayday, App.getCurrentTargetArea());
+        App.loadSprayPoints(App.map, sprayday, App.getCurrentTargetArea());
         dt = new Date(sprayday);
         dt_label = "Date: " + dt.toLocaleDateString();
         $('.sprayday_label').text(dt_label);
