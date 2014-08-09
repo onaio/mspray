@@ -21,4 +21,5 @@ if [ $# -gt 3 ]; then
     psql -c "CREATE DATABASE test_$1 WITH OWNER $1;" -U $3 -h $4
     psql -c "CREATE EXTENSION IF NOT EXISTS postgis;" -d $1 -U $3 -h $4
     psql -c "CREATE EXTENSION IF NOT EXISTS postgis_topology;" -d $1 -U $3 -h $4
+    psql -f scripts/random_point.sql -d $1 -U $3 -h $4
 fi
