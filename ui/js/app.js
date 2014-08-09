@@ -7,7 +7,7 @@ var App = {
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
 
     defaultDistrict: 'Chienge',
-    defaultTargetArea: 475,
+    defaultTargetArea: 0,
     sprayLayer: [],
     targetLayer: [],
     hhLayer: [],
@@ -51,7 +51,6 @@ var App = {
     },
 
     populateTargetAreasTable: function(doc_location_hash) {
-        console.log("Document Location Hash: ", doc_location_hash)
         console.log("Retrieving Chienge Target Areas...");
         var district_name = "";
         if (doc_location_hash === "")
@@ -131,7 +130,8 @@ var App = {
         var uri = this.DISTRICT_URI + "?district=" + district_name,
             target_list = $('#target_areas_list'), c,
             target_table = $('#target_table tbody'),
-            target_list_content = target_table_content = "" ;
+            target_list_content = "",
+            target_table_content = "" ;
 
             // reset containers
             target_list.empty();
@@ -154,27 +154,29 @@ var App = {
                 //console.log(data.features[0].properties.targetid);
                 console.log(data);
 
-                var list_data, target_id, structures, visited_total,
-                    visited_sprayed, visited_refused, visited_other,
-                    not_visited,
-                    agg_structures = agg_visited_total = agg_visited_sprayed = agg_visited_refused =  agg_visited_other = agg_not_visited = 0;
+                var agg_structures = 0,
+                    agg_visited_total = 0,
+                    agg_visited_sprayed = 0,
+                    agg_visited_refused =  0,
+                    agg_visited_other = 0,
+                    agg_not_visited = 0;
 
                 for(c = 0; c < data.length; c++){
-                    list_data = data[c],
-                    target_id = list_data.targetid,
-                    structures = list_data.structures,
-                    visited_total = list_data.visited_total;
-                    visited_sprayed = list_data.visited_sprayed;
-                    visited_refused = list_data.visited_refused;
-                    visited_other = list_data.visited_other;
-                    not_visited = list_data.not_visited;
+                    var list_data = data[c];
+                    var target_id = list_data.targetid,
+                        structures = list_data.structures,
+                        visited_total = list_data.visited_total,
+                        visited_sprayed = list_data.visited_sprayed,
+                        visited_refused = list_data.visited_refused,
+                        visited_other = list_data.visited_other,
+                        not_visited = list_data.not_visited, radix = 10;
 
-                    agg_structures += parseInt(structures);
-                    agg_visited_total += parseInt(visited_total);
-                    agg_visited_sprayed += parseInt(visited_sprayed);
-                    agg_visited_refused += parseInt(visited_refused);
-                    agg_visited_other += parseInt(visited_other);
-                    agg_not_visited += parseInt(not_visited);
+                    agg_structures += parseInt(structures, radix);
+                    agg_visited_total += parseInt(visited_total, radix);
+                    agg_visited_sprayed += parseInt(visited_sprayed, radix);
+                    agg_visited_refused += parseInt(visited_refused, radix);
+                    agg_visited_other += parseInt(visited_other, radix);
+                    agg_not_visited += parseInt(not_visited, radix);
 
                     target_list_content += '<li><a href="#!'+ district_name + "/" +
                             target_id + '">'+ target_id +'</a></li>';
@@ -187,14 +189,13 @@ var App = {
                             '<td>' + visited_refused + ' (' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
                             '<td>' + visited_other + ' (' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
                             '<td>' + not_visited + ' (' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
-                        '</tr>'
+                        '</tr>';
                     //Create a table
 
                 }
                 target_list.append(target_list_content);
                 target_table.append(target_table_content);
-                $('table#target_areas tbody').empty()
-                    .append(target_table_content)
+                $('table#target_areas tbody').empty().append(target_table_content);
                 $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
                     "<td>" + agg_structures + "</td>" +
@@ -205,8 +206,7 @@ var App = {
                     "<td>" + agg_not_visited + "</td></tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
-
-                $('h1#district-name').text("District:" + district_name)
+                $('h1#district-name').text("District:" + district_name);
             },
             error: function(){
                 console.log('Sorry, could not retrieve target areas');
@@ -436,7 +436,7 @@ var App = {
 
         Circles.create({
             id: circle_id,
-            percentage: parseInt(" "+percent),
+            percentage: parseInt(" " + percent, 10),
             radius: radius,
             width: 12,
             number: percent,
@@ -455,7 +455,7 @@ var App = {
             var filterText = $(this).val();
             var targetAreasList = $("#target_areas_list li");
 
-            if(filterText != ""){
+            if(filterText !== ""){
                 targetAreasList.hide();
                 targetAreasList.children("a").filter(function(){
                     return $(this).text().toLowerCase().indexOf(filterText) >-1;
@@ -481,9 +481,10 @@ var App = {
         $('.target_label').text('Target Area : ' + current_target_area);
 
         if(current_target_area != this.defaultTargetArea){
-            window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-            map.addLayer(new L.Google);
-            L.control.locate().addTo(map);
+            // window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
+            // map.addLayer(new L.Google());
+            // L.control.locate().addTo(map);
+            $('#map, #map-legend').show();
             App.loadAreaData(map, current_target_area);
         } else {
             this.getTargetAreas(current_district);
@@ -494,9 +495,9 @@ var App = {
     init: function (){
         $(document).ready(function(){
             window.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-            map.addLayer(new L.Google);
+            map.addLayer(new L.Google());
             L.control.locate().addTo(map);
-            $('#map, #map-legend').hide()
+            $('#map, #map-legend').hide();
 
             // load page info
             App.getDistricts();
