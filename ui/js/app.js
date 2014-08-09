@@ -292,7 +292,7 @@ var App = {
             });
 
             target_area.setStyle(App.targetOptions);
-        }).addTo(map);
+        }); //.addTo(map);
 
         // Load data into circles
         var perc_visited = 20;
@@ -351,7 +351,7 @@ var App = {
         if(targetid === undefined){
             return;
         }
-        var households = L.mapbox.featureLayer()
+        households = L.mapbox.featureLayer()
             .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
         console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
@@ -382,8 +382,7 @@ var App = {
                         }
                     });
                 }
-            })
-            .addTo(map);
+            });//.addTo(map);
 
             this.hhLayer.setZIndex(70);
         });
@@ -494,20 +493,24 @@ var App = {
         });
     },
 
+    loadMap: function(){
+        if (App.map !== undefined){
+            return;
+        }
+        App.map = L.mapbox.map('map', 'ona.j6c49d56', {maxZoom: 19});
+        App.map.addLayer(new L.Google());
+        L.control.locate().addTo(App.map);
+    },
+
     getPageState: function(){
         var current_district = this.getCurrentDistrict();
         var current_target_area = this.getCurrentTargetArea();
-
-        console.log("District", current_district.length);
-        console.log("TA", current_target_area);
 
         $('.dist_label').text('District : ' + current_district);
         $('.target_label').text('Target Area : ' + current_target_area);
 
         if(current_target_area != this.defaultTargetArea){
-            App.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-            App.map.addLayer(new L.Google());
-            L.control.locate().addTo(App.map);
+            App.loadMap();
             $('#map, #spray_date_picker, #map-legend').show();
             App.loadAreaData(App.map, current_target_area);
             console.log("Loading map for target", current_target_area);
@@ -520,9 +523,6 @@ var App = {
     init: function (){
         $(document).ready(function(){
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
-            // window.map = L.mapbox.map('map','ona.j6c49d56', {maxZoom: 19});
-            // map.addLayer(new L.Google());
-            // L.control.locate().addTo(map);
             $('#map, #spray_date_picker, #map-legend').hide();
 
             // load page info
@@ -543,11 +543,7 @@ var App = {
 
                 target_area.click(function(e){
                     $("#map, #spray_date_picker, #map-legend").show();
-                    if(App.map === undefined){
-                        App.map = L.mapbox.map('map'); //.setView([-14.2164, 29.2315], 13);
-                        App.map.addLayer(new L.Google());
-                        L.control.locate().addTo(App.map);
-                    }
+                    App.loadMap();
                     $("#district_table").hide();
                     var target_id = this.href.split('#!')[1];
 
