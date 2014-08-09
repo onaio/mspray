@@ -34,9 +34,9 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     queryset = SprayDay.objects.all()
     serializer_class = SprayDaySerializer
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
-    filter_fields = ('day',)
-    ordering_fields = ('day',)
-    ordering = ('day',)
+    filter_fields = ('spray_date',)
+    ordering_fields = ('spray_date',)
+    ordering = ('spray_date',)
 
     def filter_queryset(self, queryset):
         targetid = self.request.QUERY_PARAMS.get('target_area')
