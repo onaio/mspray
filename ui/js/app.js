@@ -33,7 +33,7 @@ var App = {
         weight: 3,
         color: '#fff',
         dashArray: '',
-        fillOpacity: 0.5
+        fillOpacity: 0.4
     },
     sprayOptions: {
         radius: 4,
@@ -313,7 +313,7 @@ var App = {
                             layer.setStyle( {fillOpacity: 0.7} );
                         },
                         mouseout: function(e){
-                            e.target.setStyle({fillOpacity: 0.5});
+                            e.target.setStyle({fillOpacity: 0.4});
                         }
                     });
                 }
@@ -441,7 +441,7 @@ var App = {
             width: 12,
             number: percent,
             text: '%',
-            colors: ['#AAAAAA', fillColor],
+            colors: ['#CCCCCC', fillColor],
             duration: 200
         });
     },
