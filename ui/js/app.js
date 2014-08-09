@@ -301,9 +301,7 @@ var App = {
                     return App.bufferOptions;
                 },
                 onEachFeature: function(feature, layer){
-                    var content = '<h4>'+ feature.properties.num_households + ' households</h4>';
-                    content += '<h4>'+ feature.properties.spray_points + ' spray points</h4>';
-                    content += '<h4>'+ feature.properties.percentage_sprayed + '% sprayed</h4>';
+                    var content = "<h4>"+ feature.properties.percentage_sprayed + '% (' + feature.properties.spray_points + '/' + feature.properties.num_households + ') HH sprayed </h4>';
                     layer.bindPopup(content, { closeButton:true });
 
                     layer.on({
