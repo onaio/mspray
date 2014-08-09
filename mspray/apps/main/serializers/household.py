@@ -5,7 +5,7 @@ from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_day import SprayDay
 
-ZERO_COLOR = '#CCCCC'
+ZERO_COLOR = '#CCCCCC'
 _1_COLOR = '#FF4136'
 _33_COLOR = '#FF851B'
 _66_COLOR = '#FFDC00'
