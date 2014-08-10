@@ -102,3 +102,10 @@ NOSE_ARGS = [
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, 'static'))
 POSTGIS_VERSION = (2, 1, 1)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
