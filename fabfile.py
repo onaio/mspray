@@ -127,11 +127,11 @@ def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     sudo('supervisorctl reload')
 
 
-def deploy(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
+def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd"):
     setup_env(deployment_name)
 
     with cd(env.home):
-        run('cd mspray && git fetch && git checkout origin/master')
+        run('cd mspray && git fetch && git checkout origin/%s' % branch)
 
     data = {
         'venv': env.virtualenv, 'project': env.project
