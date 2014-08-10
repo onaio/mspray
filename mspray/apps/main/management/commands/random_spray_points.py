@@ -20,34 +20,56 @@ def get_split(total, val1, val2, val3):
     return {1: val1, 2: val2, 3: val3}
 
 
+def _load_json_file(filename):
+    data = None
+    path = os.path.join(
+        os.path.dirname(tests.__file__),
+        'fixtures', filename)
+
+    with open(path) as f:
+        data = json.load(f)
+
+    return data
+
+
 class Command(BaseCommand):
     help = _('Create random spray points for testing')
-    submission_data = None
+    _submission_data = None
+    _no_submission_data = None
+    yes_no_list = ['yes', 'no', 'yes', 'yes', 'yes', 'no', 'yes', 'yes']
 
-    def _get_submission_data_sample(self):
-        if self.submission_data is not None:
-            return self.submission_data
+    def _get_submission_data_yes(self):
+        if self._submission_data is not None:
+            return self._submission_data
 
-        data = None
-        path = os.path.join(
-            os.path.dirname(tests.__file__),
-            'fixtures', '88037_submission.json')
+        fn = '88037_submission.json'
+        self._submission_data = _load_json_file(fn)
 
-        with open(path) as f:
-            data = json.load(f)
+        return self._submission_data
 
-        self.submission_data = data
+    def _get_submission_data_no(self):
+        if self._no_submission_data is not None:
+            return self._no_submission_data
 
-        return self.submission_data
+        fn = '88039_submission.json'
+        self._no_submission_data = _load_json_file(fn)
+
+        return self._no_submission_data
 
     def _add_sprayday(self, day, geom, submission_id):
-        data = self._get_submission_data_sample()
+        choice = random.choice(self.yes_no_list)
+
+        if choice == 'yes':
+            data = self._get_submission_data_yes()
+        else:
+            data = self._get_submission_data_no()
+            data['unsprayed/reason'] = random.choice(['1', '2', '3', '4', '5'])
+
         geolocation = "%s %s" % (geom.x, geom.y)
         data['structure_gps'] = geolocation
         data['date'] = "%s" % day
         data['_id'] = submission_id
-        yes_no_list = ['yes', 'no', 'yes', 'yes', 'no', 'yes', 'yes']
-        data['sprayed/was_sprayed'] = random.choice(yes_no_list)
+        data['sprayed/was_sprayed'] = choice
         add_spray_data(data)
 
     def handle(self, *args, **options):
