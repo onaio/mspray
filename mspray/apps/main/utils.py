@@ -3,9 +3,10 @@ import json
 
 from datetime import datetime
 
-from django.db import connection
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
+from django.core.cache import cache
+from django.db import connection
 
 from mspray.apps.main.models.target_area import TargetArea, targetarea_mapping
 from mspray.apps.main.models.household import Household, household_mapping
@@ -100,3 +101,13 @@ def add_spray_data(data):
         geom=geom)
     sprayday.data = data
     sprayday.save()
+
+    return sprayday
+
+
+def delete_cached_target_area_keys(sprayday):
+    for t in TargetArea.objects.filter(geom__contains=sprayday.geom):
+        keys = "%(key)s_not_visited %(key)s_visited_other "\
+            "%(key)s_visited_refused %(key)s_visited_sprayed "\
+            "%(key)s_visited_total" % {'key': t.pk}
+        cache.delete_many(keys)

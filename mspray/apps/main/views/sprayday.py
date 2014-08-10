@@ -9,7 +9,8 @@ from rest_framework.response import Response
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
-from mspray.apps.main.utils import add_spray_data
+from mspray.apps.main.utils import add_spray_data, \
+    delete_cached_target_area_keys
 
 
 class SprayDayViewSet(viewsets.ModelViewSet):
@@ -47,11 +48,12 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             data = {"error": _("Not a valid submission")}
             status_code = status.HTTP_400_BAD_REQUEST
         else:
-            add_spray_data(request.DATA)
+            sprayday = add_spray_data(request.DATA)
             data = {"success": _("Successfully imported submission with"
                                  " submission id %(submission_id)s."
                                  % {'submission_id': has_id})}
             status_code = status.HTTP_201_CREATED
+            delete_cached_target_area_keys(sprayday)
 
         return Response(data, status=status_code)
 
