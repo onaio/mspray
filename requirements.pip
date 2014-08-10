@@ -6,6 +6,7 @@ django_nose
 djangorestframework-gis
 django-cors-headers
 django-filter
+python3-memcached
 
 # dev
 coverage
