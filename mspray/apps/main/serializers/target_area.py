@@ -1,36 +1,70 @@
+from django.core.cache import cache
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
+
+
+def cached_queryset_count(key, queryset, query=None):
+    count = cache.get(key)
+
+    if count is not None:
+        return count
+
+    if query is None:
+        count = queryset.count()
+    else:
+        for item in queryset.objects.raw(query):
+            count = item.id
+
+    cache.set(key, count)
+
+    return count
 
 
 class TargetAreaMixin(object):
     def get_visited_total(self, obj):
         if obj:
-            return SprayDay.objects.filter(geom__coveredby=obj.geom).count()
+            key = "%s_visited_total" % obj.pk
+            queryset = SprayDay.objects.filter(geom__coveredby=obj.geom)
+
+            return cached_queryset_count(key, queryset)
 
     def get_visited_sprayed(self, obj):
         if obj:
-            return SprayDay.objects.filter(geom__coveredby=obj.geom).count()
+            key = "%s_visited_sprayed" % obj.pk
+            query = "SELECT Count(*) as id FROM main_sprayday "\
+                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
+                " AND data->>'sprayed/was_sprayed' = 'yes'" % obj.geom
+
+            return cached_queryset_count(key, SprayDay, query)
 
     def get_visited_refused(self, obj):
         if obj:
-            return obj.houses - SprayDay.objects.filter(
-                geom__coveredby=obj.geom).count()
+            key = "%s_visited_refused" % obj.pk
+            query = "SELECT Count(*) as id FROM main_sprayday "\
+                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
+                " AND data->>'unsprayed/reason' = '4'" % obj.geom
+
+            return cached_queryset_count(key, SprayDay, query)
 
     def get_visited_other(self, obj):
         if obj:
-            hh = Household.objects.filter(geom__coveredby=obj.geom).count()
-            sp = SprayDay.objects.filter(geom__coveredby=obj.geom).count()
+            key = "%s_visited_other" % obj.pk
+            query = "SELECT Count(*) as id FROM main_sprayday "\
+                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
+                " AND data->>'unsprayed/reason' = '6'" % obj.geom
 
-            return hh - sp
+            return cached_queryset_count(key, SprayDay, query)
 
     def get_not_visited(self, obj):
         if obj:
-            return obj.houses - SprayDay.objects.filter(
-                geom__coveredby=obj.geom).count()
+            key = "%s_not_visited" % obj.pk
+            queryset = SprayDay.objects.filter(geom__coveredby=obj.geom)
+            count = cached_queryset_count(key, queryset)
+
+            return obj.houses - count
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
