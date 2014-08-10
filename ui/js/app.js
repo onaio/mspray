@@ -273,7 +273,6 @@ var App = {
 
         target_area.on('ready', function(){
             bounds = target_area.getBounds();
-            console.log(bounds);
             map.fitBounds(bounds);
             var geojson = target_area.getGeoJSON();
 
@@ -316,6 +315,8 @@ var App = {
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
+            bounds = hh_buffers.getBounds();
+            map.fitBounds(bounds);
 
             this.bufferLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
@@ -433,9 +434,9 @@ var App = {
     },
 
     loadAreaData: function(map, targetid){
-        this.loadTargetArea(map, targetid);
+        // this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
-        this.loadHouseholds(map, targetid);
+        // this.loadHouseholds(map, targetid);
     },
 
     drawCircle: function(percent, circle_id, radius) {
