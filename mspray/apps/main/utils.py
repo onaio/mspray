@@ -1,4 +1,7 @@
 import gc
+import json
+
+from datetime import datetime
 
 from django.db import connection
 from django.contrib.gis.geos import MultiPolygon, Polygon
@@ -8,6 +11,12 @@ from mspray.apps.main.models.target_area import TargetArea, targetarea_mapping
 from mspray.apps.main.models.household import Household, household_mapping
 from mspray.apps.main.models.spray_day import SprayDay, sprayday_mapping
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+
+
+def geojson_from_gps_string(geolocation):
+        geolocation = [float(p) for p in geolocation.split()[:2]]
+        return json.dumps(
+            {'type': 'point', 'coordinates': geolocation})
 
 
 def queryset_iterator(queryset, chunksize=100):
@@ -70,7 +79,7 @@ def create_households_buffer(distance=15, recreate=False):
             continue
         bf = MultiPolygon([hhb for hhb in hh_buffers])
 
-        for b in bf.cascaded_union.simplify():
+        for b in bf.cascaded_union.simplify(4, True):
             if not isinstance(b, Polygon):
                 continue
             obj, created = \
@@ -78,3 +87,16 @@ def create_households_buffer(distance=15, recreate=False):
             obj.num_households = \
                 Household.objects.filter(geom__coveredby=b).count()
             obj.save()
+
+
+def add_spray_data(data):
+    submission_id = data.get('_id')
+    spray_date = data.get('date')
+    spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
+    geom = geojson_from_gps_string(data.get('structure_gps'))
+    sprayday, created = SprayDay.objects.get_or_create(
+        submission_id=submission_id,
+        spray_date=spray_date,
+        geom=geom)
+    sprayday.data = data
+    sprayday.save()
