@@ -1,4 +1,6 @@
 import datetime
+import json
+import os
 import random
 
 from django.core.management.base import BaseCommand
@@ -6,6 +8,8 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import TargetArea, Household, SprayDay
+from mspray.apps.main import tests
+from mspray.apps.main.utils import add_spray_data
 
 
 def get_split(total, val1, val2, val3):
@@ -18,6 +22,33 @@ def get_split(total, val1, val2, val3):
 
 class Command(BaseCommand):
     help = _('Create random spray points for testing')
+    submission_data = None
+
+    def _get_submission_data_sample(self):
+        if self.submission_data is not None:
+            return self.submission_data
+
+        data = None
+        path = os.path.join(
+            os.path.dirname(tests.__file__),
+            'fixtures', '88037_submission.json')
+
+        with open(path) as f:
+            data = json.load(f)
+
+        self.submission_data = data
+
+        return self.submission_data
+
+    def _add_sprayday(self, day, geom, submission_id):
+        data = self._get_submission_data_sample()
+        geolocation = "%s %s" % (geom.x, geom.y)
+        data['structure_gps'] = geolocation
+        data['date'] = "%s" % day
+        data['_id'] = submission_id
+        yes_no_list = ['yes', 'no', 'yes', 'yes', 'no', 'yes', 'yes']
+        data['sprayed/was_sprayed'] = random.choice(yes_no_list)
+        add_spray_data(data)
 
     def handle(self, *args, **options):
         k = 1
@@ -55,7 +86,6 @@ class Command(BaseCommand):
                     else:
                         used.append(geom)
 
-                    SprayDay.objects.create(
-                        spray_date=day, geom=geom, submission_id=k)
+                    self._add_sprayday(day, geom, k)
                     k += 1
                 start = split[day.day]
