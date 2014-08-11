@@ -280,5 +280,37 @@ body{
         background-position:2px;
     }
     
-    /*circles*/
+    /*legend*/
+    #map-legend{
+        background:rgba(255, 255, 255, 0.7);
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        position:absolute;
+        bottom:0; left:0;
+        margin:0.8em 0.8em 2em;
+        padding:1em;
+        text-align:center;
+    }
+
+    .legend{
+        float:left;
+        height:15em;
+    }
+    .legend.big svg{
+        height:80px!important;
+        width:80px!important;
+    }
+    .legend .circles-text-wrp *{
+        font-size:0.9em;
+    }
+    .legend.small, .legend.big{
+        border-bottom:1px dotted #AFAFAF;
+        width:12em;
+    }
+    .legend.small svg path{
+        stroke-width:8px;
+    }
+    .legend:last-child{
+        border:0;
+    }
 }
