@@ -2,12 +2,12 @@ from django.shortcuts import get_list_or_404
 from rest_framework import viewsets
 
 from mspray.apps.main.models.target_area import TargetArea
-from mspray.apps.main.serializers.target_area import GeoTargetAreaSerializer
+from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
 class TargetAreaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = TargetArea.objects.filter(targeted=TargetArea.TARGETED_VALUE)
-    serializer_class = GeoTargetAreaSerializer
+    serializer_class = TargetAreaSerializer
 
     def filter_queryset(self, queryset):
         targetid = self.request.QUERY_PARAMS.get('target_area')
