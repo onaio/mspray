@@ -399,7 +399,16 @@ var App = {
             url = url += "?spray_date=" + day + "&target_area=" + targetid;
         }
         var sprayed = L.mapbox.featureLayer()
-            .loadURL(url);
+            .loadURL(url),
+            sprayed_status = [], reason_obj = [],
+            reasons = {
+                '1': 'sick',
+                '2': 'locked',
+                '3': 'funeral',
+                '4': 'refused',
+                '5': 'knowone home/missed',
+                '6': 'others',
+            };
 
         console.log('SPRAYPOINT_URI: ' + url);
 
@@ -413,11 +422,27 @@ var App = {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.sprayOptions);
                 },
-                onEachFeature: function(){
+                onEachFeature: function(features){
+                    if (sprayed_status[features.properties.sprayed] === undefined) {
+                        sprayed_status[features.properties.sprayed] = 1;
+                    } else {
+                        sprayed_status[features.properties.sprayed]++    
+                    }
+
+                    if (features.properties.reason !== null) {
+                        if (reason_obj[reasons[features.properties.reason]] === undefined) {
+                            reason_obj[reasons[features.properties.reason]] = 1;
+                        } else {
+                            reason_obj[reasons[features.properties.reason]]++    
+                        }
+                    }
+                    
                     App.sprayCount++;
                 }
             })
             .addTo(map);
+            console.log("sprayed status: ", sprayed_status)
+            console.log("reasons : ", reason_obj)
 
             this.sprayLayer.setZIndex(80);
 
@@ -432,6 +457,7 @@ var App = {
 
             App.drawCircle(Math.round(percentage), 'circle-sprayed', 70);
         });
+
     },
 
     loadAreaData: function(map, targetid){
