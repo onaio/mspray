@@ -95,9 +95,10 @@ body{
     float:left;
     width:15em;
 }
-.legend.big{
-    padding-top:1.6em;
+.legend.big h2{
+    margin-top:0;
 }
+
 .legend.big svg path{
     stroke-width:12px;
 }
