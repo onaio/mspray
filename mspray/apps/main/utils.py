@@ -73,14 +73,14 @@ def create_households_buffer(distance=15, recreate=False):
     if recreate:
         HouseholdsBuffer.objects.all().delete()
 
-    for ta in queryset_iterator(TargetArea.objects.all(), 10):
+    for ta in queryset_iterator(TargetArea.objects.filter(), 10):
         hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
             .values_list('bgeom', flat=True)
         if len(hh_buffers) == 0:
             continue
         bf = MultiPolygon([hhb for hhb in hh_buffers])
 
-        for b in bf.cascaded_union.simplify(4, True):
+        for b in bf.cascaded_union.simplify(0.00001):
             if not isinstance(b, Polygon):
                 continue
             obj, created = \
