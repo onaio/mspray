@@ -78,8 +78,8 @@
 		</header>
 
 		<div class="container" id="district_table">
-			<h1 id="district-name"></h1>
-			<div "col-sm-12">
+			<div "col-sm-12" id="table-container">
+				<h1 id="district-name"></h1>
 				<table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap data-sortable data-sortable-switch>
 					<thead>
 						<tr>
@@ -95,6 +95,10 @@
 					<tbody></tbody>
 					<tfoot></tfoot>
 				</table>
+			</div>
+			<div class="progress-spinner" class="col-sm-4 col-sm-offset-4">
+				<img src="img/loading.gif" alt="loading...">
+				<p>loading...</p>
 			</div>
 		</div>
 

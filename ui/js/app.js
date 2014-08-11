@@ -164,10 +164,12 @@ var App = {
             url: uri,
             type: 'GET',
             beforeSend: function() {
-                $('.loader').show();
+                $('#table-container').hide()
+                $('.progress-spinner').show();
             },
             success: function(data){
-                $('.loader').hide();
+                $('#table-container').show()
+                $('.progress-spinner').hide();
 
                 // on selection of a district, show data for first target areas
                 //App.defaultTargetArea = data[0].properties.targetid;
@@ -205,11 +207,11 @@ var App = {
                     target_table_content += '<tr>'+
                             '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' +  structures +  '</td>' +
-                            '<td>' +  visited_total +  '(' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
-                            '<td>' +  visited_sprayed +  '(' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
-                            '<td>' +  visited_refused +  '(' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
-                            '<td>' +  visited_other +  '(' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
-                            '<td>' +  not_visited +  '(' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
+                            '<td>' +  visited_total +  ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
+                            '<td>' +  visited_sprayed +  ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
+                            '<td>' +  visited_refused +  ' (' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
+                            '<td>' +  visited_other +  ' (' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
+                            '<td>' +  not_visited +  ' (' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
                     //Create a table
 
@@ -220,16 +222,16 @@ var App = {
                 $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
                     "<td><b>" + agg_structures + "</b></td>" +
-                    "<td><b>" + agg_visited_total + '(' + App.calcaulatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_sprayed + '(' + App.calcaulatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_refused + '(' + App.calcaulatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_other + '(' + App.calcaulatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_not_visited + '(' + App.calcaulatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_total + ' (' + App.calcaulatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_sprayed + ' (' + App.calcaulatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_refused + ' (' + App.calcaulatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_other + ' (' + App.calcaulatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_not_visited + ' (' + App.calcaulatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
                     "</tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
                 $('table#target_areas').table().sortable('sortBy');
-                $('h1#district-name').text("District:" + district_name);
+                $('h1#district-name').text("District: " + district_name);
             },
             error: function(){
                 console.log('Sorry, could not retrieve target areas');
