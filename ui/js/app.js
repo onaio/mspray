@@ -7,7 +7,7 @@ var App = {
     HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
     DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
 
-    defaultDistrict: 'Test Target Areas Boundaries',
+    defaultDistrict: 'Chienge',
     defaultTargetArea: 0,
     sprayLayer: [],
     targetLayer: [],
@@ -266,32 +266,45 @@ var App = {
         if(targetid === undefined){
             return;
         }
-        var target_area = L.mapbox.featureLayer().
-            loadURL(App.TARGET_AREA_URI + "?target_area=" + targetid);
+        var uri = App.TARGET_AREA_URI + "?target_area=" + targetid;
+        $.getJSON(uri, function(data){
+            if(data.length > 0){
+                App.housesCount = data[0].structures;
+                var bounds = data[0].bounds;
+                if(bounds.length == 4){
+                    var minL = L.latLng(bounds[1], bounds[0]),
+                        maxL = L.latLng(bounds[3], bounds[2]);
+                    var lat_bounds = L.latLngBounds(minL, maxL);
+                    map.fitBounds(lat_bounds);
+                }
+            }
+        });
+
+        // var target_area = L.mapbox.featureLayer().loadURL(uri);
 
         console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
 
-        target_area.on('ready', function(){
-            bounds = target_area.getBounds();
-            map.fitBounds(bounds);
-            var geojson = target_area.getGeoJSON();
+        // target_area.on('ready', function(){
+        //     bounds = target_area.getBounds();
+        //     map.fitBounds(bounds);
+        //     var geojson = target_area.getGeoJSON();
 
-            this.targetLayer = [];
+        //     this.targetLayer = [];
 
-            this.targetLayer = L.geoJson(geojson, {
-                onEachFeature: function(feature, layer){
-                    var props = feature.properties;
-                    var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
-                                  'Structures: ' + props.structures;
+        //     this.targetLayer = L.geoJson(geojson, {
+        //         onEachFeature: function(feature, layer){
+        //             var props = feature.properties;
+        //             var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
+        //                           'Structures: ' + props.structures;
 
-                    layer.bindPopup(content, { closeButton:true });
+        //             layer.bindPopup(content, { closeButton:true });
 
-                    console.log("Spray data: " + props.structures);
-                }
-            });
+        //             console.log("Spray data: " + props.structures);
+        //         }
+        //     });
 
-            target_area.setStyle(App.targetOptions);
-        }); //.addTo(map);
+        //     target_area.setStyle(App.targetOptions);
+        // }); //.addTo(map);
 
         // Load data into circles
         var perc_visited = 20;
@@ -315,8 +328,8 @@ var App = {
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
-            bounds = hh_buffers.getBounds();
-            map.fitBounds(bounds);
+            // bounds = hh_buffers.getBounds();
+            // map.fitBounds(bounds);
 
             this.bufferLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
@@ -352,41 +365,44 @@ var App = {
         if(targetid === undefined){
             return;
         }
-        households = L.mapbox.featureLayer()
-            .loadURL(App.HOUSEHOLD_URI + "?target_area=" + targetid);
+        var uri = App.HOUSEHOLD_URI + "?target_area=" + targetid;
+        $.getJSON(uri, function(data){
+            console.log(data);
+        });
+        //var households = L.mapbox.featureLayer().loadURL(uri);
 
         console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
 
         this.hhLayer = []; //reset layer
 
-        households.on('ready', function(){
-            var geojson = households.getGeoJSON();
+        // households.on('ready', function(){
+        //     var geojson = households.getGeoJSON();
 
-            this.hhLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    return L.circleMarker(latlng, App.hhOptions);
-                },
-                onEachFeature: function(feature, layer){
-                    // increment no. of households
-                    App.housesCount++;
+        //     this.hhLayer = L.geoJson(geojson, {
+        //         pointToLayer: function (feature, latlng) {
+        //             return L.circleMarker(latlng, App.hhOptions);
+        //         },
+        //         onEachFeature: function(feature, layer){
+        //             // increment no. of households
+        //             App.housesCount++;
 
-                    var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
-                        'HH_type: '+ feature.properties.hh_type;
-                    layer.bindPopup(content, { closeButton:true });
+        //             var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
+        //                 'HH_type: '+ feature.properties.hh_type;
+        //             layer.bindPopup(content, { closeButton:true });
 
-                    layer.on({
-                        mouseover: function(e){
-                            e.layer.openPopup();
-                        },
-                        mouseout: function(e){
-                            e.layer.closePopup();
-                        }
-                    });
-                }
-            });//.addTo(map);
+        //             layer.on({
+        //                 mouseover: function(e){
+        //                     e.layer.openPopup();
+        //                 },
+        //                 mouseout: function(e){
+        //                     e.layer.closePopup();
+        //                 }
+        //             });
+        //         }
+        //     });//.addTo(map);
 
-            this.hhLayer.setZIndex(70);
-        });
+        //     this.hhLayer.setZIndex(70);
+        // });
     },
 
     loadSprayPoints: function (map, day, targetid) {
@@ -434,7 +450,7 @@ var App = {
     },
 
     loadAreaData: function(map, targetid){
-        // this.loadTargetArea(map, targetid);
+        this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         // this.loadHouseholds(map, targetid);
     },
