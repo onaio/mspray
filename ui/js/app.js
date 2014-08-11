@@ -230,8 +230,8 @@ var App = {
                     "</tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
-                $('table#target_areas').table().sortable('sortBy');
-                $('h1#district-name').text("District: " + district_name);
+                $('table#target_areas').table().sortable('sortBy', null, 'asc');
+                $('h1#district-name').text("District:" + district_name);
             },
             error: function(){
                 console.log('Sorry, could not retrieve target areas');
