@@ -229,7 +229,7 @@ var App = {
     },
 
     getResource: function() {
-        var url = document.location.hash
+        var url = document.location.hash,
             fragment = url.split('/'),
             district = (url.length === 0) ? App.defaultDistrict : fragment[0].substring(2, fragment[0].length),
             target_id = (fragment[1] === undefined) ? App.defaultTargetArea : fragment[1];
