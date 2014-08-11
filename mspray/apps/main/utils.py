@@ -3,6 +3,7 @@ import json
 
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Polygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
@@ -80,7 +81,7 @@ def create_households_buffer(distance=15, recreate=False):
             continue
         bf = MultiPolygon([hhb for hhb in hh_buffers])
 
-        for b in bf.cascaded_union.simplify(0.00001):
+        for b in bf.cascaded_union.simplify(settings.BUFFER_TOLERANCE):
             if not isinstance(b, Polygon):
                 continue
             obj, created = \

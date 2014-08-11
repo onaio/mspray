@@ -20,7 +20,7 @@ class TestHouseholdBufferViewSet(TestBase):
         response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('features', response.data)
-        self.assertEqual(len(response.data['features']), 36)
+        self.assertEqual(len(response.data['features']), 35)
 
     def test_link(self):
         try:
