@@ -458,6 +458,11 @@ var App = {
         else if(percent >= 80){
             fillColor = '#31A354';
         }
+        
+        // resize in tablet (40: default for small circles)
+        if( radius > 40 && $(window).width() <= 768 ){
+            radius = 40;
+        }
 
         Circles.create({
             id: circle_id,

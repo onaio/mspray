@@ -105,20 +105,24 @@
         <div id="map"></div>
 
     <div id="map-legend">
-        <div class="legend big">
-            <div id="circle-sprayed"> </div>
-            <p>Households Sprayed<br/></p>
-
-            <h1><span class="day_label">Day 0</span></h1>
+        <div class="legend big clearfix">
+            <div class="circle-holder">
+                <h2><span class="day_label">Day 0</span></h2>
+                <div id="circle-sprayed"> </div>
+                <p>Households Sprayed<br/></p>
+            </div>
         </div>
 
-        <div class="legend small" >
-            <div id="circle-visited"> </div>
-            <p>Households Refused</p>
-            <hr/>
-
-            <div id="circle-not-sprayed"> </div>
-            <p>Households Other</p>
+        <div class="legend small clearfix">
+            <div class="circle-holder">
+                <div id="circle-visited"> </div>
+                <p>Households Refused</p>
+            </div>
+            
+            <div class="circle-holder">
+                <div id="circle-not-sprayed"> </div>
+                <p>Households Other</p>
+            </div>
         </div>
         <!--<span class="circle clearfix">
             <span class="perc_label">0</span>
