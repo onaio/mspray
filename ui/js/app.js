@@ -51,17 +51,6 @@ var App = {
         fillOpacity: 0.4
     },
 
-    populateTargetAreasTable: function(doc_location_hash) {
-        console.log("Retrieving Chienge Target Areas...");
-        var district_name = "";
-        if (doc_location_hash === "")
-            district_name = 'Chienge';
-        else
-            district_name = doc_location_hash.substring(2, doc_location_hash.length);
-
-        App.getTargetAreas(district_name);
-    },
-
     getHouseholdsFor: function (layer) {
         var uri = this.HOUSEHOLD_URI;
         post_data = {in_bbox: layer.getBounds().toBBoxString()};
@@ -239,27 +228,23 @@ var App = {
         });
     },
 
-    getCurrentDistrict: function(){
-        var url = document.location.hash;
-
-        if(url.length === 0){
-            return App.defaultDistrict;
+    getResource: function() {
+        var url = document.location.hash
+            fragment = url.split('/'),
+            district = (url.length === 0) ? App.defaultDistrict : fragment[0].substring(2, fragment[0].length),
+            target_id = (fragment[1] === undefined) ? App.defaultTargetArea : fragment[1];
+        return {
+            "district": district,
+            "target_id": target_id
         }
+    },
 
-        var fragment = url.split('/')[0];
-
-        return fragment.substring(2, fragment.length);
+    getCurrentDistrict: function(){
+        return App.getResource().district;
     },
 
     getCurrentTargetArea: function(){
-        var url = document.location.hash;
-        var target_id = url.split('/')[1];
-
-        if(target_id === undefined){
-            target_id = App.defaultTargetArea;
-        }
-
-        return target_id;
+        return App.getResource().target_id;
     },
 
     loadTargetArea: function(map, targetid) {
