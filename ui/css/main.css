@@ -265,11 +265,10 @@ body{
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
-	.leaflet-control a{
+	.leaflet-top.leaflet-left .leaflet-control a{
         display:block;
         height:50px;
         width:50px;
-        font-size:3em;
     }
 	.leaflet-control-zoom-in, .leaflet-control-zoom-out{
         background-size:60px;
