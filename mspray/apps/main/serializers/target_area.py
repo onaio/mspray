@@ -66,6 +66,10 @@ class TargetAreaMixin(object):
 
             return obj.houses - count
 
+    def get_bounds(self, obj):
+        if obj:
+            return obj.geom.boundary.extent
+
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.Field(source='ranks')
@@ -75,10 +79,11 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     visited_refused = serializers.SerializerMethodField('get_visited_refused')
     visited_other = serializers.SerializerMethodField('get_visited_other')
     not_visited = serializers.SerializerMethodField('get_not_visited')
+    bounds = serializers.SerializerMethodField('get_bounds')
 
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
-                  'visited_refused', 'visited_other', 'not_visited')
+                  'visited_refused', 'visited_other', 'not_visited', 'bounds')
         model = TargetArea
 
 
