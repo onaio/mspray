@@ -89,6 +89,7 @@ body{
     padding:1em;
     text-align:center;
 }
+
 .legend{
     float:left;
     width:15em;
@@ -257,3 +258,27 @@ body{
 }
 
 
+/*responsive-controls: tablets and below*/
+@media (max-width: 768px) {
+	.leaflet-control a{
+        display:block;
+        height:50px;
+        width:50px;
+        font-size:3em;
+    }
+	.leaflet-control-zoom-in, .leaflet-control-zoom-out{
+        background-size:60px;
+    }
+    .leaflet-bar .leaflet-control-zoom-in{
+        background-position:-4px -5px!important;
+    }
+    .leaflet-bar .leaflet-control-zoom-out{
+        background-position:-4px -65px!important;
+    }
+	.leaflet-touch .leaflet-control-locate a{
+        background-size:140px;
+        background-position:2px;
+    }
+    
+    /*circles*/
+}
