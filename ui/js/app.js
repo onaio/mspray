@@ -118,7 +118,7 @@ var App = {
         var dates = [];
 
         $.getJSON(App.DATES_URI, function(data){
-            var i, 
+            var i,
                 date_list = $("#spraydays_list"),
                 li = "<li><a href='#'> All </a></li>";
             date_list.empty();
@@ -161,11 +161,11 @@ var App = {
             url: uri,
             type: 'GET',
             beforeSend: function() {
-                $('#table-container').hide()
+                $('#table-container').hide();
                 $('.progress-spinner').show();
             },
             success: function(data){
-                $('#table-container').show()
+                $('#table-container').show();
                 $('.progress-spinner').hide();
 
                 // on selection of a district, show data for first target areas
@@ -264,10 +264,10 @@ var App = {
             if(data.length > 0){
                 App.housesCount = data[0].structures;
 
-                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed', 70)
-                App.drawCircle(App.calculatePercentage(data[0].visited_other, App.housesCount, false), 'circle-other', 40) 
-                App.drawCircle(App.calculatePercentage(data[0].visited_refused, App.housesCount, false), 'circle-refused', 40)
-                                
+                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed', 70);
+                App.drawCircle(App.calculatePercentage(data[0].visited_other, App.housesCount, false), 'circle-other', 40);
+                App.drawCircle(App.calculatePercentage(data[0].visited_refused, App.housesCount, false), 'circle-refused', 40);
+
                 var bounds = data[0].bounds;
                 if(bounds.length == 4){
                     var minL = L.latLng(bounds[1], bounds[0]),
@@ -424,7 +424,15 @@ var App = {
                 '3': 'funeral',
                 '4': 'refused',
                 '5': 'knowone_home_or_missed',
-                '6': 'other',
+                '6': 'other'
+            };
+            reason_colors = {
+                '1': '#800080',
+                '2': '#FFA500',
+                '3': '#800080',
+                '4': '#FF0000',
+                '5': '#800080',
+                '6': '#800080'
             };
 
         console.log('SPRAYPOINT_URI: ' + url);
@@ -437,20 +445,25 @@ var App = {
 
             this.sprayLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
+                    if(feature.properties.sprayed === 'no'){
+                        App.sprayOptions.fillColor = reason_colors[feature.properties.reason];
+                    } else{
+                        App.sprayOptions.fillColor = "#2ECC40";
+                    }
                     return L.circleMarker(latlng, App.sprayOptions);
                 },
                 onEachFeature: function(features){
                     if (sprayed_status[features.properties.sprayed] === undefined) {
                         sprayed_status[features.properties.sprayed] = 1;
                     } else {
-                        sprayed_status[features.properties.sprayed]++
+                        sprayed_status[features.properties.sprayed]++;
                     }
 
                     if (features.properties.reason !== null) {
                         if (reason_obj[reasons[features.properties.reason]] === undefined) {
                             reason_obj[reasons[features.properties.reason]] = 1;
                         } else {
-                            reason_obj[reasons[features.properties.reason]]++
+                            reason_obj[reasons[features.properties.reason]]++;
                         }
                     }
                 }
@@ -464,7 +477,7 @@ var App = {
             var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
                 refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount, false),
                 other_percentage = App.calculatePercentage(reason_obj.other, App.housesCount, false);
-            
+
             console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed', 70);
@@ -483,7 +496,7 @@ var App = {
     drawCircle: function(percent, circle_id, radius) {
         var fillColor;
         if(percent < 30){
-            fillColor = 'orange';
+            fillColor = '#FFA500';
         }
         else if(percent >= 30 && percent < 40){
             fillColor = '#FFFFCC';
