@@ -118,14 +118,18 @@ var App = {
         var dates = [];
 
         $.getJSON(App.DATES_URI, function(data){
-            var i, date_list = $("#spraydays_list");
+            var i, 
+                date_list = $("#spraydays_list"),
+                li = "<li><a href='#'> All </a></li>";
             date_list.empty();
 
             for(i=0; i < data.length; i++){
-                var li = '<li><a href="#' + data[i] + '">' + data[i] + '</a></li>';
-                date_list.append(li);
-                date_list.find('li a').click(App.load_spray_days_by_date);
+                li += '<li><a href="#' + data[i] + '">' + data[i] + '</a></li>';
             }
+            date_list
+                .append(li)
+                .find('li a')
+                    .click(App.load_spray_days_by_date);
             App._dates = data;
         });
 
@@ -259,6 +263,11 @@ var App = {
         $.getJSON(uri, function(data){
             if(data.length > 0){
                 App.housesCount = data[0].structures;
+
+                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed', 70)
+                App.drawCircle(App.calculatePercentage(data[0].visited_other, App.housesCount, false), 'circle-other', 40) 
+                App.drawCircle(App.calculatePercentage(data[0].visited_refused, App.housesCount, false), 'circle-refused', 40)
+                                
                 var bounds = data[0].bounds;
                 if(bounds.length == 4){
                     var minL = L.latLng(bounds[1], bounds[0]),
@@ -407,8 +416,7 @@ var App = {
         if(day !== undefined){
             url = url += "?spray_date=" + day + "&target_area=" + targetid;
         }
-        var sprayed = L.mapbox.featureLayer()
-            .loadURL(url),
+        var sprayed = L.mapbox.featureLayer().loadURL(url),
             sprayed_status = {}, reason_obj = {},
             reasons = {
                 '1': 'sick',
@@ -416,7 +424,7 @@ var App = {
                 '3': 'funeral',
                 '4': 'refused',
                 '5': 'knowone_home_or_missed',
-                '6': 'others',
+                '6': 'other',
             };
 
         console.log('SPRAYPOINT_URI: ' + url);
@@ -455,15 +463,8 @@ var App = {
 
             var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
                 refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount, false),
-                other_percentage = App.calculatePercentage(function(reason_obj) {
-                    var total = 0;
-                    $.each(reason_obj, function(key, value){
-                        if (key !== "refused")
-                            total = total + value;
-                    })
-                    return total;
-                }(reason_obj), App.housesCount, false);
-
+                other_percentage = App.calculatePercentage(reason_obj.other, App.housesCount, false);
+            
             console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed', 70);
@@ -481,20 +482,19 @@ var App = {
 
     drawCircle: function(percent, circle_id, radius) {
         var fillColor;
-        // FIXME: invalid if statements
         if(percent < 30){
             fillColor = 'orange';
         }
-        else if(percent > 33){
+        else if(percent >= 30 && percent < 40){
             fillColor = '#FFFFCC';
         }
-        else if(percent < 40){
+        else if(percent >= 40 && percent < 80){
             fillColor = '#C2E699';
         }
-        else if(percent < 80){
+        else if(percent >= 80 && percent < 90){
             fillColor = '#78C679';
         }
-        else if(percent >= 80){
+        else if(percent >= 90 && percent <= 100){
             fillColor = '#31A354';
         }
 
@@ -634,10 +634,15 @@ var App = {
         event.preventDefault();
         var sprayday = this.href.split('#')[1], dt, dt_label;
         App.loadSprayPoints(App.map, sprayday, App.getCurrentTargetArea());
-        dt = new Date(sprayday);
-        dt_label = "Date: " + dt.toLocaleDateString();
-        $('.sprayday_label').text(dt_label);
-        $('.day_label').text(dt_label);
+        if (sprayday === "") {
+            $('.sprayday_label').text("All");
+            $('.day_label').text("All");
+        } else {
+            dt = new Date(sprayday);
+            dt_label = dt.toLocaleDateString();
+            $('.sprayday_label').text(dt_label);
+            $('.day_label').text(dt_label);
+        }
     }
 };
 
