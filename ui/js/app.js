@@ -132,8 +132,12 @@ var App = {
        return dates;
     },
 
-    calcaulatePercentage: function(numerator, denominator) {
-        return Math.round((numerator/denominator) * 100) + "%";
+    calculatePercentage: function(numerator, denominator, include_sign) {
+        if (numerator === undefined) numerator = 0;
+        if (denominator === undefined) numerator = 1;
+        var percentage = Math.round((numerator/denominator) * 100);
+        if (include_sign === undefined) return percentage + "%";
+        return percentage;
     },
 
     getTargetAreas: function(district_name){
@@ -196,11 +200,11 @@ var App = {
                     target_table_content += '<tr>'+
                             '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td>' +  structures +  '</td>' +
-                            '<td>' +  visited_total +  ' (' + App.calcaulatePercentage(visited_total, structures) + ')</td>' +
-                            '<td>' +  visited_sprayed +  ' (' +  App.calcaulatePercentage(visited_sprayed, structures) + ')</td>' +
-                            '<td>' +  visited_refused +  ' (' + App.calcaulatePercentage(visited_refused, structures) + ')</td>' +
-                            '<td>' +  visited_other +  ' (' + App.calcaulatePercentage(visited_other, structures) + ')</td>' +
-                            '<td>' +  not_visited +  ' (' + App.calcaulatePercentage(not_visited, structures) + ')</td>' +
+                            '<td>' +  visited_total +  ' (' + App.calculatePercentage(visited_total, structures) + ')</td>' +
+                            '<td>' +  visited_sprayed +  ' (' +  App.calculatePercentage(visited_sprayed, structures) + ')</td>' +
+                            '<td>' +  visited_refused +  ' (' + App.calculatePercentage(visited_refused, structures) + ')</td>' +
+                            '<td>' +  visited_other +  ' (' + App.calculatePercentage(visited_other, structures) + ')</td>' +
+                            '<td>' +  not_visited +  ' (' + App.calculatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
                     //Create a table
 
@@ -211,11 +215,11 @@ var App = {
                 $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
                     "<td><b>" + agg_structures + "</b></td>" +
-                    "<td><b>" + agg_visited_total + ' (' + App.calcaulatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_sprayed + ' (' + App.calcaulatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_refused + ' (' + App.calcaulatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_other + ' (' + App.calcaulatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_not_visited + ' (' + App.calcaulatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
+                    "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
                     "</tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
@@ -295,8 +299,8 @@ var App = {
         var perc_visited = 20;
         var perc_not_sprayed = 40;
 
-        this.drawCircle(perc_visited, 'circle-visited', 40);
-        this.drawCircle(perc_visited, 'circle-not-sprayed', 40);
+        this.drawCircle(perc_visited, 'circle-refused', 40);
+        this.drawCircle(perc_visited, 'circle-other', 40);
 
     },
 
@@ -400,13 +404,13 @@ var App = {
         }
         var sprayed = L.mapbox.featureLayer()
             .loadURL(url),
-            sprayed_status = [], reason_obj = [],
+            sprayed_status = {}, reason_obj = {},
             reasons = {
                 '1': 'sick',
                 '2': 'locked',
                 '3': 'funeral',
                 '4': 'refused',
-                '5': 'knowone home/missed',
+                '5': 'knowone_home_or_missed',
                 '6': 'others',
             };
 
@@ -436,26 +440,30 @@ var App = {
                             reason_obj[reasons[features.properties.reason]]++    
                         }
                     }
-                    
-                    App.sprayCount++;
                 }
             })
             .addTo(map);
-            console.log("sprayed status: ", sprayed_status)
-            console.log("reasons : ", reason_obj)
 
             this.sprayLayer.setZIndex(80);
 
             $('.perc_label').text(App.sprayCount);
 
-            // update circle with this data
-            var percentage = 0;
-            percentage = (App.sprayCount / App.housesCount) * 100;
+            var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
+                refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount, false),
+                other_percentage = App.calculatePercentage(function(reason_obj) { 
+                    var total = 0;
+                    $.each(reason_obj, function(key, value){
+                        if (key !== "refused")
+                            total = total + value;
+                    })
+                    return total; 
+                }(reason_obj), App.housesCount, false);
+            
+            console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
-            console.log('SPRAY: ' + App.sprayCount + ' / HOUSE: '+ App.housesCount +
-                        ' = ' + percentage);
-
-            App.drawCircle(Math.round(percentage), 'circle-sprayed', 70);
+            App.drawCircle(sprayed_percentage, 'circle-sprayed', 70);
+            App.drawCircle(refused_percentage, 'circle-refused', 40);
+            App.drawCircle(other_percentage, 'circle-other', 40);
         });
 
     },
@@ -564,8 +572,8 @@ var App = {
             App.getPageState();
 
             App.drawCircle(0, 'circle-sprayed', 70);
-            App.drawCircle(0, 'circle-visited', 40);
-            App.drawCircle(0, 'circle-not-sprayed', 40);
+            App.drawCircle(0, 'circle-refused', 40);
+            App.drawCircle(0, 'circle-other', 40);
 
             App.searchInit();
 
