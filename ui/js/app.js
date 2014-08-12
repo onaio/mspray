@@ -437,13 +437,13 @@ var App = {
 
         console.log('SPRAYPOINT_URI: ' + url);
 
-        this.sprayLayer = []; // reset layer
+        App.map.removeLayer(App.sprayLayer); // reset layer
 
         sprayed.on('ready', function(){
             var geojson = sprayed.getGeoJSON();
             App.sprayCount = 0; // reset counter
 
-            this.sprayLayer = L.geoJson(geojson, {
+            App.sprayLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     if(feature.properties.sprayed === 'no'){
                         App.sprayOptions.fillColor = reason_colors[feature.properties.reason];
@@ -470,7 +470,7 @@ var App = {
             })
             .addTo(map);
 
-            this.sprayLayer.setZIndex(80);
+            App.sprayLayer.setZIndex(80);
 
             $('.perc_label').text(App.sprayCount);
 
