@@ -255,7 +255,7 @@ var App = {
         if(targetid === undefined){
             return;
         }
-        var uri = App.TARGET_AREA_URI + "?target_area=" + targetid;
+        uri = App.TARGET_AREA_URI + "?target_area=" + targetid;
         $.getJSON(uri, function(data){
             if(data.length > 0){
                 App.housesCount = data[0].structures;
@@ -269,31 +269,34 @@ var App = {
             }
         });
 
-        // var target_area = L.mapbox.featureLayer().loadURL(uri);
+        if(targetid === '909001'){
+            var target_area = L.mapbox.featureLayer()
+                .loadURL(uri.replace('.json', '.geojson'));
 
-        console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
+            console.log('TARGET_AREA_URI: ' + App.TARGET_AREA_URI + "?target_area=" + targetid);
 
-        // target_area.on('ready', function(){
-        //     bounds = target_area.getBounds();
-        //     map.fitBounds(bounds);
-        //     var geojson = target_area.getGeoJSON();
+            target_area.on('ready', function(){
+                bounds = target_area.getBounds();
+                map.fitBounds(bounds);
+                var geojson = target_area.getGeoJSON();
 
-        //     this.targetLayer = [];
+                this.targetLayer = [];
 
-        //     this.targetLayer = L.geoJson(geojson, {
-        //         onEachFeature: function(feature, layer){
-        //             var props = feature.properties;
-        //             var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
-        //                           'Structures: ' + props.structures;
+                this.targetLayer = L.geoJson(geojson, {
+                    onEachFeature: function(feature, layer){
+                        var props = feature.properties;
+                        var content = '<h4>Target Area: ' + props.targetid + '</h4>' +
+                                    'Structures: ' + props.structures;
 
-        //             layer.bindPopup(content, { closeButton:true });
+                        layer.bindPopup(content, { closeButton:true });
 
-        //             console.log("Spray data: " + props.structures);
-        //         }
-        //     });
+                        console.log("Spray data: " + props.structures);
+                    }
+                });
 
-        //     target_area.setStyle(App.targetOptions);
-        // }); //.addTo(map);
+                target_area.setStyle(App.targetOptions);
+            }).addTo(map);
+        }
 
         // Load data into circles
         var perc_visited = 20;
@@ -355,43 +358,45 @@ var App = {
             return;
         }
         var uri = App.HOUSEHOLD_URI + "?target_area=" + targetid;
-        $.getJSON(uri, function(data){
-            console.log(data);
-        });
-        //var households = L.mapbox.featureLayer().loadURL(uri);
-
-        console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
-
-        this.hhLayer = []; //reset layer
-
-        // households.on('ready', function(){
-        //     var geojson = households.getGeoJSON();
-
-        //     this.hhLayer = L.geoJson(geojson, {
-        //         pointToLayer: function (feature, latlng) {
-        //             return L.circleMarker(latlng, App.hhOptions);
-        //         },
-        //         onEachFeature: function(feature, layer){
-        //             // increment no. of households
-        //             App.housesCount++;
-
-        //             var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
-        //                 'HH_type: '+ feature.properties.hh_type;
-        //             layer.bindPopup(content, { closeButton:true });
-
-        //             layer.on({
-        //                 mouseover: function(e){
-        //                     e.layer.openPopup();
-        //                 },
-        //                 mouseout: function(e){
-        //                     e.layer.closePopup();
-        //                 }
-        //             });
-        //         }
-        //     });//.addTo(map);
-
-        //     this.hhLayer.setZIndex(70);
+        // $.getJSON(uri, function(data){
+        //     console.log(data);
         // });
+        if(targetid === '909001'){
+            var households = L.mapbox.featureLayer().loadURL(uri);
+
+            console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
+
+            this.hhLayer = []; //reset layer
+
+            households.on('ready', function(){
+                var geojson = households.getGeoJSON();
+
+                this.hhLayer = L.geoJson(geojson, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, App.hhOptions);
+                    },
+                    onEachFeature: function(feature, layer){
+                        // increment no. of households
+                        App.housesCount++;
+
+                        var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
+                            'HH_type: '+ feature.properties.hh_type;
+                        layer.bindPopup(content, { closeButton:true });
+
+                        layer.on({
+                            mouseover: function(e){
+                                e.layer.openPopup();
+                            },
+                            mouseout: function(e){
+                                e.layer.closePopup();
+                            }
+                        });
+                    }
+                }).addTo(map);
+
+                this.hhLayer.setZIndex(70);
+            });
+        }
     },
 
     loadSprayPoints: function (map, day, targetid) {
@@ -430,14 +435,14 @@ var App = {
                     if (sprayed_status[features.properties.sprayed] === undefined) {
                         sprayed_status[features.properties.sprayed] = 1;
                     } else {
-                        sprayed_status[features.properties.sprayed]++    
+                        sprayed_status[features.properties.sprayed]++
                     }
 
                     if (features.properties.reason !== null) {
                         if (reason_obj[reasons[features.properties.reason]] === undefined) {
                             reason_obj[reasons[features.properties.reason]] = 1;
                         } else {
-                            reason_obj[reasons[features.properties.reason]]++    
+                            reason_obj[reasons[features.properties.reason]]++
                         }
                     }
                 }
@@ -450,15 +455,15 @@ var App = {
 
             var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
                 refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount, false),
-                other_percentage = App.calculatePercentage(function(reason_obj) { 
+                other_percentage = App.calculatePercentage(function(reason_obj) {
                     var total = 0;
                     $.each(reason_obj, function(key, value){
                         if (key !== "refused")
                             total = total + value;
                     })
-                    return total; 
+                    return total;
                 }(reason_obj), App.housesCount, false);
-            
+
             console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed', 70);
@@ -471,7 +476,7 @@ var App = {
     loadAreaData: function(map, targetid){
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
-        // this.loadHouseholds(map, targetid);
+        this.loadHouseholds(map, targetid);
     },
 
     drawCircle: function(percent, circle_id, radius) {
@@ -492,7 +497,7 @@ var App = {
         else if(percent >= 80){
             fillColor = '#31A354';
         }
-        
+
         // resize in tablet (40: default for small circles)
         if( radius > 40 && $(window).width() <= 768 ){
             radius = 40;
