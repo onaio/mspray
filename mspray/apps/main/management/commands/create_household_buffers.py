@@ -13,15 +13,19 @@ class Command(BaseCommand):
         make_option('-d', '--distance',
                     default=15, dest='distance', type=float),
         make_option('-f', '--force', default=False,
-                    dest='recreate')
+                    dest='recreate'),
+        make_option('-t', '--target', default=False,
+                    dest='target')
     )
 
     def handle(self, *args, **options):
         distance = options.get('distance')
         recreate = options.get('recreate')
+        target = options.get('target')
         count = HouseholdsBuffer.objects.count()
 
-        utils.create_households_buffer(distance=distance, recreate=recreate)
+        utils.create_households_buffer(
+            distance=distance, recreate=recreate, target=target)
 
         after_count = HouseholdsBuffer.objects.count()
 

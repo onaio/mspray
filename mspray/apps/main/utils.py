@@ -68,13 +68,24 @@ def set_household_buffer(distance=15):
         "ST_Buffer(geography(geom), %s)), 4326);" % distance)
 
 
-def create_households_buffer(distance=15, recreate=False):
+def create_households_buffer(distance=15, recreate=False, target=None):
+    ta = None
+    ta_qs = TargetArea.objects.filter()
+    if target:
+        ta = TargetArea.objects.get(ranks=target)
+        ta_qs = ta_qs.filter(pk=ta.pk)
+
     set_household_buffer(distance)
 
     if recreate:
-        HouseholdsBuffer.objects.all().delete()
+        buffer_qs = HouseholdsBuffer.objects.all()
 
-    for ta in queryset_iterator(TargetArea.objects.filter(), 10):
+        if ta is not None:
+            buffer_qs = buffer_qs.filter(geom__within=ta.geom)
+
+        buffer_qs.delete()
+
+    for ta in queryset_iterator(ta_qs, 10):
         hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
             .values_list('bgeom', flat=True)
         if len(hh_buffers) == 0:
