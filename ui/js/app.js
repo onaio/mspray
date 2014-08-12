@@ -546,6 +546,9 @@ var App = {
         App.map = L.mapbox.map('map', 'ona.j6c49d56', {maxZoom: 19});
         App.map.addLayer(new L.Google());
         L.control.locate().addTo(App.map);
+        L.control.scale({
+            position: 'bottomright'
+        }).addTo(App.map)
     },
 
     getPageState: function(){
