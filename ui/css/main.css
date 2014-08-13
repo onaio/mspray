@@ -91,9 +91,13 @@ body{
     text-align:center;
 }
 
+#map-legend h2{
+    margin-top: -4%;
+}
+
 .legend{
     float:left;
-    width:15em;
+    width:10em;
 }
 .legend.big h2{
     margin-top:0;
@@ -119,6 +123,11 @@ body{
 .legend:last-child{
     border:0;
 }
+#circle-refused, #circle-other{
+    color:#777;
+    font-weight:medium;
+    font-size:2.5em;
+}
 
 .circle{
     border:12px solid #00D2B8;
@@ -131,6 +140,7 @@ body{
 }
 .day_label{
     font-weight:bold;
+    font-size: 68%;
 }
 
 .info-panel{
@@ -286,8 +296,9 @@ body{
     
     /*legend*/
     #map-legend{
-        width:auto;
+        width:10em;
     }
+    
     .legend{
         float:none;
         text-align:center!important;
@@ -300,12 +311,14 @@ body{
         font-size:0.9em;
     }
     .legend.big{
-        border-bottom:2px solid #ddd;
         margin-bottom:1em;
         padding-top:0;
     }
     .legend.small, .legend.big{
-        max-width:10em;
+        width:12em;
+    }
+    .legend.small{
+        width:20em!important;
     }
     .legend svg path{
         stroke-width:8px!important;
@@ -315,5 +328,13 @@ body{
     }
     .legend .circle-holder{
         float:left;
+        width:5em;
+        text-align:center;
+    }
+    #circle-refused, #circle-other{
+        font-size:1.5em;
+    }
+    #sprayed-label {
+        padding-left: 45%;
     }
 }

@@ -264,9 +264,9 @@ var App = {
             if(data.length > 0){
                 App.housesCount = data[0].structures;
 
-                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed', 70);
-                App.drawCircle(App.calculatePercentage(data[0].visited_other, App.housesCount, false), 'circle-other', 40);
-                App.drawCircle(App.calculatePercentage(data[0].visited_refused, App.housesCount, false), 'circle-refused', 40);
+                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed');
+                $('#circle-refused').text(App.calculatePercentage(data[0].visited_refused, App.housesCount));
+                $('#circle-other').text(App.calculatePercentage(data[0].visited_other, App.housesCount));
 
                 var bounds = data[0].bounds;
                 if(bounds.length == 4){
@@ -307,9 +307,9 @@ var App = {
             }).addTo(map);
         }
 
-        App.drawCircle(0, 'circle-refused', 40);
-        App.drawCircle(0, 'circle-other', 40);
-        App.drawCircle(0, 'circle-sprayed', 70);
+        $('#circle-refused').text("0%")
+        $('#circle-other').text("0%")
+        App.drawCircle(0, 'circle-sprayed');
 
     },
 
@@ -472,14 +472,14 @@ var App = {
             $('.perc_label').text(App.sprayCount);
 
             var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
-                refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount, false),
-                other_percentage = App.calculatePercentage(reason_obj.other, App.housesCount, false);
+                refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount),
+                other_percentage = App.calculatePercentage(reason_obj.other, App.housesCount);
 
             console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
-            App.drawCircle(sprayed_percentage, 'circle-sprayed', 70);
-            App.drawCircle(refused_percentage, 'circle-refused', 40);
-            App.drawCircle(other_percentage, 'circle-other', 40);
+            App.drawCircle(sprayed_percentage, 'circle-sprayed');
+            $('#circle-refused').text(refused_percentage)
+            $('#circle-other').text(other_percentage)
         });
 
     },
@@ -490,7 +490,7 @@ var App = {
         this.loadHouseholds(map, targetid);
     },
 
-    drawCircle: function(percent, circle_id, radius) {
+    drawCircle: function(percent, circle_id) {
         var fillColor;
         if(percent < 30){
             fillColor = '#FFA500';
@@ -508,15 +508,10 @@ var App = {
             fillColor = '#31A354';
         }
 
-        // resize in tablet (40: default for small circles)
-        if( radius > 40 && $(window).width() <= 768 ){
-            radius = 40;
-        }
-
         Circles.create({
             id: circle_id,
             percentage: parseInt(" " + percent, 10),
-            radius: radius,
+            radius: 50,
             width: 12,
             number: percent,
             text: '%',
@@ -594,9 +589,9 @@ var App = {
             App.getDates();
             App.getPageState();
 
-            App.drawCircle(0, 'circle-sprayed', 70);
-            App.drawCircle(0, 'circle-refused', 40);
-            App.drawCircle(0, 'circle-other', 40);
+            App.drawCircle(0, 'circle-sprayed');
+            $('#circle-refused').text("0%")
+            $('#circle-other').text("0%")
 
             App.searchInit();
 
