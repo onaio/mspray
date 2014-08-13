@@ -271,6 +271,12 @@ body{
     margin-bottom:0.4em;
     opacity:0.6;
 }
+.small-legend-label {
+    font-size: 1.3em;
+}
+#sprayed-label {
+    font-size: 1.2em;
+}
 
 
 /*responsive-controls: tablets and below*/
@@ -335,6 +341,10 @@ body{
         font-size:1.5em;
     }
     #sprayed-label {
-        padding-left: 45%;
+        padding-left: 35%;
+        font-size: 1.2em;
+    }
+    .small-legend-label {
+        font-size: 1.3em;
     }
 }
