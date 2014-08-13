@@ -1,0 +1,7 @@
+image: ukanga/postgis
+env:
+    - GOPATH=/var/cache/drone
+services:
+    - postgres
+script:
+    -  psql -U postgres -h 127.0.0.1 -c "SELECT 1" postgres
