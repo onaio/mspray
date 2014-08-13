@@ -1,7 +1,6 @@
-image: ukanga/postgis
-env:
-    - GOPATH=/var/cache/drone
+image: ukanga/python:3.4
 services:
     - postgres
 script:
-    -  psql -U postgres -h 127.0.0.1 -c "SELECT 1" postgres
+    - pip3 install -r requirements.pip
+    - python3 manage.py test
