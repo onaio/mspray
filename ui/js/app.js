@@ -307,12 +307,9 @@ var App = {
             }).addTo(map);
         }
 
-        // Load data into circles
-        var perc_visited = 20;
-        var perc_not_sprayed = 40;
-
-        this.drawCircle(perc_visited, 'circle-refused', 40);
-        this.drawCircle(perc_visited, 'circle-other', 40);
+        App.drawCircle(0, 'circle-refused', 40);
+        App.drawCircle(0, 'circle-other', 40);
+        App.drawCircle(0, 'circle-sprayed', 70);
 
     },
 
@@ -584,6 +581,11 @@ var App = {
 
     init: function (){
         $(document).ready(function(){
+            var set_target_id, fragment, target_id
+                infopanel = $(".info-panel"),
+                infotoggle = $('.info-toggle'),
+                panelbtn = $('.panel-state');
+
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
             $('#map, #spray_date_picker, #map-legend').hide();
 
@@ -599,29 +601,22 @@ var App = {
             App.searchInit();
 
             $(document).ajaxComplete(function(){
-                var target_area = $('#target_areas_list li a, #target_areas a');
+                $('#target_areas_list li a, #target_areas a').click(function(e){
+                    fragment = this.href.split('#!')[1];
+                    target_id = fragment.split('/')[1];
 
-                App.drawCircle(0);
-
-                target_area.click(function(e){
                     $("#map, #spray_date_picker, #map-legend").show();
                     App.loadMap();
                     $("#district_table").hide();
-                    var target_id = this.href.split('#!')[1];
-
-                    target_id = target_id.split('/')[1];
-                    $('.target_label').text('Target Area : ' + target_id);
-
-                    //Hide the modal
-                    $('.modal-div').fadeOut(300);
-                    App.loadAreaData(App.map, target_id);
-                    console.log("Loading map for target", target_id);
+                    
+                    if (target_id !== set_target_id) {
+                        set_target_id = target_id;
+                        $('.target_label').text('Target Area : ' + target_id);
+                        App.loadAreaData(App.map, target_id);
+                        console.log("Loading map for target", target_id);
+                    }
                 });
             });
-
-            var infopanel = $(".info-panel"),
-                infotoggle = $('.info-toggle'),
-                panelbtn = $('.panel-state');
 
             //hide panel by default
             infotoggle.removeClass('open');
