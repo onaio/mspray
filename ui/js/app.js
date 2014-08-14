@@ -92,6 +92,9 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
+                    $('.info-toggle').hide()
+                    $('.info-panel').hide();
+
                     $("#map, #spray_date_picker, #map-legend").hide();
                     $("#district_table").show();
 
@@ -262,6 +265,22 @@ var App = {
         uri = App.TARGET_AREA_URI + "?target_area=" + targetid;
         $.getJSON(uri, function(data){
             if(data.length > 0){
+                $('#target-area-stats').empty().append(
+                    "<dt>" + data[0].visited_sprayed + "</dt>" +
+                    "<dd>Visited Sprayed</dd>" +
+                    "<dt>" + data[0].visited_refused + "</dt>" +
+                    "<dd>Visited Refused</dd>" +
+                    "<dt>" + data[0].visited_other + "</dt>" +
+                    "<dd>Visited Other</dd>" +
+                    "<dt>" + data[0].visited_total + "</dt>" +
+                    "<dd>Visited Total</dd>" +
+                    "<dt>" + data[0].not_visited + "</dt>" +
+                    "<dd>Not Visited</dd>" +
+                    "<dt>" + data[0].structures + "</dt>"+
+                    "<dd>Structures</dd>"
+                )
+                $('#target-area-label').text('Target Area : ' + targetid);
+
                 App.housesCount = data[0].structures;
 
                 App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed');
@@ -420,9 +439,9 @@ var App = {
                 '2': 'locked',
                 '3': 'funeral',
                 '4': 'refused',
-                '5': 'knowone_home_or_missed',
+                '5': 'knowone home or missed',
                 '6': 'other'
-            };
+            },
             reason_colors = {
                 '1': '#800080',
                 '2': '#FFA500',
@@ -430,7 +449,9 @@ var App = {
                 '4': '#FF0000',
                 '5': '#800080',
                 '6': '#800080'
-            };
+            },
+            target_area_stats = '';
+  
 
         console.log('SPRAYPOINT_URI: ' + url);
 
@@ -466,6 +487,16 @@ var App = {
                 }
             })
             .addTo(map);
+
+            target_area_stats += "<dt>" + sprayed_status.yes + "</dt><dd>Sprayed</dd>"
+            $.each(reasons, function(key, value) {
+                if (reason_obj[value])
+                    target_area_stats += "<dt>" + reason_obj[value] + "</dt><dd> Not sprayed reason: " + value + "</dd>"
+                else
+                    target_area_stats += "<dt>0</dt><dd> Not sprayed reason: " + value + "</dd>"
+            })
+            console.log("target area stats: " + target_area_stats)
+            $('#target-area-stats').empty().append(target_area_stats)
 
             App.sprayLayer.setZIndex(80);
 
@@ -560,7 +591,7 @@ var App = {
         var current_district = this.getCurrentDistrict();
         var current_target_area = this.getCurrentTargetArea();
 
-        $('.dist_label').text('District : ' + current_district);
+        $('#target-area-label').text('Target Area : ' + current_target_area);
         $('.target_label').text('Target Area : ' + current_target_area);
 
         if(current_target_area != this.defaultTargetArea){
@@ -611,18 +642,32 @@ var App = {
                         console.log("Loading map for target", target_id);
                     }
                 });
+
+                if($("#map").is(":hidden")) {
+                    infotoggle.hide()
+                    infotoggle.removeClass('open');
+                    infopanel.hide();
+                } else {
+                    $('.info-toggle').show()
+                    infotoggle.removeClass('open');
+                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
+                    infopanel.hide();
+                }
             });
 
-            //hide panel by default
-            infotoggle.removeClass('open');
-            panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Table');
-            infopanel.hide();
-
+            if($("#map").is(":hidden")) {
+                infotoggle.hide()
+                infopanel.hide();
+            } else {
+                infotoggle.show()
+                infopanel.hide();
+            }
+            
             // sidebar toggle
             $(".info-toggle").click(function(){
                 if(infopanel.hasClass('open')){
                     infotoggle.removeClass('open');
-                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Table');
+                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
                     infopanel.hide();
                 }
                 else{

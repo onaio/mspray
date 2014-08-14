@@ -278,6 +278,14 @@ body{
     font-size: 1.2em;
 }
 
+.dl-horizontal dd {
+    margin-left: 48px;
+}
+
+.dl-horizontal dt {
+    width: 25px;
+}
+
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
