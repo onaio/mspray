@@ -266,17 +266,17 @@ var App = {
         $.getJSON(uri, function(data){
             if(data.length > 0){
                 $('#target-area-stats').empty().append(
-                    "<dt>" + data[0].visited_sprayed + "</dt>" +
+                    "<dt class='reason reason-sprayed'>" + data[0].visited_sprayed + "</dt>" +
                     "<dd>Visited Sprayed</dd>" +
-                    "<dt>" + data[0].visited_refused + "</dt>" +
+                    "<dt class='reason reason-not-sprayed'>" + data[0].visited_refused + "</dt>" +
                     "<dd>Visited Refused</dd>" +
-                    "<dt>" + data[0].visited_other + "</dt>" +
+                    "<dt class='reason reason-other'>" + data[0].visited_other + "</dt>" +
                     "<dd>Visited Other</dd>" +
-                    "<dt>" + data[0].visited_total + "</dt>" +
+                    "<dt class='reason reason-total-visited'>" + data[0].visited_total + "</dt>" +
                     "<dd>Visited Total</dd>" +
-                    "<dt>" + data[0].not_visited + "</dt>" +
+                    "<dt class='reason reason-not-visited'>" + data[0].not_visited + "</dt>" +
                     "<dd>Not Visited</dd>" +
-                    "<dt>" + data[0].structures + "</dt>"+
+                    "<dt class='reason total-structures'>" + data[0].structures + "</dt>"+
                     "<dd>Structures</dd>"
                 )
                 $('#target-area-label').text('Target Area : ' + targetid);
@@ -488,13 +488,13 @@ var App = {
             })
             .addTo(map);
 
-            target_area_stats += "<dt class='reason' id='reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>"
-            target_area_stats += "<dt class='reason' id='reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>"
+            target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>"
+            target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>"
             $('#target-area-stats').empty().append(target_area_stats)
 
             target_area_stats = "";
             $.each(reasons, function(key, value) {
-                target_area_stats += "<dt class='reason' id='reason-" + value.replace(/ /g, '-')
+                target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, '-')
                 if (reason_obj[value])
                      target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>"
                 else

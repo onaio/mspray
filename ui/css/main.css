@@ -134,6 +134,7 @@ body{
 .legend.small{
     border-bottom:1px dotted #AFAFAF;
     width:6em;
+    margin-top: 7%;
 }
 .legend.small svg path{
     stroke-width:8px;
@@ -295,6 +296,7 @@ body{
 }
 #sprayed-label {
     font-size: 1.2em;
+    margin-left: 20%;
 }
 
 .dl-horizontal dd {
@@ -328,28 +330,28 @@ body{
     opacity: 0.7;
 }
 
-#reason-sick{
+.reason-sick{
     background-color: #800080;
 }
-#reason-locked{
+.reason-locked{
     background-color: #FFA500;
 }
-#reason-funeral{
+.reason-funeral{
     background-color: #800080;
 }
-#reason-refused{
+.reason-refused{
     background-color: #FF0000;
 }
-#reason-knowone-home-or-missed{
+.reason-knowone-home-or-missed{
     background-color: #800080;
 }
-#reason-other{
+.reason-other, .total-structures{
     background-color: #800080;
 }
-#reason-sprayed{
+.reason-sprayed, .reason-total-visited{
     background-color: #2ecc40;
 }
-#reason-not-sprayed{
+.reason-not-sprayed, .reason-not-visited{
     background-color: #d82118;
 }
 .reason {
