@@ -590,14 +590,14 @@ var App = {
         App.map.addLayer(google);
         App.map.addLayer(bing);
         L.control.layers({
-            'Google':google, 
+            'Google':google,
             'Bing':bing
         }, {}).addTo(App.map)
         L.control.locate().addTo(App.map);
         L.control.scale({
             position: 'bottomright'
         }).addTo(App.map)
-        App.buildLegend(App.map, L)
+        App.buildLegend(App.map)
     },
 
     getPageState: function(){
