@@ -495,7 +495,6 @@ var App = {
                 else
                     target_area_stats += "<dt>0</dt><dd> Not sprayed reason: " + value + "</dd>"
             })
-            console.log("target area stats: " + target_area_stats)
             $('#target-area-stats').empty().append(target_area_stats)
 
             App.sprayLayer.setZIndex(80);
@@ -651,6 +650,7 @@ var App = {
                     $('.info-toggle').show()
                     infotoggle.removeClass('open');
                     panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
+                    infopanel.removeClass('open')
                     infopanel.hide();
                 }
             });
