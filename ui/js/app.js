@@ -584,8 +584,15 @@ var App = {
         if (App.map !== undefined){
             return;
         }
+        var google = new L.Google(),
+            bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6");
         App.map = L.mapbox.map('map', 'ona.j6c49d56', {maxZoom: 19});
-        App.map.addLayer(new L.Google());
+        App.map.addLayer(google);
+        App.map.addLayer(bing);
+        L.control.layers({
+            'Google':google, 
+            'Bing':bing
+        }, {}).addTo(App.map)
         L.control.locate().addTo(App.map);
         L.control.scale({
             position: 'bottomright'
