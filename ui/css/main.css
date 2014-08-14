@@ -90,6 +90,24 @@ body{
     padding:1em;
     text-align:center;
 }
+.leaflet-top.leaflet-left .leaflet-control a{
+    display:block;
+    height:50px;
+    width:50px;
+}
+.leaflet-control-zoom-in, .leaflet-control-zoom-out{
+    background-size:60px;
+}
+.leaflet-bar .leaflet-control-zoom-in{
+    background-position:-4px -5px!important;
+}
+.leaflet-bar .leaflet-control-zoom-out{
+    background-position:-4px -65px!important;
+}
+.leaflet-touch .leaflet-control-locate a{
+    background-size:140px;
+    background-position:2px;
+}
 
 #map-legend h2{
     margin-top: -4%;
@@ -115,7 +133,7 @@ body{
 }
 .legend.small{
     border-bottom:1px dotted #AFAFAF;
-    width:12em;
+    width:6em;
 }
 .legend.small svg path{
     stroke-width:8px;
@@ -283,30 +301,67 @@ body{
 }
 
 .dl-horizontal dt {
-    width: 25px;
+    width: 40px;
+}
+
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.legend {
+    text-align: left;
+    line-height: 18px;
+    color: #555;
+}
+
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+#reason-sick{
+    background-color: #800080;
+}
+#reason-locked{
+    background-color: #FFA500;
+}
+#reason-funeral{
+    background-color: #800080;
+}
+#reason-refused{
+    background-color: #FF0000;
+}
+#reason-knowone-home-or-missed{
+    background-color: #800080;
+}
+#reason-other{
+    background-color: #800080;
+}
+#reason-sprayed{
+    background-color: #2ecc40;
+}
+#reason-not-sprayed{
+    background-color: #d82118;
+}
+.reason {
+    text-align: center !important;
+    border-radius: 20px;
+}
+#not-sprayed-reasons{
+    display: none;
 }
 
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
-	.leaflet-top.leaflet-left .leaflet-control a{
-        display:block;
-        height:50px;
-        width:50px;
-    }
-	.leaflet-control-zoom-in, .leaflet-control-zoom-out{
-        background-size:60px;
-    }
-    .leaflet-bar .leaflet-control-zoom-in{
-        background-position:-4px -5px!important;
-    }
-    .leaflet-bar .leaflet-control-zoom-out{
-        background-position:-4px -65px!important;
-    }
-	.leaflet-touch .leaflet-control-locate a{
-        background-size:140px;
-        background-position:2px;
-    }
     
     /*legend*/
     #map-legend{

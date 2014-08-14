@@ -488,14 +488,20 @@ var App = {
             })
             .addTo(map);
 
-            target_area_stats += "<dt>" + sprayed_status.yes + "</dt><dd>Sprayed</dd>"
-            $.each(reasons, function(key, value) {
-                if (reason_obj[value])
-                    target_area_stats += "<dt>" + reason_obj[value] + "</dt><dd> Not sprayed reason: " + value + "</dd>"
-                else
-                    target_area_stats += "<dt>0</dt><dd> Not sprayed reason: " + value + "</dd>"
-            })
+            target_area_stats += "<dt class='reason' id='reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>"
+            target_area_stats += "<dt class='reason' id='reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>"
             $('#target-area-stats').empty().append(target_area_stats)
+
+            target_area_stats = "";
+            $.each(reasons, function(key, value) {
+                target_area_stats += "<dt class='reason' id='reason-" + value.replace(/ /g, '-')
+                if (reason_obj[value])
+                     target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>"
+                else
+                    target_area_stats +=  "'>0</dt><dd >" + value + "</dd>"
+            })
+            $('#target-area-stats-not-sprayed').empty().append(target_area_stats)
+            $("#not-sprayed-reasons").show();
 
             App.sprayLayer.setZIndex(80);
 
@@ -584,6 +590,7 @@ var App = {
         L.control.scale({
             position: 'bottomright'
         }).addTo(App.map)
+        App.buildLegend(App.map, L)
     },
 
     getPageState: function(){
@@ -602,6 +609,30 @@ var App = {
             this.getTargetAreas(current_district);
         }
 
+    },
+
+    buildLegend: function(map) {
+        var legend = L.control({
+            position: 'bottomright'
+        });
+
+        if (legend.getContainer() !== undefined) {
+            legend.removeFrom(map);
+        }
+
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend'),
+                labels = [];
+            labels.push('<i style="background:#2ECC40"></i> 100%');
+            labels.push('<i style="background:#FFDC00"></i> 66-99% ');
+            labels.push('<i style="background:#FF851B"></i> 33-66% ');
+            labels.push('<i style="background:#FF4136"></i> 1-33% ');
+            labels.push('<i style="background:#CCCCCC"></i> 0%');
+            div.innerHTML = labels.join('<br><br>');
+            return div;
+        };
+
+        legend.addTo(map);
     },
 
     init: function (){
@@ -631,9 +662,10 @@ var App = {
                     target_id = fragment.split('/')[1];
 
                     $("#map, #spray_date_picker, #map-legend").show();
+                    $("#not-sprayed-reasons").hide();
                     App.loadMap();
                     $("#district_table").hide();
-                    
+
                     if (target_id !== set_target_id) {
                         set_target_id = target_id;
                         $('.target_label').text('Target Area : ' + target_id);
