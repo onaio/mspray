@@ -585,14 +585,18 @@ var App = {
             return;
         }
         var google = new L.Google(),
-            bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6");
-        App.map = L.mapbox.map('map', 'ona.j6c49d56', {maxZoom: 19});
+            bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6"),
+            bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
+
+        App.map = L.mapbox.map('map', {maxZoom: 19});
         App.map.addLayer(google);
-        App.map.addLayer(bing);
+        App.map.addLayer(bufferHouseholdsLayer);
         L.control.layers({
             'Google':google,
             'Bing':bing
-        }, {}).addTo(App.map)
+        }, { 
+            'buffershouseholds': bufferHouseholdsLayer
+        }).addTo(App.map)
         L.control.locate().addTo(App.map);
         L.control.scale({
             position: 'bottomright'
