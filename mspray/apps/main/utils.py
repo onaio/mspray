@@ -46,7 +46,7 @@ def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
 
 
 def load_area_layer_mapping(shp_file, verbose=False):
-    unique = ('ranks', 'targetid')
+    unique = 'rank_house'
     load_layer_mapping(TargetArea, shp_file, targetarea_mapping, verbose,
                        unique)
 
