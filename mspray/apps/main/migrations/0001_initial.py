@@ -27,15 +27,20 @@ class Migration(SchemaMigration):
         # Adding model 'TargetArea'
         db.create_table('main_targetarea', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('houses', self.gf('django.db.models.fields.FloatField')(db_index=True)),
-            ('targetid', self.gf('django.db.models.fields.FloatField')()),
+            ('objectid', self.gf('django.db.models.fields.IntegerField')(db_index=True)),
+            ('houses', self.gf('django.db.models.fields.IntegerField')(db_index=True)),
+            ('target_fid', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('targetid', self.gf('django.db.models.fields.FloatField')(db_index=True)),
             ('predicted', self.gf('django.db.models.fields.FloatField')()),
             ('predinc', self.gf('django.db.models.fields.FloatField')()),
-            ('ranks', self.gf('django.db.models.fields.FloatField')(db_index=True)),
+            ('ranks', self.gf('django.db.models.fields.FloatField')()),
             ('houseranks', self.gf('django.db.models.fields.FloatField')()),
             ('targeted', self.gf('django.db.models.fields.FloatField')(db_index=True)),
-            ('district_name', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=254)),
-            ('geom', self.gf('django.contrib.gis.db.models.fields.MultiPolygonField')()),
+            ('district_name', self.gf('django.db.models.fields.CharField')(max_length=254)),
+            ('shape_leng', self.gf('django.db.models.fields.FloatField')()),
+            ('shape_area', self.gf('django.db.models.fields.FloatField')()),
+            ('rank_house', self.gf('django.db.models.fields.CharField')(db_index=True, max_length=50)),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.PolygonField')()),
         ))
         db.send_create_signal('main', ['TargetArea'])
 
@@ -105,16 +110,21 @@ class Migration(SchemaMigration):
         },
         'main.targetarea': {
             'Meta': {'object_name': 'TargetArea'},
-            'district_name': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '254'}),
-            'geom': ('django.contrib.gis.db.models.fields.MultiPolygonField', [], {}),
+            'district_name': ('django.db.models.fields.CharField', [], {'max_length': '254'}),
+            'geom': ('django.contrib.gis.db.models.fields.PolygonField', [], {}),
             'houseranks': ('django.db.models.fields.FloatField', [], {}),
-            'houses': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
+            'houses': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'objectid': ('django.db.models.fields.IntegerField', [], {'db_index': 'True'}),
             'predicted': ('django.db.models.fields.FloatField', [], {}),
             'predinc': ('django.db.models.fields.FloatField', [], {}),
-            'ranks': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
+            'rank_house': ('django.db.models.fields.CharField', [], {'db_index': 'True', 'max_length': '50'}),
+            'ranks': ('django.db.models.fields.FloatField', [], {}),
+            'shape_area': ('django.db.models.fields.FloatField', [], {}),
+            'shape_leng': ('django.db.models.fields.FloatField', [], {}),
+            'target_fid': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'targeted': ('django.db.models.fields.FloatField', [], {'db_index': 'True'}),
-            'targetid': ('django.db.models.fields.FloatField', [], {})
+            'targetid': ('django.db.models.fields.FloatField', [], {'db_index': 'True'})
         }
     }
 
