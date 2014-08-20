@@ -58,4 +58,4 @@ class TestBase(TestCase):
         count = HouseholdsBuffer.objects.count()
         utils.create_households_buffer()
 
-        self.assertEqual(HouseholdsBuffer.objects.count(), count + 35)
+        self.assertEqual(HouseholdsBuffer.objects.count(), count + 23)

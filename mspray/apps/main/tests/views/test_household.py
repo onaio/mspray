@@ -18,7 +18,7 @@ class TestHouseholdViewSet(TestBase):
 
     def test_household_list_view_filter_by_target_area(self):
         self._loaddata_fixtures(self.fixtures)
-        data = {'target_area': 69}
+        data = {'target_area': '53_92'}
         request = self.factory.get('/', data)
         response = self.view(request)
         self.assertEqual(response.status_code, 200)
@@ -33,6 +33,7 @@ class TestHouseholdViewSet(TestBase):
         self.assertEqual(response.status_code, 404)
 
     def test_household_list_view_filter_by_invalid_target_area(self):
+        self.skipTest("Text are acceptable input for target_area")
         self._loaddata_fixtures(self.fixtures)
         data = {'target_area': "dummy"}
         request = self.factory.get('/', data)

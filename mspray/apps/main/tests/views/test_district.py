@@ -24,25 +24,25 @@ class TestDistrictViewSet(TestCase):
         self.factory = RequestFactory()
 
     def test_list(self):
-        self.assertEqual(TargetArea.objects.count(), 45)
+        self.assertEqual(TargetArea.objects.count(), 12)
         self.assertEqual(TargetArea.objects.filter(
-            targeted=TargetArea.TARGETED_VALUE).count(), 12)
+            targeted=TargetArea.TARGETED_VALUE).count(), 9)
 
         request = self.factory.get('/')
         response = self.view(request)
-        self.assertEqual(len(response.data), 7)
-        data = {'district_name': 'Mwansabombwe', 'num_target_areas': 3}
+        self.assertEqual(len(response.data), 2)
+        data = {'district_name': 'Mwansabombwe', 'num_target_areas': 8}
         self.assertIn(data, response.data)
 
     def test_targetareas_for_district(self):
-        self.assertEqual(TargetArea.objects.count(), 45)
+        self.assertEqual(TargetArea.objects.count(), 12)
         data = {'district': 'Mwansabombwe'}
 
         request = self.factory.get('/', data)
         response = self.view(request)
-        self.assertEqual(len(response.data), 3)
+        self.assertEqual(len(response.data), 8)
 
-        data = {'targetid': 243.0, 'structures': 29.0}
+        data = {'targetid': '53_92', 'structures': 92}
         properties = [i for i in response.data[0].items()]
 
         for item in data.items():

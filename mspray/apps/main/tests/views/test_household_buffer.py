@@ -15,12 +15,12 @@ class TestHouseholdBufferViewSet(TestBase):
         self.fixtures = [
             '848_households', '848_target_area', '848_spraypoints']
         self._create_households_buffer(self.fixtures)
-        data = {'target_area': 382}
+        data = {'target_area': '382_218'}
         request = self.factory.get('/', data)
         response = self.view(request)
         self.assertEqual(response.status_code, 200)
         self.assertIn('features', response.data)
-        self.assertEqual(len(response.data['features']), 35)
+        self.assertEqual(len(response.data['features']), 23)
 
     def test_link(self):
         try:
