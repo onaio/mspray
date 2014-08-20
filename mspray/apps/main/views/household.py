@@ -1,8 +1,6 @@
 from django.shortcuts import get_object_or_404
-from django.utils.translation import ugettext as _
 
 from rest_framework import viewsets
-from rest_framework import exceptions
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.household import HouseholdSerializer
@@ -18,13 +16,7 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            try:
-                targetid = float(targetid)
-            except ValueError:
-                raise exceptions.ParseError(
-                    _("Invalid targetid %s" % targetid))
-            else:
-                target = get_object_or_404(TargetArea, ranks=targetid)
-                queryset = queryset.filter(geom__coveredby=target.geom)
+            target = get_object_or_404(TargetArea, rank_house=targetid)
+            queryset = queryset.filter(geom__coveredby=target.geom)
 
         return queryset
