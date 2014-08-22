@@ -3,19 +3,17 @@ from django.contrib.gis.db import models
 
 
 class TargetArea(models.Model):
-    objectid = models.IntegerField(db_index=True)
-    houses = models.IntegerField(db_index=True)
-    target_fid = models.IntegerField(null=True, blank=True)
-    targetid = models.FloatField(db_index=True)
-    predicted = models.FloatField()
-    predinc = models.FloatField()
-    ranks = models.FloatField()
-    houseranks = models.FloatField()
-    targeted = models.FloatField(db_index=True)
+    targetid = models.FloatField(db_index=1)
+    predicted = models.FloatField(db_index=1)
+    predinc = models.FloatField(db_index=1)
+    ranks = models.FloatField(db_index=1)
+    houseranks = models.FloatField(db_index=1)
+    targeted = models.FloatField(db_index=1)
+    rank_house = models.CharField(db_index=1, max_length=50)
+    ranked_num = models.FloatField(db_index=1)
+    number_of = models.FloatField(db_index=1)
     district_name = models.CharField(max_length=254)
-    shape_leng = models.FloatField()
-    shape_area = models.FloatField()
-    rank_house = models.CharField(db_index=True, max_length=50)
+    houses = models.FloatField(db_index=1)
     geom = models.PolygonField(srid=4326)
     objects = models.GeoManager()
 
@@ -29,20 +27,17 @@ class TargetArea(models.Model):
 
 
 # Auto-generated `LayerMapping` dictionary for TargetArea model
-
 targetarea_mapping = {
-    'objectid': 'OBJECTID',
-    'houses': 'Join_Count',
-    'target_fid': 'TARGET_FID',
     'targetid': 'targetid',
     'predicted': 'predicted',
     'predinc': 'predinc',
     'ranks': 'ranks',
     'houseranks': 'houseranks',
     'targeted': 'targeted',
-    'district_name': 'DISTRICTNA',
-    'shape_leng': 'Shape_Leng',
-    'shape_area': 'Shape_Area',
     'rank_house': 'rank_house',
+    'ranked_num': 'Ranked_Num',
+    'number_of': 'Number_of',
+    'district_name': 'DISTRICT',
+    'houses': 'Houses',
     'geom': 'POLYGON',
 }
