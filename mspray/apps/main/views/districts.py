@@ -8,7 +8,7 @@ from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
 class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = TargetArea.objects.filter(targeted=TargetArea.TARGETED_VALUE)\
+    queryset = TargetArea.objects.filter()\
         .values('district_name')\
         .annotate(num_target_areas=Count('district_name'))
     serializer_class = DistrictSerializer
@@ -26,8 +26,7 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
 
         if district:
             queryset = TargetArea.objects.filter(
-                district_name=district,
-                targeted=TargetArea.TARGETED_VALUE
+                district_name=district
             ).order_by('ranks', 'houses')
 
         return queryset

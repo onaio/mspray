@@ -7,7 +7,7 @@ from mspray.apps.main.serializers.target_area import (
 
 
 class TargetAreaViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = TargetArea.objects.filter(targeted=TargetArea.TARGETED_VALUE)
+    queryset = TargetArea.objects.filter()
     serializer_class = TargetAreaSerializer
 
     def get_serializer_class(self):
@@ -20,7 +20,6 @@ class TargetAreaViewSet(viewsets.ReadOnlyModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            queryset = get_list_or_404(TargetArea, rank_house=targetid,
-                                       targeted=TargetArea.TARGETED_VALUE)
+            queryset = get_list_or_404(TargetArea, rank_house=targetid)
 
         return super(TargetAreaViewSet, self).filter_queryset(queryset)
