@@ -1,11 +1,11 @@
 var App = {
-    // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-    SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-    DATES_URI: "http://api.mspray.onalabs.org/spraydays.json?dates_only=true",
-    BUFFER_URI: "http://api.mspray.onalabs.org/buffers.json",
-    TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
-    HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
-    DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
+    // SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    SPRAY_DAYS_URI: "http://localhost:8000/spraydays.json",
+    DATES_URI: "http://localhost:8000/spraydays.json?dates_only=true",
+    BUFFER_URI: "http://localhost:8000/buffers.json",
+    TARGET_AREA_URI: "http://localhost:8000/targetareas.json",
+    HOUSEHOLD_URI: "http://localhost:8000/households.json",
+    DISTRICT_URI: "http://localhost:8000/districts.json",
 
     defaultDistrict: 'Chienge',
     defaultTargetArea: 0,
@@ -297,7 +297,7 @@ var App = {
             }
         });
 
-        if(targetid === '909001'){
+        if(targetid !== '909001'){
             var target_area = L.mapbox.featureLayer()
                 .loadURL(uri.replace('.json', '.geojson'));
 
@@ -386,7 +386,7 @@ var App = {
         // $.getJSON(uri, function(data){
         //     console.log(data);
         // });
-        if(targetid === '909001'){
+        if(targetid !== '909001'){
             var households = L.mapbox.featureLayer().loadURL(uri);
 
             console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
@@ -585,17 +585,17 @@ var App = {
             return;
         }
         var google = new L.Google(),
-            bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6"),
-            bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
+            bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6");
+            // bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
 
         App.map = L.mapbox.map('map', {maxZoom: 19});
         App.map.addLayer(google);
-        App.map.addLayer(bufferHouseholdsLayer);
+        // App.map.addLayer(bufferHouseholdsLayer);
         L.control.layers({
             'Google':google,
             'Bing':bing
         }, {
-            'buffershouseholds': bufferHouseholdsLayer
+            // 'buffershouseholds': bufferHouseholdsLayer
         }).addTo(App.map);
         L.control.locate().addTo(App.map);
         L.control.scale({
