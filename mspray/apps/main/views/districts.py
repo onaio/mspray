@@ -1,5 +1,4 @@
 from django.db.models import Count
-from django.shortcuts import get_list_or_404
 from rest_framework import viewsets
 
 
@@ -26,10 +25,9 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
         district = self.request.QUERY_PARAMS.get('district')
 
         if district:
-            queryset = get_list_or_404(
-                TargetArea,
+            queryset = TargetArea.objects.filter(
                 district_name=district,
                 targeted=TargetArea.TARGETED_VALUE
-            )
+            ).order_by('ranks', 'houses')
 
         return queryset
