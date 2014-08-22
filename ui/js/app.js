@@ -92,7 +92,7 @@ var App = {
                 var district = d_list.find('li a');
 
                 district.click(function(e){
-                    $('.info-toggle').hide()
+                    $('.info-toggle').hide();
                     $('.info-panel').hide();
 
                     $("#map, #spray_date_picker, #map-legend").hide();
@@ -326,8 +326,8 @@ var App = {
             }).addTo(map);
         }
 
-        $('#circle-refused').text("0%")
-        $('#circle-other').text("0%")
+        $('#circle-refused').text("0%");
+        $('#circle-other').text("0%");
         App.drawCircle(0, 'circle-sprayed');
 
     },
@@ -451,7 +451,7 @@ var App = {
                 '6': '#800080'
             },
             target_area_stats = '';
-  
+
 
         console.log('SPRAYPOINT_URI: ' + url);
 
@@ -488,19 +488,19 @@ var App = {
             })
             .addTo(map);
 
-            target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>"
-            target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>"
-            $('#target-area-stats').empty().append(target_area_stats)
+            target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>";
+            target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>";
+            $('#target-area-stats').empty().append(target_area_stats);
 
             target_area_stats = "";
             $.each(reasons, function(key, value) {
-                target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, '-')
+                target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, '-');
                 if (reason_obj[value])
-                     target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>"
+                     target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
                 else
-                    target_area_stats +=  "'>0</dt><dd >" + value + "</dd>"
-            })
-            $('#target-area-stats-not-sprayed').empty().append(target_area_stats)
+                    target_area_stats +=  "'>0</dt><dd >" + value + "</dd>";
+            });
+            $('#target-area-stats-not-sprayed').empty().append(target_area_stats);
             $("#not-sprayed-reasons").show();
 
             App.sprayLayer.setZIndex(80);
@@ -514,8 +514,8 @@ var App = {
             console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed');
-            $('#circle-refused').text(refused_percentage)
-            $('#circle-other').text(other_percentage)
+            $('#circle-refused').text(refused_percentage);
+            $('#circle-other').text(other_percentage);
         });
 
     },
@@ -594,14 +594,14 @@ var App = {
         L.control.layers({
             'Google':google,
             'Bing':bing
-        }, { 
+        }, {
             'buffershouseholds': bufferHouseholdsLayer
-        }).addTo(App.map)
+        }).addTo(App.map);
         L.control.locate().addTo(App.map);
         L.control.scale({
             position: 'bottomright'
-        }).addTo(App.map)
-        App.buildLegend(App.map)
+        }).addTo(App.map);
+        App.buildLegend(App.map);
     },
 
     getPageState: function(){
@@ -648,7 +648,7 @@ var App = {
 
     init: function (){
         $(document).ready(function(){
-            var set_target_id, fragment, target_id
+            var set_target_id, fragment, target_id,
                 infopanel = $(".info-panel"),
                 infotoggle = $('.info-toggle'),
                 panelbtn = $('.panel-state');
@@ -662,8 +662,8 @@ var App = {
             App.getPageState();
 
             App.drawCircle(0, 'circle-sprayed');
-            $('#circle-refused').text("0%")
-            $('#circle-other').text("0%")
+            $('#circle-refused').text("0%");
+            $('#circle-other').text("0%");
 
             App.searchInit();
 
@@ -686,26 +686,26 @@ var App = {
                 });
 
                 if($("#map").is(":hidden")) {
-                    infotoggle.hide()
+                    infotoggle.hide();
                     infotoggle.removeClass('open');
                     infopanel.hide();
                 } else {
-                    $('.info-toggle').show()
+                    $('.info-toggle').show();
                     infotoggle.removeClass('open');
                     panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
-                    infopanel.removeClass('open')
+                    infopanel.removeClass('open');
                     infopanel.hide();
                 }
             });
 
             if($("#map").is(":hidden")) {
-                infotoggle.hide()
+                infotoggle.hide();
                 infopanel.hide();
             } else {
-                infotoggle.show()
+                infotoggle.show();
                 infopanel.hide();
             }
-            
+
             // sidebar toggle
             $(".info-toggle").click(function(){
                 if(infopanel.hasClass('open')){
