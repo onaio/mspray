@@ -30,7 +30,7 @@ class TestDistrictViewSet(TestCase):
 
         request = self.factory.get('/')
         response = self.view(request)
-        self.assertEqual(len(response.data), 2)
+        self.assertEqual(len(response.data), 4)
         data = {'district_name': 'Mwansabombwe', 'num_target_areas': 8}
         self.assertIn(data, response.data)
 
@@ -42,7 +42,7 @@ class TestDistrictViewSet(TestCase):
         response = self.view(request)
         self.assertEqual(len(response.data), 8)
 
-        data = {'targetid': '53_92', 'structures': 92}
+        data = {'targetid': '53_41', 'structures': 41}
         properties = [i for i in response.data[0].items()]
 
         for item in data.items():
