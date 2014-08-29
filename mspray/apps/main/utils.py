@@ -18,6 +18,8 @@ from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
+from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
+from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 
@@ -112,7 +114,9 @@ def add_spray_data(data):
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
-    geom = geojson_from_gps_string(data.get('structure_gps'))
+    gps_field = data.get(STRUCTURE_GPS_FIELD,
+                         data.get(NON_STRUCTURE_GPS_FIELD))
+    geom = geojson_from_gps_string(gps_field)
     sprayday, created = SprayDay.objects.get_or_create(
         submission_id=submission_id,
         spray_date=spray_date,

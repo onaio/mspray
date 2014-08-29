@@ -4,6 +4,8 @@ from jsonfield import JSONField
 
 DATA_ID_FIELD = '_id'
 DATE_FIELD = 'today'
+STRUCTURE_GPS_FIELD = 'structure_gps'
+NON_STRUCTURE_GPS_FIELD = 'non_structure_gps'
 
 
 class SprayDay(models.Model):
