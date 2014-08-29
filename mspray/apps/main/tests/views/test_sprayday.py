@@ -98,3 +98,31 @@ class TestSprayDayViewSet(TestBase):
 
             self.assertEqual(response.status_code, 400)
             self.assertEqual(count, SprayDay.objects.count())
+
+    def test_recieve_json_post_missing_gps_field(self):
+        count = SprayDay.objects.count()
+        path = os.path.join(self.fixtures_dir,
+                            '88037_submission_missing_gps_field.json')
+
+        with open(path) as f:
+            data = f.read()
+            request = self.factory.post('/', data, 'application/json')
+            response = self.view(request)
+
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(count, SprayDay.objects.count())
+
+    def test_recieve_json_post_non_structure_gps(self):
+        count = SprayDay.objects.count()
+        path = os.path.join(self.fixtures_dir,
+                            '88037_submission_non_structure_gps_field.json')
+
+        with open(path) as f:
+            data = f.read()
+            request = self.factory.post('/', data, 'application/json')
+            response = self.view(request)
+
+            self.assertEqual(response.status_code, 201)
+            self.assertEqual(count + 1, SprayDay.objects.count())
+
+            # test double entry, should not add

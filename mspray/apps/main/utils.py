@@ -9,6 +9,7 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
+from django.core.exceptions import ValidationError
 
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import targetarea_mapping
@@ -24,9 +25,12 @@ from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 
 def geojson_from_gps_string(geolocation):
-        geolocation = [float(p) for p in geolocation.split()[:2]]
-        return json.dumps(
-            {'type': 'point', 'coordinates': geolocation})
+    if not isinstance(geolocation, str):
+        raise ValidationError('Expecting a a string for gps')
+
+    geolocation = [float(p) for p in geolocation.split()[:2]]
+    return json.dumps(
+        {'type': 'point', 'coordinates': geolocation})
 
 
 def queryset_iterator(queryset, chunksize=100):

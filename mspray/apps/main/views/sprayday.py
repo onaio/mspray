@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
@@ -53,12 +54,17 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             }
             status_code = status.HTTP_400_BAD_REQUEST
         else:
-            sprayday = add_spray_data(request.DATA)
-            data = {"success": _("Successfully imported submission with"
-                                 " submission id %(submission_id)s."
-                                 % {'submission_id': has_id})}
-            status_code = status.HTTP_201_CREATED
-            delete_cached_target_area_keys(sprayday)
+            try:
+                sprayday = add_spray_data(request.DATA)
+            except ValidationError as e:
+                data = {"error": "%s" % e}
+                status_code = status.HTTP_400_BAD_REQUEST
+            else:
+                data = {"success": _("Successfully imported submission with"
+                                     " submission id %(submission_id)s."
+                                     % {'submission_id': has_id})}
+                status_code = status.HTTP_201_CREATED
+                delete_cached_target_area_keys(sprayday)
 
         return Response(data, status=status_code)
 
