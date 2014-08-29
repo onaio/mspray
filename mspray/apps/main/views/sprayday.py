@@ -6,11 +6,13 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from mspray.apps.main.models.spray_day import DATA_ID_FIELD
+from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
-from mspray.apps.main.utils import add_spray_data, \
-    delete_cached_target_area_keys
+from mspray.apps.main.utils import add_spray_data
+from mspray.apps.main.utils import delete_cached_target_area_keys
 
 
 class SprayDayViewSet(viewsets.ModelViewSet):
@@ -41,11 +43,14 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
     def create(self, request, *args, **kwargs):
-        has_id = request.DATA.get('_id')
-        spray_date = request.DATA.get('date')
+        has_id = request.DATA.get(DATA_ID_FIELD)
+        spray_date = request.DATA.get(DATE_FIELD)
 
-        if not has_id and not spray_date:
-            data = {"error": _("Not a valid submission")}
+        if not has_id or not spray_date:
+            data = {
+                "error": _("Not a valid submission: _id - %s, date - %s"
+                           % (has_id, spray_date))
+            }
             status_code = status.HTTP_400_BAD_REQUEST
         else:
             sprayday = add_spray_data(request.DATA)

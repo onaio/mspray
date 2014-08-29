@@ -4,14 +4,20 @@ import json
 from datetime import datetime
 
 from django.conf import settings
-from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.contrib.gis.geos import Polygon
+from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
 
-from mspray.apps.main.models.target_area import TargetArea, targetarea_mapping
-from mspray.apps.main.models.household import Household, household_mapping
-from mspray.apps.main.models.spray_day import SprayDay, sprayday_mapping
+from mspray.apps.main.models.target_area import TargetArea
+from mspray.apps.main.models.target_area import targetarea_mapping
+from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.household import household_mapping
+from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_day import sprayday_mapping
+from mspray.apps.main.models.spray_day import DATA_ID_FIELD
+from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 
@@ -103,8 +109,8 @@ def create_households_buffer(distance=15, recreate=False, target=None):
 
 
 def add_spray_data(data):
-    submission_id = data.get('_id')
-    spray_date = data.get('date')
+    submission_id = data.get(DATA_ID_FIELD)
+    spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
     geom = geojson_from_gps_string(data.get('structure_gps'))
     sprayday, created = SprayDay.objects.get_or_create(

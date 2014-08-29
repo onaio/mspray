@@ -2,6 +2,9 @@
 from django.contrib.gis.db import models
 from jsonfield import JSONField
 
+DATA_ID_FIELD = '_id'
+DATE_FIELD = 'today'
+
 
 class SprayDay(models.Model):
     submission_id = models.PositiveIntegerField(unique=True)
