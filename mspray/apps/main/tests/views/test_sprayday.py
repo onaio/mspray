@@ -72,3 +72,29 @@ class TestSprayDayViewSet(TestBase):
 
             self.assertEqual(count + 1, SprayDay.objects.count())
             self.assertEqual(response.status_code, 201)
+
+    def test_recieve_json_post_missing_date(self):
+        count = SprayDay.objects.count()
+        path = os.path.join(self.fixtures_dir,
+                            '88037_submission_missing_date.json')
+
+        with open(path) as f:
+            data = f.read()
+            request = self.factory.post('/', data, 'application/json')
+            response = self.view(request)
+
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(count, SprayDay.objects.count())
+
+    def test_recieve_json_post_missing_data_id(self):
+        count = SprayDay.objects.count()
+        path = os.path.join(self.fixtures_dir,
+                            '88037_submission_missing_data_id.json')
+
+        with open(path) as f:
+            data = f.read()
+            request = self.factory.post('/', data, 'application/json')
+            response = self.view(request)
+
+            self.assertEqual(response.status_code, 400)
+            self.assertEqual(count, SprayDay.objects.count())
