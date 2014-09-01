@@ -337,21 +337,30 @@ body{
     background-color: #FFA500;
 }
 .reason-funeral{
-    background-color: #800080;
+    background-color: #1B11E1;
 }
 .reason-refused{
-    background-color: #FF0000;
+    background-color: #D05B5B;
 }
 .reason-knowone-home-or-missed{
-    background-color: #800080;
+    background-color: #C27344;
 }
-.reason-other, .total-structures{
-    background-color: #800080;
+.total-structures{
+    background-color: #FFA500
 }
-.reason-sprayed, .reason-total-visited{
+.reason-other{
+    background-color: #6C696B;
+}
+.reason-total-visited {
+    background-color: #C27344;
+}
+.reason-sprayed {
     background-color: #2ecc40;
 }
-.reason-not-sprayed, .reason-not-visited{
+.reason-not-visited {
+    background-color: #7075FA;
+}
+.reason-not-sprayed{
     background-color: #d82118;
 }
 .reason {

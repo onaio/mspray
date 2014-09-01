@@ -445,10 +445,10 @@ var App = {
             reason_colors = {
                 '1': '#800080',
                 '2': '#FFA500',
-                '3': '#800080',
-                '4': '#FF0000',
-                '5': '#800080',
-                '6': '#800080'
+                '3': '#1B11E1',
+                '4': '#D05B5B',
+                '5': '#C27344',
+                '6': '#6C696B'
             },
             target_area_stats = '';
 
@@ -500,6 +500,7 @@ var App = {
                 else
                     target_area_stats +=  "'>0</dt><dd >" + value + "</dd>";
             });
+            console.log("target area stats: " + target_area_stats)
             $('#target-area-stats-not-sprayed').empty().append(target_area_stats);
             $("#not-sprayed-reasons").show();
 
