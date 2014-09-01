@@ -588,7 +588,7 @@ var App = {
             bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6");
             // bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
 
-        App.map = L.mapbox.map('map', {maxZoom: 19});
+        App.map = L.mapbox.map('map');
         App.map.addLayer(google);
         // App.map.addLayer(bufferHouseholdsLayer);
         L.control.layers({
@@ -601,6 +601,7 @@ var App = {
         L.control.scale({
             position: 'bottomright'
         }).addTo(App.map);
+        App.map.options.maxZoom = 19
         App.buildLegend(App.map);
     },
 
