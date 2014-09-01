@@ -406,7 +406,7 @@ var App = {
 
                         var content = '<h4>'+ feature.properties.orig_fid +'</h4>' +
                             'HH_type: '+ feature.properties.hh_type;
-                        layer.bindPopup(content, { closeButton:true });
+                        // layer.bindPopup(content, { closeButton:true });
 
                         layer.on({
                             mouseover: function(e){
