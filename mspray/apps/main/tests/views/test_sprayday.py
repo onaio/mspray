@@ -125,4 +125,8 @@ class TestSprayDayViewSet(TestBase):
             self.assertEqual(response.status_code, 201)
             self.assertEqual(count + 1, SprayDay.objects.count())
 
-            # test double entry, should not add
+            request = self.factory.get('/')
+            response = self.view(request)
+            self.assertEqual(response.status_code, 200)
+            data = {'features': [], 'type': 'FeatureCollection'}
+            self.assertEqual(response.data, data)

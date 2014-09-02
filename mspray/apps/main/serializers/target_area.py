@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_day import DATA_FILTER
 from mspray.apps.main.models.target_area import TargetArea
 
 
@@ -34,34 +35,40 @@ class TargetAreaMixin(object):
     def get_visited_sprayed(self, obj):
         if obj:
             key = "%s_visited_sprayed" % obj.pk
-            query = "SELECT Count(*) as id FROM main_sprayday "\
-                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
-                " AND data->>'sprayed/was_sprayed' = 'yes'" % obj.geom
+            queryset = SprayDay.objects.filter(
+                geom__coveredby=obj.geom,
+                data__contains=DATA_FILTER
+            ).filter(data__contains='"sprayed/was_sprayed":"yes"')
 
-            return cached_queryset_count(key, SprayDay, query)
+            return cached_queryset_count(key, queryset)
 
     def get_visited_refused(self, obj):
         if obj:
             key = "%s_visited_refused" % obj.pk
-            query = "SELECT Count(*) as id FROM main_sprayday "\
-                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
-                " AND data->>'unsprayed/reason' = '4'" % obj.geom
+            queryset = SprayDay.objects.filter(
+                geom__coveredby=obj.geom,
+                data__contains=DATA_FILTER
+            ).filter(data__contains='"unsprayed/reason":"Refused"')
 
-            return cached_queryset_count(key, SprayDay, query)
+            return cached_queryset_count(key, queryset)
 
     def get_visited_other(self, obj):
         if obj:
             key = "%s_visited_other" % obj.pk
-            query = "SELECT Count(*) as id FROM main_sprayday "\
-                " WHERE ST_CoveredBy(geom, ST_GeomFromText('SRID=4326;%s'))"\
-                " AND data->>'unsprayed/reason' = '6'" % obj.geom
+            queryset = SprayDay.objects.filter(
+                geom__coveredby=obj.geom,
+                data__contains=DATA_FILTER
+            ).filter(data__contains='"unsprayed/reason":"Other"')
 
-            return cached_queryset_count(key, SprayDay, query)
+            return cached_queryset_count(key, queryset)
 
     def get_not_visited(self, obj):
         if obj:
             key = "%s_not_visited" % obj.pk
-            queryset = SprayDay.objects.filter(geom__coveredby=obj.geom)
+            queryset = SprayDay.objects.filter(
+                geom__coveredby=obj.geom,
+                data__contains=DATA_FILTER
+            )
             count = cached_queryset_count(key, queryset)
 
             return obj.houses - count
