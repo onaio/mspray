@@ -2,6 +2,7 @@
 from django.contrib.gis.db import models
 from jsonfield import JSONField
 
+DATA_FILTER = '"sprayable_structure":"yes"'
 DATA_ID_FIELD = '_id'
 DATE_FIELD = 'today'
 STRUCTURE_GPS_FIELD = 'structure_gps'

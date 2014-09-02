@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from mspray.apps.main.models.spray_day import DATA_FILTER
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
@@ -26,7 +27,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     - `ordering` - you can order by day field e.g `ordering=day` or \
     `ordering=-day`
     """
-    queryset = SprayDay.objects.all()
+    queryset = SprayDay.objects.filter(data__contains=DATA_FILTER)
     serializer_class = SprayDaySerializer
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('spray_date',)
@@ -70,7 +71,8 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.QUERY_PARAMS.get('dates_only') == 'true':
-            data = SprayDay.objects\
+            self.object_list = self.filter_queryset(self.get_queryset())
+            data = self.object_list\
                 .values_list('spray_date', flat=True).distinct()
 
             return Response(data)
