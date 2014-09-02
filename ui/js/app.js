@@ -297,7 +297,7 @@ var App = {
             }
         });
 
-        if(targetid !== '909001'){
+        if(targetid === '909001'){
             var target_area = L.mapbox.featureLayer()
                 .loadURL(uri.replace('.json', '.geojson'));
 
@@ -386,7 +386,7 @@ var App = {
         // $.getJSON(uri, function(data){
         //     console.log(data);
         // });
-        if(targetid !== '909001'){
+        if(targetid === '909001'){
             var households = L.mapbox.featureLayer().loadURL(uri);
 
             console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
@@ -587,16 +587,16 @@ var App = {
         }
         var google = new L.Google(),
             bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6");
-            // bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
+            bufferHouseholdsLayer = L.mapbox.tileLayer('ona.j6c49d56');
 
         App.map = L.mapbox.map('map');
         App.map.addLayer(google);
-        // App.map.addLayer(bufferHouseholdsLayer);
+        App.map.addLayer(bufferHouseholdsLayer);
         L.control.layers({
             'Google':google,
             'Bing':bing
         }, {
-            // 'buffershouseholds': bufferHouseholdsLayer
+            'buffershouseholds': bufferHouseholdsLayer
         }).addTo(App.map);
         L.control.locate().addTo(App.map);
         L.control.scale({
