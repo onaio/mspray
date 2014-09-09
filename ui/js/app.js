@@ -52,15 +52,15 @@ var App = {
     },
 
     getHouseholdsFor: function (layer) {
-        var uri = this.HOUSEHOLD_URI;
-        post_data = {in_bbox: layer.getBounds().toBBoxString()};
-        $.getJSON(uri, post_data, function(data){
+        var uri = this.HOUSEHOLD_URI,
+            post_data = {in_bbox: layer.getBounds().toBBoxString()};
+        $.getJSON(uri, post_data, function (data) {
             console.log(data);
         });
     },
 
-    getSprayCount: function (day){
-        var counter = 0, i =0;
+    getSprayCount: function (day) {
+        var counter = 0, i = 0;
         for (; i < points.features.length; i++){
             if(points.features[i].properties.day === day) {
                 counter+=1;
@@ -95,7 +95,7 @@ var App = {
                     $('.info-toggle').hide();
                     $('.info-panel').hide();
 
-                    $("#map, #spray_date_picker, #map-legend").hide();
+                    $("#map, #spray_date_picker, #map-legend, #target-area-stats-item").hide();
                     $("#district_table").show();
 
                     var dist_name = this.href.split('#!')[1];
@@ -615,7 +615,7 @@ var App = {
 
         if(current_target_area != this.defaultTargetArea){
             App.loadMap();
-            $('#map, #spray_date_picker, #map-legend').show();
+            $('#map, #spray_date_picker, #map-legend, #target-area-stats-item').show();
             App.loadAreaData(App.map, current_target_area);
             console.log("Loading map for target", current_target_area);
         } else {
@@ -651,12 +651,10 @@ var App = {
     init: function (){
         $(document).ready(function(){
             var set_target_id, fragment, target_id,
-                infopanel = $(".info-panel"),
-                infotoggle = $('.info-toggle'),
-                panelbtn = $('.panel-state');
+                infopanel = $(".info-panel");
 
             L.mapbox.accessToken = 'pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ';
-            $('#map, #spray_date_picker, #map-legend').hide();
+            $('#map, #spray_date_picker, #map-legend, #target-area-stats-item').hide();
 
             // load page info
             App.getDistricts();
@@ -674,7 +672,7 @@ var App = {
                     fragment = this.href.split('#!')[1];
                     target_id = fragment.split('/')[1];
 
-                    $("#map, #spray_date_picker, #map-legend").show();
+                    $("#map, #spray_date_picker, #map-legend, #target-area-stats-item").show();
                     $("#not-sprayed-reasons").hide();
                     App.loadMap();
                     $("#district_table").hide();
@@ -687,42 +685,11 @@ var App = {
                     }
                 });
 
-                if($("#map").is(":hidden")) {
-                    infotoggle.hide();
-                    infotoggle.removeClass('open');
-                    infopanel.hide();
-                } else {
-                    $('.info-toggle').show();
-                    infotoggle.removeClass('open');
-                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
-                    infopanel.removeClass('open');
-                    infopanel.hide();
-                }
             });
+            $('#target-area-stats-item').on('click', function() {
+                infopanel.toggle();
+            })
 
-            if($("#map").is(":hidden")) {
-                infotoggle.hide();
-                infopanel.hide();
-            } else {
-                infotoggle.show();
-                infopanel.hide();
-            }
-
-            // sidebar toggle
-            $(".info-toggle").click(function(){
-                if(infopanel.hasClass('open')){
-                    infotoggle.removeClass('open');
-                    panelbtn.html('<span class="glyphicon glyphicon-chevron-left"> </span> &nbsp; View Target Area Stats');
-                    infopanel.hide();
-                }
-                else{
-                    infotoggle.addClass('open');
-                    panelbtn.html('<span class="glyphicon glyphicon-remove"> </span>');
-                    infopanel.show();
-                }
-
-                infopanel.toggleClass('open');
-            });
         });
     },
 
