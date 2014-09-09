@@ -52,15 +52,15 @@ var App = {
     },
 
     getHouseholdsFor: function (layer) {
-        var uri = this.HOUSEHOLD_URI;
-        post_data = {in_bbox: layer.getBounds().toBBoxString()};
-        $.getJSON(uri, post_data, function(data){
+        var uri = this.HOUSEHOLD_URI,
+            post_data = {in_bbox: layer.getBounds().toBBoxString()};
+        $.getJSON(uri, post_data, function (data) {
             console.log(data);
         });
     },
 
-    getSprayCount: function (day){
-        var counter = 0, i =0;
+    getSprayCount: function (day) {
+        var counter = 0, i = 0;
         for (; i < points.features.length; i++){
             if(points.features[i].properties.day === day) {
                 counter+=1;
