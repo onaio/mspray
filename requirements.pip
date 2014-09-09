@@ -1,7 +1,6 @@
 django
 jsonfield
 psycopg2
-south
 django_nose
 djangorestframework-gis
 django-cors-headers

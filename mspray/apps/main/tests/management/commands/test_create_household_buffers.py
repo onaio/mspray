@@ -13,4 +13,4 @@ class TestCreateHouseholdBuffers(TestBase):
         self.assertEqual(HouseholdsBuffer.objects.count(), count + 23)
 
         call_command('create_household_buffers', distance=10, recreate=True)
-        self.assertEqual(HouseholdsBuffer.objects.count(), count + 96)
+        self.assertEqual(HouseholdsBuffer.objects.count(), count + 97)

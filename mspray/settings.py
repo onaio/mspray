@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'corsheaders',
     'django_nose',
     'rest_framework',
-    'south',
     'mspray.apps.main'
 )
 

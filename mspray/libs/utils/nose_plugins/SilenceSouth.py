@@ -8,4 +8,5 @@ class SilenceSouth(Plugin):
 
     def configure(self, options, conf):
         super(SilenceSouth, self).configure(options, conf)
-        logging.getLogger('south').setLevel(self.south_logging_level)
+        logger = logging.getLogger('django.db.backends.schema')
+        logger.setLevel(self.south_logging_level)

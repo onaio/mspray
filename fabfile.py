@@ -113,8 +113,6 @@ def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
 
         with cd(env.code_src):
             run_in_virtualenv('pip3 install -r requirements.pip')
-            run_in_virtualenv("python3 manage.py syncdb --noinput"
-                              " --settings='%s'" % env.django_module)
             run_in_virtualenv("python3 manage.py migrate --settings='%s'"
                               % env.django_module)
             run_in_virtualenv("python3 manage.py collectstatic --noinput"
@@ -142,8 +140,6 @@ def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd"):
 
         with cd(env.code_src):
             run_in_virtualenv('pip3 install -r requirements.pip --upgrade')
-            run_in_virtualenv("python3 manage.py syncdb --noinput"
-                              " --settings='%s'" % env.django_module)
             run_in_virtualenv("python3 manage.py migrate --settings='%s'"
                               % env.django_module)
             run_in_virtualenv("python3 manage.py collectstatic --noinput"
