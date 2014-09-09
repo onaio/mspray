@@ -72,22 +72,29 @@ def load_sprayday_layer_mapping(shp_file, verbose=False):
     load_layer_mapping(SprayDay, shp_file, sprayday_mapping, verbose)
 
 
-def set_household_buffer(distance=15):
+def set_household_buffer(distance=15, wkt=None):
     cursor = connection.cursor()
+    where = ""
+    if wkt is not None:
+        where = "WHERE ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" \
+            % wkt
 
     cursor.execute(
         "UPDATE main_household SET bgeom = ST_GeomFromText(ST_AsText("
-        "ST_Buffer(geography(geom), %s)), 4326);" % distance)
+        "ST_Buffer(geography(geom), %s)), 4326) %s;" % (distance, where))
 
 
 def create_households_buffer(distance=15, recreate=False, target=None):
     ta = None
     ta_qs = TargetArea.objects.filter()
-    if target:
-        ta = TargetArea.objects.get(ranks=target)
-        ta_qs = ta_qs.filter(pk=ta.pk)
+    wkt = None
 
-    set_household_buffer(distance)
+    if target:
+        ta = TargetArea.objects.get(rank_house=target)
+        ta_qs = ta_qs.filter(pk=ta.pk)
+        wkt = ta.geom.wkt
+
+    set_household_buffer(distance, wkt)
 
     if recreate:
         buffer_qs = HouseholdsBuffer.objects.all()
