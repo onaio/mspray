@@ -150,7 +150,7 @@ var App = {
     getTargetAreas: function(district_name){
         var uri = this.DISTRICT_URI + "?district=" + district_name,
             target_list = $('#target_areas_list'), c,
-            target_table = $('#target_table tbody'),
+            target_table = $('table#target_table tbody'),
             target_list_content = "",
             target_table_content = "" ;
 
@@ -213,22 +213,28 @@ var App = {
                             '<td>' +  visited_other +  ' (' + App.calculatePercentage(visited_other, structures) + ')</td>' +
                             '<td>' +  not_visited +  ' (' + App.calculatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
-                    //Create a table
-
                 }
-                target_list.append(target_list_content);
-                target_table.append(target_table_content);
-                $('table#target_areas tbody').empty().append(target_table_content);
-                $('table#target_areas tfoot').empty().append(
-                    "<tr><td> Totals </td>" +
+                target_table_content_total = "<tr><td> Totals </td>" +
                     "<td><b>" + agg_structures + "</b></td>" +
                     "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
-                    "</tr>"
-                );
+                    "</tr>";
+                target_list.append(target_list_content);
+
+                var promise = new Promise(function(resolve, reject) {
+                    $('table#target_areas tbody').empty().prepend(
+                        target_table_content
+                    )
+                    resolve($('table#target_areas tbody'));
+                });
+
+                promise.then(function(selector) {
+                    selector.prepend(target_table_content_total)
+                });
+
                 $('table#target_areas').table().data( "table" ).refresh();
                 $('table#target_areas').table().sortable('sortBy', null, 'asc');
                 $('h1#district-name').text("District:" + district_name);
