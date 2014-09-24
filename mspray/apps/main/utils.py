@@ -29,6 +29,8 @@ def geojson_from_gps_string(geolocation):
         raise ValidationError('Expecting a a string for gps')
 
     geolocation = [float(p) for p in geolocation.split()[:2]]
+    geolocation.reverse()
+
     return json.dumps(
         {'type': 'point', 'coordinates': geolocation})
 
@@ -143,4 +145,4 @@ def delete_cached_target_area_keys(sprayday):
         keys = "%(key)s_not_visited %(key)s_visited_other "\
             "%(key)s_visited_refused %(key)s_visited_sprayed "\
             "%(key)s_visited_total" % {'key': t.pk}
-        cache.delete_many(keys)
+        cache.delete_many(keys.split())
