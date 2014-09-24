@@ -28,11 +28,11 @@ class SprayDaySerializer(GeoFeatureModelSerializer):
 
     def get_spray_operator(self, obj):
         if obj:
-            return obj.data.get('sprayed/spray_operator_name')
+            return obj.data.get('sprayed/sprayop_name')
 
     def get_spray_operator_code(self, obj):
         if obj:
-            return obj.data.get('sprayed/spray_operator_code')
+            return obj.data.get('sprayed/sprayop_code')
 
     def get_irs_sticker_num(self, obj):
         if obj:

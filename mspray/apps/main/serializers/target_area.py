@@ -3,7 +3,6 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mspray.apps.main.models.spray_day import SprayDay
-from mspray.apps.main.models.spray_day import DATA_FILTER
 from mspray.apps.main.models.target_area import TargetArea
 
 
@@ -36,8 +35,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_sprayed" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=obj.geom,
-                data__contains=DATA_FILTER
+                geom__coveredby=obj.geom
             ).filter(data__contains='"sprayed/was_sprayed":"yes"')
 
             return cached_queryset_count(key, queryset)
@@ -46,8 +44,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_refused" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=obj.geom,
-                data__contains=DATA_FILTER
+                geom__coveredby=obj.geom
             ).filter(data__contains='"unsprayed/reason":"Refused"')
 
             return cached_queryset_count(key, queryset)
@@ -56,8 +53,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_other" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=obj.geom,
-                data__contains=DATA_FILTER
+                geom__coveredby=obj.geom
             ).filter(data__contains='"unsprayed/reason":"Other"')
 
             return cached_queryset_count(key, queryset)
@@ -66,8 +62,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_not_visited" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=obj.geom,
-                data__contains=DATA_FILTER
+                geom__coveredby=obj.geom
             )
             count = cached_queryset_count(key, queryset)
 
