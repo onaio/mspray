@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
 
@@ -11,6 +12,7 @@ class SprayDaySerializer(GeoFeatureModelSerializer):
     spray_operator_code = serializers.SerializerMethodField(
         'get_spray_operator_code')
     irs_sticker_num = serializers.SerializerMethodField('get_irs_sticker_num')
+    geom = GeometryField(source='geom')
 
     class Meta:
         model = SprayDay

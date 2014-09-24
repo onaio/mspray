@@ -1,6 +1,7 @@
 from django.core.cache import cache
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
@@ -97,6 +98,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     visited_refused = serializers.SerializerMethodField('get_visited_refused')
     visited_other = serializers.SerializerMethodField('get_visited_other')
     not_visited = serializers.SerializerMethodField('get_not_visited')
+    geom = GeometryField(source='geom')
 
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
