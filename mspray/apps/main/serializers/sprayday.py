@@ -26,7 +26,11 @@ class SprayDaySerializer(GeoFeatureModelSerializer):
 
     def get_reason(self, obj):
         if obj:
-            return obj.data.get('unsprayed/reason')
+            reason = obj.data.get('unsprayed/reason')
+            if isinstance(reason, str):
+                reason = reason.lower()
+
+            return reason
 
     def get_spray_operator(self, obj):
         if obj:

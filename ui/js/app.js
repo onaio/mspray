@@ -435,20 +435,20 @@ var App = {
         var sprayed = L.mapbox.featureLayer().loadURL(url),
             sprayed_status = {}, reason_obj = {},
             reasons = {
-                '1': 'sick',
-                '2': 'locked',
-                '3': 'funeral',
-                '4': 'refused',
-                '5': 'knowone home or missed',
-                '6': 'other'
+                'sick': 'sick',
+                'locked': 'locked',
+                'funeral': 'funeral',
+                'refused': 'refused',
+                'no one home/missed': 'no one home/missed',
+                'other': 'other'
             },
             reason_colors = {
-                '1': '#800080',
-                '2': '#FFA500',
-                '3': '#1B11E1',
-                '4': '#D05B5B',
-                '5': '#C27344',
-                '6': '#6C696B'
+                'sick': '#800080',
+                'locked': '#FFA500',
+                'funeral': '#1B11E1',
+                'refused': '#D05B5B',
+                'no one home/missed': '#C27344',
+                'other': '#6C696B'
             },
             target_area_stats = '';
 
