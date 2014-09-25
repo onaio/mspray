@@ -5,7 +5,6 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_day import SprayDay
-from mspray.apps.main.models.spray_day import DATA_FILTER
 
 ZERO_COLOR = '#CCCCCC'
 _1_COLOR = '#FF4136'
@@ -38,8 +37,7 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
 
             obj._cache_spray_points = \
                 SprayDay.objects.filter(
-                    geom__coveredby=obj.geom,
-                    data__contains=DATA_FILTER
+                    geom__coveredby=obj.geom
                 ).count()
 
             return obj._cache_spray_points
