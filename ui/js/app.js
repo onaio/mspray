@@ -500,7 +500,7 @@ var App = {
                 else
                     target_area_stats +=  "'>0</dt><dd >" + value + "</dd>";
             });
-            console.log("target area stats: " + target_area_stats)
+            console.log("target area stats: " + target_area_stats);
             $('#target-area-stats-not-sprayed').empty().append(target_area_stats);
             $("#not-sprayed-reasons").show();
 
@@ -525,6 +525,7 @@ var App = {
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
+        this.loadSprayPoints(map, '', targetid);
     },
 
     drawCircle: function(percent, circle_id) {
@@ -602,7 +603,7 @@ var App = {
         L.control.scale({
             position: 'bottomright'
         }).addTo(App.map);
-        App.map.options.maxZoom = 19
+        App.map.options.maxZoom = 19;
         App.buildLegend(App.map);
     },
 
@@ -688,7 +689,7 @@ var App = {
             });
             $('#target-area-stats-item').on('click', function() {
                 infopanel.toggle();
-            })
+            });
 
         });
     },
@@ -696,7 +697,9 @@ var App = {
     load_spray_days_by_date: function(event){
         event.preventDefault();
         var sprayday = this.href.split('#')[1], dt, dt_label;
+
         App.loadSprayPoints(App.map, sprayday, App.getCurrentTargetArea());
+
         if (sprayday === "") {
             $('.sprayday_label').text("All");
             $('.day_label').text("All");
