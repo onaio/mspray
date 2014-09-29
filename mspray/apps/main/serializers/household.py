@@ -35,10 +35,12 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
             if hasattr(obj, '_cache_spray_points'):
                 return obj._cache_spray_points
 
-            obj._cache_spray_points = \
-                SprayDay.objects.filter(
-                    geom__coveredby=obj.geom
-                ).count()
+            queryset = SprayDay.objects.filter(geom__coveredby=obj.geom)
+            request = self.context.get('request')
+            if request and request.GET.get('spray_date'):
+                spray_date = request.GET.get('spray_date')
+                queryset = queryset.filter(spray_date=spray_date)
+            obj._cache_spray_points = queryset.count()
 
             return obj._cache_spray_points
 

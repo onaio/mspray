@@ -332,23 +332,27 @@ var App = {
 
     },
 
-    loadBufferAreas: function(map, targetid) {
+    loadBufferAreas: function(map, targetid, day) {
         if(targetid === undefined){
             return;
         }
-        var hh_buffers = L.mapbox.featureLayer()
-            .loadURL(App.BUFFER_URI + "?target_area=" + targetid);
+        url = App.BUFFER_URI + "?target_area=" + targetid;
+        if(day !== undefined){
+            url += '&spray_date=' + day;
+        }
+        var hh_buffers = L.mapbox.featureLayer().loadURL(url);
 
-        console.log('BUFFER_URI: ' + App.BUFFER_URI + "?target_area=" + targetid);
+        console.log(url);
 
-        this.bufferLayer = [];
+        if (App.bufferLayer !== undefined)
+            App.map.removeLayer(App.bufferLayer); // reset layer
 
         hh_buffers.on('ready', function(){
             var geojson = hh_buffers.getGeoJSON();
             // bounds = hh_buffers.getBounds();
             // map.fitBounds(bounds);
 
-            this.bufferLayer = L.geoJson(geojson, {
+            App.bufferLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     return L.circleMarker(latlng, App.hhOptions);
                 },
@@ -374,7 +378,7 @@ var App = {
                 }
             }).addTo(map);
 
-            this.bufferLayer.setZIndex(60);
+            App.bufferLayer.setZIndex(60);
         });
     },
 
@@ -424,7 +428,7 @@ var App = {
         }
     },
 
-    loadSprayPoints: function (map, day, targetid) {
+    loadSprayPoints: function (map, targetid, day) {
         if(targetid === undefined){
             return;
         }
@@ -525,7 +529,7 @@ var App = {
         this.loadTargetArea(map, targetid);
         this.loadBufferAreas(map, targetid);
         this.loadHouseholds(map, targetid);
-        this.loadSprayPoints(map, '', targetid);
+        this.loadSprayPoints(map, targetid, '');
     },
 
     drawCircle: function(percent, circle_id) {
@@ -698,7 +702,8 @@ var App = {
         event.preventDefault();
         var sprayday = this.href.split('#')[1], dt, dt_label;
 
-        App.loadSprayPoints(App.map, sprayday, App.getCurrentTargetArea());
+        App.loadSprayPoints(App.map, App.getCurrentTargetArea(), sprayday);
+        App.loadBufferAreas(App.map, App.getCurrentTargetArea(), sprayday);
 
         if (sprayday === "") {
             $('.sprayday_label').text("All");
