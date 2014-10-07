@@ -603,7 +603,7 @@ var App = {
         }, {
             'buffershouseholds': bufferHouseholdsLayer
         }).addTo(App.map);
-        L.control.locate().addTo(App.map);
+        L.control.locate({locateOptions: {enableHighAccuracy: true, maximumAge: 0}}).addTo(App.map);
         L.control.scale({
             position: 'bottomright'
         }).addTo(App.map);
