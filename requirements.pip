@@ -10,8 +10,6 @@ python3-memcached
 # dev
 coverage
 flake8
-ipython
-ipdb
 
 # deployment
 uwsgi
