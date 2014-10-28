@@ -13,6 +13,7 @@ var App = {
     targetLayer: [],
     hhLayer: [],
     bufferLayer: [],
+    allDistricts: [],
     housesCount: 0,
     sprayCount: 0,
 
@@ -85,9 +86,10 @@ var App = {
 
                         // dist_data = '<li><a href="#!'+ dist_name +'">'+ dist_name +'</a></li>';
                         dist_data = '<li><a href="/#!' + dist_name +'">'+ dist_name +'</a></li>';
-
+                        App.allDistricts.push(dist_name);
                     d_list.append(dist_data);
                 }
+                d_list.prepend('<li><a href="/#!All">All</a></li>');
 
                 var district = d_list.find('li a');
 
@@ -103,7 +105,11 @@ var App = {
                     $('.dist_label').text('District : ' + dist_name);
                     $('.target_label').text('Target Area: Select');
 
-                    App.getTargetAreas(dist_name);
+                    if (dist_name === "All") {
+                        App.getTargetAreasAggregate()
+                    } else {
+                        App.getTargetAreas(dist_name);
+                    }
 
                     //Show districts modal
                     // $('.modal-div').fadeIn(300);
@@ -111,6 +117,11 @@ var App = {
             },
             error: function(){
                 console.log('Sorry, could not retrieve districts');
+            }
+        }).done(function() {
+            if (location.hash.indexOf('All') > 0) {
+                $('.progress-spinner').hide();
+                App.getTargetAreasAggregate()
             }
         });
     },
@@ -148,6 +159,9 @@ var App = {
     },
 
     getTargetAreas: function(district_name){
+        if (district_name === "All") {
+            return
+        }
         var uri = this.DISTRICT_URI + "?district=" + district_name,
             target_list = $('#target_areas_list'), c,
             target_table = $('#target_table tbody'),
@@ -155,6 +169,7 @@ var App = {
             target_table_content = "" ;
 
             // reset containers
+            $('#target_areas thead tr th :first').text("TARGET AREA")
             target_list.empty();
             target_table.empty();
 
@@ -237,6 +252,60 @@ var App = {
                 console.log('Sorry, could not retrieve target areas');
             }
         });
+    },
+
+    getTargetAreasAggregate: function(){
+        $('h1#district-name').text("District: All");
+        $('#target_areas thead tr th :first').text("DISTRICT")
+        $('table#target_areas tbody, table#target_areas tfoot').empty();
+        for(var index in App.allDistricts){
+            (function(index){
+                var district_name = App.allDistricts[index],
+                    uri = App.DISTRICT_URI + "?district=" + district_name;
+                    $.ajax({
+                        method: 'get',
+                        url: uri,
+                        success: function(data) {
+                            var agg_structures = 0,
+                                agg_visited_total = 0,
+                                agg_visited_sprayed = 0,
+                                agg_visited_refused =  0,
+                                agg_visited_other = 0,
+                                agg_not_visited = 0,
+                                totals = [],
+                                percentages = [];
+
+                            for(c = 0; c < data.length; c++){
+                                var list_data = data[c],
+                                    structures = list_data.structures,
+                                    visited_total = list_data.visited_total,
+                                    visited_sprayed = list_data.visited_sprayed,
+                                    visited_refused = list_data.visited_refused,
+                                    visited_other = list_data.visited_other,
+                                    not_visited = list_data.not_visited, radix = 10;
+
+                                agg_structures += parseInt(structures, radix);
+                                agg_visited_total += parseInt(visited_total, radix);
+                                agg_visited_sprayed += parseInt(visited_sprayed, radix);
+                                agg_visited_refused += parseInt(visited_refused, radix);
+                                agg_visited_other += parseInt(visited_other, radix);
+                                agg_not_visited += parseInt(not_visited, radix);
+                            }
+
+                            $('table#target_areas tbody').append(
+                                "<tr><td>"+ district_name +"</td>" +
+                                "<td><b>" + agg_structures + "</b></td>" +
+                                "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
+                                "<td><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
+                                "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
+                                "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
+                                "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
+                                "</tr>"
+                            );
+                        }
+                    });
+            })(index);
+        }
     },
 
     getResource: function() {
