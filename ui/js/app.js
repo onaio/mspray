@@ -258,6 +258,12 @@ var App = {
         $('h1#district-name').text("District: All");
         $('#target_areas thead tr th :first').text("DISTRICT")
         $('table#target_areas tbody, table#target_areas tfoot').empty();
+        var total_agg_structures = 0,
+            total_agg_visited_total = 0,
+            total_agg_visited_sprayed = 0,
+            total_agg_visited_refused =  0,
+            total_agg_visited_other = 0,
+            total_agg_not_visited = 0;
         for(var index in App.allDistricts){
             (function(index){
                 var district_name = App.allDistricts[index],
@@ -292,6 +298,13 @@ var App = {
                                 agg_not_visited += parseInt(not_visited, radix);
                             }
 
+                            total_agg_structures += agg_structures;
+                            total_agg_visited_total += agg_visited_total;
+                            total_agg_visited_sprayed += agg_visited_sprayed;
+                            total_agg_visited_refused += agg_visited_refused;
+                            total_agg_visited_other += agg_visited_other;
+                            total_agg_not_visited += agg_not_visited;
+
                             $('table#target_areas tbody').append(
                                 "<tr><td>"+ district_name +"</td>" +
                                 "<td><b>" + agg_structures + "</b></td>" +
@@ -302,6 +315,19 @@ var App = {
                                 "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
                                 "</tr>"
                             );
+
+                            if (index == (App.allDistricts.length - 1)) {
+                                $('table#target_areas tbody').append(
+                                    "<tr><td><b>Grand Total</b></td>" +
+                                    "<td><b>" + total_agg_structures + "</b></td>" +
+                                    "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
+                                    "</tr>"
+                                );
+                            }
                         }
                     });
             })(index);
