@@ -317,7 +317,7 @@ var App = {
                             );
 
                             if (index == (App.allDistricts.length - 1)) {
-                                $('table#target_areas tbody').append(
+                                $('table#target_areas tfoot').append(
                                     "<tr><td><b>Grand Total</b></td>" +
                                     "<td><b>" + total_agg_structures + "</b></td>" +
                                     "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
