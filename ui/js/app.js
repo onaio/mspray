@@ -119,7 +119,8 @@ var App = {
                 console.log('Sorry, could not retrieve districts');
             }
         }).done(function() {
-            if (location.hash.indexOf('All') > 0) {
+
+            if (location.hash.indexOf('All') > 0 || location.hash === "") {
                 $('.progress-spinner').hide();
                 App.getTargetAreasAggregate()
             }
@@ -307,24 +308,24 @@ var App = {
 
                             $('table#target_areas tbody').append(
                                 "<tr><td>"+ district_name +"</td>" +
-                                "<td><b>" + agg_structures + "</b></td>" +
-                                "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
-                                "<td><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
-                                "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
-                                "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
-                                "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
+                                "<td>" + agg_structures + "</td>" +
+                                "<td>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</td>" +
+                                "<td>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</td>" +
+                                "<td>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</td>" +
+                                "<td>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
+                                "<td>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</td>" +
                                 "</tr>"
                             );
 
                             if (index == (App.allDistricts.length - 1)) {
                                 $('table#target_areas tfoot').append(
-                                    "<tr><td><b>Grand Total</b></td>" +
-                                    "<td><b>" + total_agg_structures + "</b></td>" +
-                                    "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
+                                    "<tr><td>Grand Total</td>" +
+                                    "<td>" + total_agg_structures + "</td>" +
+                                    "<td>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</td>" +
+                                    "<td>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</td>" +
+                                    "<td>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</td>" +
+                                    "<td>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</td>" +
+                                    "<td>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</td>" +
                                     "</tr>"
                                 );
                             }
@@ -726,10 +727,7 @@ var App = {
             $('#map, #spray_date_picker, #map-legend, #target-area-stats-item').show();
             App.loadAreaData(App.map, current_target_area);
             console.log("Loading map for target", current_target_area);
-        } else {
-            this.getTargetAreas(current_district);
         }
-
     },
 
     buildLegend: function(map) {
