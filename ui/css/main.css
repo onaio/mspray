@@ -371,6 +371,9 @@ body{
 #not-sprayed-reasons{
     display: none;
 }
+.leaflet-control-locate a {
+    background-size: 310%;
+}
 
 
 /*responsive-controls: tablets and below*/
