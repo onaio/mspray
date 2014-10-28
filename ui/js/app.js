@@ -222,11 +222,11 @@ var App = {
 
                     target_table_content += '<tr>'+
                             '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
-                            '<td>' +  structures +  '</td>' +
+                            '<td class="lime-column">' +  structures +  '</td>' +
                             '<td>' +  visited_total +  ' (' + App.calculatePercentage(visited_total, structures) + ')</td>' +
-                            '<td>' +  visited_sprayed +  ' (' +  App.calculatePercentage(visited_sprayed, structures) + ')</td>' +
+                            '<td class="lime-column">' +  visited_sprayed +  ' (' +  App.calculatePercentage(visited_sprayed, structures) + ')</td>' +
                             '<td>' +  visited_refused +  ' (' + App.calculatePercentage(visited_refused, structures) + ')</td>' +
-                            '<td>' +  visited_other +  ' (' + App.calculatePercentage(visited_other, structures) + ')</td>' +
+                            '<td class="lime-column">' +  visited_other +  ' (' + App.calculatePercentage(visited_other, structures) + ')</td>' +
                             '<td>' +  not_visited +  ' (' + App.calculatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
                     //Create a table
@@ -237,11 +237,11 @@ var App = {
                 $('table#target_areas tbody').empty().append(target_table_content);
                 $('table#target_areas tfoot').empty().append(
                     "<tr><td> Totals </td>" +
-                    "<td><b>" + agg_structures + "</b></td>" +
+                    "<td class='lime-column'><b>" + agg_structures + "</b></td>" +
                     "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
+                    "<td class='lime-column'><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
+                    "<td class='lime-column'><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
                     "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
                     "</tr>"
                 );
@@ -307,12 +307,12 @@ var App = {
                             total_agg_not_visited += agg_not_visited;
 
                             $('table#target_areas tbody').append(
-                                "<tr><td>"+ district_name +"</td>" +
-                                "<td>" + agg_structures + "</td>" +
+                                "<tr><td><a href='/#!"+ district_name +"' class='distrct-links'>" + district_name + "</a></td>" +
+                                "<td class='lime-column'>" + agg_structures + "</td>" +
                                 "<td>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</td>" +
-                                "<td>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</td>" +
+                                "<td class='lime-column'>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</td>" +
                                 "<td>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</td>" +
-                                "<td>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
+                                "<td class='lime-column'>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
                                 "<td>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</td>" +
                                 "</tr>"
                             );
@@ -320,11 +320,11 @@ var App = {
                             if (index == (App.allDistricts.length - 1)) {
                                 $('table#target_areas tfoot').append(
                                     "<tr><td>Grand Total</td>" +
-                                    "<td>" + total_agg_structures + "</td>" +
+                                    "<td class='lime-column'>" + total_agg_structures + "</td>" +
                                     "<td>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</td>" +
-                                    "<td>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</td>" +
+                                    "<td class='lime-column'>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</td>" +
                                     "<td>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</td>" +
-                                    "<td>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</td>" +
+                                    "<td class='lime-column'>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</td>" +
                                     "<td>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</td>" +
                                     "</tr>"
                                 );
@@ -727,6 +727,9 @@ var App = {
             $('#map, #spray_date_picker, #map-legend, #target-area-stats-item').show();
             App.loadAreaData(App.map, current_target_area);
             console.log("Loading map for target", current_target_area);
+        } else {
+            console.log("current district >> " + current_district)
+            this.getTargetAreas(current_district);
         }
     },
 
@@ -776,18 +779,35 @@ var App = {
             $(document).ajaxComplete(function(){
                 $('#target_areas_list li a, #target_areas a').click(function(e){
                     fragment = this.href.split('#!')[1];
-                    target_id = fragment.split('/')[1];
 
-                    $("#map, #spray_date_picker, #map-legend, #target-area-stats-item").show();
-                    $("#not-sprayed-reasons").hide();
-                    App.loadMap();
-                    $("#district_table").hide();
+                    // Check if link has a target area segment
+                    if (fragment.indexOf('/') > 0) {
+                        // If it does, load map
+                        target_id = fragment.split('/')[1];
 
-                    if (target_id !== set_target_id) {
-                        set_target_id = target_id;
-                        $('.target_label').text('Target Area : ' + target_id);
-                        App.loadAreaData(App.map, target_id);
-                        console.log("Loading map for target", target_id);
+                        $("#map, #spray_date_picker, #map-legend, #target-area-stats-item").show();
+                        $("#not-sprayed-reasons").hide();
+                        App.loadMap();
+                        $("#district_table").hide();
+
+                        if (target_id !== set_target_id) {
+                            set_target_id = target_id;
+                            $('.target_label').text('Target Area : ' + target_id);
+                            App.loadAreaData(App.map, target_id);
+                            console.log("Loading map for target", target_id);
+                        }
+                    } else {
+                        // If it doesn't, the link should load a district table based on the district
+                        $('.info-toggle').hide();
+                        $('.info-panel').hide();
+
+                        $("#map, #spray_date_picker, #map-legend, #target-area-stats-item").hide();
+                        $("#district_table").show();
+
+                        $('.dist_label').text('District : ' + fragment);
+                        $('.target_label').text('Target Area: Select');
+
+                        App.getTargetAreas(fragment);
                     }
                 });
 

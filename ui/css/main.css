@@ -380,6 +380,14 @@ body{
     margin-top: -9px;
 }
 
+a.distrct-links {
+    color: #8CC63E;
+}
+
+.lime-column {
+    background-color: #f5f5f5;
+}
+
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
