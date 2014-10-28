@@ -375,6 +375,11 @@ body{
     background-size: 310%;
 }
 
+#mspray-logo {
+    height: 37px;
+    margin-top: -9px;
+}
+
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
