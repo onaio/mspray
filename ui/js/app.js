@@ -728,8 +728,10 @@ var App = {
             App.loadAreaData(App.map, current_target_area);
             console.log("Loading map for target", current_target_area);
         } else {
-            console.log("current district >> " + current_district)
-            this.getTargetAreas(current_district);
+            // Check if url has a district name
+            if (location.href.indexOf("#!") >= 0) {
+                this.getTargetAreas(current_district);
+            }
         }
     },
 
