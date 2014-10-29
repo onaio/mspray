@@ -331,6 +331,10 @@ body{
     opacity: 0.7;
 }
 
+.structures {
+    background-color: #ffdc00;
+    color: black;
+}
 .reason-sick{
     background-color: #800080;
 }
@@ -388,6 +392,10 @@ a.distrct-links {
     background-color: #f5f5f5;
 }
 
+.sprayed-structures-ratio {
+    padding-right: 3px !important;
+    padding-left: 3px !important;
+}
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {

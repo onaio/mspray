@@ -380,6 +380,8 @@ var App = {
                 App.housesCount = data[0].structures;
 
                 App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed');
+                $("#sprayed-count").text(data[0].visited_sprayed)
+                $("#structures-count").text(App.housesCount)
                 $('#circle-refused').text(App.calculatePercentage(data[0].visited_refused, App.housesCount));
                 $('#circle-other').text(App.calculatePercentage(data[0].visited_other, App.housesCount));
 
@@ -587,6 +589,12 @@ var App = {
                 }
             })
             .addTo(map);
+
+            App.housesCount
+
+            $('#target-area-stats-structures').empty().append(
+                "<dt class='reason structures'>" + ((App.housesCount === undefined) ? 0 : App.housesCount) + "</dt><dd>Structures</dd>"
+            );
 
             target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>";
             target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>";
