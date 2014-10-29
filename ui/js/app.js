@@ -319,13 +319,13 @@ var App = {
 
                             if (index == (App.allDistricts.length - 1)) {
                                 $('table#target_areas tfoot').append(
-                                    "<tr><td>Grand Total</td>" +
-                                    "<td class='lime-column'>" + total_agg_structures + "</td>" +
-                                    "<td>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</td>" +
-                                    "<td class='lime-column'>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</td>" +
-                                    "<td>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</td>" +
-                                    "<td class='lime-column'>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</td>" +
-                                    "<td>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</td>" +
+                                    "<tr><td><b>Grand Total</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_structures + "</b></td>" +
+                                    "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
                                     "</tr>"
                                 );
                             }
