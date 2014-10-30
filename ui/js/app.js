@@ -590,7 +590,6 @@ var App = {
             })
             .addTo(map);
 
-            App.housesCount
 
             $('#target-area-stats-structures').empty().append(
                 "<dt class='reason structures'>" + ((App.housesCount === undefined) ? 0 : App.housesCount) + "</dt><dd>Structures</dd>"
