@@ -11,7 +11,6 @@ DEPLOYMENTS = {
         'host_string':
         'ubuntu@107.20.178.211',
         'project': 'mspray',
-        'key_filename': os.path.expanduser('~/.ssh/ona.pem'),
         'django_module': 'mspray.preset.local_settings'
     },
 }
