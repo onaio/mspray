@@ -376,7 +376,11 @@ body{
     display: none;
 }
 .leaflet-control-locate a {
-    background-size: 310%;
+    background-size: 310% !important;
+    background-position: -3px -2px;
+}
+.leaflet-control-locate.active a {
+    background-position: -54px -2px;
 }
 
 #mspray-logo {
