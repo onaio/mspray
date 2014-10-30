@@ -380,8 +380,7 @@ var App = {
                 App.housesCount = data[0].structures;
 
                 App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed');
-                $("#sprayed-count").text(data[0].visited_sprayed)
-                $("#structures-count").text(App.housesCount)
+                $("#sprayed-ratio").text("(" + data[0].visited_sprayed + "/" + App.housesCount + ")")
                 $('#circle-refused').text(App.calculatePercentage(data[0].visited_refused, App.housesCount));
                 $('#circle-other').text(App.calculatePercentage(data[0].visited_other, App.housesCount));
 

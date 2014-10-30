@@ -298,6 +298,7 @@ body{
 #sprayed-label {
     font-size: 1.2em;
     margin-left: 20%;
+    margin-top: -10px;
 }
 
 .dl-horizontal dd {
@@ -396,9 +397,10 @@ a.distrct-links {
     background-color: #f5f5f5;
 }
 
-.sprayed-structures-ratio {
-    padding-right: 3px !important;
-    padding-left: 3px !important;
+#sprayed-ratio {
+    font-size: 12px;
+    padding-left: 32px;
+    margin-top: -15px;
 }
 
 /*responsive-controls: tablets and below*/
