@@ -152,9 +152,12 @@ var App = {
     },
 
     calculatePercentage: function(numerator, denominator, include_sign) {
-        if (numerator === undefined) numerator = 0;
-        if (denominator === undefined) numerator = 1;
-        var percentage = Math.round((numerator/denominator) * 100);
+        var _denominator = denominator,
+            _numerator = numerator,
+            percentage;
+        if (_numerator === undefined) _numerator = 0;
+        if (_denominator === undefined || _denominator === 0) _denominator = 1;
+        percentage = Math.round((_numerator/_denominator) * 100);
         if (include_sign === undefined) return percentage + "%";
         return percentage;
     },
@@ -196,6 +199,7 @@ var App = {
                 var agg_structures = 0,
                     agg_visited_total = 0,
                     agg_visited_sprayed = 0,
+                    agg_visited_not_sprayed = 0,
                     agg_visited_refused =  0,
                     agg_visited_other = 0,
                     agg_not_visited = 0;
@@ -206,6 +210,7 @@ var App = {
                         structures = list_data.structures,
                         visited_total = list_data.visited_total,
                         visited_sprayed = list_data.visited_sprayed,
+                        visited_not_sprayed = list_data.visited_not_sprayed,
                         visited_refused = list_data.visited_refused,
                         visited_other = list_data.visited_other,
                         not_visited = list_data.not_visited, radix = 10;
@@ -213,6 +218,7 @@ var App = {
                     agg_structures += parseInt(structures, radix);
                     agg_visited_total += parseInt(visited_total, radix);
                     agg_visited_sprayed += parseInt(visited_sprayed, radix);
+                    agg_visited_not_sprayed += parseInt(visited_not_sprayed, radix);
                     agg_visited_refused += parseInt(visited_refused, radix);
                     agg_visited_other += parseInt(visited_other, radix);
                     agg_not_visited += parseInt(not_visited, radix);
@@ -224,10 +230,11 @@ var App = {
                             '<th><a href="#!'+ district_name + "/" + target_id + '">'+ target_id +'</a></th>' +
                             '<td class="lime-column">' +  structures +  '</td>' +
                             '<td>' +  visited_total +  ' (' + App.calculatePercentage(visited_total, structures) + ')</td>' +
-                            '<td class="lime-column">' +  visited_sprayed +  ' (' +  App.calculatePercentage(visited_sprayed, structures) + ')</td>' +
-                            '<td>' +  visited_refused +  ' (' + App.calculatePercentage(visited_refused, structures) + ')</td>' +
-                            '<td class="lime-column">' +  visited_other +  ' (' + App.calculatePercentage(visited_other, structures) + ')</td>' +
-                            '<td>' +  not_visited +  ' (' + App.calculatePercentage(not_visited, structures) + ')</td>' +
+                            '<td class="lime-column">' +  visited_sprayed +  ' (' +  App.calculatePercentage(visited_sprayed, visited_total) + ')</td>' +
+                            '<td >' +  visited_not_sprayed +  ' (' +  App.calculatePercentage(visited_not_sprayed, visited_total) + ')</td>' +
+                            '<td class="lime-column">' +  visited_refused +  ' (' + App.calculatePercentage(visited_refused, visited_total) + ')</td>' +
+                            '<td>' +  visited_other +  ' (' + App.calculatePercentage(visited_other, visited_total) + ')</td>' +
+                            '<td class="lime-column">' +  not_visited +  ' (' + App.calculatePercentage(not_visited, structures) + ')</td>' +
                         '</tr>';
                     //Create a table
 
@@ -239,10 +246,11 @@ var App = {
                     "<tr><td> Totals </td>" +
                     "<td class='lime-column'><b>" + agg_structures + "</b></td>" +
                     "<td><b>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</b></td>" +
-                    "<td class='lime-column'><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</b></td>" +
-                    "<td class='lime-column'><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</b></td>" +
-                    "<td><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
+                    "<td class='lime-column'><b>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_visited_total) + ")</b></td>" +
+                    "<td><b>" + agg_visited_not_sprayed + ' (' + App.calculatePercentage(agg_visited_not_sprayed, agg_visited_total) + ")</b></td>" +
+                    "<td class='lime-column'><b>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_visited_total) + ")</b></td>" +
+                    "<td><b>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_visited_total) + ")</b></td>" +
+                    "<td class='lime-column'><b>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</b></td>" +
                     "</tr>"
                 );
                 $('table#target_areas').table().data( "table" ).refresh();
