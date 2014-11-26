@@ -324,10 +324,10 @@ var App = {
                                 "<tr><td><a href='/#!"+ district_name +"' class='distrct-links'>" + district_name + "</a></td>" +
                                 "<td class='lime-column'>" + agg_structures + "</td>" +
                                 "<td>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</td>" +
-                                "<td class='lime-column'>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</td>" +
-                                "<td>" + agg_visited_not_sprayed + ' (' + App.calculatePercentage(agg_visited_not_sprayed, agg_structures) + ")</td>" +
-                                "<td class='lime-column'>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</td>" +
-                                "<td>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
+                                "<td class='lime-column'>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_visited_total) + ")</td>" +
+                                "<td>" + agg_visited_not_sprayed + ' (' + App.calculatePercentage(agg_visited_not_sprayed, agg_visited_total) + ")</td>" +
+                                "<td class='lime-column'>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_visited_total) + ")</td>" +
+                                "<td>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_visited_total) + ")</td>" +
                                 "<td class='lime-column'>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</td>" +
                                 "</tr>"
                             );
@@ -337,10 +337,10 @@ var App = {
                                     "<tr><td><b>Grand Total</b></td>" +
                                     "<td class='lime-column'><b>" + total_agg_structures + "</b></td>" +
                                     "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
-                                    "<td class='lime-column'><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_not_sprayed + ' (' + App.calculatePercentage(total_agg_visited_not_sprayed, total_agg_structures) + ")</b></td>" +
-                                    "<td class='lime-column'><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_visited_total) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_not_sprayed + ' (' + App.calculatePercentage(total_agg_visited_not_sprayed, total_agg_visited_total) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_visited_total) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_visited_total) + ")</b></td>" +
                                     "<td class='lime-column'><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
                                     "</tr>"
                                 );
