@@ -206,6 +206,7 @@ var App = {
 
                 for(c = 0; c < data.length; c++){
                     var list_data = data[c];
+                    console.log(list_data)
                     var target_id = list_data.targetid,
                         structures = list_data.structures,
                         visited_total = list_data.visited_total,
@@ -270,6 +271,7 @@ var App = {
         var total_agg_structures = 0,
             total_agg_visited_total = 0,
             total_agg_visited_sprayed = 0,
+            total_agg_visited_not_sprayed = 0,
             total_agg_visited_refused =  0,
             total_agg_visited_other = 0,
             total_agg_not_visited = 0;
@@ -284,6 +286,7 @@ var App = {
                             var agg_structures = 0,
                                 agg_visited_total = 0,
                                 agg_visited_sprayed = 0,
+                                agg_visited_not_sprayed = 0,
                                 agg_visited_refused =  0,
                                 agg_visited_other = 0,
                                 agg_not_visited = 0,
@@ -295,6 +298,7 @@ var App = {
                                     structures = list_data.structures,
                                     visited_total = list_data.visited_total,
                                     visited_sprayed = list_data.visited_sprayed,
+                                    visited_not_sprayed = list_data.visited_not_sprayed,
                                     visited_refused = list_data.visited_refused,
                                     visited_other = list_data.visited_other,
                                     not_visited = list_data.not_visited, radix = 10;
@@ -302,6 +306,7 @@ var App = {
                                 agg_structures += parseInt(structures, radix);
                                 agg_visited_total += parseInt(visited_total, radix);
                                 agg_visited_sprayed += parseInt(visited_sprayed, radix);
+                                agg_visited_not_sprayed += parseInt(visited_not_sprayed, radix);
                                 agg_visited_refused += parseInt(visited_refused, radix);
                                 agg_visited_other += parseInt(visited_other, radix);
                                 agg_not_visited += parseInt(not_visited, radix);
@@ -310,6 +315,7 @@ var App = {
                             total_agg_structures += agg_structures;
                             total_agg_visited_total += agg_visited_total;
                             total_agg_visited_sprayed += agg_visited_sprayed;
+                            total_agg_visited_not_sprayed += agg_visited_not_sprayed;
                             total_agg_visited_refused += agg_visited_refused;
                             total_agg_visited_other += agg_visited_other;
                             total_agg_not_visited += agg_not_visited;
@@ -319,9 +325,10 @@ var App = {
                                 "<td class='lime-column'>" + agg_structures + "</td>" +
                                 "<td>" + agg_visited_total + ' (' + App.calculatePercentage(agg_visited_total, agg_structures) + ")</td>" +
                                 "<td class='lime-column'>" + agg_visited_sprayed + ' (' + App.calculatePercentage(agg_visited_sprayed, agg_structures) + ")</td>" +
-                                "<td>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</td>" +
-                                "<td class='lime-column'>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
-                                "<td>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</td>" +
+                                "<td>" + agg_visited_not_sprayed + ' (' + App.calculatePercentage(agg_visited_not_sprayed, agg_structures) + ")</td>" +
+                                "<td class='lime-column'>" + agg_visited_refused + ' (' + App.calculatePercentage(agg_visited_refused, agg_structures) + ")</td>" +
+                                "<td>" + agg_visited_other + ' (' + App.calculatePercentage(agg_visited_other, agg_structures) + ")</td>" +
+                                "<td class='lime-column'>" + agg_not_visited + ' (' + App.calculatePercentage(agg_not_visited, agg_structures) + ")</td>" +
                                 "</tr>"
                             );
 
@@ -331,11 +338,15 @@ var App = {
                                     "<td class='lime-column'><b>" + total_agg_structures + "</b></td>" +
                                     "<td><b>" + total_agg_visited_total + ' (' + App.calculatePercentage(total_agg_visited_total, total_agg_structures) + ")</b></td>" +
                                     "<td class='lime-column'><b>" + total_agg_visited_sprayed + ' (' + App.calculatePercentage(total_agg_visited_sprayed, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
-                                    "<td class='lime-column'><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
-                                    "<td><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_not_sprayed + ' (' + App.calculatePercentage(total_agg_visited_not_sprayed, total_agg_structures) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_visited_refused + ' (' + App.calculatePercentage(total_agg_visited_refused, total_agg_structures) + ")</b></td>" +
+                                    "<td><b>" + total_agg_visited_other + ' (' + App.calculatePercentage(total_agg_visited_other, total_agg_structures) + ")</b></td>" +
+                                    "<td class='lime-column'><b>" + total_agg_not_visited + ' (' + App.calculatePercentage(total_agg_not_visited, total_agg_structures) + ")</b></td>" +
                                     "</tr>"
                                 );
+                                $('table#target_areas').table().data( "table" ).refresh();
+                                $('table#target_areas').table().sortable('sortBy', null, 'asc');
+                                $('h1#district-name').text("District: All");
                             }
                         }
                     });
