@@ -73,7 +73,7 @@ class TargetAreaMixin(object):
                 Q(data__contains='"unsprayed/reason":"Sick"') |
                 Q(data__contains='"unsprayed/reason":"Funeral"') |
                 Q(data__contains='"unsprayed/reason":"Locked"') |
-                Q(data__contains='"unsprayed/reason":"No One Home/Missing"'))
+                Q(data__contains='"unsprayed/reason":"No one home/Missed"'))
 
             return cached_queryset_count(key, queryset)
 
