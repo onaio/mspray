@@ -16,6 +16,7 @@ var App = {
     allDistricts: [],
     housesCount: 0,
     sprayCount: 0,
+    visitedTotal: 0,
 
     targetOptions: {
         fillColor: '#999999',
@@ -206,7 +207,6 @@ var App = {
 
                 for(c = 0; c < data.length; c++){
                     var list_data = data[c];
-                    console.log(list_data)
                     var target_id = list_data.targetid,
                         structures = list_data.structures,
                         visited_total = list_data.visited_total,
@@ -397,11 +397,7 @@ var App = {
                 $('#target-area-label').text('Target Area : ' + targetid);
 
                 App.housesCount = data[0].structures;
-
-                App.drawCircle(App.calculatePercentage(data[0].visited_sprayed, App.housesCount, false), 'circle-sprayed');
-                $("#sprayed-ratio").text("(" + data[0].visited_sprayed + "/" + App.housesCount + ")")
-                $('#circle-refused').text(App.calculatePercentage(data[0].visited_refused, App.housesCount));
-                $('#circle-other').text(App.calculatePercentage(data[0].visited_other, App.housesCount));
+                App.visitedTotal = data[0].visited_total;
 
                 var bounds = data[0].bounds;
                 if(bounds.length == 4){
@@ -478,7 +474,7 @@ var App = {
                     return App.bufferOptions;
                 },
                 onEachFeature: function(feature, layer){
-                    var content = "<h4>"+ feature.properties.percentage_sprayed + '% (' + feature.properties.spray_points + '/' + feature.properties.num_households + ') Visited </h4>';
+                    var content = "<h4>"+ feature.properties.percentage_sprayed + '% (' + feature.properties.spray_points + '/' + feature.properties.num_households + ') Found </h4>';
                     layer.bindPopup(content, { closeButton:true });
 
                     layer.on({
@@ -618,12 +614,16 @@ var App = {
             $('#target-area-stats').empty().append(target_area_stats);
 
             target_area_stats = "";
+            total_of_other = 0;
             $.each(reasons, function(key, value) {
                 target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, '-');
-                if (reason_obj[value])
-                     target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
-                else
+                if (reason_obj[value]){
+                    target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
+                    if (value !== 'refused')
+                        total_of_other += reason_obj[value]
+                } else {
                     target_area_stats +=  "'>0</dt><dd >" + value + "</dd>";
+                }
             });
             console.log("target area stats: " + target_area_stats);
             $('#target-area-stats-not-sprayed').empty().append(target_area_stats);
@@ -633,11 +633,11 @@ var App = {
 
             $('.perc_label').text(App.sprayCount);
 
-            var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.housesCount, false),
-                refused_percentage = App.calculatePercentage(reason_obj.refused, App.housesCount),
-                other_percentage = App.calculatePercentage(reason_obj.other, App.housesCount);
+            var sprayed_percentage = App.calculatePercentage(sprayed_status.yes, App.visitedTotal, false),
+                refused_percentage = App.calculatePercentage(reason_obj.refused, App.visitedTotal),
+                other_percentage = App.calculatePercentage(total_of_other, App.visitedTotal);
 
-            console.log('SPRAY: ' + sprayed_status.yes + ' / HOUSE: '+ App.housesCount + ' = ' + sprayed_percentage);
+            console.log('SPRAY: ' + sprayed_status.yes + ' / VISTED: '+ App.visitedTotal + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed');
             $('#circle-refused').text(refused_percentage);
