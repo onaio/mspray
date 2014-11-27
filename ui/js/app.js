@@ -640,6 +640,7 @@ var App = {
             console.log('SPRAY: ' + sprayed_status.yes + ' / VISTED: '+ App.visitedTotal + ' = ' + sprayed_percentage);
 
             App.drawCircle(sprayed_percentage, 'circle-sprayed');
+            $("#sprayed-ratio").text("(" + sprayed_status.yes + "/" + App.visitedTotal + ")")
             $('#circle-refused').text(refused_percentage);
             $('#circle-other').text(other_percentage);
         });
