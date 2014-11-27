@@ -16,7 +16,8 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            target = get_object_or_404(TargetArea, rank_house=targetid)
+            target = get_object_or_404(TargetArea, rank_house=targetid,
+                                       targeted=TargetArea.TARGETED_VALUE)
             queryset = queryset.filter(geom__coveredby=target.geom)
 
         return queryset
