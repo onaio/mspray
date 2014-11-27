@@ -82,7 +82,7 @@ class TargetAreaMixin(object):
             key = "%s_not_visited" % obj.pk
             queryset = SprayDay.objects.filter(
                 geom__coveredby=obj.geom
-            )
+            ).filter(data__contains='"sprayable_structure":"yes"')
             count = cached_queryset_count(key, queryset)
 
             return obj.houses - count
