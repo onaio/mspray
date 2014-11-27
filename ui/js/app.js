@@ -580,7 +580,8 @@ var App = {
             App.sprayLayer = L.geoJson(geojson, {
                 pointToLayer: function (feature, latlng) {
                     if(feature.properties.sprayed === 'no'){
-                        App.sprayOptions.fillColor = reason_colors[feature.properties.reason];
+                        // App.sprayOptions.fillColor = reason_colors[feature.properties.reason];
+                        App.sprayOptions.fillColor = "#D82118";
                     } else{
                         App.sprayOptions.fillColor = "#2ECC40";
                     }
