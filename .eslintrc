@@ -1,0 +1,14 @@
+{
+    "parser": "espree",
+    "env": {
+        "browser": true,
+        "node": false
+    },
+    "settings": {
+        "ecmascript": 5,
+    },
+    "rules": {
+        "camelcase": 0,
+        "no-underscore-dangle": 0
+    }
+}
