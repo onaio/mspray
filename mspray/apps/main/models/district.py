@@ -11,3 +11,6 @@ class District(models.Model):
 
     class Meta:
         app_label = 'main'
+
+    def __str__(self):
+        return self.district_name
