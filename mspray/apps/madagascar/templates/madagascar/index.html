@@ -1,0 +1,28 @@
+<table>
+    <tr>
+        <thead>
+            <th>District</th>
+            <th>Targeted</th>
+            <th>Found</th>
+            <th>Sprayed</th>
+            <th>Not Sprayed</th>
+            <th>Not Sprayed - Refused</th>
+            <th>Not Sprayed - Others</th>
+            <th>Not Found</th>
+        </thead>
+    </tr>
+    <tbody>
+        {% for district in district_list %}
+        <tr>
+            <td>{{ district.district_name }}</td>
+            <td>{{ district.structures }}</td>
+            <td>{{ district.visited_total }}</td>
+            <td>{{ district.visited_sprayed }}</td>
+            <td>{{ district.visited_not_sprayed }}</td>
+            <td>{{ district.visited_refused }}</td>
+            <td>{{ district.visited_other }}</td>
+            <td>{{ district.not_visited }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -7,6 +7,7 @@ admin.autodiscover()
 from mspray.apps.main.views import (
     target_area, household, household_buffer, sprayday, indicators, districts
 )
+from mspray.apps.madagascar import views as madagascar
 
 router = routers.DefaultRouter(trailing_slash=False)
 
@@ -26,5 +27,6 @@ urlpatterns = patterns(
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),
+    url(r'madagascar/$', madagascar.index, name='index'),
     url(r'^admin/', include(admin.site.urls)),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
