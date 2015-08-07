@@ -29,9 +29,13 @@ class TargetAreaMixin(object):
 
     def get_visited_total(self, obj):
         if obj:
+            geom = TargetArea.objects.filter(
+                targeted=TargetArea.TARGETED_VALUE,
+                district_name__iexact=obj.district_name
+            ).collect()
             key = "%s_visited_total" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=obj.geom
+                geom__coveredby=geom
             ).filter(data__contains='"sprayable_structure":"yes"')
 
             return cached_queryset_count(key, queryset)
@@ -93,19 +97,19 @@ class TargetAreaMixin(object):
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
-    targetid = serializers.Field(source='rank_house')
-    structures = serializers.Field(source='houses')
-    visited_total = serializers.SerializerMethodField('get_visited_total')
-    visited_sprayed = serializers.SerializerMethodField('get_visited_sprayed')
-    visited_not_sprayed = serializers.SerializerMethodField(
-        'get_visited_not_sprayed')
-    visited_refused = serializers.SerializerMethodField('get_visited_refused')
-    visited_other = serializers.SerializerMethodField('get_visited_other')
-    not_visited = serializers.SerializerMethodField('get_not_visited')
-    bounds = serializers.SerializerMethodField('get_bounds')
+    targetid = serializers.ReadOnlyField(source='rank_house')
+    structures = serializers.ReadOnlyField(source='houses')
+    visited_total = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
+    not_visited = serializers.SerializerMethodField()
+    bounds = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
+        fields = ('targetid', 'district_name',
+                  'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds')
         model = TargetArea
