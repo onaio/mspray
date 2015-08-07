@@ -27,6 +27,6 @@ urlpatterns = patterns(
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),
-    url(r'madagascar/$', madagascar.index, name='index'),
+    url(r'madagascar/$', madagascar.IndexView.as_view(), name='index'),
     url(r'^admin/', include(admin.site.urls)),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
