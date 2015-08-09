@@ -1,4 +1,6 @@
-<table>
+{% extends 'madagascar/base.html' %}
+{% block content %}
+<table class="table table-striped">
     <tr>
         <thead>
             <th>District</th>
@@ -26,3 +28,4 @@
         {% endfor %}
     </tbody>
 </table>
+{% endblock %}
