@@ -19,7 +19,7 @@ class IndexView(View):
 
 
 class DistrictView(DetailView):
-    template_name = 'madagascar/index.html'
+    template_name = 'madagascar/district.html'
     model = District
     slug_field = 'district_name'
 
