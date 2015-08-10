@@ -3,15 +3,8 @@ from django.contrib.gis.db import models
 
 
 class TargetArea(models.Model):
-    targetid = models.FloatField(db_index=1)
-    predicted = models.FloatField(db_index=1)
-    predinc = models.FloatField(db_index=1)
-    ranks = models.FloatField(db_index=1)
-    houseranks = models.FloatField(db_index=1)
-    targeted = models.FloatField(db_index=1)
-    rank_house = models.CharField(db_index=1, max_length=50)
-    ranked_num = models.FloatField(db_index=1)
-    number_of = models.FloatField(db_index=1)
+    targetid = models.IntegerField(db_index=1)
+    targeted = models.IntegerField(db_index=1, default=1)
     district_name = models.CharField(max_length=254)
     houses = models.FloatField(db_index=1)
     geom = models.PolygonField(srid=4326)
@@ -40,4 +33,11 @@ targetarea_mapping = {
     'district_name': 'DISTRICT',
     'houses': 'Houses',
     'geom': 'POLYGON',
+}
+
+namibia_mapping = {
+    'targetid': 'UniqueID_1',
+    'district_name': 'HDist_1',
+    'houses': 'Count_12',
+    'geom': 'MULTIPOLYGON',
 }
