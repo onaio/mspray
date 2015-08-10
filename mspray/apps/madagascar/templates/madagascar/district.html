@@ -3,7 +3,7 @@
 <table class="table table-striped">
     <tr>
         <thead>
-            <th>District</th>
+            <th>Target Area</th>
             <th>Targeted</th>
             <th>Found</th>
             <th>Sprayed</th>
@@ -16,7 +16,7 @@
     <tbody>
         {% for district in district_list %}
         <tr>
-            <td><a href="{% url 'madagascar:district' district.district_name %}">{{ district.district_name }}</a></td>
+            <td><a href="{% url 'madagascar:district' district.district_name %}">{{ district.targetid }}</a></td>
             <td>{{ district.structures }}</td>
             <td>{{ district.visited_total }}</td>
             <td>{{ district.visited_sprayed }}</td>
