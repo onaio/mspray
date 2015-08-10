@@ -29,13 +29,9 @@ class TargetAreaMixin(object):
 
     def get_visited_total(self, obj):
         if obj:
-            geom = TargetArea.objects.filter(
-                targeted=TargetArea.TARGETED_VALUE,
-                district_name__iexact=obj.district_name
-            ).collect()
             key = "%s_visited_total" % obj.pk
             queryset = SprayDay.objects.filter(
-                geom__coveredby=geom
+                geom__coveredby=obj.geom
             ).filter(data__contains='"sprayable_structure":"yes"')
 
             return cached_queryset_count(key, queryset)
