@@ -3,13 +3,13 @@
     "use strict";
 
     var App = {
-        // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-        SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-        DATES_URI: "http://api.mspray.onalabs.org/spraydays.json?dates_only=true",
-        BUFFER_URI: "http://api.mspray.onalabs.org/buffers.json",
-        TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
-        HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
-        DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
+        // SPRAY_DAYS_URI: "http://namibia-api.mspray.onalabs.org/spraydays.json",
+        SPRAY_DAYS_URI: "http://namibia-api.mspray.onalabs.org/spraydays.json",
+        DATES_URI: "http://namibia-api.mspray.onalabs.org/spraydays.json?dates_only=true",
+        BUFFER_URI: "http://namibia-api.mspray.onalabs.org/buffers.json",
+        TARGET_AREA_URI: "http://namibia-api.mspray.onalabs.org/targetareas.json",
+        HOUSEHOLD_URI: "http://namibia-api.mspray.onalabs.org/households.json",
+        DISTRICT_URI: "http://namibia-api.mspray.onalabs.org/districts.json",
 
         defaultDistrict: "Chienge",
         defaultTargetArea: 0,
@@ -402,7 +402,7 @@
                 }
             });
 
-            if(targetid === "909001"){
+            if(targetid !== "XXXXX"){
                 var target_area = L.mapbox.featureLayer()
                     .loadURL(uri.replace(".json", ".geojson"));
 
