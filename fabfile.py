@@ -9,7 +9,8 @@ DEPLOYMENTS = {
     'default': {
         'home': '/home/ubuntu/src',
         'host_string':
-        'ubuntu@107.20.178.211',
+        'ubuntu@52.28.222.219',
+        'key_filename': '/home/ukanga/.ssh/ona.pem',
         'project': 'mspray',
         'django_module': 'mspray.preset.local_settings'
     },
@@ -68,13 +69,14 @@ def change_local_settings(config_module, dbname, dbuser, dbpass,
 def system_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     setup_env(deployment_name)
     sudo('sh -c \'echo "deb http://apt.postgresql.org/pub/repos/apt/ '
-         'precise-pgdg main" > /etc/apt/sources.list.d/pgdg.list\'')
+         'trusty-pgdg main" > /etc/apt/sources.list.d/pgdg.list\'')
     sudo('wget --quiet -O - http://apt.postgresql.org/pub'
          '/repos/apt/ACCC4CF8.asc | apt-key add -')
     sudo('apt-get update')
     sudo('apt-get install -y nginx git python3 python3-setuptools'
          ' python3-dev binutils'
-         ' libproj-dev gdal-bin Postgresql-9.3 libpq-dev')
+         ' libproj-dev gdal-bin Postgresql-9.3 postgresql-9.3-postgis-2.1'
+         ' postgresql-9.3-postgis-2.1-scripts libpq-dev supervisor')
     sudo('easy_install3 pip')
     sudo('pip3 install virtualenvwrapper uwsgi')
     run('sudo -u postgres psql -U postgres -d postgres'
@@ -83,6 +85,8 @@ def system_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
         ' -c "CREATE DATABASE %s OWNER %s;"' % (dbuser, dbuser))
     run('sudo -u postgres psql -U postgres -d %s'
         ' -c "CREATE EXTENSION POSTGIS;"' % (dbuser))
+    run('sudo -u postgres psql -U postgres -d %s'
+        ' -c "CREATE EXTENSION POSTGIS_TOPOLOGY;"' % (dbuser))
 
 
 def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
@@ -105,7 +109,8 @@ def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     data = {
         'venv': env.virtualenv, 'project': env.project
     }
-    with prefix('WORKON_HOME=%(venv)s' % data):
+    with prefix('WORKON_HOME=%(venv)s '
+                'VIRTUALENVWRAPPER_PYTHON=`which python3`' % data):
         run('source `which virtualenvwrapper.sh`'
             ' && WORKON_HOME=%(venv)s mkvirtualenv -p  `which python3`'
             ' %(project)s' % data)
@@ -133,7 +138,8 @@ def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd"):
     data = {
         'venv': env.virtualenv, 'project': env.project
     }
-    with prefix('WORKON_HOME=%(venv)s' % data):
+    with prefix('WORKON_HOME=%(venv)s '
+                'VIRTUALENVWRAPPER_PYTHON=`which python3`' % data):
         run('source `which virtualenvwrapper.sh`'
             ' && WORKON_HOME=%(venv)s workon %(project)s' % data)
 
