@@ -20,7 +20,7 @@ class TargetAreaViewSet(viewsets.ReadOnlyModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            queryset = get_list_or_404(TargetArea, rank_house=targetid,
+            queryset = get_list_or_404(TargetArea, targetid=targetid,
                                        targeted=TargetArea.TARGETED_VALUE)
 
         return super(TargetAreaViewSet, self).filter_queryset(queryset)
