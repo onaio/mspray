@@ -23,7 +23,7 @@ CACHES = {
 
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
-    'mspray.onalabs.org',
-    'api.mspray.onalabs.org',
+    'PROJECT.mspray.onalabs.org',
+    'PROJECT.api.mspray.onalabs.org',
     'localhost:3000'
 )

@@ -11,7 +11,7 @@ DEPLOYMENTS = {
         'host_string':
         'ubuntu@52.28.222.219',
         'key_filename': '/home/ukanga/.ssh/ona.pem',
-        'project': 'mspray',
+        'project': 'namibia',
         'django_module': 'mspray.preset.local_settings'
     },
 }
@@ -64,6 +64,17 @@ def change_local_settings(config_module, dbname, dbuser, dbpass,
         files.sed(config_path, 'REPLACE_DB_USER', dbuser)
         files.sed(config_path, 'REPLACE_DB_PASSWORD', dbpass)
         files.sed(config_path, 'REPLACE_DB_HOST', dbhost)
+        files.sed(config_path, 'PROJECT', env.project)
+
+
+def db_create(deployment_name, dbname, dbuser):
+    setup_env(deployment_name)
+    run('sudo -u postgres psql -U postgres -d postgres'
+        ' -c "CREATE DATABASE %s OWNER %s;"' % (dbname, dbuser))
+    run('sudo -u postgres psql -U postgres -d %s'
+        ' -c "CREATE EXTENSION POSTGIS;"' % (dbname))
+    run('sudo -u postgres psql -U postgres -d %s'
+        ' -c "CREATE EXTENSION POSTGIS_TOPOLOGY;"' % (dbname))
 
 
 def system_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
@@ -81,31 +92,40 @@ def system_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
     sudo('pip3 install virtualenvwrapper uwsgi')
     run('sudo -u postgres psql -U postgres -d postgres'
         ' -c "CREATE USER %s with password \'%s\';"' % (dbuser, dbpass))
-    run('sudo -u postgres psql -U postgres -d postgres'
-        ' -c "CREATE DATABASE %s OWNER %s;"' % (dbuser, dbuser))
-    run('sudo -u postgres psql -U postgres -d %s'
-        ' -c "CREATE EXTENSION POSTGIS;"' % (dbuser))
-    run('sudo -u postgres psql -U postgres -d %s'
-        ' -c "CREATE EXTENSION POSTGIS_TOPOLOGY;"' % (dbuser))
+    db_create(deployment_name, dbuser, dbuser)
 
 
-def server_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd"):
+def server_setup(deployment_name, branch='master', dbuser='dbuser',
+                 dbpass="dbpwd", dbname='dbuser', port='8008'):
     setup_env(deployment_name)
 
     sudo('mkdir -p %s' % env.home)
     sudo('chown -R ubuntu %s' % env.home)
 
     with cd(env.home):
-        run('git clone git@github.com:onaio/mspray.git mspray'
-            ' || (cd mspray && git fetch && git checkout origin/master)')
+        run('git clone git@github.com:onaio/mspray.git {}'
+            ' || (cd {} && git fetch)'.format(
+                env.project, env.project
+            ))
+        run('cd {} && git checkout origin/{}'.format(env.project, branch))
 
     with lcd(current_working_dir):
-        change_local_settings(env.django_module, dbuser, dbuser, dbpass)
-
-        put('context/etc/nginx/sites-available/nginx.conf',
-            '/etc/nginx/conf.d/mspray.conf', use_sudo=True)
-        put('context/etc/supervisor/conf.d/mspray.conf',
-            '/etc/supervisor/conf.d/mspray.conf', use_sudo=True)
+        change_local_settings(env.django_module, dbname, dbuser, dbpass)
+        nginx_conf = '/etc/nginx/conf.d/%(project)s.conf' % env
+        put('context/etc/nginx/sites-available/nginx.conf', nginx_conf,
+            use_sudo=True)
+        files.sed(nginx_conf, 'PROJECT', env.project, use_sudo=True)
+        files.sed(nginx_conf, 'PORT', port, use_sudo=True)
+        supervisor_conf = '/etc/supervisor/conf.d/%(project)s.conf' % env
+        put('context/etc/supervisor/conf.d/mspray.conf', supervisor_conf,
+            use_sudo=True)
+        files.sed(supervisor_conf, 'PROJECT', env.project, use_sudo=True)
+        uwsgi_path = os.path.join(
+            env.code_src, 'mspray', 'preset', 'uwsgi.ini'
+        )
+        put('context/mspray/preset/uwsgi.ini', uwsgi_path)
+        files.sed(uwsgi_path, 'PROJECT', env.project)
+        files.sed(uwsgi_path, 'PORT', port)
     data = {
         'venv': env.virtualenv, 'project': env.project
     }
