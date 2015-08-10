@@ -14,7 +14,7 @@ _100_COLOR = '#2ECC40'
 
 
 class HouseholdSerializer(GeoFeatureModelSerializer):
-    geom = GeometryField(source='geom')
+    geom = GeometryField()
 
     class Meta:
         model = Household
@@ -22,9 +22,9 @@ class HouseholdSerializer(GeoFeatureModelSerializer):
 
 
 class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
-    spray_points = serializers.SerializerMethodField('get_spray_points')
+    spray_points = serializers.SerializerMethodField()
     percentage_sprayed = serializers.SerializerMethodField('get_perc_sprayed')
-    geom = GeometryField(source='geom')
+    geom = GeometryField()
 
     class Meta:
         model = HouseholdsBuffer

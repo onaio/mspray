@@ -6,13 +6,12 @@ from mspray.apps.main.models.spray_day import SprayDay
 
 
 class SprayDaySerializer(GeoFeatureModelSerializer):
-    sprayed = serializers.SerializerMethodField('get_sprayed')
-    reason = serializers.SerializerMethodField('get_reason')
-    spray_operator = serializers.SerializerMethodField('get_spray_operator')
-    spray_operator_code = serializers.SerializerMethodField(
-        'get_spray_operator_code')
-    irs_sticker_num = serializers.SerializerMethodField('get_irs_sticker_num')
-    geom = GeometryField(source='geom')
+    sprayed = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    spray_operator = serializers.SerializerMethodField()
+    spray_operator_code = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+    geom = GeometryField()
 
     class Meta:
         model = SprayDay
