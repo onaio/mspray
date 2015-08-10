@@ -6,7 +6,7 @@ class TargetArea(models.Model):
     targetid = models.IntegerField(db_index=1)
     targeted = models.IntegerField(db_index=1, default=1)
     district_name = models.CharField(max_length=254)
-    houses = models.FloatField(db_index=1)
+    houses = models.IntegerField(db_index=1)
     geom = models.MultiPolygonField(srid=4326)
     objects = models.GeoManager()
 
@@ -16,7 +16,7 @@ class TargetArea(models.Model):
         app_label = 'main'
 
     def __str__(self):
-        return '%s' % self.rank_house
+        return '{}_{}'.format(self.targetid, self.houses)
 
 
 # Auto-generated `LayerMapping` dictionary for TargetArea model
