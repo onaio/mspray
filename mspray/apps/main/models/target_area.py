@@ -7,7 +7,7 @@ class TargetArea(models.Model):
     targeted = models.IntegerField(db_index=1, default=1)
     district_name = models.CharField(max_length=254)
     houses = models.FloatField(db_index=1)
-    geom = models.PolygonField(srid=4326)
+    geom = models.MultiPolygonField(srid=4326)
     objects = models.GeoManager()
 
     TARGETED_VALUE = 1
