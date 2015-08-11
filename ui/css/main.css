@@ -458,6 +458,7 @@ a.distrct-links {
     color: black;
     background-color: transparent;
     border: none;
+    font-size: 20px;
 }
 .ta-label:before {
     border: none;
