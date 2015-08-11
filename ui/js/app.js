@@ -711,6 +711,7 @@
                 bufferHouseholdsLayer = L.mapbox.tileLayer("ona.j6c49d56");
 
             App.map = L.mapbox.map("map");
+            App.map.locate({ enableHighAccuracy: true });
             App.map.addLayer(google);
             App.map.addLayer(bufferHouseholdsLayer);
             L.control.layers({
