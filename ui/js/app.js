@@ -733,7 +733,8 @@
                 position: "bottomright"
             }).addTo(App.map);
             App.map.options.maxZoom = 19;
-            App.buildLegend(App.map);
+            // TODO: show legend optional config
+            // App.buildLegend(App.map);
         },
 
         getPageState: function(){
