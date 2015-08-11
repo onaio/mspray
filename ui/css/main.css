@@ -1,5 +1,5 @@
 body{
-    margin:0; padding:0; 
+    margin:0; padding:0;
     font:12px 'Open Sans', Arial;
 }
 
@@ -405,12 +405,12 @@ a.distrct-links {
 
 /*responsive-controls: tablets and below*/
 @media (max-width: 768px) {
-    
+
     /*legend*/
     #map-legend{
         width:10em;
     }
-    
+
     .legend{
         float:none;
         text-align:center!important;
@@ -418,7 +418,7 @@ a.distrct-links {
     .legend h2{
         margin:0 0 0.4em;
     }
-    
+
     .legend .circles-text-wrp *{
         font-size:0.9em;
     }
@@ -453,4 +453,12 @@ a.distrct-links {
     .small-legend-label {
         font-size: 1.3em;
     }
+}
+.ta-label {
+    color: black;
+    background-color: transparent;
+    border: none;
+}
+.ta-label:before {
+    border: none;
 }

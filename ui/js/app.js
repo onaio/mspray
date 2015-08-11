@@ -1,4 +1,5 @@
-/* global $ L Circles*/
+/* global $ L Circles global console */
+var k, mp;
 (function() {
     "use strict";
 
@@ -424,6 +425,11 @@
                             layer.bindPopup(content, {closeButton: true});
 
                             // console.log("Spray data: " + props.structures);
+                            var label = new L.Label({className: "ta-label"});
+                            label.setContent("" + props.targetid);
+                            label.setLatLng(layer.getBounds().getCenter());
+                            map.showLabel(label);
+                            k = label;
                         }
                     });
 
