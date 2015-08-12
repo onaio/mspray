@@ -710,6 +710,31 @@
             if (App.map !== undefined){
                 return;
             }
+            $('#my-location').click(function(e){
+                function onAccuratePositionError (e) {
+                    console.log("error: ", e.message);
+                }
+
+                function onAccuratePositionProgress (e) {
+                    console.log('event: ', e);
+                }
+
+                function onAccuratePositionFound (e) {
+                    var message = "Most accurate position found: " + e.accuracy;
+                    console.log('message: ', message);
+                    App.map.setView(e.latlng, 19);
+                    L.marker(e.latlng).addTo(App.map);
+                }
+                App.map.on('accuratepositionprogress', onAccuratePositionProgress);
+                App.map.on('accuratepositionfound', onAccuratePositionFound);
+                App.map.on('accuratepositionerror', onAccuratePositionError);
+
+                App.map.findAccuratePosition({
+                    maxWait: 20000,
+                    desiredAccuracy: 20
+                });
+            });
+
             var google = new L.Google(),
                 bing = new L.BingLayer("AuOGADooQT2MGfigXZmbgIOJ_Jts7glmpRAAWZU9WHYfvPFFZp0lmxqV5T86RVt6"),
                 bufferHouseholdsLayer = L.mapbox.tileLayer("ona.j6c49d56");
@@ -733,7 +758,9 @@
             //         watch: true
             //     }
             // };
-            L.control.locate().addTo(App.map);
+            L.control.locate({
+                locateOptions: { enableHighAccuracy: true }
+            }).addTo(App.map);
             L.control.scale({
                 position: "bottomright"
             }).addTo(App.map);
