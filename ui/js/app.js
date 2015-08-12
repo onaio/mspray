@@ -1,5 +1,4 @@
-/* global $ L Circles global console */
-var k, mp;
+/* global $ L Circles console */
 (function() {
     "use strict";
 
@@ -429,7 +428,6 @@ var k, mp;
                             label.setContent("" + props.targetid);
                             label.setLatLng(layer.getBounds().getCenter());
                             map.showLabel(label);
-                            k = label;
                         }
                     });
 
@@ -500,7 +498,7 @@ var k, mp;
             // $.getJSON(uri, function(data){
             //     console.log(data);
             // });
-            if(targetid === "909001"){
+            if(targetid !== "909001"){
                 var households = L.mapbox.featureLayer().loadURL(uri);
 
                 // console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
