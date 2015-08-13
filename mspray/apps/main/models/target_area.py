@@ -3,11 +3,13 @@ from django.contrib.gis.db import models
 
 
 class TargetArea(models.Model):
-    targetid = models.IntegerField(db_index=1)
+    targetid = models.CharField(db_index=1, max_length=254, unique=True)
     targeted = models.IntegerField(db_index=1, default=1)
     district_name = models.CharField(max_length=254)
     houses = models.IntegerField(db_index=1)
-    geom = models.MultiPolygonField(srid=4326)
+    geom = models.MultiPolygonField(srid=4326, null=True)
+    district = models.ForeignKey('District')
+
     objects = models.GeoManager()
 
     TARGETED_VALUE = 1
