@@ -11,7 +11,7 @@ DEPLOYMENTS = {
         'host_string':
         'ubuntu@52.28.222.219',
         'key_filename': '/home/ukanga/.ssh/ona.pem',
-        'project': 'namibia',
+        'project': 'madagascar',
         'django_module': 'mspray.preset.local_settings'
     },
 }
