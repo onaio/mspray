@@ -3,13 +3,13 @@
     "use strict";
 
     var App = {
-        // SPRAY_DAYS_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json",
-        SPRAY_DAYS_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json",
-        DATES_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json?dates_only=true",
-        BUFFER_URI: "http://namibia.api.mspray.onalabs.org/buffers.json",
-        TARGET_AREA_URI: "http://namibia.api.mspray.onalabs.org/targetareas.json",
-        HOUSEHOLD_URI: "http://namibia.api.mspray.onalabs.org/households.json",
-        DISTRICT_URI: "http://namibia.api.mspray.onalabs.org/districts.json",
+        // SPRAY_DAYS_URI: "http://madagascar.api.mspray.onalabs.org/spraydays.json",
+        SPRAY_DAYS_URI: "http://madagascar.api.mspray.onalabs.org/spraydays.json",
+        DATES_URI: "http://madagascar.api.mspray.onalabs.org/spraydays.json?dates_only=true",
+        BUFFER_URI: "http://madagascar.api.mspray.onalabs.org/buffers.json",
+        TARGET_AREA_URI: "http://madagascar.api.mspray.onalabs.org/targetareas.json",
+        HOUSEHOLD_URI: "http://madagascar.api.mspray.onalabs.org/households.json",
+        DISTRICT_URI: "http://madagascar.api.mspray.onalabs.org/districts.json",
 
         defaultDistrict: "Chienge",
         defaultTargetArea: 0,
@@ -219,7 +219,7 @@
                                 target_id + "'>" + target_id + "</a></li>";
 
                         target_table_content += "<tr>" +
-                                "<th><a href='#!" + district_name + "/" + target_id + "'>" + target_id + "</a></th>" +
+                                "<th><a href='#!" + district_name + "/" + list_data.pk + "'>" + target_id + "</a></th>" +
                                 "<td class='lime-column'>" + structures + "</td>" +
                                 "<td>" + visited_total + " (" + App.calculatePercentage(visited_total, structures) + ")</td>" +
                                 "<td class='lime-column'>" + visited_sprayed + " (" + App.calculatePercentage(visited_sprayed, visited_total) + ")</td>" +
@@ -646,9 +646,9 @@
         },
 
         loadAreaData: function(map, targetid){
-            this.loadTargetArea(map, targetid);
-            this.loadBufferAreas(map, targetid);
-            this.loadHouseholds(map, targetid);
+            // this.loadTargetArea(map, targetid);
+            // this.loadBufferAreas(map, targetid);
+            // this.loadHouseholds(map, targetid);
             this.loadSprayPoints(map, targetid, "");
         },
 
