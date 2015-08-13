@@ -5,13 +5,14 @@ from django.contrib import admin
 admin.autodiscover()
 
 from mspray.apps.main.views import (
-    target_area, household, household_buffer, sprayday, indicators, districts
+    target_area, household, household_buffer, sprayday, indicators
 )
+from mspray.apps.madagascar.viewsets.district import DistrictViewSet
 
 router = routers.DefaultRouter(trailing_slash=False)
 
 router.register(r'buffers', household_buffer.HouseholdBufferViewSet)
-router.register(r'districts', districts.DistrictViewSet, 'district')
+router.register(r'districts', DistrictViewSet, 'district')
 router.register(r'households', household.HouseholdViewSet)
 router.register(r'spraydays', sprayday.SprayDayViewSet)
 router.register(r'targetareas', target_area.TargetAreaViewSet)
