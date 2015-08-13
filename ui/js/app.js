@@ -87,8 +87,8 @@
 
                         dist_name = this.href.split("#!")[1];
 
-                        $(".dist_label").text("District : " + dist_name);
-                        $(".target_label").text("Target Area: Select");
+                        $(".dist_label").text("Commune : " + dist_name);
+                        $(".target_label").text("Fokontany: Select");
 
                         if (dist_name === "All") {
                             App.getTargetAreasAggregate();
@@ -165,7 +165,7 @@
                 target_table_content = "";
 
                 // reset containers
-                $("#target_areas thead tr th :first").text("TARGET AREA");
+                $("#target_areas thead tr th :first").text("FOKONTANY");
                 target_list.empty();
                 target_table.empty();
 
@@ -247,7 +247,7 @@
                     );
                     $("table#target_areas").table().data( "table" ).refresh();
                     $("table#target_areas").table().sortable("sortBy", null, "asc");
-                    $("h1#district-name").text("District:" + district_name);
+                    $("h1#district-name").text("Commune:" + district_name);
                 },
                 error: function(){
                     // console.log('Sorry, could not retrieve target areas');
@@ -256,8 +256,8 @@
         },
 
         getTargetAreasAggregate: function(){
-            $("h1#district-name").text("District: All");
-            $("#target_areas thead tr th :first").text("DISTRICT");
+            $("h1#district-name").text("Commune: All");
+            $("#target_areas thead tr th :first").text("COMMUNE");
             $("table#target_areas tbody, table#target_areas tfoot").empty();
             var total_agg_structures = 0,
                 total_agg_visited_total = 0,
@@ -342,7 +342,7 @@
                             );
                             $("table#target_areas").table().data( "table" ).refresh();
                             $("table#target_areas").table().sortable("sortBy", null, "asc");
-                            $("h1#district-name").text("District: All");
+                            $("h1#district-name").text("Commune: All");
                         }
                     }
                 });
@@ -387,7 +387,7 @@
                         "<dt class='reason total-structures'>" + data[0].structures + "</dt>" +
                         "<dd>Structures</dd>"
                     );
-                    $("#target-area-label").text("Target Area : " + targetid);
+                    $("#target-area-label").text("Fokontany : " + targetid);
 
                     App.housesCount = data[0].structures;
                     App.visitedTotal = data[0].visited_total;
@@ -418,7 +418,7 @@
                     this.targetLayer = L.geoJson(geojson, {
                         onEachFeature: function(feature, layer){
                             var props = feature.properties;
-                            var content = "<h4>Target Area: " + props.targetid + "</h4>" +
+                            var content = "<h4>Fokontany: " + props.targetid + "</h4>" +
                                 "Structures: " + props.structures;
 
                             layer.bindPopup(content, {closeButton: true});
@@ -745,8 +745,8 @@
             var current_district = this.getCurrentDistrict();
             var current_target_area = this.getCurrentTargetArea();
 
-            $("#target-area-label").text("Target Area : " + current_target_area);
-            $(".target_label").text("Target Area : " + current_target_area);
+            $("#target-area-label").text("Fokontany : " + current_target_area);
+            $(".target_label").text("Fokontany : " + current_target_area);
 
             if(current_target_area !== this.defaultTargetArea){
                 App.loadMap();
@@ -821,7 +821,7 @@
 
                             if (target_id !== set_target_id) {
                                 set_target_id = target_id;
-                                $(".target_label").text("Target Area : " + target_id);
+                                $(".target_label").text("Fokontany : " + target_id);
                                 App.loadAreaData(App.map, target_id);
                                 // console.log("Loading map for target", target_id);
                             }
@@ -834,7 +834,7 @@
                             $("#district_table").show();
 
                             $(".dist_label").text("District : " + fragment);
-                            $(".target_label").text("Target Area: Select");
+                            $(".target_label").text("Fokontany: Select");
 
                             App.getTargetAreas(fragment);
                         }
