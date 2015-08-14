@@ -5,7 +5,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 from mspray.apps.main.views import (
-    target_area, household, household_buffer, sprayday, indicators, districts
+    target_area, household, household_buffer, sprayday, indicators, districts,
+    performance
 )
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -29,4 +30,6 @@ urlpatterns = patterns(
     url(r'^madagascar/', include('mspray.apps.madagascar.urls',
                                  namespace='madagascar')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^performance/',
+        'mspray.apps.main.views.performance.district'),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
