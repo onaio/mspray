@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>Performance - District</title>
+    </head>
+    <body>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>District</th>
+                        <th>structures</th>
+                        <th>target areas</th>
+                        <th>number(TA's with >95% Found coveragea)</th>
+                        <th>%</th>
+                        <th>number(TA's with >85% Spray coverageb)</th>
+                        <th>%</th>
+                        <th>number(District spray coverage by structure)</th>
+                        <th>%</th>
+                        <th>Average structures sprayed per day per SO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in data %}
+                    <tr>
+                        <td>{{ row.district_name }}</td>
+                        <td>{{ row.houses }}</td>
+                        <td>{{ row.target_areas }}</td>
+                        <td>{{ row.found }}</td>
+                        <td>{{ row.found_percentage }} %</td>
+                        <td>{{ row.sprayed }}</td>
+                        <td>{{ row.sprayed_percentage }} %</td>
+                        <td>{{ row.sprayed_total }}</td>
+                        <td>{{ row.sprayed_total_percentage }} %</td>
+                        <td>{{ row.avg_structures_per_user_per_so }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
