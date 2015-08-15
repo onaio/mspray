@@ -111,7 +111,8 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
         run('cd {} && git checkout origin/{}'.format(env.project, branch))
 
     with lcd(current_working_dir):
-        change_local_settings(env.django_module, dbname, dbuser, dbpass)
+        change_local_settings(env.django_module, dbname, dbuser, dbpass,
+                              project=project)
         nginx_conf = '/etc/nginx/conf.d/%(project)s.conf' % env
         put('context/etc/nginx/sites-available/nginx.conf', nginx_conf,
             use_sudo=True)
