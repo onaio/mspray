@@ -1,41 +1,134 @@
 <html>
     <head>
         <title>Performance - District</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     </head>
     <body>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>District</th>
-                        <th>structures</th>
-                        <th>target areas</th>
-                        <th>number(TA's with >95% Found coveragea)</th>
-                        <th>%</th>
-                        <th>number(TA's with >85% Spray coverageb)</th>
-                        <th>%</th>
-                        <th>number(District spray coverage by structure)</th>
-                        <th>%</th>
-                        <th>Average structures sprayed per day per SO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for row in data %}
-                    <tr>
-                        <td>{{ row.district_name }}</td>
-                        <td>{{ row.houses }}</td>
-                        <td>{{ row.target_areas }}</td>
-                        <td>{{ row.found }}</td>
-                        <td>{{ row.found_percentage }} %</td>
-                        <td>{{ row.sprayed }}</td>
-                        <td>{{ row.sprayed_percentage }} %</td>
-                        <td>{{ row.sprayed_total }}</td>
-                        <td>{{ row.sprayed_total_percentage }} %</td>
-                        <td>{{ row.avg_structures_per_user_per_so }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">District</th>
+                                <th colspan="2">Targeted</th>
+                                <th colspan="2">TA's with >95% Found coveragea</th>
+                                <th colspan="2">TA's with >85% Spray coverageb</th>
+                                <th colspan="2">District spray coverage by structure</th>
+                                <th rowspan="2">Average structures sprayed per day per SO</th>
+                                <th rowspan="2">Average start timec</th>
+                                <th rowspan="2">Average end timed</th>
+                            </tr>
+                            <tr>
+                                <th>Structures</th>
+                                <th>Target areas</th>
+                                <th>Number</th>
+                                <th>%</th>
+                                <th>Number</th>
+                                <th>%</th>
+                                <th>Number</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for row in data %}
+                            <tr>
+                                <td>{{ row.district_name }}</td>
+                                <td>{{ row.houses }}</td>
+                                <td>{{ row.target_areas }}</td>
+                                <td>{{ row.found }}</td>
+                                <td>{{ row.found_percentage }}</td>
+                                <td>{{ row.sprayed }}</td>
+                                <td>{{ row.sprayed_percentage }}</td>
+                                <td>{{ row.sprayed_total }}</td>
+                                <td>{{ row.sprayed_total_percentage }}</td>
+                                {% if row.avg_structures_per_user_per_so < 12 %}
+                                    <td style="background-color: red">
+                                {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
+                                    <td style="background-color: yellow">
+                                {% elif row.avg_structures_per_user_per_so > 14 %}
+                                    <td style="background-color: yellow">
+                                {% endif %}
+                                    {{ row.avg_structures_per_user_per_so }}</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <p>a - Found coverage is defined as the number of structures found / number of structures enumerated</p>
+                    <p>b - Spray coverage is defined as number of structures sprayed / number of structures found</p>
+                    <p>c - Start time is determined from the time the first form is completed per day per operator</p>
+                    <p>d - Finish time is determined from the time the last form is started per day per operator</p>
+                </div>
+            </div>
+            <div class="row">
+                <p><strong>Conditional formatting rules</strong></p>
+                <div class="col-md-4">
+                    <p><strong>Average structures sprayed per day per SO</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>< 12</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 12 and 14</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> 14</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Average start time</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>> 8:30</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 8.00 and 8.30</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> < 8.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Average end time</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>< 14:00</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 14.00 and 15.00</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> > 15.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </body>
 </html>
