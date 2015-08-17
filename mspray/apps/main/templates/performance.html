@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load staticfiles %}
 <html>
     <head>
@@ -47,14 +48,14 @@
                         {% for row in data %}
                             <tr>
                                 <td><a href="{% url "team-leaders" row.district_name %}">{{ row.district_name }}</a></td>
-                                <td>{{ row.houses }}</td>
-                                <td>{{ row.target_areas }}</td>
-                                <td>{{ row.structures_found }}</td>
-                                <td>{{ row.found }}</td>
+                                <td>{{ row.houses|intcomma }}</td>
+                                <td>{{ row.target_areas|intcomma }}</td>
+                                <td>{{ row.structures_found|intcomma  }}</td>
+                                <td>{{ row.found|intcomma  }}</td>
                                 <td>{{ row.found_percentage }}%</td>
-                                <td>{{ row.sprayed }}</td>
+                                <td>{{ row.sprayed|intcomma  }}</td>
                                 <td>{{ row.sprayed_percentage }}%</td>
-                                <td>{{ row.sprayed_total }}</td>
+                                <td>{{ row.sprayed_total|intcomma  }}</td>
                                 <td>{{ row.sprayed_total_percentage }}%</td>
                                 {% if row.avg_structures_per_user_per_so < 12 %}
                                     <td style="background-color: red">

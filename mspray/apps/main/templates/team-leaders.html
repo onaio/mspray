@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load staticfiles %}
 <html>
     <head>
@@ -43,11 +44,11 @@
                             {% for team_leader,row in data.items %}
                                 <tr>
                                     <td>{{ team_leader }}</td>
-                                    <td>{{ row.sprayable }}</td>
-                                    <td>{{ row.not_sprayable }}</td>
-                                    <td>{{ row.sprayed }}</td>
-                                    <td>{{ row.refused }}</td>
-                                    <td>{{ row.other }}</td>
+                                    <td>{{ row.sprayable|intcomma  }}</td>
+                                    <td>{{ row.not_sprayable|intcomma  }}</td>
+                                    <td>{{ row.sprayed|intcomma  }}</td>
+                                    <td>{{ row.refused|intcomma  }}</td>
+                                    <td>{{ row.other|intcomma  }}</td>
                                     <td>{{ row.not_sprayed_total }}</td>
                                     <td>{{ row.spray_success_rate }}%</td>
                                     {% if row.avg_structures_per_user_per_so < 12 %}
