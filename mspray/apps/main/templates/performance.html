@@ -45,7 +45,7 @@
                         <tbody>
                         {% for row in data %}
                             <tr>
-                                <td>{{ row.district_name }}</td>
+                                <td><a href="{% url "team-leaders" row.district_name %}">{{ row.district_name }}</a></td>
                                 <td>{{ row.houses }}</td>
                                 <td>{{ row.target_areas }}</td>
                                 <td>{{ row.found }}</td>
