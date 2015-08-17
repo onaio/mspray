@@ -33,6 +33,16 @@ def definitions_and_conditions(request):
 def district(request):
     # get districts and the number of structures in them
     dist_hse = District.objects.filter().values('houses', 'district_name')
+    totals = {
+        'avg_structures_per_user_per_so': 0,
+        'found': 0,
+        'structures_found': 0,
+        'sprayed': 0,
+        'sprayed_total': 0,
+        'target_areas': 0,
+        'houses': 0
+    }
+
     for a in dist_hse:
         # a - {'district_name': '', 'houses': }
         target_areas = TargetArea.objects.filter(
@@ -77,19 +87,42 @@ def district(request):
         avg_struct_per_user_per_so = round(numerator/denominator, 1)
 
         a['avg_structures_per_user_per_so'] = avg_struct_per_user_per_so
-        a['found'] = target_areas_found_total
-        a['found_percentage'] = round((
-            a.get('found') / target_areas.count()) * 100, 1)
-        a['structures_found'] = spray_points_total
-        a['sprayed'] = target_areas_sprayed_total
-        a['sprayed_percentage'] = round(
-            (a.get('sprayed') / target_areas.count()) * 100, 1)
-        a['sprayed_total'] = structures_sprayed_totals
-        a['sprayed_total_percentage'] = round(
-            (structures_sprayed_totals / spray_points_total * 100), 1)
-        a['target_areas'] = target_areas.count()
+        totals['avg_structures_per_user_per_so'] += avg_struct_per_user_per_so
 
-    return render_to_response('performance.html', {'data': dist_hse})
+        a['found'] = target_areas_found_total
+        totals['found'] += target_areas_found_total
+
+        a['found_percentage'] = round((
+            a.get('found') / target_areas.count()) * 100, 0)
+        a['structures_found'] = spray_points_total
+        totals['structures_found'] += spray_points_total
+
+        a['sprayed'] = target_areas_sprayed_total
+        totals['sprayed'] += target_areas_sprayed_total
+
+        a['sprayed_percentage'] = round(
+            (a.get('sprayed') / target_areas.count()) * 100, 0)
+        a['sprayed_total'] = structures_sprayed_totals
+        totals['sprayed_total'] += structures_sprayed_totals
+
+        a['sprayed_total_percentage'] = round(
+            (structures_sprayed_totals / spray_points_total * 100), 0)
+        a['target_areas'] = target_areas.count()
+        totals['target_areas'] += target_areas.count()
+
+        totals['houses'] += a.get('houses')
+
+    totals['found_percentage'] = round((
+        totals['found']/totals['target_areas']) * 100)
+    totals['sprayed_percentage'] = round((
+        totals['sprayed']/totals['target_areas']) * 100)
+    totals['sprayed_total_percentage'] = round((
+        totals['sprayed_total']/totals['structures_found']) * 100)
+    totals['avg_structures_per_user_per_so'] = round(
+        totals['avg_structures_per_user_per_so']/dist_hse.count(), 0)
+
+    return render_to_response('performance.html',
+                              {'data': dist_hse, 'totals': totals})
 
 
 def get_total(spray_day, condition):

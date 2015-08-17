@@ -64,10 +64,22 @@
                                     <td style="background-color: yellow">
                                 {% endif %}
                                     {{ row.avg_structures_per_user_per_so }}</td>
-                                <td></td>
-                                <td></td>
                             </tr>
                         {% endfor %}
+                            <tr></tr>
+                            <tr>
+                                <td>Totals</td>
+                                <td>{{ totals.houses }}</td>
+                                <td>{{ totals.target_areas }}</td>
+                                <td>{{ totals.structures_found }}</td>
+                                <td>{{ totals.found }}</td>
+                                <td>{{ totals.found_percentage }}</td>
+                                <td>{{ totals.sprayed }}</td>
+                                <td>{{ totals.sprayed_percentage }}</td>
+                                <td>{{ totals.sprayed_total }}</td>
+                                <td>{{ totals.sprayed_total_percentage }}</td>
+                                <td>{{ totals.avg_structures_per_user_per_so }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
