@@ -23,7 +23,8 @@
                             <tr>
                                 <th rowspan="3">Team Leader</th>
                                 <th colspan="6">Structures</th>
-                                <th colspan="3">Spray success rate</th>
+                                <th rowspan="3">Spray success rate</th>
+                                <th rowspan="3">Average structures sprayed per day per SO</th>
                             </tr>
                             <tr>
                                 <th colspan="2">Found</th>
@@ -49,6 +50,14 @@
                                     <td>{{ row.other }}</td>
                                     <td>{{ row.not_sprayed_total }}</td>
                                     <td>{{ row.spray_success_rate }}</td>
+                                    {% if row.avg_structures_per_user_per_so < 12 %}
+                                        <td style="background-color: red">
+                                    {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
+                                        <td style="background-color: yellow">
+                                    {% elif row.avg_structures_per_user_per_so > 14 %}
+                                        <td style="background-color: yellow">
+                                    {% endif %}
+                                        {{ row.avg_structures_per_user_per_so }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
