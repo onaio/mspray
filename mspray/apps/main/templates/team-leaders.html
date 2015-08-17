@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load staticfiles %}
 <html>
     <head>
@@ -43,19 +44,19 @@
                             {% for team_leader,row in data.items %}
                                 <tr>
                                     <td>{{ team_leader }}</td>
-                                    <td>{{ row.sprayable }}</td>
-                                    <td>{{ row.not_sprayable }}</td>
-                                    <td>{{ row.sprayed }}</td>
-                                    <td>{{ row.refused }}</td>
-                                    <td>{{ row.other }}</td>
-                                    <td>{{ row.not_sprayed_total }}</td>
-                                    <td>{{ row.spray_success_rate }}%</td>
+                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.not_sprayed_total }}</td>
+                                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
                                     {% if row.avg_structures_per_user_per_so < 12 %}
-                                        <td style="background-color: red">
+                                        <td class='numbers' style="background-color: red">
                                     {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
-                                        <td style="background-color: yellow">
+                                        <td class='numbers' style="background-color: yellow">
                                     {% elif row.avg_structures_per_user_per_so > 14 %}
-                                        <td style="background-color: yellow">
+                                        <td class='numbers' style="background-color: yellow">
                                     {% endif %}
                                         {{ row.avg_structures_per_user_per_so }}</td>
                                 </tr>

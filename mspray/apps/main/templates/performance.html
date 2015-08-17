@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load staticfiles %}
 <html>
     <head>
@@ -47,21 +48,21 @@
                         {% for row in data %}
                             <tr>
                                 <td><a href="{% url "team-leaders" row.district_name %}">{{ row.district_name }}</a></td>
-                                <td>{{ row.houses }}</td>
-                                <td>{{ row.target_areas }}</td>
-                                <td>{{ row.structures_found }}</td>
-                                <td>{{ row.found }}</td>
-                                <td>{{ row.found_percentage }}%</td>
-                                <td>{{ row.sprayed }}</td>
-                                <td>{{ row.sprayed_percentage }}%</td>
-                                <td>{{ row.sprayed_total }}</td>
-                                <td>{{ row.sprayed_total_percentage }}%</td>
+                                <td class='numbers'>{{ row.houses|intcomma }}</td>
+                                <td class='numbers'>{{ row.target_areas|intcomma }}</td>
+                                <td class='numbers'>{{ row.structures_found|intcomma  }}</td>
+                                <td class='numbers'>{{ row.found|intcomma  }}</td>
+                                <td class='numbers'>{{ row.found_percentage }}%</td>
+                                <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
+                                <td class='numbers'>{{ row.sprayed_percentage }}%</td>
+                                <td class='numbers'>{{ row.sprayed_total|intcomma  }}</td>
+                                <td class='numbers'>{{ row.sprayed_total_percentage }}%</td>
                                 {% if row.avg_structures_per_user_per_so < 12 %}
-                                    <td style="background-color: red">
+                                    <td class='numbers' style="background-color: red">
                                 {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
-                                    <td style="background-color: yellow">
+                                    <td class='numbers' style="background-color: yellow">
                                 {% elif row.avg_structures_per_user_per_so > 14 %}
-                                    <td style="background-color: yellow">
+                                    <td class='numbers' style="background-color: yellow">
                                 {% endif %}
                                     {{ row.avg_structures_per_user_per_so }}</td>
                             </tr>
