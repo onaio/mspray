@@ -9,6 +9,12 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     </head>
     <body>
+        <header class="navbar navbar-inverse" role="navigation">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/"><img src="{% static "img/mSpray-logo.png" %}" alt="mspray" id="mspray-logo" /> Zambia</a>
+                </div>
+            </div>
+        </header>
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
@@ -33,16 +39,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for a,b in data.items %}
+                            {% for team_leader,row in data.items %}
                                 <tr>
-                                    <td>{{ a }}</td>
-                                    <td>{{ b.sprayable }}</td>
-                                    <td>{{ b.not_sprayable }}</td>
-                                    <td>{{ b.sprayed }}</td>
-                                    <td>{{ b.refused }}</td>
-                                    <td>{{ b.other }}</td>
-                                    <td>{{ b.not_sprayed_total }}</td>
-                                    <td>{{ b.spray_success_rate }}</td>
+                                    <td>{{ team_leader }}</td>
+                                    <td>{{ row.sprayable }}</td>
+                                    <td>{{ row.not_sprayable }}</td>
+                                    <td>{{ row.sprayed }}</td>
+                                    <td>{{ row.refused }}</td>
+                                    <td>{{ row.other }}</td>
+                                    <td>{{ row.not_sprayed_total }}</td>
+                                    <td>{{ row.spray_success_rate }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
