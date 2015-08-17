@@ -126,16 +126,7 @@ def team_leaders(request, district_name):
 
         for a in spray_day:
             if not rows.get(a.data.get('team_leader')):
-                rows[a.data.get('team_leader')] = {
-                    'sprayable': 0,
-                    'not_sprayable': 0,
-                    'sprayed': 0,
-                    'refused': 0,
-                    'other': 0,
-                    'not_sprayed_total': 0,
-                    'spray_success_rate': 0,
-                    'team_leader': 0
-                }
+                rows[a.data.get('team_leader')] = {}
 
                 team_leader_dict = rows.get(a.data.get('team_leader'))
                 team_leader_dict['sprayable'] = get_total(
@@ -153,6 +144,18 @@ def team_leaders(request, district_name):
                     else team_leader_dict['sprayable']
                 sprayed_success_rate = round((numerator/denominator) * 100, 1)
                 team_leader_dict['spray_success_rate'] = sprayed_success_rate
+
+                # calcuate Average structures sprayed per day per SO
+                spray_points_sprayed = spray_day.filter(
+                    data__contains='"sprayed/was_sprayed":"yes"')
+                sprayed_structures = update_sprayed_structures(
+                    spray_points_sprayed, {})
+                denominator = len(sprayed_structures.keys())
+                numerator = sum(a for a in sprayed_structures.values())
+                avg_struct_per_user_per_so = round(numerator/denominator, 1)
+
+                team_leader_dict['avg_structures_per_user_per_so'] = \
+                    avg_struct_per_user_per_so
 
                 rows[a.data.get('team_leader')] = team_leader_dict
 
