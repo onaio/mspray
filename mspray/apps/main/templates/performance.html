@@ -70,16 +70,23 @@
                             <tr></tr>
                             <tr>
                                 <td>Totals</td>
-                                <td>{{ totals.houses }}</td>
-                                <td>{{ totals.target_areas }}</td>
-                                <td>{{ totals.structures_found }}</td>
-                                <td>{{ totals.found }}</td>
-                                <td>{{ totals.found_percentage }}</td>
-                                <td>{{ totals.sprayed }}</td>
-                                <td>{{ totals.sprayed_percentage }}</td>
-                                <td>{{ totals.sprayed_total }}</td>
-                                <td>{{ totals.sprayed_total_percentage }}</td>
-                                <td>{{ totals.avg_structures_per_user_per_so }}</td>
+                                <td class='numbers'>{{ totals.houses|intcomma }}</td>
+                                <td class='numbers'>{{ totals.target_areas|intcomma }}</td>
+                                <td class='numbers'>{{ totals.structures_found|intcomma }}</td>
+                                <td class='numbers'>{{ totals.found|intcomma }}</td>
+                                <td class='numbers'>{{ totals.found_percentage }}%</td>
+                                <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
+                                <td class='numbers'>{{ totals.sprayed_percentage }}%</td>
+                                <td class='numbers'>{{ totals.sprayed_total|intcomma }}</td>
+                                <td class='numbers'>{{ totals.sprayed_total_percentage }}%</td>
+                                {% if totals.avg_structures_per_user_per_so < 12 %}
+                                    <td class='numbers' style="background-color: red">
+                                {% elif totals.avg_structures_per_user_per_so > 12  and totals.avg_structures_per_user_per_so < 14 %}
+                                    <td class='numbers' style="background-color: yellow">
+                                {% elif totals.avg_structures_per_user_per_so > 14 %}
+                                    <td class='numbers' style="background-color: yellow">
+                                {% endif %}
+                                    {{ totals.avg_structures_per_user_per_so }}</td>
                             </tr>
                         </tbody>
                     </table>
