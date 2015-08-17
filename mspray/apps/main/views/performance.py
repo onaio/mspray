@@ -51,6 +51,7 @@ def district(request):
             # found
             spray_points_founds = spray_day.filter(
                 data__contains='"sprayable_structure":"yes"').count()
+            spray_points_total += spray_points_founds
             if spray_points_founds > 0:
                 target_areas_found_total += calculate(spray_points_founds,
                                                       structures,
@@ -59,7 +60,6 @@ def district(request):
             # sprayed
             spray_points_sprayed = spray_day.filter(
                 data__contains='"sprayed/was_sprayed":"yes"')
-            spray_points_total += spray_day.count()
 
             spray_points_sprayed_count = spray_points_sprayed.count()
             if spray_points_sprayed_count > 0:
@@ -80,6 +80,7 @@ def district(request):
         a['found'] = target_areas_found_total
         a['found_percentage'] = round((
             a.get('found') / target_areas.count()) * 100, 1)
+        a['structures_found'] = spray_points_total
         a['sprayed'] = target_areas_sprayed_total
         a['sprayed_percentage'] = round(
             (a.get('sprayed') / target_areas.count()) * 100, 1)
