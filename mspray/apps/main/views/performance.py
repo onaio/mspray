@@ -138,17 +138,22 @@ def team_leaders(request, district_name):
                 }
 
                 team_leader_dict = rows.get(a.data.get('team_leader'))
-                team_leader_dict['sprayable'] += get_total(
+                team_leader_dict['sprayable'] = get_total(
                     spray_day, "sprayable")
-                team_leader_dict['not_sprayable'] += get_total(
+                team_leader_dict['not_sprayable'] = get_total(
                     spray_day, "not_sprayable")
-                team_leader_dict['sprayed'] += get_total(spray_day, "sprayed")
-                team_leader_dict['refused'] += get_total(spray_day, "refused")
-                team_leader_dict['other'] += get_total(spray_day, "other")
-                team_leader_dict['not_sprayed_total'] += team_leader_dict['other'] + team_leader_dict['refused']
-                team_leader_dict['spray_success_rate'] += team_leader_dict['sprayable'] / 1 if team_leader_dict['sprayed'] == 0 else team_leader_dict['sprayed']
-                
+                team_leader_dict['sprayed'] = get_total(spray_day, "sprayed")
+                team_leader_dict['refused'] = get_total(spray_day, "refused")
+                team_leader_dict['other'] = get_total(spray_day, "other")
+                team_leader_dict['not_sprayed_total'] = \
+                    team_leader_dict['other'] + team_leader_dict['refused']
+
+                numerator = team_leader_dict['sprayed']
+                denominator = 1 if team_leader_dict['sprayable'] == 0 \
+                    else team_leader_dict['sprayable']
+                sprayed_success_rate = round((numerator/denominator) * 100, 1)
+                team_leader_dict['spray_success_rate'] = sprayed_success_rate
+
                 rows[a.data.get('team_leader')] = team_leader_dict
 
-    #return "Success!"
     return render_to_response('team-leaders.html', {'data': rows})
