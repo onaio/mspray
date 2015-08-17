@@ -1,0 +1,54 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Performance - Team Leader</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link href='{% static "css/main.css" %}' rel='stylesheet' />
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">Team Leader</th>
+                                <th colspan="6">Structures</th>
+                                <th colspan="3">Spray success rate</th>
+                            </tr>
+                            <tr>
+                                <th colspan="2">Found</th>
+                                <th rowspan="2">Sprayed</th>
+                                <th colspan="3">Not sprayed</th>
+                            </tr>
+                            <tr>
+                                <th>Sprayable</th>
+                                <th>Non-Sprayable</th>
+                                <th>Refused</th>
+                                <th>Other</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a,b in data.items %}
+                                <tr>
+                                    <td>{{ a }}</td>
+                                    <td>{{ b.sprayable }}</td>
+                                    <td>{{ b.not_sprayable }}</td>
+                                    <td>{{ b.sprayed }}</td>
+                                    <td>{{ b.refused }}</td>
+                                    <td>{{ b.other }}</td>
+                                    <td>{{ b.not_sprayed_total }}</td>
+                                    <td>{{ b.spray_success_rate }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
