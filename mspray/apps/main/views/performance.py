@@ -89,54 +89,29 @@ def district(request):
     return render_to_response('performance.html', {'data': dist_hse})
 
 
-def get_sprayable(target_area):
-    if target_area:
-        queryset = SprayDay.objects.filter(
-            geom__coveredby=target_area.geom
-        ).filter(data__contains='"sprayable_structure":"yes"').count()
+def get_total(spray_day, condition):
+    if spray_day:
+        if condition == "sprayable":
+            queryset = spray_day.filter(
+                data__contains='"sprayable_structure":"yes"')
+        elif condition == "not_sprayable":
+            queryset = spray_day.filter(
+                data__contains='"sprayable_structure":"no"')
+        elif condition == "sprayed":
+            queryset = spray_day.filter(
+                data__contains='"sprayed/was_sprayed":"yes"')
+        elif condition == "refused":
+            queryset = spray_day.filter(
+                data__contains='"unsprayed/reason":"Refused"')
+        elif condition == "other":
+            queryset = spray_day.filter(
+                Q(data__contains='"unsprayed/reason":"Other"') |
+                Q(data__contains='"unsprayed/reason":"Sick"') |
+                Q(data__contains='"unsprayed/reason":"Funeral"') |
+                Q(data__contains='"unsprayed/reason":"Locked"') |
+                Q(data__contains='"unsprayed/reason":"No one home/Missed"'))
 
-        return queryset
-
-
-def get_not_sprayable(target_area):
-    if target_area:
-        queryset = SprayDay.objects.filter(
-            geom__coveredby=target_area.geom
-        ).filter(data__contains='"sprayable_structure":"no"').count()
-
-        return queryset
-
-
-def get_visited_sprayed(target_area):
-    if target_area:
-        queryset = SprayDay.objects.filter(
-            geom__coveredby=target_area.geom
-        ).filter(data__contains='"sprayed/was_sprayed":"yes"').count()
-
-        return queryset
-
-
-def get_visited_refused(target_area):
-    if target_area:
-        queryset = SprayDay.objects.filter(
-            geom__coveredby=target_area.geom
-        ).filter(data__contains='"unsprayed/reason":"Refused"').count()
-
-        return queryset
-
-
-def get_visited_other(target_area):
-    if target_area:
-        queryset = SprayDay.objects.filter(
-            geom__coveredby=target_area.geom
-        ).filter(
-            Q(data__contains='"unsprayed/reason":"Other"') |
-            Q(data__contains='"unsprayed/reason":"Sick"') |
-            Q(data__contains='"unsprayed/reason":"Funeral"') |
-            Q(data__contains='"unsprayed/reason":"Locked"') |
-            Q(data__contains='"unsprayed/reason":"No one home/Missed"')).count()
-
-        return queryset
+        return queryset.count()
 
 
 def team_leaders(request, district_name):
@@ -151,18 +126,29 @@ def team_leaders(request, district_name):
 
         for a in spray_day:
             if not rows.get(a.data.get('team_leader')):
-                rows[a.data.get('team_leader')] = {}
+                rows[a.data.get('team_leader')] = {
+                    'sprayable': 0,
+                    'not_sprayable': 0,
+                    'sprayed': 0,
+                    'refused': 0,
+                    'other': 0,
+                    'not_sprayed_total': 0,
+                    'spray_success_rate': 0,
+                    'team_leader': 0
+                }
 
-        team_leader_dict = rows[a.data.get('team_leader')]
-        team_leader_dict['sprayable'] = get_sprayable(target_area)
-        team_leader_dict['not_sprayable'] = get_not_sprayable(target_area)
-        team_leader_dict['sprayed'] = get_visited_sprayed(target_area)
-        team_leader_dict['refused'] = get_visited_refused(target_area)
-        team_leader_dict['other'] = get_visited_other(target_area)
-        team_leader_dict['not_sprayed_total'] = get_visited_other(target_area) + get_visited_refused(target_area)
-        team_leader_dict['spray_success_rate'] = team_leader_dict['sprayable'] / 1 if team_leader_dict['sprayed'] == 0 else team_leader_dict['sprayed']
-        rows[a.data.get('team_leader')] = team_leader_dict
+                team_leader_dict = rows.get(a.data.get('team_leader'))
+                team_leader_dict['sprayable'] += get_total(
+                    spray_day, "sprayable")
+                team_leader_dict['not_sprayable'] += get_total(
+                    spray_day, "not_sprayable")
+                team_leader_dict['sprayed'] += get_total(spray_day, "sprayed")
+                team_leader_dict['refused'] += get_total(spray_day, "refused")
+                team_leader_dict['other'] += get_total(spray_day, "other")
+                team_leader_dict['not_sprayed_total'] += team_leader_dict['other'] + team_leader_dict['refused']
+                team_leader_dict['spray_success_rate'] += team_leader_dict['sprayable'] / 1 if team_leader_dict['sprayed'] == 0 else team_leader_dict['sprayed']
+                
+                rows[a.data.get('team_leader')] = team_leader_dict
 
-    print("rows: %s" % rows)
-
+    #return "Success!"
     return render_to_response('team-leaders.html', {'data': rows})
