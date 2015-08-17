@@ -1,4 +1,5 @@
 # from django.core.cache import cache
+from django.db.models import Q
 from django.shortcuts import render_to_response
 from mspray.apps.main.models import TargetArea, District, SprayDay
 
@@ -86,3 +87,82 @@ def district(request):
         a['target_areas'] = target_areas.count()
 
     return render_to_response('performance.html', {'data': dist_hse})
+
+
+def get_sprayable(target_area):
+    if target_area:
+        queryset = SprayDay.objects.filter(
+            geom__coveredby=target_area.geom
+        ).filter(data__contains='"sprayable_structure":"yes"').count()
+
+        return queryset
+
+
+def get_not_sprayable(target_area):
+    if target_area:
+        queryset = SprayDay.objects.filter(
+            geom__coveredby=target_area.geom
+        ).filter(data__contains='"sprayable_structure":"no"').count()
+
+        return queryset
+
+
+def get_visited_sprayed(target_area):
+    if target_area:
+        queryset = SprayDay.objects.filter(
+            geom__coveredby=target_area.geom
+        ).filter(data__contains='"sprayed/was_sprayed":"yes"').count()
+
+        return queryset
+
+
+def get_visited_refused(target_area):
+    if target_area:
+        queryset = SprayDay.objects.filter(
+            geom__coveredby=target_area.geom
+        ).filter(data__contains='"unsprayed/reason":"Refused"').count()
+
+        return queryset
+
+
+def get_visited_other(target_area):
+    if target_area:
+        queryset = SprayDay.objects.filter(
+            geom__coveredby=target_area.geom
+        ).filter(
+            Q(data__contains='"unsprayed/reason":"Other"') |
+            Q(data__contains='"unsprayed/reason":"Sick"') |
+            Q(data__contains='"unsprayed/reason":"Funeral"') |
+            Q(data__contains='"unsprayed/reason":"Locked"') |
+            Q(data__contains='"unsprayed/reason":"No one home/Missed"')).count()
+
+        return queryset
+
+
+def team_leaders(request, district_name):
+    target_areas = TargetArea.objects.filter(
+                    targeted=TargetArea.TARGETED_VALUE,
+                    district_name=district_name).order_by(
+                  'ranks', 'houses')
+
+    rows = {}
+    for target_area in target_areas:
+        spray_day = SprayDay.objects.filter(geom__coveredby=target_area.geom)
+
+        for a in spray_day:
+            if not rows.get(a.data.get('team_leader')):
+                rows[a.data.get('team_leader')] = {}
+
+        team_leader_dict = rows[a.data.get('team_leader')]
+        team_leader_dict['sprayable'] = get_sprayable(target_area)
+        team_leader_dict['not_sprayable'] = get_not_sprayable(target_area)
+        team_leader_dict['sprayed'] = get_visited_sprayed(target_area)
+        team_leader_dict['refused'] = get_visited_refused(target_area)
+        team_leader_dict['other'] = get_visited_other(target_area)
+        team_leader_dict['not_sprayed_total'] = get_visited_other(target_area) + get_visited_refused(target_area)
+        team_leader_dict['spray_success_rate'] = team_leader_dict['sprayable'] / 1 if team_leader_dict['sprayed'] == 0 else team_leader_dict['sprayed']
+        rows[a.data.get('team_leader')] = team_leader_dict
+
+    print("rows: %s" % rows)
+
+    return render_to_response('team-leaders.html', {'data': rows})
