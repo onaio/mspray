@@ -31,8 +31,8 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^performance/district',
         'mspray.apps.main.views.performance.district'),
-    # url(r'^performance/team-leader',
-    #     'mspray.apps.main.views.performance.team_leader'),
+    url(r'^performance/team-leaders/(?P<district_name>[^/]+)',
+        'mspray.apps.main.views.performance.team_leaders'),
     url(r'^definitions-and-conditions',
         'mspray.apps.main.views.performance.definitions_and_conditions'),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
