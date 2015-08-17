@@ -36,9 +36,8 @@ def district(request):
     for a in dist_hse:
         # a - {'district_name': '', 'houses': }
         target_areas = TargetArea.objects.filter(
-                        targeted=TargetArea.TARGETED_VALUE,
-                        district_name=a.get('district_name')).order_by(
-                      'ranks', 'houses')
+            targeted=TargetArea.TARGETED_VALUE,
+            district_name=a.get('district_name')).order_by('ranks', 'houses')
 
         sprayed_structures = {}
         target_areas_found_total = 0
@@ -116,16 +115,19 @@ def get_total(spray_day, condition):
 
 def team_leaders(request, district_name):
     target_areas = TargetArea.objects.filter(
-                    targeted=TargetArea.TARGETED_VALUE,
-                    district_name=district_name).order_by(
-                  'ranks', 'houses')
+        targeted=TargetArea.TARGETED_VALUE,
+        district_name=district_name).order_by('ranks', 'houses')
 
     rows = {}
     for target_area in target_areas:
-        spray_day = SprayDay.objects.filter(geom__coveredby=target_area.geom)
+        sp = SprayDay.objects.filter(geom__coveredby=target_area.geom)
 
-        for a in spray_day:
+        for a in sp:
             if not rows.get(a.data.get('team_leader')):
+                tl = a.data.get('team_leader')
+                spray_day = sp.filter(
+                    data__contains='"team_leader":"{}"'.format(tl)
+                )
                 rows[a.data.get('team_leader')] = {}
 
                 team_leader_dict = rows.get(a.data.get('team_leader'))
@@ -150,7 +152,8 @@ def team_leaders(request, district_name):
                     data__contains='"sprayed/was_sprayed":"yes"')
                 sprayed_structures = update_sprayed_structures(
                     spray_points_sprayed, {})
-                denominator = len(sprayed_structures.keys())
+                denominator = 1 if len(sprayed_structures.keys()) == 0 \
+                    else len(sprayed_structures.keys())
                 numerator = sum(a for a in sprayed_structures.values())
                 avg_struct_per_user_per_so = round(numerator/denominator, 1)
 
@@ -160,3 +163,4 @@ def team_leaders(request, district_name):
                 rows[a.data.get('team_leader')] = team_leader_dict
 
     return render_to_response('team-leaders.html', {'data': rows})
+
