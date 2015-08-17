@@ -457,3 +457,6 @@ a.distrct-links {
 .navbar-brand>img {
     display: inline;
 }
+td.numbers {
+    text-align: right;
+}
