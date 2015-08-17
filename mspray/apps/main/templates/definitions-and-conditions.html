@@ -1,0 +1,75 @@
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Definitions and Conditions</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link href='{% static "css/main.css" %}' rel='stylesheet' />
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <h1><strong>Conditional formatting rules</strong></h1>
+                <div class="col-md-4">
+                    <p><strong>Average structures sprayed per day per SO</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>< 12</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 12 and 14</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> 14</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Average start time</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>> 8:30</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 8.00 and 8.30</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> < 8.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Average end time</strong></p>
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td>Red</td>
+                                <td>< 14:00</td>
+                            </tr>
+                            <tr>
+                                <td>Yellow</td>
+                                <td>between 14.00 and 15.00</td>
+                            </tr>
+                            <tr>
+                                <td>Green</td>
+                                <td> > 15.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>        
+    </body>
+</html>
