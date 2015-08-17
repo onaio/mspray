@@ -43,6 +43,7 @@ def district(request):
         target_areas_found_total = 0
         target_areas_sprayed_total = 0
         structures_sprayed_totals = 0
+        spray_points_total = 0
         for target_area in target_areas:
             structures = 1 if target_area.houses < 1 else target_area.houses
             spray_day = SprayDay.objects.filter(
@@ -58,6 +59,8 @@ def district(request):
             # sprayed
             spray_points_sprayed = spray_day.filter(
                 data__contains='"sprayed/was_sprayed":"yes"')
+            spray_points_total += spray_day.count()
+
             spray_points_sprayed_count = spray_points_sprayed.count()
             if spray_points_sprayed_count > 0:
                 target_areas_sprayed_total += calculate(
@@ -82,7 +85,7 @@ def district(request):
             (a.get('sprayed') / target_areas.count()) * 100, 1)
         a['sprayed_total'] = structures_sprayed_totals
         a['sprayed_total_percentage'] = round(
-            (structures_sprayed_totals / a.get('houses') * 100), 1)
+            (structures_sprayed_totals / spray_points_total * 100), 1)
         a['target_areas'] = target_areas.count()
 
     return render_to_response('performance.html', {'data': dist_hse})
@@ -163,4 +166,3 @@ def team_leaders(request, district_name):
                 rows[a.data.get('team_leader')] = team_leader_dict
 
     return render_to_response('team-leaders.html', {'data': rows})
-
