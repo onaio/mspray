@@ -1,3 +1,4 @@
+# from django.core.cache import cache
 from django.shortcuts import render_to_response
 from mspray.apps.main.models import TargetArea, District, SprayDay
 
@@ -22,6 +23,10 @@ def update_sprayed_structures(spray_points_sprayed, sprayed_structures):
             sprayed_structures[key] = 1
 
     return sprayed_structures
+
+
+def definitions_and_conditions(request):
+    return render_to_response('definitions-and-conditions.html')
 
 
 def district(request):
