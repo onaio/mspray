@@ -29,7 +29,7 @@ urlpatterns = patterns(
     url(r'^madagascar/', include('mspray.apps.madagascar.urls',
                                  namespace='madagascar')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^performance$',
+    url(r'^performance/$',
         'mspray.apps.main.views.performance.district'),
     url(r'^perfomance/definitions-and-conditions$',
         'mspray.apps.main.views.performance.definitions_and_conditions',
