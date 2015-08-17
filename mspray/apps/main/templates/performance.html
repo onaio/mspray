@@ -24,6 +24,7 @@
                             <tr>
                                 <th rowspan="2">District</th>
                                 <th colspan="2">Targeted</th>
+                                <th rowspan="2">Structure Found</th>
                                 <th colspan="2">TA's with >95% Found coverage<sup title="Found coverage is defined as the number of structures found / number of structures enumerated">[a]</sup></th>
                                 <th colspan="2">TA's with >85% Spray coverage<sup title="Spray coverage is defined as number of structures sprayed / number of structures found">[b]</sup></th>
                                 <th colspan="2">District spray coverage by structure</th>
@@ -48,12 +49,13 @@
                                 <td><a href="{% url "team-leaders" row.district_name %}">{{ row.district_name }}</a></td>
                                 <td>{{ row.houses }}</td>
                                 <td>{{ row.target_areas }}</td>
+                                <td>{{ row.structures_found }}</td>
                                 <td>{{ row.found }}</td>
-                                <td>{{ row.found_percentage }}</td>
+                                <td>{{ row.found_percentage }}%</td>
                                 <td>{{ row.sprayed }}</td>
-                                <td>{{ row.sprayed_percentage }}</td>
+                                <td>{{ row.sprayed_percentage }}%</td>
                                 <td>{{ row.sprayed_total }}</td>
-                                <td>{{ row.sprayed_total_percentage }}</td>
+                                <td>{{ row.sprayed_total_percentage }}%</td>
                                 {% if row.avg_structures_per_user_per_so < 12 %}
                                     <td style="background-color: red">
                                 {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}

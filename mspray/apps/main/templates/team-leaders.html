@@ -49,7 +49,7 @@
                                     <td>{{ row.refused }}</td>
                                     <td>{{ row.other }}</td>
                                     <td>{{ row.not_sprayed_total }}</td>
-                                    <td>{{ row.spray_success_rate }}</td>
+                                    <td>{{ row.spray_success_rate }}%</td>
                                     {% if row.avg_structures_per_user_per_so < 12 %}
                                         <td style="background-color: red">
                                     {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
