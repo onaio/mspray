@@ -43,9 +43,36 @@ h2{
     border-right:1px solid #ddd;
 }
 
+/* Table color-coding */
+.table > tbody > tr > td.red, 
+.table > tbody > tr > td.green{
+    color:#fff;
+    opacity:0.8;
+}
+.table > tbody > tr > td.red{
+    background:#F30;
+}
+.table > tbody > tr > td.yellow{
+    background:#FF3;
+}
+.table > tbody > tr > td.green{
+    background:#090;
+}
+
 /* Containers */
 .container{
     max-width:1280px;
+}
+.panel{
+    border-radius:0;
+    margin-bottom:3em;
+}
+.panel-heading > h3{
+    font-size:1.4em;
+    margin:0;
+}
+.panel .table{
+    margin:0 0 1em;
 }
 
 .form-control{
