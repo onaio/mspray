@@ -184,6 +184,7 @@ def team_leaders(request, district_name):
     refused = dict(spraypoints.extra(where=['data->>%s = %s'], params=['unsprayed/reason', 'Refused']).annotate(c=Count('data')))
     other = dict(spraypoints.extra(where=['data->>%s IN (%s, %s, %s, %s, %s)'], params=['unsprayed/reason', 'Other', 'Sick', 'Funeral', 'Locked', 'No one home/Missed']).annotate(c=Count('data')))
     team_leaders = spraypoints.values_list('team_leader', flat=True).distinct()
+    sprayable_qs.extra(select={'today': "data->>'today'", 'spray_operator': "data->>'sprayed/sprayop_name'"}, where=["(data->'sprayed/sprayop_name') IS NOT NULL"], order_by=['team_leader', 'spray_operator', 'today']).values_list('team_leader', 'today', 'spray_operator').annotate(k=Count('id'))
 
     for team_leader in team_leaders:
         numerator = sprayed.get(team_leader)
