@@ -10,7 +10,7 @@ body{
 }
 
 a{
-    color:#3B9100;
+    color:green;
 }
 a:hover{
     text-decoration:none;
@@ -29,9 +29,12 @@ h2{
 .table tr th, .table tr td{
     font-size:14px;
 }
-.table > thead > tr > th{
+.table > thead > tr > th, 
+.table > tfoot > tr > td{
     background:#ddd;
     border:1px solid #ccc;
+}
+.table > thead > tr > th{
     border-top:0;
     text-align:center;
 }
@@ -42,20 +45,36 @@ h2{
     border-left:1px solid #ddd;
     border-right:1px solid #ddd;
 }
+.table > tfoot > tr > td:first-child{
+    text-transform:uppercase;
+}
+.table > tfoot > tr > td{
+    background:#ddd;
+    border:1px solid #ccc;
+    font-size:1.1em;
+    font-weight:bold;
+    padding-bottom:1em;
+    padding-top:1em;
+}
 
 /* Table color-coding */
 .table > tbody > tr > td.red, 
-.table > tbody > tr > td.green{
+.table > tbody > tr > td.green,
+.table > tfoot > tr > td.red, 
+.table > tfoot > tr > td.green{
     color:#fff;
     opacity:0.8;
 }
-.table > tbody > tr > td.red{
+.table > tbody > tr > td.red,
+.table > tfoot > tr > td.red{
     background:#F30;
 }
-.table > tbody > tr > td.yellow{
+.table > tbody > tr > td.yellow,
+.table > tfoot > tr > td.yellow{
     background:#FF3;
 }
-.table > tbody > tr > td.green{
+.table > tbody > tr > td.green,
+.table > tfoot > tr > td.green{
     background:#090;
 }
 
