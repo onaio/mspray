@@ -7,3 +7,4 @@ data
 .project
 ui/bower_components
 .DS_Store
+ui/*.xlsx
