@@ -17,6 +17,7 @@
             </div>
         </header>
         <div class="container">
+            <h1>{{ district_name }}</h1>
             <div class="row">
                 <div class="col-md-12">
                     <table class="table">
@@ -45,7 +46,7 @@
                         <tbody>
                             {% for team_leader,row in data.items %}
                                 <tr>
-                                    <td>{{ team_leader }}</td>
+                                    <td><a href="{% url "spray-operators" team_leader %}">{{ team_leader }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
