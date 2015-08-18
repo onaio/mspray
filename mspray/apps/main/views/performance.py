@@ -1,5 +1,5 @@
 # from django.core.cache import cache
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.shortcuts import render_to_response
 from mspray.apps.main.models import TargetArea, District, SprayDay
 
@@ -12,12 +12,16 @@ def calculate(numerator, denominator, percentage):
     return 0
 
 
-def update_sprayed_structures(spray_points_sprayed, sprayed_structures):
+def update_sprayed_structures(
+        spray_points_sprayed, sprayed_structures, per_so=True):
     # set structures sprayed per day per spray operator
     for a in spray_points_sprayed:
         date_sprayed = a.data.get('today')
-        spray_operator = a.data.get('sprayed/sprayop_name')
-        key = "%s-%s" % (date_sprayed, spray_operator)
+        if per_so:
+            spray_operator = a.data.get('sprayed/sprayop_name')
+            key = "%s-%s" % (date_sprayed, spray_operator)
+        else:
+            key = date_sprayed
         if sprayed_structures.get(key):
             sprayed_structures[key] = sprayed_structures[key] + 1
         else:
@@ -125,11 +129,16 @@ def district(request):
                               {'data': dist_hse, 'totals': totals})
 
 
-def get_total(spray_day, condition):
+def get_total(spray_day, condition, spray_operator=None):
     if spray_day:
+        if spray_operator:
+            spray_day = spray_day.filter(
+                data__contains='"sprayed/sprayop_name":"%s"' % spray_operator)
         if condition == "sprayable":
-            queryset = spray_day.filter(
-                data__contains='"sprayable_structure":"yes"')
+            queryset = spray_day.extra(
+                where=["data->>%s = %s"],
+                params=["sprayable_structure", "yes"]
+            )
         elif condition == "not_sprayable":
             queryset = spray_day.filter(
                 data__contains='"sprayable_structure":"no"')
@@ -166,75 +175,156 @@ def team_leaders(request, district_name):
         'not_sprayed_total': 0,
         'spray_success_rate': 0
     }
-    team_leader_count = 0
-    for target_area in target_areas:
-        sp = SprayDay.objects.filter(geom__coveredby=target_area.geom)
 
-        for a in sp:
-            if not rows.get(a.data.get('team_leader')):
-                team_leader_count += 1
-                tl = a.data.get('team_leader')
-                spray_day = sp.filter(
-                    data__contains='"team_leader":"{}"'.format(tl)
-                )
-                rows[a.data.get('team_leader')] = {}
+    spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas.collect()).extra(select={'team_leader':'data->>%s'}, select_params=['team_leader']).values_list('team_leader')
+    sprayable_qs = spraypoints.extra(where=['data->>%s = %s'], params=['sprayable_structure', 'yes'])
+    sprayable = dict(sprayable_qs.annotate(c=Count('data')))
+    non_sprayable = dict(spraypoints.extra(where=['data->>%s = %s'], params=['sprayable_structure', 'no']).annotate(c=Count('data')))
+    sprayed = dict(spraypoints.extra(where=['data->>%s = %s'], params=['sprayed/was_sprayed', 'yes']).annotate(c=Count('data')))
+    refused = dict(spraypoints.extra(where=['data->>%s = %s'], params=['unsprayed/reason', 'Refused']).annotate(c=Count('data')))
+    other = dict(spraypoints.extra(where=['data->>%s IN (%s, %s, %s, %s, %s)'], params=['unsprayed/reason', 'Other', 'Sick', 'Funeral', 'Locked', 'No one home/Missed']).annotate(c=Count('data')))
+    team_leaders = spraypoints.values_list('team_leader', flat=True).distinct()
 
-                team_leader_dict = rows.get(a.data.get('team_leader'))
-                team_leader_dict['sprayable'] = get_total(
-                    spray_day, "sprayable")
-                totals['sprayable'] += team_leader_dict['sprayable']
+    for team_leader in team_leaders:
+        numerator = sprayed.get(team_leader)
+        denominator = 1 if sprayable.get(team_leader) == 0 \
+            else sprayable.get(team_leader)
+        sprayed_success_rate = round((numerator/denominator) * 100, 1)
 
-                team_leader_dict['not_sprayable'] = get_total(
-                    spray_day, "not_sprayable")
-                totals['not_sprayable'] += team_leader_dict['not_sprayable']
+        # calcuate Average structures sprayed per day per SO
+        spray_points_sprayed = SprayDay.objects.filter(
+            data__contains='"sprayed/was_sprayed":"yes"').filter(
+            data__contains='"team_leader":"{}"'.format(team_leader))
+        sprayed_structures = update_sprayed_structures(
+            spray_points_sprayed, {})
+        denominator = 1 if len(sprayed_structures.keys()) == 0 \
+            else len(sprayed_structures.keys())
+        numerator = sum(a for a in sprayed_structures.values())
+        avg_structures_per_user_per_so = round(numerator/denominator, 1)
 
-                team_leader_dict['sprayed'] = get_total(spray_day, "sprayed")
-                totals['sprayed'] += team_leader_dict['sprayed']
+        not_sprayed_total = refused.get(team_leader) + other.get(team_leader)
 
-                team_leader_dict['refused'] = get_total(spray_day, "refused")
-                totals['refused'] += team_leader_dict['refused']
+        leader_dict = {
+            'sprayable': sprayable.get(team_leader),
+            'not_sprayable': non_sprayable.get(team_leader),
+            'sprayed': sprayed.get(team_leader),
+            'refused': refused.get(team_leader),
+            'other': other.get(team_leader),
+            'spray_success_rate': sprayed_success_rate,
+            'avg_structures_per_user_per_so': avg_structures_per_user_per_so,
+            'not_sprayed_total': not_sprayed_total
+        }
 
-                team_leader_dict['other'] = get_total(spray_day, "other")
-                totals['other'] += team_leader_dict['other']
+        rows[team_leader] = leader_dict
 
-                team_leader_dict['not_sprayed_total'] = \
-                    team_leader_dict['other'] + team_leader_dict['refused']
-                totals['not_sprayed_total'] += \
-                    team_leader_dict['not_sprayed_total']
+        # calculate totals
+        totals['sprayable'] += sprayable.get(team_leader)
+        totals['not_sprayable'] += non_sprayable.get(team_leader)
+        totals['sprayed'] += sprayed.get(team_leader)
+        totals['refused'] += refused.get(team_leader)
+        totals['other'] += other.get(team_leader)
+        totals['not_sprayed_total'] += not_sprayed_total
+        totals['avg_structures_per_user_per_so'] += \
+            avg_structures_per_user_per_so
 
-                numerator = team_leader_dict['sprayed']
-                denominator = 1 if team_leader_dict['sprayable'] == 0 \
-                    else team_leader_dict['sprayable']
-                sprayed_success_rate = round((numerator/denominator) * 100, 1)
-                team_leader_dict['spray_success_rate'] = sprayed_success_rate
-                totals['spray_success_rate'] += \
-                    team_leader_dict['spray_success_rate']
-
-                # calcuate Average structures sprayed per day per SO
-                spray_points_sprayed = spray_day.filter(
-                    data__contains='"sprayed/was_sprayed":"yes"')
-                sprayed_structures = update_sprayed_structures(
-                    spray_points_sprayed, {})
-                denominator = 1 if len(sprayed_structures.keys()) == 0 \
-                    else len(sprayed_structures.keys())
-                numerator = sum(a for a in sprayed_structures.values())
-                avg_struct_per_user_per_so = round(numerator/denominator, 1)
-
-                team_leader_dict['avg_structures_per_user_per_so'] = \
-                    avg_struct_per_user_per_so
-                totals['avg_structures_per_user_per_so'] += \
-                    team_leader_dict['avg_structures_per_user_per_so']
-
-                rows[a.data.get('team_leader')] = team_leader_dict
-
+    # calculate spray_success_rate total
     numerator = totals['sprayed']
     denominator = 1 if totals['sprayable'] == 0 \
         else totals['sprayable']
     sprayed_success_rate = round((numerator/denominator) * 100, 1)
     totals['spray_success_rate'] = sprayed_success_rate
 
+    # calculate avg_structures_per_user_per_so total
     totals['avg_structures_per_user_per_so'] = round(
-        totals['avg_structures_per_user_per_so']/team_leader_count, 0)
+        totals['avg_structures_per_user_per_so']/len(team_leaders), 0)
 
     return render_to_response('team-leaders.html',
-                              {'data': rows, 'totals': totals})
+                              {'data': rows,
+                               'totals': totals,
+                               'district_name': district_name})
+
+
+def spray_operators(request, team_leader):
+    spray_day = SprayDay.objects.filter(
+        data__contains='"team_leader":"%s"' % team_leader)
+    select = {'spray_operator': "data->>'sprayed/sprayop_name'"}
+    spray_operators = spray_day.extra(
+        select=select).values_list('spray_operator', flat=True).distinct()
+
+    spray_operators_dict = {}
+    totals = {
+        'no_of_days_worked': 0,
+        'avg_structures_per_so': 0,
+        'other': 0,
+        'refused': 0,
+        'sprayed': 0,
+        'sprayable': 0,
+        'not_sprayable': 0,
+        'not_sprayed_total': 0,
+        'spray_success_rate': 0
+    }
+    for a in spray_operators:
+        if a is not None:
+            sprayed = get_total(spray_day, "sprayed", spray_operator=a)
+            totals['sprayed'] += sprayed
+
+            sprayable = get_total(spray_day, "sprayable", spray_operator=a)
+            totals['sprayable'] += sprayable
+
+            not_sprayable = get_total(
+                spray_day, "not_sprayable", spray_operator=a)
+            totals['not_sprayable'] += not_sprayable
+
+            refused = get_total(spray_day, "refused", spray_operator=a)
+            totals['refused'] += refused
+
+            other = get_total(spray_day, "other", spray_operator=a)
+            totals['other'] += other
+
+            not_sprayed_total = other + refused
+            totals['not_sprayed_total'] += not_sprayed_total
+
+            numerator = sprayed
+            denominator = 1 if sprayable == 0 else sprayable
+            spray_success_rate = round((numerator/denominator) * 100, 0)
+            totals['spray_success_rate'] += spray_success_rate
+
+            # calcuate Average structures sprayed per day per SO
+            spray_points_sprayed = spray_day.filter(
+                data__contains='"sprayed/was_sprayed":"yes"').filter(
+                data__contains='"sprayed/sprayop_name":"%s"' % a)
+            sprayed_structures = update_sprayed_structures(
+                spray_points_sprayed, {}, per_so=False)
+            no_of_days_worked = len(sprayed_structures.keys())
+            totals['no_of_days_worked'] += no_of_days_worked
+
+            denominator = 1 if no_of_days_worked == 0 else no_of_days_worked
+            numerator = sum(a for a in sprayed_structures.values())
+            avg_structures_per_so = round(numerator/denominator, 1)
+            totals['avg_structures_per_so'] += avg_structures_per_so
+
+            spray_operators_dict[a] = {
+                'no_of_days_worked': no_of_days_worked,
+                'sprayed': sprayed,
+                'sprayable': sprayable,
+                'not_sprayable': not_sprayable,
+                'refused': refused,
+                'other': other,
+                'not_sprayed_total': not_sprayed_total,
+                'spray_success_rate': spray_success_rate,
+                'avg_structures_per_so': avg_structures_per_so,
+            }
+
+    numerator = totals['sprayed']
+    denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
+    sprayed_success_rate = round((numerator/denominator) * 100, 1)
+    totals['spray_success_rate'] = sprayed_success_rate
+
+    spray_operators = [a for a in spray_operators if a is not None]
+    totals['avg_structures_per_so'] = round(
+        totals['avg_structures_per_so']/len(spray_operators), 1)
+
+    return render_to_response('spray-operators.html',
+                              {'data': spray_operators_dict,
+                               'totals': totals,
+                               'team_leader': team_leader})
