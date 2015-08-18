@@ -233,8 +233,6 @@ def team_leaders(request, district_name):
     sprayed_success_rate = round((numerator/denominator) * 100, 1)
     totals['spray_success_rate'] = sprayed_success_rate
 
-    print("average: %s" % totals['avg_structures_per_user_per_so'])
-    print("counter: %s" % target_areas.count())
     totals['avg_structures_per_user_per_so'] = round(
         totals['avg_structures_per_user_per_so']/team_leader_count, 0)
 
