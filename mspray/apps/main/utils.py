@@ -146,3 +146,35 @@ def delete_cached_target_area_keys(sprayday):
             "%(key)s_visited_refused %(key)s_visited_sprayed "\
             "%(key)s_visited_total" % {'key': t.pk}
         cache.delete_many(keys.split())
+
+
+def avg_time(qs, field):
+    if field not in ['start', 'end']:
+        raise ValueError(
+            "field should be either 'start' or 'end': {} is invalid."
+            .format(field)
+        )
+    SQL_AVG_TIME = (
+        "SELECT AVG(t1) AS hour, AVG(t2) AS minute FROM ("
+        "SELECT  today, AVG("
+        "EXTRACT(HOUR FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
+        " AS t1, AVG(EXTRACT("
+        "MINUTE FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
+        " AS t2 FROM (SELECT (data->>'sprayed/sprayop_name')::int "
+        "AS spray_operator, data->>'today' AS today, data->>%s AS endtime,"
+        " ROW_NUMBER() OVER ("
+        "PARTITION BY (data->>'sprayed/sprayop_name')::int, data->>'today'"
+        " ORDER BY data->>%s) FROM main_sprayday "
+        "WHERE (data->'sprayed/sprayop_name') IS NOT NULL "
+        "AND data->>'today' = SUBSTRING(data->>%s, 0, 11) "
+        "AND id IN %s) AS Q1 "
+        "WHERE row_number = 1 GROUP BY today ORDER BY today) AS Q2;"
+    )
+    pks = list(qs.values_list('pk', flat=True))
+    cursor = connection.cursor()
+    cursor.execute(SQL_AVG_TIME, [field, field, field, tuple(pks)])
+    hour, minute = 0, 0
+    for i in cursor.fetchall():
+        hour, minute = i
+
+    return (round(hour), round(minute))
