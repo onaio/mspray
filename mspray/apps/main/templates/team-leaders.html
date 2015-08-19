@@ -46,7 +46,7 @@
                         <tbody>
                             {% for team_leader,row in data.items %}
                                 <tr>
-                                    <td><a href="{% url "spray-operators" team_leader %}">{{ team_leader }}</a></td>
+                                    <td><a href="{% url "spray-operator-summary" team_leader district_name %}">{{ team_leader }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
