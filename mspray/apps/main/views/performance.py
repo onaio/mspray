@@ -1,5 +1,5 @@
 # from django.core.cache import cache
-from django.db.models import Q, Count
+from django.db.models import Count
 from django.shortcuts import render_to_response
 from mspray.apps.main.models import TargetArea, District, SprayDay
 from mspray.apps.main.utils import avg_time
@@ -48,6 +48,7 @@ def district(request):
         'houses': 0
     }
     start_times = []
+    end_times = []
 
     for a in dist_hse:
         # a - {'district_name': '', 'houses': }
@@ -61,9 +62,15 @@ def district(request):
         structures_sprayed_totals = 0
         spray_points_total = 0
         qs = SprayDay.objects.filter(geom__coveredby=target_areas.collect())
+
+        _end_time = avg_time(qs, 'start')
+        a['avg_end_time'] = '%s.%s' % _end_time
+        end_times.append(_end_time)
+
         _start_time = avg_time(qs, 'end')
         a['avg_start_time'] = '%s.%s' % _start_time
         start_times.append(_start_time)
+
         for target_area in target_areas:
             structures = 1 if target_area.houses < 1 else target_area.houses
             spray_day = SprayDay.objects.filter(
@@ -131,10 +138,14 @@ def district(request):
     totals['avg_structures_per_user_per_so'] = round(
         totals['avg_structures_per_user_per_so']/dist_hse.count(), 0)
 
-    if len(start_times):
+    if len(start_times) and len(end_times):
         totals['avg_start_time'] = '{}.{}'.format(
-            round(sum([i[1] for i in start_times])/len(start_times)),
-            round(sum([i[0] for i in start_times])/len(start_times))
+            round(sum([i[0] for i in start_times])/len(start_times)),
+            round(sum([i[1] for i in start_times])/len(start_times))
+        )
+        totals['avg_end_time'] = '{}.{}'.format(
+            round(sum([i[0] for i in end_times])/len(end_times)),
+            round(sum([i[1] for i in end_times])/len(end_times))
         )
 
     return render_to_response('performance.html',

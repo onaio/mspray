@@ -65,8 +65,8 @@
                                 <td class='numbers' style="background-color: yellow">
                             {% endif %}
                                 {{ row.avg_structures_per_user_per_so }}</td>
-                            <td></td>
-                            <td></td>
+                            <td class='numbers'>{{ row.avg_start_time }}</td>
+                            <td class='numbers'>{{ row.avg_end_time }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -90,8 +90,8 @@
                                 <td class='numbers' class="green">
                             {% endif %}
                                 {{ totals.avg_structures_per_user_per_so }}</td>
-                            <td></td>
-                            <td></td>
+                            <td class='numbers'>{{ totals.avg_start_time }}</td>
+                            <td class='numbers'>{{ totals.avg_end_time }}</td>
                         </tr>
                     </tfoot>
                 </table>

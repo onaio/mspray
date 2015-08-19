@@ -149,11 +149,15 @@ def delete_cached_target_area_keys(sprayday):
 
 
 def avg_time(qs, field):
-    if field not in ['start', 'end']:
+    START = 'start'
+    END = 'end'
+    if field not in [START, END]:
         raise ValueError(
             "field should be either 'start' or 'end': {} is invalid."
             .format(field)
         )
+    ORDER = 'ASC' if field == END else 'DESC'
+
     SQL_AVG_TIME = (
         "SELECT AVG(t1) AS hour, AVG(t2) AS minute FROM ("
         "SELECT  today, AVG("
@@ -164,7 +168,7 @@ def avg_time(qs, field):
         "AS spray_operator, data->>'today' AS today, data->>%s AS endtime,"
         " ROW_NUMBER() OVER ("
         "PARTITION BY (data->>'sprayed/sprayop_name')::int, data->>'today'"
-        " ORDER BY data->>%s) FROM main_sprayday "
+        " ORDER BY data->>%s " + ORDER + ") FROM main_sprayday "
         "WHERE (data->'sprayed/sprayop_name') IS NOT NULL "
         "AND data->>'today' = SUBSTRING(data->>%s, 0, 11) "
         "AND id IN %s) AS Q1 "
