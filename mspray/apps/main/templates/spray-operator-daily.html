@@ -1,0 +1,92 @@
+{% load humanize %}
+{% load staticfiles %}
+<html>
+    <head>
+        <title>Performance - Team Leader</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <link href='{% static "css/main.css" %}' rel='stylesheet' />
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <header class="navbar navbar-inverse" role="navigation">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/"><img src="{% static "img/mSpray-logo.png" %}" alt="mspray" id="mspray-logo" /> Zambia</a>
+                </div>
+            </div>
+        </header>
+        <div class="container">
+            <h1></h1>
+            <div class="row">
+                <h1>Data for: {{ spray_operator }}</h1>
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">Day</th>
+                                <th colspan="6">Structures</th>
+                                <th rowspan="3">Spray success rate</th>
+                                <th rowspan="3">Start time</th>
+                                <th rowspan="3">End time</th>
+                                <th rowspan="3">Duration in field</th>
+                            </tr>
+                            <tr>
+                                <th colspan="2">Found</th>
+                                <th rowspan="2">Sprayed</th>
+                                <th colspan="3">Not sprayed</th>
+                            </tr>
+                            <tr>
+                                <th>Sprayable</th>
+                                <th>Non-Sprayable</th>
+                                <th>Refused</th>
+                                <th>Other</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day,row in data.items %}
+                                <tr>
+                                    <td>{{ day }}</a></td>
+                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.not_sprayed_total }}</td>
+                                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                                    {% if row.avg_structures_per_user_per_so < 12 %}
+                                        <td class='numbers' style="background-color: red">
+                                    {% elif row.avg_structures_per_user_per_so > 12  and row.avg_structures_per_user_per_so < 14 %}
+                                        <td class='numbers' style="background-color: yellow">
+                                    {% elif row.avg_structures_per_user_per_so > 14 %}
+                                        <td class='numbers' style="background-color: yellow">
+                                    {% endif %}
+                                        {{ row.avg_structures_per_user_per_so }}</td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td>Totals</td>
+                                <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.refused|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.other|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.not_sprayed_total }}</td>
+                                <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                                {% if totals.avg_structures_per_user_per_so < 12 %}
+                                    <td class='numbers' style="background-color: red">
+                                {% elif totals.avg_structures_per_user_per_so > 12  and totals.avg_structures_per_user_per_so < 14 %}
+                                    <td class='numbers' style="background-color: yellow">
+                                {% elif totals.avg_structures_per_user_per_so > 14 %}
+                                    <td class='numbers' style="background-color: yellow">
+                                {% endif %}
+                                    {{ totals.avg_structures_per_user_per_so }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

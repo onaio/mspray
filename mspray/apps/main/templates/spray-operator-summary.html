@@ -46,9 +46,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for team_leader,row in data.items %}
+                            {% for spray_operator,row in data.items %}
                                 <tr>
-                                    <td>{{ team_leader }}</td>
+                                    <td><a href="{% url "spray-operator-daily" team_leader district_name spray_operator %}">{{ spray_operator }}</a></td>
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
