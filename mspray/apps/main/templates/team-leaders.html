@@ -3,6 +3,7 @@
 <html>
     <head>
         <title>Performance - Team Leader</title>
+        <link id="favicon" rel="shortcut icon" href='{% static "img/favicon.png" %}' type="image/png"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <link href='{% static "css/main.css" %}' rel='stylesheet' />
 
@@ -20,7 +21,7 @@
             <h1>{{ district_name }}</h1>
             <div class="row">
                 <div class="col-md-12">
-                    <table class="table">
+                    <table class="table table-striped">
                         <thead>
                             <tr>
                                 <th rowspan="3">Team Leader</th>
@@ -62,8 +63,12 @@
                                         <td class='numbers' style="background-color: yellow">
                                     {% endif %}
                                         {{ row.avg_structures_per_user_per_so }}</td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             {% endfor %}
+                        </tbody>
+                        <tfoot>
                             <tr>
                                 <td>Totals</td>
                                 <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
@@ -74,15 +79,17 @@
                                 <td class='numbers'>{{ totals.not_sprayed_total }}</td>
                                 <td class='numbers'>{{ totals.spray_success_rate }}%</td>
                                 {% if totals.avg_structures_per_user_per_so < 12 %}
-                                    <td class='numbers' style="background-color: red">
+                                    <td class='numbers' class="red">
                                 {% elif totals.avg_structures_per_user_per_so > 12  and totals.avg_structures_per_user_per_so < 14 %}
-                                    <td class='numbers' style="background-color: yellow">
+                                    <td class='numbers' class="yellow">
                                 {% elif totals.avg_structures_per_user_per_so > 14 %}
-                                    <td class='numbers' style="background-color: yellow">
+                                    <td class='numbers' class="green">
                                 {% endif %}
                                     {{ totals.avg_structures_per_user_per_so }}</td>
+                                <td></td>
+                                <td></td>
                             </tr>
-                        </tbody>
+                        </tfoot>
                     </table>
                 </div>
             </div>

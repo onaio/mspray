@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>Definitions and Conditions</title>
+        <link id="favicon" rel="shortcut icon" href='{% static "img/favicon.png" %}' type="image/png"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         <link href='{% static "css/main.css" %}' rel='stylesheet' />
 
@@ -10,75 +11,87 @@
     </head>
     <body>
         <div class="container">
-            <div class="row">       
-                <h1><strong>Definitions</strong></h1>
-                <div class="col-md-12">        
-                    <p>a - Found coverage is defined as the number of structures found / number of structures enumerated</p>       
-                    <p>b - Spray coverage is defined as number of structures sprayed / number of structures found</p>      
-                    <p>c - Start time is determined from the time the first form is completed per day per operator</p>     
-                    <p>d - Finish time is determined from the time the last form is started per day per operator</p>       
-                </div>     
-            </div>
             <div class="row">
-                <h1><strong>Conditional formatting rules</strong></h1>
-                <div class="col-md-4">
-                    <p><strong>Average structures sprayed per day per SO</strong></p>
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>Red</td>
-                                <td>< 12</td>
-                            </tr>
-                            <tr>
-                                <td>Yellow</td>
-                                <td>between 12 and 14</td>
-                            </tr>
-                            <tr>
-                                <td>Green</td>
-                                <td> 14</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Definitions</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-12">        
+                            <p>a - Found coverage is defined as the number of structures found / number of structures enumerated</p>       
+                            <p>b - Spray coverage is defined as number of structures sprayed / number of structures found</p>      
+                            <p>c - Start time is determined from the time the first form is completed per day per operator</p>     
+                            <p>d - Finish time is determined from the time the last form is started per day per operator</p>       
+                        </div>
+                        
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <p><strong>Average start time</strong></p>
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>Red</td>
-                                <td>> 8:30</td>
-                            </tr>
-                            <tr>
-                                <td>Yellow</td>
-                                <td>between 8.00 and 8.30</td>
-                            </tr>
-                            <tr>
-                                <td>Green</td>
-                                <td> < 8.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-md-4">
-                    <p><strong>Average end time</strong></p>
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>Red</td>
-                                <td>< 14:00</td>
-                            </tr>
-                            <tr>
-                                <td>Yellow</td>
-                                <td>between 14.00 and 15.00</td>
-                            </tr>
-                            <tr>
-                                <td>Green</td>
-                                <td> > 15.00</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3>Conditional formatting rules</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="col-md-4">
+                            <p><strong>Average structures sprayed per day per SO</strong></p>
+                            <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="red">Red</td>
+                                    <td>&lt; 12</td>
+                                </tr>
+                                <tr>
+                                    <td class="yellow">Yellow</td>
+                                    <td>between 12 and 14</td>
+                                </tr>
+                                <tr>
+                                    <td class="green">Green</td>
+                                    <td> 14</td>
+                                </tr>
+                            </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Average start time</strong></p>
+                            <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="red">Red</td>
+                                    <td>&gt; 8:30</td>
+                                </tr>
+                                <tr>
+                                    <td class="yellow">Yellow</td>
+                                    <td>between 8.00 and 8.30</td>
+                                </tr>
+                                <tr>
+                                    <td class="green">Green</td>
+                                    <td> &lt; 8.00</td>
+                                </tr>
+                            </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Average end time</strong></p>
+                            <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td class="red">Red</td>
+                                    <td>&lt; 14:00</td>
+                                </tr>
+                                <tr>
+                                    <td class="yellow">Yellow</td>
+                                    <td>between 14.00 and 15.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="green">Green</td>
+                                    <td> &gt; 15.00</td>
+                                </tr>
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>        
+        </div>       
     </body>
 </html>
