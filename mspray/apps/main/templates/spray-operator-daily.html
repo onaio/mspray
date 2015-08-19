@@ -45,9 +45,9 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for day,row in data.items %}
+                            {% for row in data %}
                                 <tr>
-                                    <td>{{ day }}</a></td>
+                                    <td>{{ row.day }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
