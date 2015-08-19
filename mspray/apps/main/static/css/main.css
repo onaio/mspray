@@ -481,8 +481,13 @@ h2{
 }
 
 #mspray-logo {
+    float: left;
     height: 37px;
     margin-top: -9px;
+    margin-right: 9px;
+}
+#mspray-logo + span{
+    float: left;
 }
 
 a.distrct-links {
