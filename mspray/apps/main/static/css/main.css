@@ -29,7 +29,7 @@ h2{
 .table tr th, .table tr td{
     font-size:14px;
 }
-.table > thead > tr > th, 
+.table > thead > tr > th,
 .table > tfoot > tr > td{
     background:#ddd;
     border:1px solid #ccc;
@@ -58,9 +58,9 @@ h2{
 }
 
 /* Table color-coding */
-.table > tbody > tr > td.red, 
+.table > tbody > tr > td.red,
 .table > tbody > tr > td.green,
-.table > tfoot > tr > td.red, 
+.table > tfoot > tr > td.red,
 .table > tfoot > tr > td.green{
     color:#fff;
     opacity:0.8;
@@ -573,4 +573,7 @@ a.distrct-links {
 }
 .ta-label:before {
     border: none;
+}
+td.numbers {
+    text-align: right;
 }
