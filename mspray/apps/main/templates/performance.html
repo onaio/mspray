@@ -1,6 +1,6 @@
 {% load humanize %}
-{% load performance_extras %}
 {% load staticfiles %}
+{% load performance_extras %}
 <html>
     <head>
         <title>Performance - District</title>
@@ -78,7 +78,7 @@
                             <td class='numbers'>{{ totals.sprayed_percentage }}%</td>
                             <td class='numbers'>{{ totals.sprayed_total|intcomma }}</td>
                             <td class='numbers'>{{ totals.sprayed_total_percentage }}%</td>
-                            <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>
+                            <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
                                 {{ totals.avg_structures_per_user_per_so }}
                             </td>
                             <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
