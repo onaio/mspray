@@ -30,7 +30,7 @@ def format_avg_time(value):
 
 @register.filter
 def avg_start_time_color(value):
-    if not isinstance(value, tuple):
+    if not isinstance(value, tuple) or value is None:
         return ''
 
     color = 'red'
@@ -46,7 +46,7 @@ def avg_start_time_color(value):
 
 @register.filter
 def avg_end_time_color(value):
-    if not isinstance(value, tuple):
+    if not isinstance(value, tuple) or value is None:
         return ''
 
     color = 'red'

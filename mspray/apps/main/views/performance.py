@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.shortcuts import render_to_response
 from mspray.apps.main.models import TargetArea, District, SprayDay
 from mspray.apps.main.utils import avg_time
+from mspray.apps.main.utils import avg_time_tuple
 
 
 def calculate(numerator, denominator, percentage):
@@ -455,6 +456,8 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
     refused = get_totals(spraypoints, "refused")
     other = get_totals(spraypoints, "other")
     dates = sorted(spraypoints.values_list('today', flat=True).distinct())
+    start_times = []
+    end_times = []
 
     for index, _date in enumerate(dates):
         numerator = sprayed.get(_date)
@@ -465,6 +468,13 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
         not_sprayed_total = refused.get(team_leader, 0) + \
             other.get(team_leader, 0)
 
+        qs = spraypoints.extra(where=["data->>%s = %s"],
+                               params=["today", _date])
+        _end_time = avg_time(qs, 'start')
+        end_times.append(_end_time)
+        _start_time = avg_time(qs, 'end')
+        start_times.append(_start_time)
+
         data.append({
             'day': index + 1,
             'date': _date,
@@ -474,7 +484,8 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
             'refused': refused.get(_date, 0),
             'other': other.get(_date, 0),
             'spray_success_rate': spray_success_rate,
-            'not_sprayed_total': not_sprayed_total
+            'not_sprayed_total': not_sprayed_total,
+            'avg_start_time': _start_time,
         })
 
         # calculate totals
@@ -489,6 +500,8 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
     denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
     sprayed_success_rate = round((numerator/denominator) * 100, 1)
     totals['spray_success_rate'] = sprayed_success_rate
+    totals['avg_start_time'] = avg_time_tuple(start_times)
+    totals['avg_end_time'] = avg_time_tuple(end_times)
 
     return render_to_response('spray-operator-daily.html',
                               {'data': data,
