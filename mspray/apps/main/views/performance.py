@@ -1,7 +1,10 @@
 # from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import render_to_response
-from mspray.apps.main.models import TargetArea, District, SprayDay
+from mspray.apps.main.models import District
+from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import TargetArea
+from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
 
@@ -337,9 +340,11 @@ def spray_operator_summary(request, team_leader, district_name):
         .filter(
             data__contains='"team_leader":"%s"' % team_leader
         ).extra(
-            select={'sprayed/sprayop_name': 'data->>%s'},
-            select_params=['sprayed/sprayop_name']
-        ).values_list('sprayed/sprayop_name')
+            select={'spray_operator_code': 'data->>%s'},
+            select_params=['sprayed/sprayop_name'],
+            where=['(data->%s) IS NOT NULL'],
+            params=['sprayed/sprayop_name']
+        ).values_list('spray_operator_code')
 
     sprayable = get_totals(spraypoints, "sprayable")
     non_sprayable = get_totals(spraypoints, "non-sprayable")
@@ -347,23 +352,25 @@ def spray_operator_summary(request, team_leader, district_name):
     refused = get_totals(spraypoints, "refused")
     other = get_totals(spraypoints, "other")
 
-    spray_operator_names = [a
-                            for a in spraypoints.values_list(
-                                'sprayed/sprayop_name', flat=True).distinct()
-                            if a is not None]
+    spray_operators = spraypoints.extra(
+        select={
+            "spray_operator_name": "(select name from main_sprayoperator"
+            " where code = (data->>'sprayed/sprayop_name')::int)"
+        }
+    ).values_list('spray_operator_code', 'spray_operator_name').distinct()
     start_times = []
     end_times = []
 
-    for spray_operator_name in spray_operator_names:
-        numerator = sprayed.get(spray_operator_name)
-        denominator = 1 if sprayable.get(spray_operator_name) == 0 \
-            else sprayable.get(spray_operator_name)
+    for spray_operator_code, spray_operator_name in spray_operators:
+        numerator = sprayed.get(spray_operator_code)
+        denominator = 1 if sprayable.get(spray_operator_code) == 0 \
+            else sprayable.get(spray_operator_code)
         spray_success_rate = round((numerator/denominator) * 100, 1)
 
         # calcuate Average structures sprayed per day per SO
         spray_points_sprayed = SprayDay.objects.filter(
             data__contains='"sprayed/was_sprayed":"yes"').filter(
-            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_name)
+            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_code)
         sprayed_structures = update_sprayed_structures(
             spray_points_sprayed, {}, per_so=False)
         no_of_days_worked = len(sprayed_structures.keys())
@@ -377,7 +384,7 @@ def spray_operator_summary(request, team_leader, district_name):
 
         qs = SprayDay.objects.filter(
             geom__coveredby=target_areas_geom,
-            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_name
+            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_code
         ).filter(data__contains='"team_leader":"{}"'.format(team_leader))
         _end_time = avg_time(qs, 'start')
         end_times.append(_end_time)
@@ -385,12 +392,13 @@ def spray_operator_summary(request, team_leader, district_name):
         start_times.append(_start_time)
 
         data.append({
+            'spray_operator_code': spray_operator_code,
             'spray_operator_name': spray_operator_name,
-            'sprayable': sprayable.get(spray_operator_name, 0),
-            'not_sprayable': non_sprayable.get(spray_operator_name, 0),
-            'sprayed': sprayed.get(spray_operator_name, 0),
-            'refused': refused.get(spray_operator_name, 0),
-            'other': other.get(spray_operator_name, 0),
+            'sprayable': sprayable.get(spray_operator_code, 0),
+            'not_sprayable': non_sprayable.get(spray_operator_code, 0),
+            'sprayed': sprayed.get(spray_operator_code, 0),
+            'refused': refused.get(spray_operator_code, 0),
+            'other': other.get(spray_operator_code, 0),
             'no_of_days_worked': no_of_days_worked,
             'spray_success_rate': spray_success_rate,
             'avg_structures_per_so': avg_structures_per_so,
@@ -400,11 +408,11 @@ def spray_operator_summary(request, team_leader, district_name):
         })
 
         # totals
-        totals['sprayed'] += sprayed.get(spray_operator_name, 0)
-        totals['sprayable'] += sprayable.get(spray_operator_name, 0)
-        totals['not_sprayable'] += non_sprayable.get(spray_operator_name, 0)
-        totals['refused'] += refused.get(spray_operator_name, 0)
-        totals['other'] += other.get(spray_operator_name, 0)
+        totals['sprayed'] += sprayed.get(spray_operator_code, 0)
+        totals['sprayable'] += sprayable.get(spray_operator_code, 0)
+        totals['not_sprayable'] += non_sprayable.get(spray_operator_code, 0)
+        totals['refused'] += refused.get(spray_operator_code, 0)
+        totals['other'] += other.get(spray_operator_code, 0)
         totals['not_sprayed_total'] += not_sprayed_total
         totals['no_of_days_worked'] += no_of_days_worked
         totals['avg_structures_per_so'] += avg_structures_per_so
@@ -414,9 +422,8 @@ def spray_operator_summary(request, team_leader, district_name):
     sprayed_success_rate = round((numerator/denominator) * 100, 1)
     totals['spray_success_rate'] = sprayed_success_rate
 
-    spray_operators = [a for a in spray_operator_names]
     totals['avg_structures_per_so'] = round(
-        totals['avg_structures_per_so']/len(spray_operators), 1)
+        totals['avg_structures_per_so']/len(list(spray_operators)), 1)
 
     totals['avg_start_time'] = avg_time_tuple(start_times)
     totals['avg_end_time'] = avg_time_tuple(end_times)
@@ -425,6 +432,8 @@ def spray_operator_summary(request, team_leader, district_name):
                               {'data': data,
                                'totals': totals,
                                'team_leader': team_leader,
+                               'team_leader_name':
+                               TeamLeader.objects.get(code=team_leader).name,
                                'district_name': district_name})
 
 

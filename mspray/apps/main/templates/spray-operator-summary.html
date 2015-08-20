@@ -20,11 +20,11 @@
             </div>
         </header>
         <div class="container">
-            <h1>{{ team_leader }}</h1>
+            <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
               <li><a href="{% url "districts" %}">Performance</a></li>
               <li><a href="{% url "team-leaders" district_name %}">{{ district_name }}</a></li>
-              <li class="active">{{ team_leader }}</li>
+              <li class="active">{{ team_leader_name }}</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
@@ -32,10 +32,10 @@
                         <thead>
                             <tr>
                                 <th rowspan="3">Spray Operator</th>
-                                <th rowspan="3">Number of days worked</th>
+                                <th rowspan="3">Number of <br/> days worked</th>
                                 <th colspan="6">Structures</th>
                                 <th rowspan="3">Spray success rate</th>
-                                <th rowspan="3">Average structures sprayed per day</th>
+                                <th rowspan="3">Average structures<br /> sprayed per day</th>
                                 <th rowspan="3">Average start time</th>
                                 <th rowspan="3">Average end time</th>
                                 <th rowspan="3">Duration in field</th>
@@ -56,7 +56,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "spray-operator-daily" team_leader district_name row.spray_operator_name %}">{{ row.spray_operator_name }}</a></td>
+                                    <td><a href="{% url "spray-operator-daily" team_leader district_name row.spray_operator_code %}">{{ row.spray_operator_name }}</a></td>
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
