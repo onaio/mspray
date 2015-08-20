@@ -25,7 +25,10 @@ def sprayed_color(value):
 def format_avg_time(value):
     if not isinstance(value, tuple):
         return value
-    return '%s:%s' % value
+
+    hour, minute = value
+
+    return '{}:{}'.format(hour, minute)
 
 
 @register.filter
@@ -35,8 +38,9 @@ def avg_start_time_color(value):
 
     color = 'red'
     hour, minute = value
-
-    if hour < 8:
+    if hour is None or minute is None:
+        color = ''
+    elif hour < 8:
         color = 'green'
     elif hour == 8 and minute >= 0 and minute <= 30:
         color = 'yellow'
@@ -52,7 +56,9 @@ def avg_end_time_color(value):
     color = 'red'
     hour, minute = value
 
-    if hour >= 15:
+    if hour is None or minute is None:
+        color = ''
+    elif hour >= 15:
         color = 'green'
     elif hour >= 14 and hour < 15:
         color = 'yellow'
