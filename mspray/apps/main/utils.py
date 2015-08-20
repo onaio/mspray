@@ -181,4 +181,19 @@ def avg_time(qs, field):
     for i in cursor.fetchall():
         hour, minute = i
 
-    return (round(hour), round(minute))
+    return (round(hour) if hour is not None else hour,
+            round(minute) if minute is not None else minute)
+
+
+def avg_time_tuple(times):
+    """Takes a list of tuples and calculates the average"""
+    hours = [t[0] for t in times if t[0] is not None]
+    minutes = [t[1] for t in times if t[1] is not None]
+
+    if len(hours) and len(minutes):
+        hour = round(sum(hours))/len(hours)
+        minute = round(sum(minutes))/len(minutes)
+
+        return (hour, minute)
+
+    return None
