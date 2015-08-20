@@ -15,7 +15,7 @@ def sprayed_color(value):
 
     if value < 12:
         color = 'red'
-    elif value >= 12 and value <= 14:
+    elif value >= 12 and value < 14:
         color = 'yellow'
 
     return color
@@ -33,12 +33,12 @@ def avg_start_time_color(value):
     if not isinstance(value, tuple):
         return ''
 
-    color = 'green'
+    color = 'red'
     hour, minute = value
 
-    if hour > 8 and minute > 30:
-        color = 'red'
-    elif hour >= 8 and minute >= 0 and minute <= 30:
+    if hour < 8:
+        color = 'green'
+    elif hour == 8 and minute >= 0 and minute <= 30:
         color = 'yellow'
 
     return color
@@ -49,12 +49,12 @@ def avg_end_time_color(value):
     if not isinstance(value, tuple):
         return ''
 
-    color = 'green'
+    color = 'red'
     hour, minute = value
 
-    if hour > 8 and minute > 30:
-        color = 'red'
-    elif hour >= 8 and minute >= 0 and minute <= 30:
+    if hour >= 15:
+        color = 'green'
+    elif hour >= 14 and hour < 15:
         color = 'yellow'
 
     return color
