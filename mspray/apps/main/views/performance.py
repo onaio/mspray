@@ -224,11 +224,17 @@ def team_leaders(request, district_name):
     sprayed = get_totals(spraypoints, "sprayed")
     refused = get_totals(spraypoints, "refused")
     other = get_totals(spraypoints, "other")
-    team_leaders = spraypoints.values_list('team_leader', flat=True).distinct()
+    team_leaders = spraypoints.extra(
+        select={
+            "name": "(select name from main_teamleader"
+            " where code = (data->>'team_leader')::int)"
+        }
+    ).values_list('team_leader', 'name').distinct()
+
     start_times = []
     end_times = []
 
-    for team_leader in team_leaders:
+    for team_leader, team_leader_name in team_leaders:
         numerator = sprayed.get(team_leader, 0)
         denominator = 1 if sprayable.get(team_leader, 0) == 0 \
             else sprayable.get(team_leader)
@@ -259,7 +265,7 @@ def team_leaders(request, district_name):
         start_times.append(_start_time)
 
         data.append({
-            'team_leader': team_leader,
+            'team_leader': team_leader_name,
             'sprayable': sprayable.get(team_leader, 0),
             'not_sprayable': non_sprayable.get(team_leader, 0),
             'sprayed': sprayed.get(team_leader, 0),
