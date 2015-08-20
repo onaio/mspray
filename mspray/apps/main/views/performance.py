@@ -64,11 +64,11 @@ def district(request):
         qs = SprayDay.objects.filter(geom__coveredby=target_areas.collect())
 
         _end_time = avg_time(qs, 'start')
-        a['avg_end_time'] = '%s.%s' % _end_time
+        a['avg_end_time'] = _end_time
         end_times.append(_end_time)
 
         _start_time = avg_time(qs, 'end')
-        a['avg_start_time'] = '%s.%s' % _start_time
+        a['avg_start_time'] = _start_time
         start_times.append(_start_time)
 
         for target_area in target_areas:
@@ -139,11 +139,11 @@ def district(request):
         totals['avg_structures_per_user_per_so']/dist_hse.count(), 0)
 
     if len(start_times) and len(end_times):
-        totals['avg_start_time'] = '{}.{}'.format(
+        totals['avg_start_time'] = (
             round(sum([i[0] for i in start_times])/len(start_times)),
             round(sum([i[1] for i in start_times])/len(start_times))
         )
-        totals['avg_end_time'] = '{}.{}'.format(
+        totals['avg_end_time'] = (
             round(sum([i[0] for i in end_times])/len(end_times)),
             round(sum([i[1] for i in end_times])/len(end_times))
         )
