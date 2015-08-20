@@ -1,8 +1,10 @@
 # from django.core.cache import cache
 from django.db.models import Count
 from django.shortcuts import render_to_response
+from django.shortcuts import get_object_or_404
 from mspray.apps.main.models import District
 from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
@@ -428,13 +430,17 @@ def spray_operator_summary(request, team_leader, district_name):
     totals['avg_start_time'] = avg_time_tuple(start_times)
     totals['avg_end_time'] = avg_time_tuple(end_times)
 
-    return render_to_response('spray-operator-summary.html',
-                              {'data': data,
-                               'totals': totals,
-                               'team_leader': team_leader,
-                               'team_leader_name':
-                               TeamLeader.objects.get(code=team_leader).name,
-                               'district_name': district_name})
+    return render_to_response(
+        'spray-operator-summary.html',
+        {
+            'data': data,
+            'totals': totals,
+            'team_leader': team_leader,
+            'team_leader_name':
+            get_object_or_404(TeamLeader, code=team_leader).name,
+            'district_name': district_name
+        }
+    )
 
 
 def spray_operator_daily(request, team_leader, district_name, spray_operator):
@@ -513,9 +519,17 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
     totals['avg_start_time'] = avg_time_tuple(start_times)
     totals['avg_end_time'] = avg_time_tuple(end_times)
 
-    return render_to_response('spray-operator-daily.html',
-                              {'data': data,
-                               'totals': totals,
-                               'spray_operator': spray_operator,
-                               'district_name': district_name,
-                               'team_leader': team_leader})
+    return render_to_response(
+        'spray-operator-daily.html',
+        {
+            'data': data,
+            'totals': totals,
+            'spray_operator': spray_operator,
+            'spray_operator_name':
+            get_object_or_404(SprayOperator, code=spray_operator).name,
+            'district_name': district_name,
+            'team_leader': team_leader,
+            'team_leader_name':
+            get_object_or_404(TeamLeader, code=team_leader).name,
+        }
+    )
