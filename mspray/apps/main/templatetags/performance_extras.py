@@ -28,7 +28,8 @@ def format_avg_time(value):
 
     hour, minute = value
 
-    return '{}:{}'.format(hour, minute)
+    return '{}:{}'.format('' if hour is None else hour,
+                          '' if minute is None else minute)
 
 
 @register.filter
