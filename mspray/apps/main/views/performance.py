@@ -244,7 +244,8 @@ def team_leaders(request, district_name):
         numerator = sum(a for a in sprayed_structures.values())
         avg_structures_per_user_per_so = round(numerator/denominator, 1)
 
-        not_sprayed_total = refused.get(team_leader) + other.get(team_leader)
+        not_sprayed_total = refused.get(team_leader, 0) + \
+            other.get(team_leader, 0)
 
         qs = SprayDay.objects.filter(
             geom__coveredby=target_areas_geom,
@@ -258,11 +259,11 @@ def team_leaders(request, district_name):
 
         data.append({
             'team_leader': team_leader,
-            'sprayable': sprayable.get(team_leader),
-            'not_sprayable': non_sprayable.get(team_leader),
-            'sprayed': sprayed.get(team_leader),
-            'refused': refused.get(team_leader),
-            'other': other.get(team_leader),
+            'sprayable': sprayable.get(team_leader, 0),
+            'not_sprayable': non_sprayable.get(team_leader, 0),
+            'sprayed': sprayed.get(team_leader, 0),
+            'refused': refused.get(team_leader, 0),
+            'other': other.get(team_leader, 0),
             'spray_success_rate': sprayed_success_rate,
             'avg_structures_per_user_per_so': avg_structures_per_user_per_so,
             'not_sprayed_total': not_sprayed_total,
@@ -271,11 +272,11 @@ def team_leaders(request, district_name):
         })
 
         # calculate totals
-        totals['sprayable'] += sprayable.get(team_leader)
-        totals['not_sprayable'] += non_sprayable.get(team_leader)
-        totals['sprayed'] += sprayed.get(team_leader)
-        totals['refused'] += refused.get(team_leader)
-        totals['other'] += other.get(team_leader)
+        totals['sprayable'] += sprayable.get(team_leader, 0)
+        totals['not_sprayable'] += non_sprayable.get(team_leader, 0)
+        totals['sprayed'] += sprayed.get(team_leader, 0)
+        totals['refused'] += refused.get(team_leader, 0)
+        totals['other'] += other.get(team_leader, 0)
         totals['not_sprayed_total'] += not_sprayed_total
         totals['avg_structures_per_user_per_so'] += \
             avg_structures_per_user_per_so
