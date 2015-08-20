@@ -411,15 +411,8 @@ def spray_operator_summary(request, team_leader, district_name):
     totals['avg_structures_per_so'] = round(
         totals['avg_structures_per_so']/len(spray_operators), 1)
 
-    if len(start_times) and len(end_times):
-        totals['avg_start_time'] = (
-            round(sum([i[0] for i in start_times])/len(start_times)),
-            round(sum([i[1] for i in start_times])/len(start_times))
-        )
-        totals['avg_end_time'] = (
-            round(sum([i[0] for i in end_times])/len(end_times)),
-            round(sum([i[1] for i in end_times])/len(end_times))
-        )
+    totals['avg_start_time'] = avg_time_tuple(start_times)
+    totals['avg_end_time'] = avg_time_tuple(end_times)
 
     return render_to_response('spray-operator-summary.html',
                               {'data': data,
@@ -486,6 +479,7 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
             'spray_success_rate': spray_success_rate,
             'not_sprayed_total': not_sprayed_total,
             'avg_start_time': _start_time,
+            'avg_end_time': _end_time
         })
 
         # calculate totals
