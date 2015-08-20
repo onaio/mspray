@@ -500,4 +500,6 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
     return render_to_response('spray-operator-daily.html',
                               {'data': data,
                                'totals': totals,
-                               'spray_operator': spray_operator})
+                               'spray_operator': spray_operator,
+                               'district_name': district_name,
+                               'team_leader': team_leader})
