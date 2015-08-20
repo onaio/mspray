@@ -265,7 +265,8 @@ def team_leaders(request, district_name):
         start_times.append(_start_time)
 
         data.append({
-            'team_leader': team_leader_name,
+            'team_leader': team_leader,
+            'team_leader_name': team_leader_name,
             'sprayable': sprayable.get(team_leader, 0),
             'not_sprayable': non_sprayable.get(team_leader, 0),
             'sprayed': sprayed.get(team_leader, 0),

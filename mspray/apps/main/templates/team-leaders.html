@@ -52,7 +52,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "spray-operator-summary" row.team_leader district_name %}">{{ row.team_leader }}</a></td>
+                                    <td><a href="{% url "spray-operator-summary" row.team_leader district_name %}">{{ row.team_leader_name }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
