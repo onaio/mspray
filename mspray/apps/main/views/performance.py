@@ -208,18 +208,24 @@ def team_leaders(request, district_name):
         'spray_success_rate': 0
     }
 
-    spraypoints = SprayDay.objects.filter(
-        geom__coveredby=target_areas.collect()).extra(
-        select={'team_leader': 'data->>%s'},
-        select_params=['team_leader']).values_list('team_leader')
+    target_areas_geom = target_areas.collect(),
+    spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas_geom)\
+        .extra(
+            select={'team_leader': 'data->>%s'},
+            select_params=['team_leader']
+        ).values_list('team_leader')
     sprayable_qs = spraypoints.extra(
-        where=['data->>%s = %s'], params=['sprayable_structure', 'yes'])
+        where=['data->>%s = %s'],
+        params=['sprayable_structure', 'yes']
+    )
     sprayable = dict(sprayable_qs.annotate(c=Count('data')))
     non_sprayable = get_totals(spraypoints, "non-sprayable")
     sprayed = get_totals(spraypoints, "sprayed")
     refused = get_totals(spraypoints, "refused")
     other = get_totals(spraypoints, "other")
     team_leaders = spraypoints.values_list('team_leader', flat=True).distinct()
+    start_times = []
+    end_times = []
 
     for team_leader in team_leaders:
         numerator = sprayed.get(team_leader)
@@ -240,6 +246,16 @@ def team_leaders(request, district_name):
 
         not_sprayed_total = refused.get(team_leader) + other.get(team_leader)
 
+        qs = SprayDay.objects.filter(
+            geom__coveredby=target_areas_geom,
+            data__contains='"team_leader":"{}"'.format(team_leader)
+        )
+        _end_time = avg_time(qs, 'start')
+        end_times.append(_end_time)
+
+        _start_time = avg_time(qs, 'end')
+        start_times.append(_start_time)
+
         data.append({
             'team_leader': team_leader,
             'sprayable': sprayable.get(team_leader),
@@ -249,7 +265,9 @@ def team_leaders(request, district_name):
             'other': other.get(team_leader),
             'spray_success_rate': sprayed_success_rate,
             'avg_structures_per_user_per_so': avg_structures_per_user_per_so,
-            'not_sprayed_total': not_sprayed_total
+            'not_sprayed_total': not_sprayed_total,
+            'avg_start_time': _start_time,
+            'avg_end_time': _end_time
         })
 
         # calculate totals
@@ -272,6 +290,16 @@ def team_leaders(request, district_name):
     # calculate avg_structures_per_user_per_so total
     totals['avg_structures_per_user_per_so'] = round(
         totals['avg_structures_per_user_per_so']/len(team_leaders), 0)
+
+    if len(start_times) and len(end_times):
+        totals['avg_start_time'] = (
+            round(sum([i[0] for i in start_times])/len(start_times)),
+            round(sum([i[1] for i in start_times])/len(start_times))
+        )
+        totals['avg_end_time'] = (
+            round(sum([i[0] for i in end_times])/len(end_times)),
+            round(sum([i[1] for i in end_times])/len(end_times))
+        )
 
     return render_to_response('team-leaders.html',
                               {'data': data,
