@@ -21,6 +21,11 @@
         </header>
         <div class="container">
             <h1>{{ team_leader }}</h1>
+            <ol class="breadcrumb">
+              <li><a href="{% url "districts" %}">Performance</a></li>
+              <li><a href="{% url "team-leaders" district_name %}">{{ district_name }}</a></li>
+              <li class="active">{{ team_leader }}</li>
+            </ol>
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-striped">

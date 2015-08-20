@@ -19,9 +19,14 @@
             </div>
         </header>
         <div class="container">
-            <h1></h1>
+            <h1>Data for: {{ spray_operator }}</h1>
+            <ol class="breadcrumb">
+              <li><a href="{% url "districts" %}">Performance</a></li>
+              <li><a href="{% url "team-leaders" district_name %}">{{ district_name }}</a></li>
+              <li><a href="{% url "spray-operator-summary" team_leader district_name %}">{{ team_leader }}</a></li>
+              <li class="active">{{ spray_operator }}</li>
+            </ol>
             <div class="row">
-                <h1>Data for: {{ spray_operator }}</h1>
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
