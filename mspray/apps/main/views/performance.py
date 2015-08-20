@@ -323,13 +323,14 @@ def spray_operator_summary(request, team_leader, district_name):
     target_areas = TargetArea.objects.filter(
         targeted=TargetArea.TARGETED_VALUE,
         district_name=district_name).order_by('ranks', 'houses')
-
-    spraypoints = SprayDay.objects.filter(
-        geom__coveredby=target_areas.collect()).filter(
-        data__contains='"team_leader":"%s"' % team_leader).extra(
-        select={'sprayed/sprayop_name': 'data->>%s'},
-        select_params=['sprayed/sprayop_name']).values_list(
-            'sprayed/sprayop_name')
+    target_areas_geom = target_areas.collect(),
+    spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas_geom)\
+        .filter(
+            data__contains='"team_leader":"%s"' % team_leader
+        ).extra(
+            select={'sprayed/sprayop_name': 'data->>%s'},
+            select_params=['sprayed/sprayop_name']
+        ).values_list('sprayed/sprayop_name')
 
     sprayable = get_totals(spraypoints, "sprayable")
     non_sprayable = get_totals(spraypoints, "non-sprayable")
@@ -341,6 +342,8 @@ def spray_operator_summary(request, team_leader, district_name):
                             for a in spraypoints.values_list(
                                 'sprayed/sprayop_name', flat=True).distinct()
                             if a is not None]
+    start_times = []
+    end_times = []
 
     for spray_operator_name in spray_operator_names:
         numerator = sprayed.get(spray_operator_name)
@@ -363,6 +366,15 @@ def spray_operator_summary(request, team_leader, district_name):
         not_sprayed_total = refused.get(team_leader, 0) + \
             other.get(team_leader, 0)
 
+        qs = SprayDay.objects.filter(
+            geom__coveredby=target_areas_geom,
+            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_name
+        ).filter(data__contains='"team_leader":"{}"'.format(team_leader))
+        _end_time = avg_time(qs, 'start')
+        end_times.append(_end_time)
+        _start_time = avg_time(qs, 'end')
+        start_times.append(_start_time)
+
         data.append({
             'spray_operator_name': spray_operator_name,
             'sprayable': sprayable.get(spray_operator_name, 0),
@@ -373,7 +385,9 @@ def spray_operator_summary(request, team_leader, district_name):
             'no_of_days_worked': no_of_days_worked,
             'spray_success_rate': spray_success_rate,
             'avg_structures_per_so': avg_structures_per_so,
-            'not_sprayed_total': not_sprayed_total
+            'not_sprayed_total': not_sprayed_total,
+            'avg_start_time': _start_time,
+            'avg_end_time': _end_time
         })
 
         # totals
@@ -394,6 +408,16 @@ def spray_operator_summary(request, team_leader, district_name):
     spray_operators = [a for a in spray_operator_names]
     totals['avg_structures_per_so'] = round(
         totals['avg_structures_per_so']/len(spray_operators), 1)
+
+    if len(start_times) and len(end_times):
+        totals['avg_start_time'] = (
+            round(sum([i[0] for i in start_times])/len(start_times)),
+            round(sum([i[1] for i in start_times])/len(start_times))
+        )
+        totals['avg_end_time'] = (
+            round(sum([i[0] for i in end_times])/len(end_times)),
+            round(sum([i[1] for i in end_times])/len(end_times))
+        )
 
     return render_to_response('spray-operator-summary.html',
                               {'data': data,
