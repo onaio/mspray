@@ -194,6 +194,6 @@ def avg_time_tuple(times):
         hour = round(sum(hours))/len(hours)
         minute = round(sum(minutes))/len(minutes)
 
-        return (hour, minute)
+        return (round(hour), round(minute))
 
     return None
