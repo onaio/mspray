@@ -228,8 +228,8 @@ def team_leaders(request, district_name):
     end_times = []
 
     for team_leader in team_leaders:
-        numerator = sprayed.get(team_leader)
-        denominator = 1 if sprayable.get(team_leader) == 0 \
+        numerator = sprayed.get(team_leader, 0)
+        denominator = 1 if sprayable.get(team_leader, 0) == 0 \
             else sprayable.get(team_leader)
         sprayed_success_rate = round((numerator/denominator) * 100, 1)
 

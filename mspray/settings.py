@@ -70,7 +70,7 @@ WSGI_APPLICATION = 'mspray.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'mspray',
+        'NAME': 'mspray_2',
         'USER': 'mspray',
         'PASSWORD': 'mspray',
         'HOST': '127.0.0.1',
