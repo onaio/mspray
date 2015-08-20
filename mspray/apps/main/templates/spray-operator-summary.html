@@ -70,7 +70,7 @@
                                     </td>
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
-                                    <td></td>
+                                    <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -90,7 +90,7 @@
                                 </td>
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
-                                <td></td>
+                                <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
                             </tr>
                         </tfoot>
                     </table>

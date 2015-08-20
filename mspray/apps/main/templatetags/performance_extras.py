@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import template
 
 register = template.Library()
@@ -65,3 +66,24 @@ def avg_end_time_color(value):
         color = 'yellow'
 
     return color
+
+
+@register.simple_tag
+def avg_time_interval(value, from_value):
+    if (not isinstance(value, tuple) or value is None) or \
+            (not isinstance(from_value, tuple) or from_value is None):
+        return ''
+    start_time = '{}:{}'.format(*from_value)
+    end_time = '{}:{}'.format(*value)
+
+    if 'None' in start_time or 'None' in end_time:
+        return ''
+
+    start_time = datetime.strptime(start_time, '%H:%M')
+    end_time = datetime.strptime(end_time, '%H:%M')
+    time_diff = end_time - start_time
+
+    minutes, seconds = divmod(time_diff.seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+
+    return '%d:%02d' % (hours, minutes)
