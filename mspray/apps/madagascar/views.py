@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic import View
-from django.views.generic import DetailView
+from django.views.generic import ListView
 
 from mspray.apps.main.models import District
 from mspray.apps.main.models import TargetArea
@@ -18,17 +18,20 @@ class IndexView(View):
         return render(request, 'madagascar/index.html', context)
 
 
-class DistrictView(DetailView):
+class DistrictView(ListView):
     template_name = 'madagascar/district.html'
-    model = District
+    model = TargetArea
     slug_field = 'district_name'
+
+    def get_queryset(self):
+        qs = super(DistrictView, self).get_queryset()
+        district_name = self.kwargs.get('slug')
+
+        return qs.filter(district_name=district_name).order_by('targetid')
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
-        qs = TargetArea.objects.filter(
-            district_name=kwargs['object'].district_name
-        )
-        serializer = TargetAreaSerializer(qs, many=True,
+        serializer = TargetAreaSerializer(context['object_list'], many=True,
                                           context={'request': self.request})
         context['district_list'] = serializer.data
 
