@@ -93,7 +93,7 @@ class TargetAreaMixin(object):
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
-    targetid = serializers.ReadOnlyField(source='rank_house')
+    targetid = serializers.ReadOnlyField()
     structures = serializers.ReadOnlyField(source='houses')
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -112,16 +112,15 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
 
 
 class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
-    targetid = serializers.Field(source='rank_house')
-    structures = serializers.Field(source='houses')
-    visited_total = serializers.SerializerMethodField('get_visited_total')
-    visited_sprayed = serializers.SerializerMethodField('get_visited_sprayed')
-    visited_not_sprayed = serializers.SerializerMethodField(
-        'get_visited_not_sprayed')
-    visited_refused = serializers.SerializerMethodField('get_visited_refused')
-    visited_other = serializers.SerializerMethodField('get_visited_other')
-    not_visited = serializers.SerializerMethodField('get_not_visited')
-    geom = GeometryField(source='geom')
+    targetid = serializers.ReadOnlyField()
+    structures = serializers.ReadOnlyField(source='houses')
+    visited_total = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
+    not_visited = serializers.SerializerMethodField()
+    geom = GeometryField()
 
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',

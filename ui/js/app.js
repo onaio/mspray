@@ -1,15 +1,15 @@
-/* global $ L Circles*/
+/* global $ L Circles console */
 (function() {
     "use strict";
 
     var App = {
-        // SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-        SPRAY_DAYS_URI: "http://api.mspray.onalabs.org/spraydays.json",
-        DATES_URI: "http://api.mspray.onalabs.org/spraydays.json?dates_only=true",
-        BUFFER_URI: "http://api.mspray.onalabs.org/buffers.json",
-        TARGET_AREA_URI: "http://api.mspray.onalabs.org/targetareas.json",
-        HOUSEHOLD_URI: "http://api.mspray.onalabs.org/households.json",
-        DISTRICT_URI: "http://api.mspray.onalabs.org/districts.json",
+        // SPRAY_DAYS_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json",
+        SPRAY_DAYS_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json",
+        DATES_URI: "http://namibia.api.mspray.onalabs.org/spraydays.json?dates_only=true",
+        BUFFER_URI: "http://namibia.api.mspray.onalabs.org/buffers.json",
+        TARGET_AREA_URI: "http://namibia.api.mspray.onalabs.org/targetareas.json",
+        HOUSEHOLD_URI: "http://namibia.api.mspray.onalabs.org/households.json",
+        DISTRICT_URI: "http://namibia.api.mspray.onalabs.org/districts.json",
 
         defaultDistrict: "Chienge",
         defaultTargetArea: 0,
@@ -402,7 +402,7 @@
                 }
             });
 
-            if(targetid === "909001"){
+            if(targetid !== "XXXXX"){
                 var target_area = L.mapbox.featureLayer()
                     .loadURL(uri.replace(".json", ".geojson"));
 
@@ -424,6 +424,10 @@
                             layer.bindPopup(content, {closeButton: true});
 
                             // console.log("Spray data: " + props.structures);
+                            var label = new L.Label({className: "ta-label"});
+                            label.setContent("" + props.targetid);
+                            label.setLatLng(layer.getBounds().getCenter());
+                            map.showLabel(label);
                         }
                     });
 
@@ -494,7 +498,7 @@
             // $.getJSON(uri, function(data){
             //     console.log(data);
             // });
-            if(targetid === "909001"){
+            if(targetid !== "909001"){
                 var households = L.mapbox.featureLayer().loadURL(uri);
 
                 // console.log('HOUSEHOLD_URI: ' + App.HOUSEHOLD_URI + "?target_area=" + targetid);
@@ -711,6 +715,7 @@
                 bufferHouseholdsLayer = L.mapbox.tileLayer("ona.j6c49d56");
 
             App.map = L.mapbox.map("map");
+            App.map.locate({ enableHighAccuracy: true });
             App.map.addLayer(google);
             App.map.addLayer(bufferHouseholdsLayer);
             L.control.layers({
@@ -732,7 +737,8 @@
                 position: "bottomright"
             }).addTo(App.map);
             App.map.options.maxZoom = 19;
-            App.buildLegend(App.map);
+            // TODO: show legend optional config
+            // App.buildLegend(App.map);
         },
 
         getPageState: function(){

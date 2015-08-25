@@ -18,7 +18,7 @@ class HouseholdBufferViewSet(viewsets.ReadOnlyModelViewSet):
 
         if targetid:
             target_area = get_object_or_404(TargetArea,
-                                            rank_house=targetid,
+                                            targetid=targetid,
                                             targeted=TargetArea.TARGETED_VALUE)
             queryset = queryset.filter(target_area=target_area)
 

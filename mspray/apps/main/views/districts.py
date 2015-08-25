@@ -28,6 +28,6 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = TargetArea.objects.filter(
                 targeted=TargetArea.TARGETED_VALUE,
                 district_name=district
-            ).order_by('ranks', 'houses')
+            ).order_by('targetid', 'houses')
 
         return queryset

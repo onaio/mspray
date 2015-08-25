@@ -12,7 +12,7 @@ from django.db import connection
 from django.core.exceptions import ValidationError
 
 from mspray.apps.main.models.target_area import TargetArea
-from mspray.apps.main.models.target_area import targetarea_mapping
+from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
 from mspray.apps.main.models.spray_day import SprayDay
@@ -60,8 +60,8 @@ def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
 
 
 def load_area_layer_mapping(shp_file, verbose=False):
-    unique = 'rank_house'
-    load_layer_mapping(TargetArea, shp_file, targetarea_mapping, verbose,
+    unique = 'targetid'
+    load_layer_mapping(TargetArea, shp_file, namibia_mapping, verbose,
                        unique)
 
 

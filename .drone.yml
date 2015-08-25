@@ -1,7 +1,7 @@
-image: ukanga/python:3.4
+image: bradrydzewski/python:3.4
 services:
-    - ukanga/postgis
+    - onaio/postgis
 script:
     - scripts/install_postgis mspray mspray postgres 127.0.0.1 DUMMY SUPERUSER
-    - pip3 install -r requirements.pip
-    - python3 manage.py test
+    - pip install -r requirements.pip
+    - python manage.py test
