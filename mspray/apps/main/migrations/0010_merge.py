@@ -2,13 +2,13 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
-import django.contrib.gis.db.models.fields
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0005_auto_20150810_1438'),
+        ('main', '0009_auto_20150812_0938'),
+        ('main', '0006_sprayoperator'),
     ]
 
     operations = [

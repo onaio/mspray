@@ -4,7 +4,7 @@ from django.contrib.gis.db import models
 
 class Household(models.Model):
     hh_id = models.IntegerField()
-    geom = models.PointField(srid=4326)
+    geom = models.MultiPointField(srid=4326)
     bgeom = models.PolygonField(srid=4326, null=True, blank=True)
 
     objects = models.GeoManager()

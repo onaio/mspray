@@ -44,9 +44,4 @@ class Migration(migrations.Migration):
             name='targeted',
             field=models.IntegerField(default=1, db_index=1),
         ),
-        migrations.AlterField(
-            model_name='targetarea',
-            name='targetid',
-            field=models.IntegerField(db_index=1),
-        ),
     ]

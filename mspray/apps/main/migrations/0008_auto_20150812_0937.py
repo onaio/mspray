@@ -12,9 +12,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='household',
-            name='geom',
-            field=django.contrib.gis.db.models.fields.PointField(srid=4326),
-        ),
     ]
