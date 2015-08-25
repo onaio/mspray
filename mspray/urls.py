@@ -16,6 +16,23 @@ router.register(r'households', household.HouseholdViewSet)
 router.register(r'spraydays', sprayday.SprayDayViewSet)
 router.register(r'targetareas', target_area.TargetAreaViewSet)
 
+performance_urls = [
+    url(r'^$', 'mspray.apps.main.views.performance.district',
+        name="districts"),
+    url(r'^team-leaders/(?P<district_name>[^/]+)',
+        'mspray.apps.main.views.performance.team_leaders',
+        name="team-leaders"),
+    url(r'^spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/summary',  # noqa
+        'mspray.apps.main.views.performance.spray_operator_summary',
+        name="spray-operator-summary"),
+    url(r'^spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/(?P<spray_operator>[^/]+)/daily',  # noqa
+        'mspray.apps.main.views.performance.spray_operator_daily',
+        name="spray-operator-daily"),
+    url(r'^definitions-and-conditions$',
+        'mspray.apps.main.views.performance.definitions_and_conditions',
+        name='definitions-and-conditions'),
+]
+
 urlpatterns = patterns(
     '',
     # Examples:
@@ -28,20 +45,6 @@ urlpatterns = patterns(
         name='number_of_housesholds'),
     url(r'^madagascar/', include('mspray.apps.madagascar.urls',
                                  namespace='madagascar')),
+    url(r'^performance/', include(performance_urls)),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^performance/$',
-        'mspray.apps.main.views.performance.district',
-        name="districts"),
-    url(r'^performance/team-leaders/(?P<district_name>[^/]+)',
-        'mspray.apps.main.views.performance.team_leaders',
-        name="team-leaders"),
-    url(r'^performance/spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/summary',
-        'mspray.apps.main.views.performance.spray_operator_summary',
-        name="spray-operator-summary"),
-    url(r'^performance/spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/(?P<spray_operator>[^/]+)/daily',
-        'mspray.apps.main.views.performance.spray_operator_daily',
-        name="spray-operator-daily"),
-    url(r'^perfomance/definitions-and-conditions$',
-        'mspray.apps.main.views.performance.definitions_and_conditions',
-        name='definitions-and-conditions'),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
