@@ -60,7 +60,7 @@ def district(request):
         # a - {'district_name': '', 'houses': }
         target_areas = TargetArea.objects.filter(
             targeted=TargetArea.TARGETED_VALUE,
-            district_name=a.get('district_name')).order_by('ranks', 'houses')
+            district_name=a.get('district_name')).order_by('targetid')
 
         sprayed_structures = {}
         target_areas_found_total = 0
@@ -200,7 +200,7 @@ def get_totals(spraypoints, condition):
 def team_leaders(request, district_name):
     target_areas = TargetArea.objects.filter(
         targeted=TargetArea.TARGETED_VALUE,
-        district_name=district_name).order_by('ranks', 'houses')
+        district_name=district_name).order_by('targetid')
 
     data = []
     totals = {
@@ -336,7 +336,7 @@ def spray_operator_summary(request, team_leader, district_name):
     }
     target_areas = TargetArea.objects.filter(
         targeted=TargetArea.TARGETED_VALUE,
-        district_name=district_name).order_by('ranks', 'houses')
+        district_name=district_name).order_by('targetid')
     target_areas_geom = target_areas.collect(),
     spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas_geom)\
         .filter(
@@ -456,7 +456,7 @@ def spray_operator_daily(request, team_leader, district_name, spray_operator):
     }
     target_areas = TargetArea.objects.filter(
         targeted=TargetArea.TARGETED_VALUE,
-        district_name=district_name).order_by('ranks', 'houses')
+        district_name=district_name).order_by('targetid')
 
     spraypoints = SprayDay.objects.filter(
         geom__coveredby=target_areas.collect()).filter(
