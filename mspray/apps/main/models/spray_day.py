@@ -5,7 +5,7 @@ from jsonfield import JSONField
 DATA_FILTER = '"sprayable_structure":"yes"'
 DATA_ID_FIELD = '_id'
 DATE_FIELD = 'today'
-STRUCTURE_GPS_FIELD = 'structuredetails/structure_gps'
+STRUCTURE_GPS_FIELD = 'structure_gps'
 NON_STRUCTURE_GPS_FIELD = 'non_structure_gps'
 
 
