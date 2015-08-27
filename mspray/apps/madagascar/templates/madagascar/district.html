@@ -16,7 +16,7 @@
     <tbody>
         {% for district in district_list %}
         <tr>
-            <td><a href="{% url 'madagascar:district' district.district_name %}">{{ district.targetid }}</a></td>
+            <td><a href="{% url 'madagascar:target_area' district.district_name district.targetid %}">{{ district.targetid }}</a></td>
             <td>{{ district.structures }}</td>
             <td>{{ district.visited_total }}</td>
             <td>{{ district.visited_sprayed }}</td>

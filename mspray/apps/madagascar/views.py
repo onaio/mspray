@@ -1,10 +1,13 @@
 from django.shortcuts import render
-from django.views.generic import View
+from django.views.generic import DetailView
 from django.views.generic import ListView
+from django.views.generic import View
 
 from mspray.apps.main.models import District
+from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
+from mspray.apps.main.serializers.sprayday import SprayDaySerializer
 
 
 class IndexView(View):
@@ -25,7 +28,7 @@ class DistrictView(ListView):
 
     def get_queryset(self):
         qs = super(DistrictView, self).get_queryset()
-        district_name = self.kwargs.get('slug')
+        district_name = self.kwargs.get(self.slug_field)
 
         return qs.filter(district_name=district_name).order_by('targetid')
 
@@ -34,5 +37,19 @@ class DistrictView(ListView):
         serializer = TargetAreaSerializer(context['object_list'], many=True,
                                           context={'request': self.request})
         context['district_list'] = serializer.data
+
+        return context
+
+
+class TargetAreaView(DetailView):
+    template_name = 'madagascar/map.html'
+    model = TargetArea
+    slug_field = 'targetid'
+
+    def get_context_data(self, **kwargs):
+        context = super(TargetAreaView, self).get_context_data(**kwargs)
+        serializer = TargetAreaSerializer(context['object'],
+                                          context={'request': self.request})
+        context['target_data'] = serializer.data
 
         return context

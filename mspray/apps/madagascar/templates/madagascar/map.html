@@ -1,0 +1,79 @@
+{% extends 'madagascar/base.html' %}
+
+{% load staticfiles %}
+
+{% block content %}
+
+        <section class="info-panel">
+            <div class="info-holder">
+                <h4><span class="dist_label" id="target-area-label"> </span></h4>
+
+                <div>
+                    <dl class="dl-horizontal" id="target-area-stats-structures">
+                    </dl>
+                </div>
+                <hr>
+                <div>
+                    <dl class="dl-horizontal" id="target-area-stats">
+                    </dl>
+                </div>
+                <hr>
+                <div id="not-sprayed-reasons">
+                    <p>Not Sprayed</p>
+                    <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        <div id="map"></div>
+
+    <div id="map-legend">
+        <h2><span class="day_label">All</span></h2>
+        <div class="legend big clearfix">
+            <div class="circle-holder">
+                <div id="circle-sprayed"> </div>
+                <p id="sprayed-label">Sprayed</p>
+                <p id="sprayed-ratio"></p>
+            </div>
+        </div>
+
+        <div class="legend small clearfix">
+            <div class="circle-holder">
+                <div id="circle-refused"> </div>
+                <p class="small-legend-label">Refused</p>
+            </div>
+
+            <div class="circle-holder">
+                <div id="circle-other"> </div>
+                <p class="small-legend-label">Other</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.0/mapbox.js'></script>
+    <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+    <script src="{% static "js/Google.js" %}"></script>
+    <script src="{% static "js/Bing.js" %}"></script>
+    <script src="{% static "js/circles.min.js" %}"></script>
+    <script src="{% static "js/app.js" %}"></script>
+
+    <script type="text/javascript">
+        var bounds = {{ target_data.bounds|safe }};
+        var app = new App();
+        app.fitBounds(bounds);
+
+        app.housesCount = {{ target_data.structures }};
+        app.visitedTotal = {{ target_data.visited_total }};
+
+        var buffers_url = "{{ request.get_host }}{% url 'householdsbuffer-list' %}?target_area={{ object.targetid }}";
+        app.loadBufferAreas(buffers_url, undefined, true);
+        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' %}?target_area={{ object.targetid }}";
+        app.loadSprayPoints(spraypoints_url);
+    </script>
+{% endblock %}
