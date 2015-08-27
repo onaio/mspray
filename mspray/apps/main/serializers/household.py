@@ -68,10 +68,10 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
 
             return color
 
-    def to_native(self, obj):
-        ret = super(HouseholdsBufferSerializer, self).to_native(obj)
+    def to_representation(self, value):
+        ret = super(HouseholdsBufferSerializer, self).to_representation(value)
 
-        if 'style' not in ret and obj is not None:
-            ret['style'] = {'fillColor': self._get_color(obj)}
+        if 'style' not in ret and value is not None:
+            ret['style'] = {'fillColor': self._get_color(value)}
 
         return ret
