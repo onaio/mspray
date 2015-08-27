@@ -168,7 +168,7 @@ var App = function() {
             .addTo(app.map);
 
             $("#target-area-stats-structures").empty().append(
-                "<dt class='reason structures'>" + ((this.housesCount === undefined) ? 0 : this.housesCount) + "</dt><dd>Structures</dd>"
+                "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"
             );
             target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>";
             target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>";
@@ -201,6 +201,10 @@ var App = function() {
             $("#sprayed-ratio").text("(" + sprayed_status.yes + "/" + app.visitedTotal + ")");
             $("#circle-refused").text(refused_percentage);
             $("#circle-other").text(other_percentage);
+
+            $("#target-area-stats-item").on("click", function() {
+                $(".info-panel").toggle();
+            });
         });
     };
 
