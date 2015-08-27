@@ -89,7 +89,7 @@ class TargetAreaMixin(object):
 
     def get_bounds(self, obj):
         if obj:
-            return obj.geom.boundary.extent
+            return list(obj.geom.boundary.extent)
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
