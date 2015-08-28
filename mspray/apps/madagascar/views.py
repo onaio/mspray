@@ -54,6 +54,10 @@ class DistrictView(ListView):
             district_name=self.kwargs.get(self.slug_field)
         )
         context['district_totals'] = TargetAreaSerializer(t).data
+        context['district_name'] = self.kwargs.get(self.slug_field)
+
+        context['districts'] = District.objects\
+            .values_list('district_name', flat=True).order_by('district_name')
 
         return context
 
@@ -82,5 +86,7 @@ class TargetAreaView(DetailView):
 
         context['districts'] = District.objects\
             .values_list('district_name', flat=True).order_by('district_name')
+
+        context['district_name'] = self.kwargs.get('district_name')
 
         return context

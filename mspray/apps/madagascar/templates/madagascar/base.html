@@ -26,6 +26,16 @@
                     <a class="navbar-brand" href="/"><img src="{% static "img/mSpray-logo.png" %}" alt="mspray" id="mspray-logo"></a>
                 </div>
                 {% block map-nav %}
+                <div class="collapse navbar-collapse" id="msp-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        {% include 'madagascar/district_list.html' %}
+                        {% include 'madagascar/target_areas_list.html' %}
+                        {% block spray_dates  %}
+                        {% endblock %}
+                        {% block target_area_stats  %}
+                        {% endblock %}
+                    </ul>
+                </div>
                 {% endblock %}
             </div>
         </header>
@@ -37,6 +47,8 @@
         </section>
         <section id="scripts">
         {% block scripts %}
+            <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+            <script src="{% static "js/bootstrap.min.js" %}"></script>
         {% endblock %}
         </section>
     </body>
