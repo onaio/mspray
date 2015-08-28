@@ -91,8 +91,12 @@ def avg_time_interval(value, from_value):
 
 @register.simple_tag
 def percentage(numerator, denominator):
-    denominator = float(denominator)
-    numerator = float(numerator)
+    try:
+        denominator = float(denominator)
+        numerator = float(numerator)
+    except ValueError:
+        return ''
+
     if denominator == 0:
         return ''
 
