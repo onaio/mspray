@@ -1,63 +1,44 @@
 from dateutil.parser import parse
-from django.db.models import Sum
-from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import ListView
-from django.views.generic import View
 
 from mspray.apps.main.models import District
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
-class IndexView(View):
-    def get(self, request):
-        qs = District.objects.filter().order_by('district_name')
-
-        serializer = TargetAreaSerializer(qs, many=True,
-                                          context={'request': request})
-        context = {'district_list': serializer.data}
-
-        return render(request, 'madagascar/index.html', context)
-
-
 class DistrictView(ListView):
     template_name = 'madagascar/district.html'
-    model = TargetArea
+    model = District
     slug_field = 'district_name'
 
     def get_queryset(self):
-        qs = super(DistrictView, self).get_queryset()
         district_name = self.kwargs.get(self.slug_field)
+        if district_name is not None:
+            qs = TargetArea.objects.filter(district_name=district_name)\
+                .order_by('targetid')
+        else:
+            qs = super(DistrictView, self).get_queryset()
 
-        return qs.filter(district_name=district_name).order_by('targetid')
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
         serializer = TargetAreaSerializer(context['object_list'], many=True,
                                           context={'request': self.request})
         context['district_list'] = serializer.data
-
-        class Totals(object):
-            def __init__(self, pk, geom, houses, targetid, district_name):
-                self.pk = pk
-                self.geom = geom
-                self.houses = houses
-                self.targetid = targetid
-                self.district_name = district_name
-
-        t = Totals(
-            pk=-1,
-            geom=context['object_list'].collect(),
-            houses=context['object_list'].aggregate(c=Sum('houses'))['c'],
-            targetid=self.kwargs.get(self.slug_field),
-            district_name=self.kwargs.get(self.slug_field)
-        )
-        context['district_totals'] = TargetAreaSerializer(t).data
+        fields = ['structures', 'visited_total', 'visited_sprayed',
+                  'visited_not_sprayed', 'visited_refused', 'visited_other',
+                  'not_visited']
+        totals = {}
+        for rec in serializer.data:
+            for field in fields:
+                totals[field] = rec[field] + (totals[field]
+                                              if field in totals else 0)
         context['district_name'] = self.kwargs.get(self.slug_field)
-
         context['districts'] = District.objects\
             .values_list('district_name', flat=True).order_by('district_name')
+        context['district_totals'] = totals
 
         return context
 
