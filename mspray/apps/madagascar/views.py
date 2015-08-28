@@ -52,11 +52,16 @@ class TargetAreaView(DetailView):
         serializer = TargetAreaSerializer(context['object'],
                                           context={'request': self.request})
         context['target_data'] = serializer.data
+
         spray_date = self.request.GET.get('spray_date')
         if spray_date:
             try:
                 context['spray_date'] = parse(spray_date).date()
             except ValueError:
                 pass
+
+        context['target_areas'] = TargetArea.objects.filter(
+            district_name=self.kwargs['district_name']
+        ).values_list('targetid', flat=True)
 
         return context

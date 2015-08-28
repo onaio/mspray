@@ -24,7 +24,13 @@
                                     <form action="/" method="post" class="form-inline" id="search_form">
                                         <input type="text" name="target_filter" class="target_filter form-control" placeholder="Search..."/>
                                     </form>
-                                    <ul id="target_areas_list"></ul>
+                                    <ul id="target_areas_list">
+                                    {% for targetid in target_areas %}
+                                        <li>
+                                            <a href="{% url 'madagascar:target_area' object.district_name targetid  %}">{{ targetid }}</a>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
                                 </li>
                             </ul>
                         </li>
