@@ -5,10 +5,8 @@ from django.views.generic import ListView
 from django.views.generic import View
 
 from mspray.apps.main.models import District
-from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
-from mspray.apps.main.serializers.sprayday import SprayDaySerializer
 
 
 class IndexView(View):
@@ -63,5 +61,8 @@ class TargetAreaView(DetailView):
         context['target_areas'] = TargetArea.objects.filter(
             district_name=self.kwargs['district_name']
         ).values_list('targetid', flat=True)
+
+        context['districts'] = District.objects.values_list('district_name',
+                                                            flat=True)
 
         return context
