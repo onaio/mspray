@@ -1,3 +1,4 @@
+from dateutil.parser import parse
 from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -51,5 +52,11 @@ class TargetAreaView(DetailView):
         serializer = TargetAreaSerializer(context['object'],
                                           context={'request': self.request})
         context['target_data'] = serializer.data
+        spray_date = self.request.GET.get('spray_date')
+        if spray_date:
+            try:
+                context['spray_date'] = parse(spray_date).date()
+            except ValueError:
+                pass
 
         return context

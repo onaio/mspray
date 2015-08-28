@@ -27,6 +27,14 @@ def cached_queryset_count(key, queryset, query=None):
 
 class TargetAreaMixin(object):
 
+    def get_spray_dates(self, obj):
+        if obj:
+            queryset = SprayDay.objects.filter(
+                geom__coveredby=obj.geom
+            ).filter(data__contains='"sprayable_structure":"yes"')
+
+            return queryset.values_list('spray_date', flat=True).distinct()
+
     def get_visited_total(self, obj):
         if obj:
             key = "%s_visited_total" % obj.pk
@@ -102,12 +110,13 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('targetid', 'district_name',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds')
+                  'not_visited', 'bounds', 'spray_dates')
         model = TargetArea
 
 
