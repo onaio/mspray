@@ -18,7 +18,8 @@ class DistrictView(ListView):
             qs = TargetArea.objects.filter(district_name=district_name)\
                 .order_by('targetid')
         else:
-            qs = super(DistrictView, self).get_queryset()
+            qs = super(DistrictView, self).get_queryset()\
+                .order_by('district_name')
 
         return qs
 
