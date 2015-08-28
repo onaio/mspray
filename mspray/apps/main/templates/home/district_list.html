@@ -8,7 +8,7 @@
                             <ul class="dropdown-menu" id="districts_list">
                             {% for district_name in districts %}
                                 <li>
-                                    <a href="{% url 'madagascar:district' district_name  %}">{{ district_name }}</a>
+                                    <a href="{% url 'district' district_name  %}">{{ district_name }}</a>
                                 </li>
                             {% endfor %}
                             </ul>

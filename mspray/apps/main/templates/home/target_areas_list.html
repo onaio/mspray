@@ -13,7 +13,7 @@
                                     <ul id="target_areas_list">
                                     {% for targetid in target_areas %}
                                         <li>
-                                            <a href="{% url 'madagascar:target_area' object.district_name targetid  %}">{{ targetid }}</a>
+                                            <a href="{% url 'target_area' object.district_name targetid  %}">{{ targetid }}</a>
                                         </li>
                                     {% endfor %}
                                     </ul>

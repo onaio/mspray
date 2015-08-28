@@ -8,7 +8,7 @@ from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
 class DistrictView(ListView):
-    template_name = 'madagascar/district.html'
+    template_name = 'home/district.html'
     model = District
     slug_field = 'district_name'
 
@@ -45,7 +45,7 @@ class DistrictView(ListView):
 
 
 class TargetAreaView(DetailView):
-    template_name = 'madagascar/map.html'
+    template_name = 'home/map.html'
     model = TargetArea
     slug_field = 'targetid'
 

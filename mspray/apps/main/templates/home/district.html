@@ -1,4 +1,4 @@
-{% extends 'madagascar/base.html' %}
+{% extends 'home/base.html' %}
 
 {% load humanize %}
 {% load staticfiles %}
@@ -26,9 +26,9 @@
                         <tr>
                             <td>
                                 {% if district.targetid  %}
-                                <a href="{% url 'madagascar:target_area' district.district_name district.targetid %}">{{ district.targetid }}</a>
+                                <a href="{% url 'target_area' district.district_name district.targetid %}">{{ district.targetid }}</a>
                                 {% else %}
-                                <a href="{% url 'madagascar:district' district.district_name %}">{{ district.district_name }}</a>
+                                <a href="{% url 'district' district.district_name %}">{{ district.district_name }}</a>
                                 {% endif %}
                             </td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>

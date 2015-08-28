@@ -46,7 +46,6 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'mspray.apps.main',
-    'mspray.apps.madagascar'
 )
 
 MIDDLEWARE_CLASSES = (
