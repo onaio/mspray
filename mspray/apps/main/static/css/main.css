@@ -5,8 +5,7 @@
 }
 
 body{
-    font:14px 'Open Sans', Arial;
-    line-height:1.6em;
+    font:12px 'Open Sans', Arial;
 }
 
 a{
@@ -576,4 +575,7 @@ a.distrct-links {
 }
 td.numbers {
     text-align: right;
+}
+.tablesaw tfoot > tr > td {
+    font-weight: bold;
 }
