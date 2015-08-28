@@ -87,3 +87,13 @@ def avg_time_interval(value, from_value):
     hours, minutes = divmod(minutes, 60)
 
     return '%d:%02d' % (hours, minutes)
+
+
+@register.simple_tag
+def percentage(numerator, denominator):
+    denominator = float(denominator)
+    numerator = float(numerator)
+    if denominator == 0:
+        return ''
+
+    return '%d%%' % round((numerator * 100) / denominator)
