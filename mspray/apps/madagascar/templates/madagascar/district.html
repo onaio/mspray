@@ -1,31 +1,57 @@
 {% extends 'madagascar/base.html' %}
+
+{% load staticfiles %}
+{% load performance_extras %}
+
 {% block content %}
-<table class="table table-striped">
-    <tr>
-        <thead>
-            <th>Target Area</th>
-            <th>Targeted</th>
-            <th>Found</th>
-            <th>Sprayed</th>
-            <th>Not Sprayed</th>
-            <th>Not Sprayed - Refused</th>
-            <th>Not Sprayed - Others</th>
-            <th>Not Found</th>
-        </thead>
-    </tr>
-    <tbody>
-        {% for district in district_list %}
-        <tr>
-            <td><a href="{% url 'madagascar:target_area' district.district_name district.targetid %}">{{ district.targetid }}</a></td>
-            <td>{{ district.structures }}</td>
-            <td>{{ district.visited_total }}</td>
-            <td>{{ district.visited_sprayed }}</td>
-            <td>{{ district.visited_not_sprayed }}</td>
-            <td>{{ district.visited_refused }}</td>
-            <td>{{ district.visited_other }}</td>
-            <td>{{ district.not_visited }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+        <div class="container" id="district_table">
+            <div "col-sm-12" id="table-container">
+                <h1 id="district-name">District: {{ district_totals.targetid }}</h1>
+                <table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap data-sortable data-sortable-switch>
+                    <thead>
+                        <tr>
+                            <th data-priority="persist" data-sortable-col data-sortable-default-col>Target Area</th>
+                            <th data-sortable-col>Targeted</th>
+                            <th data-sortable-col>Found</th>
+                            <th data-sortable-col>Sprayed</th>
+                            <th data-sortable-col>Not Sprayed</th>
+                            <th data-sortable-col>Not Sprayed - Refused</th>
+                            <th data-sortable-col>Not Sprayed - Others</th>
+                            <th data-sortable-col>Not Found</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for district in district_list %}
+                        <tr>
+                            <td><a href="{% url 'madagascar:target_area' district.district_name district.targetid %}">{{ district.targetid }}</a></td>
+                            <td>{{ district.structures }}</td>
+                            <td>{{ district.visited_total }} ({% percentage district.visited_total district.structures %})</td>
+                            <td>{{ district.visited_sprayed }} ({% percentage district.visited_sprayed district.visited_total %})</td>
+                            <td>{{ district.visited_not_sprayed }} ({% percentage district.visited_not_sprayed district.visited_total %})</td>
+                            <td>{{ district.visited_refused }} ({% percentage district.visited_refused district.visited_total %})</td>
+                            <td>{{ district.visited_other }} ({% percentage district.visited_other district.visited_total %})</td>
+                            <td>{{ district.not_visited }} ({% percentage district.not_visited district.structures %})</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Totals</a></td>
+                            <td>{{ district_totals.structures }}</td>
+                            <td>{{ district_totals.visited_total }} ({% percentage district_totals.visited_total district_totals.structures %})</td>
+                            <td>{{ district_totals.visited_sprayed }} ({% percentage district_totals.visited_sprayed district_totals.visited_total %})</td>
+                            <td>{{ district_totals.visited_not_sprayed }} ({% percentage district_totals.visited_not_sprayed district_totals.visited_total %})</td>
+                            <td>{{ district_totals.visited_refused }} ({% percentage district_totals.visited_refused district_totals.visited_total %})</td>
+                            <td>{{ district_totals.visited_other }} ({% percentage district_totals.visited_other district_totals.visited_total %})</td>
+                            <td>{{ district_totals.not_visited }} ({% percentage district_totals.not_visited district_totals.structures %})</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="{% static "js/tablesaw.js" %}"></script>
 {% endblock %}

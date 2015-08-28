@@ -1,4 +1,5 @@
 from dateutil.parser import parse
+from django.db.models import Sum
 from django.shortcuts import render
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -37,6 +38,23 @@ class DistrictView(ListView):
                                           context={'request': self.request})
         context['district_list'] = serializer.data
 
+        class Totals(object):
+            def __init__(self, pk, geom, houses, targetid, district_name):
+                self.pk = pk
+                self.geom = geom
+                self.houses = houses
+                self.targetid = targetid
+                self.district_name = district_name
+
+        t = Totals(
+            pk=-1,
+            geom=context['object_list'].collect(),
+            houses=context['object_list'].aggregate(c=Sum('houses'))['c'],
+            targetid=self.kwargs.get(self.slug_field),
+            district_name=self.kwargs.get(self.slug_field)
+        )
+        context['district_totals'] = TargetAreaSerializer(t).data
+
         return context
 
 
@@ -62,7 +80,7 @@ class TargetAreaView(DetailView):
             district_name=self.kwargs['district_name']
         ).values_list('targetid', flat=True)
 
-        context['districts'] = District.objects.values_list('district_name',
-                                                            flat=True)
+        context['districts'] = District.objects\
+            .values_list('district_name', flat=True).order_by('district_name')
 
         return context
