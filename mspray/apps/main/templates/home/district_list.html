@@ -8,7 +8,11 @@
                             <ul class="dropdown-menu" id="districts_list">
                             {% for code, name in districts %}
                                 <li>
-                                    <a href="{% url 'district' code  %}">{{ name }}</a>
+                                {% if site_name == 'madagascar'  %}
+                                    <a href="{% url 'target_area' code code %}">{{ name }}</a>
+                                {% else %}
+                                    <a href="{% url 'district' code %}">{{ name }}</a>
+                                {% endif %}
                                 </li>
                             {% endfor %}
                             </ul>
