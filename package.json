@@ -1,0 +1,22 @@
+{
+  "name": "mspray",
+  "version": "0.0.1",
+  "description": "mspray",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onaio/mspray.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/onaio/mspray/issues"
+  },
+  "homepage": "https://github.com/onaio/mspray#readme",
+  "dependencies": {
+    "leaflet-plugins": "^1.3.9"
+  }
+}
