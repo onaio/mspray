@@ -197,4 +197,5 @@ LOGGING = {
 }
 
 MSPRAY_LOCATION_FIELD = 'location_code'
+MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
 MSPRAY_SPATIAL_QUERIES = True

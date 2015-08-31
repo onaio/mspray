@@ -9,6 +9,7 @@ from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
+WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -54,7 +55,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_sprayed" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"sprayed/was_sprayed":"yes"')
+                .filter(data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD))
 
             return cached_queryset_count(key, queryset)
 
@@ -62,7 +63,7 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_not_sprayed" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"sprayed/was_sprayed":"no"')
+                .filter(data__contains='"{}":"no"'.format(WAS_SPRAYED_FIELD))
 
             return cached_queryset_count(key, queryset)
 
