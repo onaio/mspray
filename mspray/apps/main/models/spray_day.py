@@ -1,6 +1,6 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
-from jsonfield import JSONField
+from django_pgjson.fields import JsonField
 
 DATA_FILTER = '"sprayable_structure":"yes"'
 DATA_ID_FIELD = '_id'
@@ -13,7 +13,7 @@ class SprayDay(models.Model):
     submission_id = models.PositiveIntegerField(unique=True)
     spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326)
-    data = JSONField(default={})
+    data = JsonField(default={})
     location = models.ForeignKey('Location', default=2)
 
     objects = models.GeoManager()

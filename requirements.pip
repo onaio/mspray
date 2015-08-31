@@ -1,5 +1,5 @@
 django
-jsonfield
+django-pgjson
 psycopg2
 django_nose
 djangorestframework-gis
