@@ -25,8 +25,10 @@
                     {% for district in district_list %}
                         <tr>
                             <td>
-                                {% if district_name  %}
-                                <a href="{% url 'target_area' district_code district.targetid %}">{{ district.targetid }}</a>
+                                {% if site_name == 'madagascar'  %}
+                                <a href="{% url 'target_area' district.targetid district.targetid %}">{{ district.district_name }}</a>
+                                {% elif district_name  %}
+                                <a href="{% url 'target_area' district_code district.targetid %}">{{ district.district_name }}</a>
                                 {% else %}
                                 <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
                                 {% endif %}
