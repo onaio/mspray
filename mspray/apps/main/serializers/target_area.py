@@ -59,7 +59,8 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_sprayed" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD))
+                .extra(where=['data->>%s = %s'],
+                       params=[WAS_SPRAYED_FIELD, "yes"])
 
             return cached_queryset_count(key, queryset)
 
@@ -67,7 +68,8 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_not_sprayed" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"{}":"no"'.format(WAS_SPRAYED_FIELD))
+                .extra(where=['data->>%s = %s'],
+                       params=[WAS_SPRAYED_FIELD, "no"])
 
             return cached_queryset_count(key, queryset)
 
@@ -75,9 +77,8 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_refused" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"unsprayed/reason":"{}"'.format(
-                    REASON_REFUSED)
-                )
+                .extra(where=['data->>%s = %s'],
+                       params=["unsprayed/reason", REASON_REFUSED])
 
             return cached_queryset_count(key, queryset)
 
