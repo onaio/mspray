@@ -14,10 +14,10 @@ class DistrictView(ListView):
     slug_field = 'district_name'
 
     def get_queryset(self):
+        qs = super(DistrictView, self).get_queryset()
         district_name = self.kwargs.get(self.slug_field)
         if district_name is not None:
-            qs = TargetArea.objects.filter(district_name=district_name)\
-                .order_by('targetid')
+            qs = qs.filter(parent__code=district_name)
         else:
             qs = super(DistrictView, self).get_queryset()\
                 .filter(parent=None).order_by('name')

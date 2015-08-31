@@ -35,7 +35,10 @@ class TargetAreaMixin(object):
         if SPATIAL_QUERIES:
             return SprayDay.objects.filter(geom__covered_by=obj.geom)
 
-        return SprayDay.objects.filter(location__parent=obj)
+        if obj.parent is None:
+            return SprayDay.objects.filter(location__parent=obj)
+
+        return SprayDay.objects.filter(location=obj)
 
     def get_spray_dates(self, obj):
         if obj:
