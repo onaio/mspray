@@ -27,3 +27,5 @@ CORS_ORIGIN_WHITELIST = (
     'PROJECT.api.mspray.onalabs.org',
     'localhost:3000'
 )
+
+SITE_NAME = 'PROJECT'

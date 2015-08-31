@@ -1,4 +1,5 @@
 from dateutil.parser import parse
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -46,6 +47,7 @@ class DistrictView(ListView):
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals
+        context['site_name'] = settings.PROJECT
 
         return context
 
@@ -81,5 +83,6 @@ class TargetAreaView(DetailView):
             context['district_name'] = get_object_or_404(
                 Location, code=district_code
             ).name
+        context['site_name'] = settings.PROJECT
 
         return context

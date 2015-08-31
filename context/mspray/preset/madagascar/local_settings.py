@@ -27,6 +27,9 @@ CORS_ORIGIN_WHITELIST = (
     'PROJECT.api.mspray.onalabs.org',
     'localhost:3000'
 )
+
+SITE_NAME = 'PROJECT'
+
 MSPRAY_LOCATION_FIELD = 'fokontany'
 MSPRAY_SPATIAL_QUERIES = False
 MSPRAY_WAS_SPRAYED_FIELD = 'was_sprayed'
