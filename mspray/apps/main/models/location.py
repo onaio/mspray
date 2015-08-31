@@ -16,3 +16,11 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def district_name(self):
+        return self.name
+
+    @property
+    def targetid(self):
+        return self.code
