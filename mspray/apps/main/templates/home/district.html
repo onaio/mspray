@@ -25,10 +25,10 @@
                     {% for district in district_list %}
                         <tr>
                             <td>
-                                {% if district.targetid  %}
+                                {% if target_area_view  %}
                                 <a href="{% url 'target_area' district.district_name district.targetid %}">{{ district.targetid }}</a>
                                 {% else %}
-                                <a href="{% url 'district' district.district_name %}">{{ district.district_name }}</a>
+                                <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
                                 {% endif %}
                             </td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>

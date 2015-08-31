@@ -3,13 +3,14 @@ from django.views.generic import DetailView
 from django.views.generic import ListView
 
 from mspray.apps.main.models import District
+from mspray.apps.main.models import Location
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
 class DistrictView(ListView):
     template_name = 'home/district.html'
-    model = District
+    model = Location
     slug_field = 'district_name'
 
     def get_queryset(self):
@@ -19,7 +20,7 @@ class DistrictView(ListView):
                 .order_by('targetid')
         else:
             qs = super(DistrictView, self).get_queryset()\
-                .order_by('district_name')
+                .filter(parent=None).order_by('name')
 
         return qs
 
@@ -37,8 +38,8 @@ class DistrictView(ListView):
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
         context['district_name'] = self.kwargs.get(self.slug_field)
-        context['districts'] = District.objects\
-            .values_list('district_name', flat=True).order_by('district_name')
+        context['districts'] = Location.objects.filter(parent=None)\
+            .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals
 
         return context
