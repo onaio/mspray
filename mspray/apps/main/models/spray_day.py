@@ -14,6 +14,7 @@ class SprayDay(models.Model):
     spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326)
     data = JSONField(default={})
+    location = models.ForeignKey('Location', default=2)
 
     objects = models.GeoManager()
 
