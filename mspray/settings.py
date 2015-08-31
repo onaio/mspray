@@ -195,3 +195,5 @@ LOGGING = {
         },
     }
 }
+
+MSPRAY_LOCATION_FIELD = 'location_code'

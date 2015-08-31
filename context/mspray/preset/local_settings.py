@@ -27,3 +27,4 @@ CORS_ORIGIN_WHITELIST = (
     'PROJECT.api.mspray.onalabs.org',
     'localhost:3000'
 )
+MSPRAY_LOCATION_FIELD = 'LOCATION_FIELD'

@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.db import connection
 from django.core.exceptions import ValidationError
 
+from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
@@ -135,6 +136,11 @@ def add_spray_data(data):
         spray_date=spray_date,
         geom=geom)
     sprayday.data = data
+
+    location_code = data.get(settings.MSPRAY_LOCATION_FIELD)
+    if location_code:
+        sprayday.location = Location.objects.get(code=location_code)
+
     sprayday.save()
 
     return sprayday
