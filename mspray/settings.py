@@ -207,3 +207,9 @@ MSPRAY_UNSPRAYED_REASON_OTHER = {
     "Locked": "Locked",
     "No one home/Missed": "No one home/Missed"
 }
+
+MPSRAY_DATA_FILTER = '"sprayable_structure":"yes"'
+MSPRAY_DATA_ID_FIELD = '_id'
+MSPRAY_DATE_FIELD = 'today'
+MSPRAY_STRUCTURE_GPS_FIELD = 'structuredetails/structure_gps'
+MPSRYA_NON_STRUCTURE_GPS_FIELD = 'non_structure_gps'

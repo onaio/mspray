@@ -40,3 +40,5 @@ MSPRAY_UNSPRAYED_REASON_OTHER = {
     "4": "Family Event",
     "5": "Other"
 }
+
+MSPRAY_STRUCTURE_GPS_FIELD = 'structure_gps'

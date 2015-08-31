@@ -1,12 +1,16 @@
 # This is an auto-generated Django model module created by ogrinspect.
+from django.conf import settings
 from django.contrib.gis.db import models
 from django_pgjson.fields import JsonField
 
-DATA_FILTER = '"sprayable_structure":"yes"'
-DATA_ID_FIELD = '_id'
-DATE_FIELD = 'today'
-STRUCTURE_GPS_FIELD = 'structuredetails/structure_gps'
-NON_STRUCTURE_GPS_FIELD = 'non_structure_gps'
+DATA_FILTER = getattr(settings, 'MSPRAY_DATA_FILTER',
+                      '"sprayable_structure":"yes"')
+DATA_ID_FIELD = getattr(settings, 'MSPRAY_DATA_ID_FIELD', '_id')
+DATE_FIELD = getattr(settings, 'MSPRAY_DATE_FIELD', 'today')
+STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_STRUCTURE_GPS_FIELD',
+                              'structure_gps')
+NON_STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_NON_STRUCTURE_GPS_FIELD',
+                                  'non_structure_gps')
 
 
 class SprayDay(models.Model):
