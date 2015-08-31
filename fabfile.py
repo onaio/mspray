@@ -52,17 +52,17 @@ def change_local_settings(config_module, dbname, dbuser, dbpass,
                           dbhost='127.0.0.1',
                           deployment_name='default', project='mspray-project'):
     setup_env(deployment_name, project)
-    lconfig_path = os.path.join('mspray',
-                                'preset', project, 'local_settings.py')
+    lconfig_path = os.path.join('context', 'mspray', 'preset', project,
+                                'local_settings.py')
     if not os.path.exists(lconfig_path):
-        lconfig_path = os.path.join('mspray',
-                                    'preset', 'local_settings.py')
+        lconfig_path = os.path.join('context', 'mspray', 'preset',
+                                    'local_settings.py')
     config_path = os.path.join(env.code_src, 'mspray', 'preset',
                                'local_settings.py')
 
     with cd(env.code_src):
             run('mkdir -p mspray/preset')
-    put(os.path.join('context', lconfig_path), config_path)
+    put(lconfig_path, config_path)
     if files.exists(config_path):
         files.sed(config_path, 'REPLACE_DB_NAME', dbname)
         files.sed(config_path, 'REPLACE_DB_USER', dbuser)

@@ -47,7 +47,7 @@ class DistrictView(ListView):
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals
-        context['site_name'] = settings.PROJECT
+        context['site_name'] = settings.SITE_NAME
 
         return context
 
@@ -83,6 +83,6 @@ class TargetAreaView(DetailView):
             context['district_name'] = get_object_or_404(
                 Location, code=district_code
             ).name
-        context['site_name'] = settings.PROJECT
+        context['site_name'] = settings.SITE_NAME
 
         return context
