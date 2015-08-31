@@ -199,3 +199,11 @@ LOGGING = {
 MSPRAY_LOCATION_FIELD = 'location_code'
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
 MSPRAY_SPATIAL_QUERIES = True
+MSPRAY_UNSPRAYED_REASON_REFUSED = "Refused"
+MSPRAY_UNSPRAYED_REASON_OTHER = {
+    "Other": "Other",
+    "Sick": "Sick",
+    "Funeral": "Funeral",
+    "Locked": "Locked",
+    "No one home/Missed": "No one home/Missed"
+}

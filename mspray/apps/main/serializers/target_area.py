@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import Q
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
@@ -10,6 +9,8 @@ from mspray.apps.main.models.target_area import TargetArea
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
+REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -71,7 +72,9 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_refused" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(data__contains='"unsprayed/reason":"Refused"')
+                .filter(data__contains='"unsprayed/reason":"{}"'.format(
+                    REASON_REFUSED)
+                )
 
             return cached_queryset_count(key, queryset)
 
@@ -79,13 +82,11 @@ class TargetAreaMixin(object):
         if obj:
             key = "%s_visited_other" % obj.pk
             queryset = self.get_spray_queryset(obj)\
-                .filter(
-                    Q(data__contains='"unsprayed/reason":"Other"') |
-                    Q(data__contains='"unsprayed/reason":"Sick"') |
-                    Q(data__contains='"unsprayed/reason":"Funeral"') |
-                    Q(data__contains='"unsprayed/reason":"Locked"') |
-                    Q(data__contains='"unsprayed/reason":"No one home/Missed"')
-                )
+                .extra(where=[
+                    "data->>%s IN ({})".format(
+                        ",".join(["'{}'".format(i) for i in REASON_OTHER])
+                    )
+                ], params=['unsprayed/reason'])
 
             return cached_queryset_count(key, queryset)
 
