@@ -1,4 +1,5 @@
 from dateutil.parser import parse
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 
@@ -37,7 +38,12 @@ class DistrictView(ListView):
             for field in fields:
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
-        context['district_name'] = self.kwargs.get(self.slug_field)
+        district_code = self.kwargs.get(self.slug_field)
+        if district_code:
+            context['district_code'] = district_code
+            context['district_name'] = get_object_or_404(
+                Location, code=district_code
+            ).name
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals

@@ -7,7 +7,7 @@
 {% block content %}
         <div class="container" id="district_table">
             <div "col-sm-12" id="table-container">
-                <h1 id="district-name">District: {{ district_totals.targetid }}</h1>
+                <h1 id="district-name">District: {{ district_name }}</h1>
                 <table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap data-sortable data-sortable-switch>
                     <thead>
                         <tr>
@@ -25,8 +25,8 @@
                     {% for district in district_list %}
                         <tr>
                             <td>
-                                {% if target_area_view  %}
-                                <a href="{% url 'target_area' district.district_name district.targetid %}">{{ district.targetid }}</a>
+                                {% if district_name  %}
+                                <a href="{% url 'target_area' district_code district.targetid %}">{{ district.targetid }}</a>
                                 {% else %}
                                 <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
                                 {% endif %}
