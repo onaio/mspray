@@ -173,6 +173,8 @@ def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd",
             ' && WORKON_HOME=%(venv)s workon %(project)s' % data)
 
         with cd(env.code_src):
+            change_local_settings(env.django_module, dbname, dbuser, dbpass,
+                                  project=project)
             run_in_virtualenv('pip3 install -r requirements.pip --upgrade')
             run_in_virtualenv("python3 manage.py migrate --settings='%s'"
                               % env.django_module)
