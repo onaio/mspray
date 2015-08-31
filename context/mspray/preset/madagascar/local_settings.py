@@ -27,3 +27,13 @@ CORS_ORIGIN_WHITELIST = (
     'PROJECT.api.mspray.onalabs.org',
     'localhost:3000'
 )
+MSPRAY_LOCATION_FIELD = 'fokontany'
+MSPRAY_SPATIAL_QUERIES = False
+MSPRAY_WAS_SPRAYED_FIELD = 'was_sprayed'
+MSPRAY_UNSPRAYED_REASON_REFUSED = "2"
+MSPRAY_UNSPRAYED_REASON_OTHER = {
+    "1": "Locked",
+    "3": "Sick",
+    "4": "Family Event",
+    "5": "Other"
+}
