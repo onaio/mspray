@@ -12,7 +12,7 @@
                             <ul class="dropdown-menu" id="spraydays_list">
                             {% for day in target_data.spray_dates %}
                                 <li>
-                                    <a href="{% url 'target_area' object.district_name object.targetid  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                                    <a href="{% url 'target_area' district_code object.targetid  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
                                 </li>
                             {% endfor %}
                             </ul>
