@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 
-from mspray.apps.main.models import District
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
@@ -53,8 +52,8 @@ class DistrictView(ListView):
 
 class TargetAreaView(DetailView):
     template_name = 'home/map.html'
-    model = TargetArea
-    slug_field = 'targetid'
+    model = Location
+    slug_field = 'code'
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)
@@ -73,9 +72,14 @@ class TargetAreaView(DetailView):
             district_name=self.kwargs['district_name']
         ).values_list('targetid', flat=True)
 
-        context['districts'] = District.objects\
-            .values_list('district_name', flat=True).order_by('district_name')
+        context['districts'] = Location.objects.filter(parent=None)\
+            .values_list('code', 'name').order_by('name')
 
-        context['district_name'] = self.kwargs.get('district_name')
+        district_code = self.kwargs.get('district_name')
+        if district_code:
+            context['district_code'] = district_code
+            context['district_name'] = get_object_or_404(
+                Location, code=district_code
+            ).name
 
         return context

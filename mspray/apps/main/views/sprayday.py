@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
@@ -7,10 +8,10 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from mspray.apps.main.models import Location
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
-from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
@@ -37,9 +38,11 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         targetid = self.request.QUERY_PARAMS.get('target_area')
 
         if targetid:
-            target = get_object_or_404(TargetArea, targetid=targetid,
-                                       targeted=TargetArea.TARGETED_VALUE)
-            queryset = queryset.filter(geom__coveredby=target.geom)
+            target = get_object_or_404(Location, code=targetid)
+            if settings.MSPRAY_SPATIAL_QUERIES:
+                queryset = queryset.filter(geom__coveredby=target.geom)
+            else:
+                queryset = queryset.filter(location=target)
 
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 

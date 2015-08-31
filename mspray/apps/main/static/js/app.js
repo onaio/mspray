@@ -1,5 +1,5 @@
 /* global L, $, Circles */
-var App = function() {
+var App = function(buffer) {
     "use strict";
     this.hhOptions = {
         radius: 4,
@@ -31,13 +31,20 @@ var App = function() {
         , bing = new L.BingLayer("Alt-3s6hwEWPw-f2IKRw3Fg4qsV1BItu4KbylMsVKY7jyWFGkT5D10Qntw9xr6MX", {type: "Aerial"});
     this.map.addLayer(google);
     this.map.addLayer(bing);
-    this.map.addLayer(bufferHouseholdsLayer);
-    this.map.addControl(new L.control.layers({
-        "Google": google,
-        "Bing": bing
-    }, {
-        "Households Buffer": bufferHouseholdsLayer
-    }));
+    if(buffer !== undefined) {
+        this.map.addLayer(bufferHouseholdsLayer);
+        this.map.addControl(new L.control.layers({
+            "Google": google,
+            "Bing": bing
+        }, {
+            "Households Buffer": bufferHouseholdsLayer
+        }));
+    } else {
+         this.map.addControl(new L.control.layers({
+            "Google": google,
+            "Bing": bing
+        }));
+    }
 
     this.buildLegend = function() {
         var legend = L.control({
@@ -138,6 +145,7 @@ var App = function() {
         target_area_stats = "";
         sprayed.on("ready", function(){
             var geojson = sprayed.getGeoJSON();
+            app.k = geojson;
             app.sprayCount = 0; // reset counter
 
             app.sprayLayer = L.geoJson(geojson, {
@@ -166,6 +174,7 @@ var App = function() {
                 }
             })
             .addTo(app.map);
+            app.map.fitBounds(app.sprayLayer.getBounds());
 
             $("#target-area-stats-structures").empty().append(
                 "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"

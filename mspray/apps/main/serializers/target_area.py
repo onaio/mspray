@@ -106,6 +106,8 @@ class TargetAreaMixin(object):
         if obj and obj.geom:
             return list(obj.geom.boundary.extent)
 
+        return []
+
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.ReadOnlyField()

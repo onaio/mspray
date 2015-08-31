@@ -1,8 +1,11 @@
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
+
+WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 
 
 class SprayDaySerializer(GeoFeatureModelSerializer):
@@ -21,7 +24,7 @@ class SprayDaySerializer(GeoFeatureModelSerializer):
 
     def get_sprayed(self, obj):
         if obj:
-            return obj.data.get('sprayed/was_sprayed')
+            return obj.data.get(WAS_SPRAYED_FIELD)
 
     def get_reason(self, obj):
         if obj:
