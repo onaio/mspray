@@ -36,8 +36,8 @@
                             <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.visited_total %})</td>
                             <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.visited_total %})</td>
                             <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.visited_total %})</td>
-                            <td class='numbers'>{{ district.visited_other }} ({% percentage district.visited_other district.visited_total %})</td>
-                            <td class='numbers'>{{ district.not_visited }} ({% percentage district.not_visited district.structures %})</td>
+                            <td class='numbers'>{{ district.visited_other|intcomma }} ({% percentage district.visited_other district.visited_total %})</td>
+                            <td class='numbers'>{{ district.not_visited|intcomma }} ({% percentage district.not_visited district.structures %})</td>
                         </tr>
                     {% endfor %}
                     </tbody>
