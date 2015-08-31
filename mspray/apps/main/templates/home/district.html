@@ -14,7 +14,8 @@
                             <th data-priority="persist" data-sortable-col data-sortable-default-col>Target Area</th>
                             <th data-sortable-col>Targeted</th>
                             <th data-sortable-col>Found</th>
-                            <th data-sortable-col>Sprayed</th>
+                            <th data-sortable-col>Spray Progress</th>
+                            <th data-sortable-col>Spray Coverage</th>
                             <th data-sortable-col>Not Sprayed</th>
                             <th data-sortable-col>Not Sprayed - Refused</th>
                             <th data-sortable-col>Not Sprayed - Others</th>
@@ -33,6 +34,7 @@
                             </td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>
                             <td class='numbers'>{{ district.visited_total|intcomma }} ({% percentage district.visited_total district.structures %})</td>
+                            <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.structures %})</td>
                             <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.visited_total %})</td>
                             <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.visited_total %})</td>
                             <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.visited_total %})</td>
@@ -46,6 +48,7 @@
                             <td>Totals</a></td>
                             <td class='numbers'>{{ district_totals.structures|intcomma  }}</td>
                             <td class='numbers'>{{ district_totals.visited_total|intcomma  }} ({% percentage district_totals.visited_total district_totals.structures %})</td>
+                            <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.structures %})</td>
                             <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.visited_total %})</td>
                             <td class='numbers'>{{ district_totals.visited_not_sprayed|intcomma  }} ({% percentage district_totals.visited_not_sprayed district_totals.visited_total %})</td>
                             <td class='numbers'>{{ district_totals.visited_refused|intcomma  }} ({% percentage district_totals.visited_refused district_totals.visited_total %})</td>
