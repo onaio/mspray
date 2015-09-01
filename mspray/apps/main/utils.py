@@ -125,6 +125,9 @@ def create_households_buffer(distance=15, recreate=False, target=None):
 
 
 def add_spray_data(data):
+    """"
+    Add spray data submission from aggregate submission to the dashboard
+    """
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')

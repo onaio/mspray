@@ -5,4 +5,4 @@ from .target_area import TargetArea  # noqa
 from .district import District  # noqa
 from .team_leader import TeamLeader  # noqa
 from .spray_operator import SprayOperator  # noqa
-from .location import Location
+from .location import Location  # noqa
