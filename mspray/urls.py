@@ -2,6 +2,7 @@ from mspray.apps.main.views import (
     target_area, household, household_buffer, sprayday, indicators, districts
 )
 from mspray.apps.main.views import home
+from mspray.apps.main.views import performance
 
 from django.conf import settings
 from django.conf.urls import patterns, include, url, static
@@ -18,7 +19,7 @@ router.register(r'spraydays', sprayday.SprayDayViewSet)
 router.register(r'targetareas', target_area.TargetAreaViewSet)
 
 performance_urls = [
-    url(r'^$', 'mspray.apps.main.views.performance.district',
+    url(r'^$', performance.DistrictPerfomanceView.as_view(),
         name="districts"),
     url(r'^team-leaders/(?P<district_name>[^/]+)',
         'mspray.apps.main.views.performance.team_leaders',

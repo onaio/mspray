@@ -3,6 +3,7 @@ from django.db.models import Count
 from django.conf import settings
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
+from django.views.generic import ListView
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
@@ -49,125 +50,141 @@ def definitions_and_conditions(request):
     return render_to_response('definitions-and-conditions.html')
 
 
-def district(request):
-    # get districts and the number of structures in them
-    districts = Location.objects.filter(parent=None).order_by('name')
-    totals = {
-        'avg_structures_per_user_per_so': 0,
-        'found': 0,
-        'structures_found': 0,
-        'sprayed': 0,
-        'sprayed_total': 0,
-        'target_areas': 0,
-        'houses': 0
-    }
-    start_times = []
-    end_times = []
-    results = []
-    for district in districts:
-        target_areas = Location.objects.filter(parent=district)\
-            .order_by('name')
-        result = {'location': district}
+class DistrictPerfomanceView(ListView):
+    model = Location
+    template_name = 'performance.html'
 
-        sprayed_structures = {}
-        target_areas_found_total = 0
-        target_areas_sprayed_total = 0
-        structures_sprayed_totals = 0
-        spray_points_total = 0
-        if settings.MSPRAY_SPATIAL_QUERIES:
-            qs = SprayDay.objects\
-                .filter(geom__coveredby=target_areas.collect())
-        else:
-            qs = SprayDay.objects.filter(location__parent=district)
+    def get_queryset(self):
+        qs = super(DistrictPerfomanceView, self).get_queryset()
 
-        _end_time = avg_time(qs, 'start')
-        result['avg_end_time'] = _end_time
-        end_times.append(_end_time)
+        return qs.filter(parent=None).order_by('name')
 
-        _start_time = avg_time(qs, 'end')
-        result['avg_start_time'] = _start_time
-        start_times.append(_start_time)
+    def get_context_data(self, **kwargs):
+        context = super(DistrictPerfomanceView, self)\
+            .get_context_data(**kwargs)
+        districts = context.get('object_list')
+        totals = {
+            'avg_structures_per_user_per_so': 0,
+            'found': 0,
+            'structures_found': 0,
+            'sprayed': 0,
+            'sprayed_total': 0,
+            'target_areas': 0,
+            'houses': 0
+        }
+        start_times = []
+        end_times = []
+        results = []
+        for district in districts:
+            target_areas = Location.objects.filter(parent=district)\
+                .order_by('name')
+            result = {'location': district}
 
-        for target_area in target_areas:
-            structures = 0 if target_area.houses < 0 else target_area.houses
+            sprayed_structures = {}
+            target_areas_found_total = 0
+            target_areas_sprayed_total = 0
+            structures_sprayed_totals = 0
+            spray_points_total = 0
             if settings.MSPRAY_SPATIAL_QUERIES:
-                spray_day = SprayDay.objects.filter(
-                    geom__coveredby=target_area.geom)
+                qs = SprayDay.objects\
+                    .filter(geom__coveredby=target_areas.collect())
             else:
-                spray_day = SprayDay.objects.filter(location=target_area)
-            # found
-            spray_points_founds = spray_day.filter().count()
-            # data__contains='"sprayable_structure":"yes"').count()
-            spray_points_total += spray_points_founds
-            if spray_points_founds > 0:
-                target_areas_found_total += calculate(spray_points_founds,
-                                                      structures,
-                                                      0.95)
+                qs = SprayDay.objects.filter(location__parent=district)
 
-            # sprayed
-            spray_points_sprayed = spray_day.filter(
-                data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD))
+            _end_time = avg_time(qs, 'start')
+            result['avg_end_time'] = _end_time
+            end_times.append(_end_time)
 
-            spray_points_sprayed_count = spray_points_sprayed.count()
-            if spray_points_sprayed_count > 0:
-                target_areas_sprayed_total += calculate(
-                    spray_points_sprayed_count, structures, 0.85)
-                structures_sprayed_totals += spray_points_sprayed_count
+            _start_time = avg_time(qs, 'end')
+            result['avg_start_time'] = _start_time
+            start_times.append(_start_time)
 
-                # update sprayed structures
-                sprayed_structures = update_sprayed_structures(
-                    spray_points_sprayed, sprayed_structures)
+            for target_area in target_areas:
+                structures = 0 \
+                    if target_area.structures < 0 else target_area.structures
+                if settings.MSPRAY_SPATIAL_QUERIES:
+                    spray_day = SprayDay.objects.filter(
+                        geom__coveredby=target_area.geom)
+                else:
+                    spray_day = SprayDay.objects.filter(location=target_area)
+                # found
+                spray_points_founds = spray_day.filter().count()
+                # data__contains='"sprayable_structure":"yes"').count()
+                spray_points_total += spray_points_founds
 
-        # calcuate Average structures sprayed per day per spray operator
-        denominator = len(sprayed_structures.keys())
-        numerator = sum(a for a in sprayed_structures.values())
-        avg_struct_per_user_per_so = round(numerator/denominator, 1)
+                if spray_points_founds > 0:
+                    target_areas_found_total += calculate(spray_points_founds,
+                                                          structures, 0.95)
 
-        result['avg_structures_per_user_per_so'] = avg_struct_per_user_per_so
-        totals['avg_structures_per_user_per_so'] += avg_struct_per_user_per_so
+                # sprayed
+                spray_points_sprayed = spray_day.filter(
+                    data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD))
 
-        result['found'] = target_areas_found_total
-        totals['found'] += target_areas_found_total
+                spray_points_sprayed_count = spray_points_sprayed.count()
+                if spray_points_sprayed_count > 0:
+                    target_areas_sprayed_total += calculate(
+                        spray_points_sprayed_count, structures, 0.85)
+                    structures_sprayed_totals += spray_points_sprayed_count
 
-        result['found_percentage'] = round((
-            target_areas_found_total / target_areas.count()) * 100, 0)
-        result['structures_found'] = spray_points_total
-        totals['structures_found'] += spray_points_total
+                    # update sprayed structures
+                    sprayed_structures = update_sprayed_structures(
+                        spray_points_sprayed, sprayed_structures)
 
-        result['sprayed'] = target_areas_sprayed_total
-        totals['sprayed'] += target_areas_sprayed_total
+            # calcuate Average structures sprayed per day per spray operator
+            denominator = len(sprayed_structures.keys())
+            numerator = sum(a for a in sprayed_structures.values())
+            avg_struct_per_user_per_so = round(numerator/denominator, 1)
 
-        result['sprayed_percentage'] = round(
-            (target_areas_sprayed_total / target_areas.count()) * 100, 0)
-        result['sprayed_total'] = structures_sprayed_totals
-        totals['sprayed_total'] += structures_sprayed_totals
+            result['avg_structures_per_user_per_so'] = \
+                avg_struct_per_user_per_so
+            totals['avg_structures_per_user_per_so'] += \
+                avg_struct_per_user_per_so
 
-        if spray_points_total > 0:
-            result['sprayed_total_percentage'] = round(
-                (structures_sprayed_totals / spray_points_total * 100), 0)
-        result['target_areas'] = target_areas.count()
-        totals['target_areas'] += target_areas.count()
+            result['found'] = target_areas_found_total
+            totals['found'] += target_areas_found_total
 
-        totals['houses'] += district.structures
-        results.append(result)
+            result['found_percentage'] = round((
+                target_areas_found_total / target_areas.count()) * 100, 0)
+            result['structures_found'] = spray_points_total
+            totals['structures_found'] += spray_points_total
 
-    totals['found_percentage'] = round((
-        totals['found']/totals['target_areas']) * 100)
-    totals['sprayed_percentage'] = round((
-        totals['sprayed']/totals['target_areas']) * 100)
-    if totals['structures_found'] > 0:
-        totals['sprayed_total_percentage'] = round((
-            totals['sprayed_total'] / totals['structures_found']) * 100)
-    totals['avg_structures_per_user_per_so'] = round(
-        totals['avg_structures_per_user_per_so']/districts.count(), 0)
+            result['sprayed'] = target_areas_sprayed_total
+            totals['sprayed'] += target_areas_sprayed_total
 
-    if len(start_times) and len(end_times):
-        totals['avg_start_time'] = avg_time_tuple(start_times)
-        totals['avg_end_time'] = avg_time_tuple(end_times)
+            result['sprayed_percentage'] = round(
+                (target_areas_sprayed_total / target_areas.count()) * 100, 0)
+            result['sprayed_total'] = structures_sprayed_totals
+            totals['sprayed_total'] += structures_sprayed_totals
 
-    return render_to_response('performance.html', {
-        'data': results, 'totals': totals, 'performance_tables': True
-    })
+            if spray_points_total > 0:
+                result['sprayed_total_percentage'] = round(
+                    (structures_sprayed_totals / spray_points_total * 100), 0)
+            result['target_areas'] = target_areas.count()
+            totals['target_areas'] += target_areas.count()
+
+            totals['houses'] += district.structures
+            results.append(result)
+
+        totals['found_percentage'] = round((
+            totals['found']/totals['target_areas']) * 100)
+        totals['sprayed_percentage'] = round((
+            totals['sprayed']/totals['target_areas']) * 100)
+        if totals['structures_found'] > 0:
+            totals['sprayed_total_percentage'] = round((
+                totals['sprayed_total'] / totals['structures_found']) * 100)
+        totals['avg_structures_per_user_per_so'] = round(
+            totals['avg_structures_per_user_per_so']/districts.count(), 0)
+
+        if len(start_times) and len(end_times):
+            totals['avg_start_time'] = avg_time_tuple(start_times)
+            totals['avg_end_time'] = avg_time_tuple(end_times)
+
+        context.update({
+            'data': results, 'totals': totals,
+            'performance_tables': True
+        })
+
+        return context
 
 
 def get_totals(spraypoints, condition):
