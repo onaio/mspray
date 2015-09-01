@@ -28,6 +28,19 @@
                 </div>
                 {% block map-nav %}
                 <div class="collapse navbar-collapse" id="msp-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown">
+                                <span>{% if perfomance_tables %}Performance Progress {% else %}Progress{% endif %}</span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'index' %}">Progress</a></li>
+                                <li><a href="{% url 'performance:districts' %} ">Performance Progress</a></li>
+                            </ul>
+                        </li>
+                    </ul>
                     <ul class="nav navbar-nav navbar-right">
                         {% include 'home/district_list.html' %}
                         {% include 'home/target_areas_list.html' %}

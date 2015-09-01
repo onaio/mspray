@@ -165,8 +165,9 @@ def district(request):
         totals['avg_start_time'] = avg_time_tuple(start_times)
         totals['avg_end_time'] = avg_time_tuple(end_times)
 
-    return render_to_response('performance.html',
-                              {'data': results, 'totals': totals})
+    return render_to_response('performance.html', {
+        'data': results, 'totals': totals, 'performance_tables': True
+    })
 
 
 def get_totals(spraypoints, condition):
