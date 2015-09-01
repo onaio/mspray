@@ -4,12 +4,13 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 
+from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 
-class DistrictView(ListView):
+class DistrictView(SiteNameMixin, ListView):
     template_name = 'home/district.html'
     model = Location
     slug_field = 'district_name'
@@ -47,12 +48,11 @@ class DistrictView(ListView):
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals
-        context['site_name'] = settings.SITE_NAME
 
         return context
 
 
-class TargetAreaView(DetailView):
+class TargetAreaView(SiteNameMixin, DetailView):
     template_name = 'home/map.html'
     model = Location
     slug_field = 'code'
@@ -83,6 +83,5 @@ class TargetAreaView(DetailView):
             context['district_name'] = get_object_or_404(
                 Location, code=district_code
             ).name
-        context['site_name'] = settings.SITE_NAME
 
         return context

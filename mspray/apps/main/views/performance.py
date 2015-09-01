@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
+from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
@@ -50,7 +51,7 @@ def definitions_and_conditions(request):
     return render_to_response('definitions-and-conditions.html')
 
 
-class IsPerformanceViewMixin(object):
+class IsPerformanceViewMixin(SiteNameMixin):
     def get_context_data(self, **kwargs):
         context = super(IsPerformanceViewMixin, self)\
             .get_context_data(**kwargs)
