@@ -237,9 +237,7 @@ def get_totals(spraypoints, condition):
 
 
 def team_leaders(request, district_name):
-    target_areas = TargetArea.objects.filter(
-        targeted=TargetArea.TARGETED_VALUE,
-        district_name=district_name).order_by('targetid')
+    district = get_object_or_404(Location, code=district_name)
 
     data = []
     totals = {
@@ -253,16 +251,21 @@ def team_leaders(request, district_name):
         'spray_success_rate': 0
     }
 
-    target_areas_geom = target_areas.collect(),
-    spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas_geom)\
-        .extra(
-            select={'team_leader': 'data->>%s'},
-            select_params=['team_leader']
-        ).values_list('team_leader')
-    sprayable_qs = spraypoints.extra(
-        where=['data->>%s = %s'],
-        params=['sprayable_structure', 'yes']
-    )
+    if settings.MSPRAY_SPATIAL_QUERIES:
+        target_areas_geom = Location.objects.filter(parent=district).collect()
+        spraypoints = SprayDay.objects\
+            .filter(geom__coveredby=target_areas_geom)
+    else:
+        spraypoints = SprayDay.objects.filter(location__parent=district)
+    spraypoints = spraypoints.extra(
+        select={'team_leader': 'data->>%s'},
+        select_params=['team_leader']
+    ).values_list('team_leader')
+    sprayable_qs = spraypoints
+    # .extra(
+    #     where=['data->>%s = %s'],
+    #     params=['sprayable_structure', 'yes']
+    # )
     sprayable = dict(sprayable_qs.annotate(c=Count('data')))
     non_sprayable = get_totals(spraypoints, "non-sprayable")
     sprayed = get_totals(spraypoints, "sprayed")
@@ -286,7 +289,7 @@ def team_leaders(request, district_name):
 
         # calcuate Average structures sprayed per day per SO
         spray_points_sprayed = SprayDay.objects.filter(
-            data__contains='"sprayed/was_sprayed":"yes"').filter(
+            data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD)).filter(
             data__contains='"team_leader":"{}"'.format(team_leader))
         sprayed_structures = update_sprayed_structures(
             spray_points_sprayed, {})
@@ -298,8 +301,7 @@ def team_leaders(request, district_name):
         not_sprayed_total = refused.get(team_leader, 0) + \
             other.get(team_leader, 0)
 
-        qs = SprayDay.objects.filter(
-            geom__coveredby=target_areas_geom,
+        qs = sprayable_qs.filter(
             data__contains='"team_leader":"{}"'.format(team_leader)
         )
         _end_time = avg_time(qs, 'start')
@@ -345,14 +347,8 @@ def team_leaders(request, district_name):
         totals['avg_structures_per_user_per_so']/len(team_leaders), 0)
 
     if len(start_times) and len(end_times):
-        totals['avg_start_time'] = (
-            round(sum([i[0] for i in start_times])/len(start_times)),
-            round(sum([i[1] for i in start_times])/len(start_times))
-        )
-        totals['avg_end_time'] = (
-            round(sum([i[0] for i in end_times])/len(end_times)),
-            round(sum([i[1] for i in end_times])/len(end_times))
-        )
+        totals['avg_start_time'] = avg_time_tuple(start_times)
+        totals['avg_end_time'] = avg_time_tuple(end_times)
 
     return render_to_response('team-leaders.html',
                               {'data': data,
