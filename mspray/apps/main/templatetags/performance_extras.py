@@ -25,12 +25,14 @@ def sprayed_color(value):
 @register.filter
 def format_avg_time(value):
     if not isinstance(value, tuple):
-        return value
+        return value if value is not None else ''
 
     hour, minute = value
 
-    return '{}:{}'.format('' if hour is None else hour,
-                          '' if minute is None else minute)
+    if hour is None or minute is None:
+        return ''
+
+    return '{}:{}'.format(hour, minute)
 
 
 @register.filter
