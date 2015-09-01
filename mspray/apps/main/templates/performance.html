@@ -50,8 +50,8 @@
                     <tbody>
                     {% for row in data %}
                         <tr>
-                            <td><a href="{% url "team-leaders" row.district_name %}">{{ row.district_name }}</a></td>
-                            <td class='numbers'>{{ row.houses|intcomma }}</td>
+                            <td><a href="{% url "performance:team-leaders" row.location.code %}">{{ row.location.name }}</a></td>
+                            <td class='numbers'>{{ row.location.structures|intcomma }}</td>
                             <td class='numbers'>{{ row.target_areas|intcomma }}</td>
                             <td class='numbers'>{{ row.structures_found|intcomma  }}</td>
                             <td class='numbers'>{{ row.found|intcomma  }}</td>
@@ -89,7 +89,7 @@
                     </tfoot>
                 </table>
                 <p class="definitions">
-                    <a href="{% url "definitions-and-conditions" %}">
+                    <a href="{% url "performance:definitions-and-conditions" %}">
                         <span class="glyphicon glyphicon-info-sign"></span> Definitions and Conditions
                     </a>
                 </p>

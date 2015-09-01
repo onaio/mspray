@@ -50,6 +50,6 @@ urlpatterns = patterns(
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),
-    url(r'^performance/', include(performance_urls)),
+    url(r'^performance/', include(performance_urls, namespace='performance')),
     url(r'^admin/', include(admin.site.urls)),
 ) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
