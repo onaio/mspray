@@ -24,3 +24,7 @@ class Location(models.Model):
     @property
     def targetid(self):
         return self.code
+
+    @property
+    def houses(self):
+        return self.structures
