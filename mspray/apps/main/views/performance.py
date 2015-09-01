@@ -50,7 +50,16 @@ def definitions_and_conditions(request):
     return render_to_response('definitions-and-conditions.html')
 
 
-class DistrictPerfomanceView(ListView):
+class IsPerformanceViewMixin(object):
+    def get_context_data(self, **kwargs):
+        context = super(IsPerformanceViewMixin, self)\
+            .get_context_data(**kwargs)
+        context['performance_tables'] = True
+
+        return context
+
+
+class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
     model = Location
     template_name = 'performance.html'
 
@@ -180,8 +189,7 @@ class DistrictPerfomanceView(ListView):
             totals['avg_end_time'] = avg_time_tuple(end_times)
 
         context.update({
-            'data': results, 'totals': totals,
-            'performance_tables': True
+            'data': results, 'totals': totals
         })
 
         return context
