@@ -1,32 +1,24 @@
-{% load staticfiles %}
-<html>
-    <head>
-        <title>Definitions and Conditions</title>
-        <link id="favicon" rel="shortcut icon" href='{% static "img/favicon.png" %}' type="image/png"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link href='{% static "css/main.css" %}' rel='stylesheet' />
+{% extends 'home/base.html' %}
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    </head>
-    <body>
-        <div class="container">
+{% load staticfiles %}
+{% block content %}
+       <div class="container">
             <div class="row">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3>Definitions</h3>
                     </div>
                     <div class="panel-body">
-                        <div class="col-md-12">        
-                            <p>a - Found coverage is defined as the number of structures found / number of structures enumerated</p>       
-                            <p>b - Spray coverage is defined as number of structures sprayed / number of structures found</p>      
-                            <p>c - Start time is determined from the time the first form is completed per day per operator</p>     
-                            <p>d - Finish time is determined from the time the last form is started per day per operator</p>       
+                        <div class="col-md-12">
+                            <p>a - Found coverage is defined as the number of structures found / number of structures enumerated</p>
+                            <p>b - Spray coverage is defined as number of structures sprayed / number of structures found</p>
+                            <p>c - Start time is determined from the time the first form is completed per day per operator</p>
+                            <p>d - Finish time is determined from the time the last form is started per day per operator</p>
                         </div>
-                        
+
                     </div>
                 </div>
-                
+
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3>Conditional formatting rules</h3>
@@ -92,6 +84,5 @@
                     </div>
                 </div>
             </div>
-        </div>       
-    </body>
-</html>
+        </div>
+{% endblock %}

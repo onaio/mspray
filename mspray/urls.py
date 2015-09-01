@@ -31,7 +31,7 @@ performance_urls = [
         'mspray.apps.main.views.performance.spray_operator_daily',
         name="spray-operator-daily"),
     url(r'^definitions-and-conditions$',
-        'mspray.apps.main.views.performance.definitions_and_conditions',
+        performance.DefinitionAndConditionView.as_view(),
         name='definitions-and-conditions'),
 ]
 

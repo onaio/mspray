@@ -4,6 +4,7 @@ from django.conf import settings
 from django.shortcuts import render_to_response
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
+from django.views.generic import TemplateView
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
@@ -47,10 +48,6 @@ def update_sprayed_structures(
     return sprayed_structures
 
 
-def definitions_and_conditions(request):
-    return render_to_response('definitions-and-conditions.html')
-
-
 class IsPerformanceViewMixin(SiteNameMixin):
     def get_context_data(self, **kwargs):
         context = super(IsPerformanceViewMixin, self)\
@@ -58,6 +55,10 @@ class IsPerformanceViewMixin(SiteNameMixin):
         context['performance_tables'] = True
 
         return context
+
+
+class DefinitionAndConditionView(IsPerformanceViewMixin, TemplateView):
+    template_name = 'definitions-and-conditions.html'
 
 
 class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
