@@ -32,7 +32,7 @@ def format_avg_time(value):
     if hour is None or minute is None:
         return ''
 
-    return '{}:{}'.format(hour, minute)
+    return '{:02}:{:02}'.format(hour, minute)
 
 
 @register.filter
@@ -88,7 +88,7 @@ def avg_time_interval(value, from_value):
     minutes, seconds = divmod(time_diff.seconds, 60)
     hours, minutes = divmod(minutes, 60)
 
-    return '%d:%02d' % (hours, minutes)
+    return '{:02}:{:02}'.format(hours, minutes)
 
 
 @register.simple_tag
@@ -102,4 +102,4 @@ def percentage(numerator, denominator):
     if denominator == 0:
         return ''
 
-    return '%d%%' % round((numerator * 100) / denominator)
+    return '{:.0%}'.format(numerator / denominator)
