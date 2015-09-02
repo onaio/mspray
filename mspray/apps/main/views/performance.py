@@ -81,6 +81,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         totals = {
             'avg_structures_per_user_per_so': 0,
             'found': 0,
+            'found_gt_20': 0,
             'structures_found': 0,
             'sprayed': 0,
             'sprayed_total': 0,
@@ -100,6 +101,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             target_areas_sprayed_total = 0
             structures_sprayed_totals = 0
             spray_points_total = 0
+            found_gt_20 = 0
             if settings.MSPRAY_SPATIAL_QUERIES:
                 qs = SprayDay.objects\
                     .filter(geom__coveredby=target_areas.collect())
@@ -130,6 +132,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 if spray_points_founds > 0:
                     target_areas_found_total += calculate(spray_points_founds,
                                                           structures, 0.95)
+                    found_gt_20 += calculate(spray_points_founds, structures,
+                                             0.20)
 
                 # sprayed
                 spray_points_sprayed = spray_day.extra(
@@ -160,11 +164,15 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
             result['found'] = target_areas_found_total
             totals['found'] += target_areas_found_total
+            result['found_gt_20'] = found_gt_20
+            totals['found_gt_20'] += found_gt_20
 
             result['found_percentage'] = round((
                 target_areas_found_total / target_areas.count()) * 100, 0)
             result['structures_found'] = spray_points_total
             totals['structures_found'] += spray_points_total
+            result['found_gt_20_percentage'] = round((
+                found_gt_20 / target_areas.count()) * 100, 0)
 
             result['sprayed'] = target_areas_sprayed_total
             totals['sprayed'] += target_areas_sprayed_total
@@ -185,6 +193,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
         totals['found_percentage'] = round((
             totals['found']/totals['target_areas']) * 100)
+        totals['found_gt_20_percentage'] = round((
+            totals['found_gt_20']/totals['target_areas']) * 100)
         totals['sprayed_percentage'] = round((
             totals['sprayed']/totals['target_areas']) * 100)
         if totals['structures_found'] > 0:

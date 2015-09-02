@@ -14,6 +14,7 @@
                             <th rowspan="2">District</th>
                             <th colspan="2">Targeted</th>
                             <th rowspan="2">Structures Found</th>
+                            <th colspan="2">TA's with >20% Found coverage<sup title="Found coverage is defined as the number of structures found / number of structures enumerated">[a]</sup></th>
                             <th colspan="2">TA's with >95% Found coverage<sup title="Found coverage is defined as the number of structures found / number of structures enumerated">[a]</sup></th>
                             <th colspan="2">TA's with >85% Spray coverage<sup title="Spray coverage is defined as number of structures sprayed / number of structures found">[b]</sup></th>
                             <th colspan="2">District spray coverage by structure</th>
@@ -30,6 +31,8 @@
                             <th>%</th>
                             <th>Number</th>
                             <th>%</th>
+                            <th>Number</th>
+                            <th>%</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,6 +42,8 @@
                             <td class='numbers'>{{ row.location.structures|intcomma }}</td>
                             <td class='numbers'>{{ row.target_areas|intcomma }}</td>
                             <td class='numbers'>{{ row.structures_found|intcomma  }}</td>
+                            <td class='numbers'>{{ row.found_gt_20|intcomma  }}</td>
+                            <td class='numbers'>{{ row.found_gt_20_percentage }}%</td>
                             <td class='numbers'>{{ row.found|intcomma  }}</td>
                             <td class='numbers'>{{ row.found_percentage }}%</td>
                             <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
@@ -59,6 +64,8 @@
                             <td class='numbers'>{{ totals.houses|intcomma }}</td>
                             <td class='numbers'>{{ totals.target_areas|intcomma }}</td>
                             <td class='numbers'>{{ totals.structures_found|intcomma }}</td>
+                            <td class='numbers'>{{ totals.found_gt_20|intcomma  }}</td>
+                            <td class='numbers'>{{ totals.found_gt_20_percentage }}%</td>
                             <td class='numbers'>{{ totals.found|intcomma }}</td>
                             <td class='numbers'>{{ totals.found_percentage }}%</td>
                             <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
