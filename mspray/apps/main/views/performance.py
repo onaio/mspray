@@ -20,6 +20,8 @@ SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
+SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 
 
 def calculate(numerator, denominator, percentage):
@@ -384,19 +386,24 @@ def spray_operator_summary(request, team_leader, district_name):
         'not_sprayed_total': 0,
         'spray_success_rate': 0
     }
-    target_areas = TargetArea.objects.filter(
-        targeted=TargetArea.TARGETED_VALUE,
-        district_name=district_name).order_by('targetid')
-    target_areas_geom = target_areas.collect(),
-    spraypoints = SprayDay.objects.filter(geom__coveredby=target_areas_geom)\
-        .filter(
-            data__contains='"team_leader":"%s"' % team_leader
-        ).extra(
-            select={'spray_operator_code': 'data->>%s'},
-            select_params=['sprayed/sprayop_name'],
-            where=['(data->%s) IS NOT NULL'],
-            params=['sprayed/sprayop_name']
-        ).values_list('spray_operator_code')
+    district = get_object_or_404(Location, code=district_name)
+    if SPATIAL_QUERIES:
+        target_areas_geom = Location.objects.filter(
+            parent=district
+        ).collect()
+        spraypoints = SprayDay.objects.filter(
+            geom__coveredby=target_areas_geom
+        )
+    else:
+        spraypoints = SprayDay.objects.filter(location__parent=district)
+    spraypoints = spraypoints.filter(
+        data__contains='"team_leader":"%s"' % team_leader
+    ).extra(
+        select={'spray_operator_code': 'data->>%s'},
+        select_params=[SPRAY_OPERATOR_CODE],
+        where=['(data->%s) IS NOT NULL'],
+        params=[SPRAY_OPERATOR_CODE]
+    ).values_list('spray_operator_code')
 
     sprayable = get_totals(spraypoints, "sprayable")
     non_sprayable = get_totals(spraypoints, "non-sprayable")
@@ -407,7 +414,7 @@ def spray_operator_summary(request, team_leader, district_name):
     spray_operators = spraypoints.extra(
         select={
             "spray_operator_name": "(select name from main_sprayoperator"
-            " where code = (data->>'sprayed/sprayop_name')::int)"
+            " where code = (data->>'{}'))".format(SPRAY_OPERATOR_CODE)
         }
     ).values_list('spray_operator_code', 'spray_operator_name').distinct()
     start_times = []
@@ -434,9 +441,9 @@ def spray_operator_summary(request, team_leader, district_name):
         not_sprayed_total = refused.get(team_leader, 0) + \
             other.get(team_leader, 0)
 
-        qs = SprayDay.objects.filter(
-            geom__coveredby=target_areas_geom,
-            data__contains='"sprayed/sprayop_name":"%s"' % spray_operator_code
+        qs = spraypoints.filter(
+            data__contains='"{}":"{}"'.format(SPRAY_OPERATOR_CODE,
+                                              spray_operator_code)
         ).filter(data__contains='"team_leader":"{}"'.format(team_leader))
         _end_time = avg_time(qs, 'start')
         end_times.append(_end_time)
@@ -474,8 +481,9 @@ def spray_operator_summary(request, team_leader, district_name):
     sprayed_success_rate = round((numerator/denominator) * 100, 1)
     totals['spray_success_rate'] = sprayed_success_rate
 
-    totals['avg_structures_per_so'] = round(
-        totals['avg_structures_per_so']/len(list(spray_operators)), 1)
+    if len(list(spray_operators)) != 0:
+        totals['avg_structures_per_so'] = round(
+            totals['avg_structures_per_so']/len(list(spray_operators)), 1)
 
     totals['avg_start_time'] = avg_time_tuple(start_times)
     totals['avg_end_time'] = avg_time_tuple(end_times)
