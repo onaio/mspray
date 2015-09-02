@@ -8,9 +8,9 @@
         <div class="container">
             <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
-              <li><a href="{% url "performance:districts" %}">Performance</a></li>
-              <li><a href="{% url "performance:team-leaders" district_name %}">{{ district_name }}</a></li>
-              <li class="active">{{ team_leader_name }}</li>
+              <li><a href="{% url "performance:districts" %}">Province</a></li>
+              <li><a href="{% url "performance:team-leaders" district_name %}">District</a></li>
+              <li class="active">Team Leader</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
@@ -42,7 +42,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "spray-operator-daily" team_leader district_name row.spray_operator_code %}">{{ row.spray_operator_name }}</a></td>
+                                    <td><a href="{% url "performance:spray-operator-daily" team_leader district_name row.spray_operator_code %}">{{ row.spray_operator_name }}</a></td>
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
