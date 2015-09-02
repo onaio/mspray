@@ -21,8 +21,8 @@ router.register(r'targetareas', target_area.TargetAreaViewSet)
 performance_urls = [
     url(r'^$', performance.DistrictPerfomanceView.as_view(),
         name="districts"),
-    url(r'^team-leaders/(?P<district_name>[^/]+)',
-        'mspray.apps.main.views.performance.team_leaders',
+    url(r'^team-leaders/(?P<slug>[^/]+)',
+        performance.TeamLeadersPerformanceView.as_view(),
         name="team-leaders"),
     url(r'^spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/summary',  # noqa
         'mspray.apps.main.views.performance.spray_operator_summary',
