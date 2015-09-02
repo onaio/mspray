@@ -160,6 +160,9 @@ def delete_cached_target_area_keys(sprayday):
 
 
 def avg_time(qs, field):
+    if qs.count() == 0:
+        return (None, None)
+
     START = 'start'
     END = 'end'
     if field not in [START, END]:
