@@ -457,8 +457,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             numerator = sum(a for a in sprayed_structures.values())
             avg_structures_per_so = round(numerator/denominator, 1)
 
-            not_sprayed_total = refused.get(team_leader, 0) + \
-                other.get(team_leader, 0)
+            not_sprayed_total = refused.get(spray_operator_code, 0) + \
+                other.get(spray_operator_code, 0)
 
             _end_time = avg_time(qs, 'start')
             end_times.append(_end_time)
@@ -573,8 +573,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 else sprayable.get(_date)
             spray_success_rate = round((numerator/denominator) * 100, 1)
 
-            not_sprayed_total = refused.get(team_leader, 0) + \
-                other.get(team_leader, 0)
+            not_sprayed_total = refused.get(_date, 0) + \
+                other.get(_date, 0)
 
             qs = spraypoints.extra(where=["data->>%s = %s"],
                                    params=["today", _date])
