@@ -27,8 +27,8 @@ performance_urls = [
     url(r'^spray-operators/(?P<slug>[^/]+)/(?P<team_leader>[^/]+)/summary',
         performance.SprayOperatorSummaryView.as_view(),
         name="spray-operator-summary"),
-    url(r'^spray-operators/(?P<team_leader>[^/]+)/(?P<district_name>[^/]+)/(?P<spray_operator>[^/]+)/daily',  # noqa
-        'mspray.apps.main.views.performance.spray_operator_daily',
+    url(r'^spray-operators/(?P<slug>[^/]+)/(?P<team_leader>[^/]+)/(?P<spray_operator>[^/]+)/daily',  # noqa
+        performance.SprayOperatorDailyView.as_view(),
         name="spray-operator-daily"),
     url(r'^definitions-and-conditions$',
         performance.DefinitionAndConditionView.as_view(),
