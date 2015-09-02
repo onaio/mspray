@@ -132,8 +132,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                                                           structures, 0.95)
 
                 # sprayed
-                spray_points_sprayed = spray_day.filter(
-                    data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD))
+                spray_points_sprayed = spray_day.extra(
+                    where=["data->>%s = %s"],
+                    params=[WAS_SPRAYED_FIELD, "yes"]
+                )
 
                 spray_points_sprayed_count = spray_points_sprayed.count()
                 if spray_points_sprayed_count > 0:
@@ -262,12 +264,12 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
-            spraypoints = SprayDay.objects.filter(
+            spraypoints_qs = SprayDay.objects.filter(
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints = SprayDay.objects.filter(location__parent=district)
-        spraypoints = spraypoints.extra(
+            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
+        spraypoints = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
             select_params=['team_leader']
         ).values_list('team_leader')
@@ -292,15 +294,16 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         end_times = []
 
         for team_leader, team_leader_name in team_leaders:
+            qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
+                                      params=["team_leader", team_leader])
             numerator = sprayed.get(team_leader, 0)
             denominator = 1 if sprayable.get(team_leader, 0) == 0 \
                 else sprayable.get(team_leader)
             sprayed_success_rate = round((numerator/denominator) * 100, 1)
 
             # calcuate Average structures sprayed per day per SO
-            spray_points_sprayed = SprayDay.objects.filter(
-                data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD)).filter(
-                data__contains='"team_leader":"{}"'.format(team_leader))
+            spray_points_sprayed = qs.extra(where=["data->>%s = %s"],
+                                            params=[WAS_SPRAYED_FIELD, "yes"])
             sprayed_structures = update_sprayed_structures(
                 spray_points_sprayed, {})
             denominator = 1 if len(sprayed_structures.keys()) == 0 \
@@ -311,9 +314,6 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             not_sprayed_total = refused.get(team_leader, 0) + \
                 other.get(team_leader, 0)
 
-            qs = sprayable_qs.filter(
-                data__contains='"team_leader":"{}"'.format(team_leader)
-            )
             _end_time = avg_time(qs, 'start')
             end_times.append(_end_time)
 
@@ -396,19 +396,17 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
-            spraypoints = SprayDay.objects.filter(
+            spraypoints_qs = SprayDay.objects.filter(
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints = SprayDay.objects.filter(location__parent=district)
+            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
         team_leader = self.kwargs.get('team_leader')
-        spraypoints = spraypoints.filter(
-            data__contains='"team_leader":"%s"' % team_leader
-        ).extra(
+        spraypoints = spraypoints_qs.extra(
             select={'spray_operator_code': 'data->>%s'},
             select_params=[SPRAY_OPERATOR_CODE],
-            where=['(data->%s) IS NOT NULL'],
-            params=[SPRAY_OPERATOR_CODE]
+            where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
+            params=[SPRAY_OPERATOR_CODE, "team_leader", team_leader]
         ).values_list('spray_operator_code')
 
         sprayable = get_totals(spraypoints, "sprayable")
@@ -427,16 +425,19 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         end_times = []
 
         for spray_operator_code, spray_operator_name in spray_operators:
+            qs = spraypoints_qs.extra(
+                where=["data->>%s = %s"],
+                params=[SPRAY_OPERATOR_CODE, spray_operator_code]
+            )
             numerator = sprayed.get(spray_operator_code)
             denominator = 1 if sprayable.get(spray_operator_code) == 0 \
                 else sprayable.get(spray_operator_code)
             spray_success_rate = round((numerator/denominator) * 100, 1)
 
             # calcuate Average structures sprayed per day per SO
-            spray_points_sprayed = SprayDay.objects.filter(
-                data__contains='"{}":"yes"'.format(WAS_SPRAYED_FIELD)
-            ).filter(data__contains='"{}":"{}"'.format(
-                SPRAY_OPERATOR_CODE, spray_operator_code)
+            spray_points_sprayed = qs.extra(
+                where=["data->>%s = %s"],
+                params=[WAS_SPRAYED_FIELD, "yes"]
             )
             sprayed_structures = update_sprayed_structures(
                 spray_points_sprayed, {}, per_so=False)
@@ -449,10 +450,6 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             not_sprayed_total = refused.get(team_leader, 0) + \
                 other.get(team_leader, 0)
 
-            qs = spraypoints.filter(
-                data__contains='"{}":"{}"'.format(SPRAY_OPERATOR_CODE,
-                                                  spray_operator_code)
-            ).filter(data__contains='"team_leader":"{}"'.format(team_leader))
             _end_time = avg_time(qs, 'start')
             end_times.append(_end_time)
             _start_time = avg_time(qs, 'end')
@@ -536,22 +533,19 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
-            spraypoints = SprayDay.objects.filter(
+            spraypoints_qs = SprayDay.objects.filter(
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints = SprayDay.objects.filter(location__parent=district)
+            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
 
         team_leader = self.kwargs.get('team_leader')
         spray_operator = self.kwargs.get('spray_operator')
-        spraypoints = spraypoints.filter(
-            data__contains='"team_leader":"%s"' % team_leader
-        ).filter(
-            data__contains='"{}":"{}"'.format(
-                SPRAY_OPERATOR_CODE, spray_operator
-            )
-        ).extra(
-            select={'today': 'data->>%s'}, select_params=['today']
+        spraypoints = spraypoints_qs.extra(
+            select={'today': 'data->>%s'}, select_params=['today'],
+            where=["data->>%s =  %s", "data->>%s =  %s"],
+            params=["team_leader", team_leader, SPRAY_OPERATOR_CODE,
+                    spray_operator]
         ).values_list('today')
 
         sprayable = get_totals(spraypoints, "sprayable")
