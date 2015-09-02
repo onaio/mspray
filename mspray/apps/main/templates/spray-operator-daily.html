@@ -1,23 +1,10 @@
+{% extends 'home/base.html' %}
+
 {% load humanize %}
 {% load staticfiles %}
 {% load performance_extras %}
-<html>
-    <head>
-        <title>Performance - Team Leader</title>
-        <link id="favicon" rel="shortcut icon" href='{% static "img/favicon.png" %}' type="image/png"/>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link href='{% static "css/main.css" %}' rel='stylesheet' />
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    </head>
-    <body>
-        <header class="navbar navbar-inverse" role="navigation">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="/"><img src="{% static "img/mSpray-logo.png" %}" alt="mspray" id="mspray-logo" /> Zambia</a>
-                </div>
-            </div>
-        </header>
+{% block content %}
         <div class="container">
             <h1>Data for: {{ spray_operator_name }}</h1>
             <ol class="breadcrumb">
@@ -87,5 +74,4 @@
                 </div>
             </div>
         </div>
-    </body>
-</html>
+{% endblock %}
