@@ -26,7 +26,7 @@ class Command(BaseCommand):
                     for row in csv_reader:
                         spray_operator, created = \
                             SprayOperator.objects.get_or_create(
-                                code=int(row['code']),
+                                code=row['code'].strip(),
                                 name=row['name']
                             )
                         if created:
