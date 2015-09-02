@@ -16,6 +16,8 @@ from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
 
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
+REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 
 
 def calculate(numerator, denominator, percentage):
@@ -200,38 +202,33 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 def get_totals(spraypoints, condition):
     if spraypoints:
         if condition == "sprayable":
-            resultset = dict(spraypoints.extra(
-                where=['data->>%s = %s'],
-                params=['sprayable_structure', 'yes']).annotate(
-                    c=Count('data')))
+            resultset = dict(spraypoints.annotate(c=Count('data')))
+            # resultset = dict(spraypoints.extra(
+            #     where=['data->>%s = %s'],
+            #     params=['sprayable_structure', 'yes']).annotate(
+            #         c=Count('data')))
         elif condition == "non-sprayable":
             resultset = dict(spraypoints.extra(
                 where=['data->>%s = %s'],
                 params=['sprayable_structure', 'no']).annotate(
                     c=Count('data')))
         elif condition == "sprayed":
-            resultset = dict(
-                spraypoints.extra(
-                    where=['data->>%s = %s'],
-                    params=['sprayed/was_sprayed', 'yes']).annotate(
-                        c=Count('data')))
+            resultset = dict(spraypoints
+                             .extra(where=['data->>%s = %s'],
+                                    params=[WAS_SPRAYED_FIELD, 'yes'])
+                             .annotate(c=Count('data')))
         elif condition == "refused":
             resultset = dict(
                 spraypoints.extra(
                     where=['data->>%s = %s'],
-                    params=['unsprayed/reason', 'Refused']).annotate(
+                    params=['unsprayed/reason', REASON_REFUSED]).annotate(
                         c=Count('data')))
         elif condition == "other":
             resultset = dict(
                 spraypoints.extra(
-                    where=['data->>%s IN (%s, %s, %s, %s, %s)'],
-                    params=['unsprayed/reason',
-                            'Other',
-                            'Sick',
-                            'Funeral',
-                            'Locked',
-                            'No one home/Missed']).annotate(
-                                c=Count('data')))
+                    where=["data->>%s IN ({})".format(
+                        ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
+                    params=['unsprayed/reason']).annotate(c=Count('data')))
 
         return resultset
 
@@ -274,7 +271,7 @@ def team_leaders(request, district_name):
     team_leaders = spraypoints.extra(
         select={
             "name": "(select name from main_teamleader"
-            " where code = (data->>'team_leader')::int)"
+            " where code = data->>'team_leader')"
         }
     ).values_list('team_leader', 'name').distinct()
 
