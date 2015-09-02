@@ -160,7 +160,8 @@ def delete_cached_target_area_keys(sprayday):
 
 
 def avg_time(qs, field):
-    if qs.count() == 0:
+    pks = list(qs.values_list('pk', flat=True))
+    if len(pks) == 0:
         return (None, None)
 
     START = 'start'
@@ -188,7 +189,6 @@ def avg_time(qs, field):
         "AND id IN %s) AS Q1 "
         "WHERE row_number = 1 GROUP BY today ORDER BY today) AS Q2;"
     )
-    pks = list(qs.values_list('pk', flat=True))
     cursor = connection.cursor()
     cursor.execute(SQL_AVG_TIME, [
         SPRAY_OPERATOR_CODE, field, SPRAY_OPERATOR_CODE, field,
