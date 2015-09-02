@@ -601,6 +601,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         totals['spray_success_rate'] = sprayed_success_rate
         totals['avg_start_time'] = avg_time_tuple(start_times)
         totals['avg_end_time'] = avg_time_tuple(end_times)
+        totals['avg_sprayed'] = 0
+        if len(dates) != 0:
+            totals['avg_sprayed'] = round(numerator / len(dates))
 
         context.update(
             {
