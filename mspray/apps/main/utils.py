@@ -24,6 +24,8 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
+SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+
 
 def geojson_from_gps_string(geolocation):
     if not isinstance(geolocation, str):
@@ -173,19 +175,22 @@ def avg_time(qs, field):
         "EXTRACT(HOUR FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
         " AS t1, AVG(EXTRACT("
         "MINUTE FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
-        " AS t2 FROM (SELECT (data->>'sprayed/sprayop_name')::int "
+        " AS t2 FROM (SELECT (data->>%s) "
         "AS spray_operator, data->>'today' AS today, data->>%s AS endtime,"
         " ROW_NUMBER() OVER ("
-        "PARTITION BY (data->>'sprayed/sprayop_name')::int, data->>'today'"
+        "PARTITION BY (data->>%s), data->>'today'"
         " ORDER BY data->>%s " + ORDER + ") FROM main_sprayday "
-        "WHERE (data->'sprayed/sprayop_name') IS NOT NULL "
+        "WHERE (data->%s) IS NOT NULL "
         "AND data->>'today' = SUBSTRING(data->>%s, 0, 11) "
         "AND id IN %s) AS Q1 "
         "WHERE row_number = 1 GROUP BY today ORDER BY today) AS Q2;"
     )
     pks = list(qs.values_list('pk', flat=True))
     cursor = connection.cursor()
-    cursor.execute(SQL_AVG_TIME, [field, field, field, tuple(pks)])
+    cursor.execute(SQL_AVG_TIME, [
+        SPRAY_OPERATOR_CODE, field, SPRAY_OPERATOR_CODE, field,
+        SPRAY_OPERATOR_CODE, field, tuple(pks)
+    ])
     hour, minute = 0, 0
     for i in cursor.fetchall():
         hour, minute = i
