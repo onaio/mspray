@@ -364,6 +364,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         context.update({
             'data': data,
             'totals': totals,
+            'district': district,
             'district_name': district.name
         })
 
