@@ -148,7 +148,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             # calcuate Average structures sprayed per day per spray operator
             denominator = len(sprayed_structures.keys())
             numerator = sum(a for a in sprayed_structures.values())
-            avg_struct_per_user_per_so = round(numerator/denominator, 1)
+            avg_struct_per_user_per_so = round(numerator/denominator, 1) \
+                if numerator != 0 else 0
 
             result['avg_structures_per_user_per_so'] = \
                 avg_struct_per_user_per_so
