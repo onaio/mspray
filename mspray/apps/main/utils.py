@@ -2,6 +2,7 @@ import gc
 import json
 
 from datetime import datetime
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.gis.geos import Polygon
@@ -204,13 +205,15 @@ def avg_time(qs, field):
 
 def avg_time_tuple(times):
     """Takes a list of tuples and calculates the average"""
-    hours = [t[0] for t in times if t[0] is not None]
-    minutes = [t[1] for t in times if t[1] is not None]
+    results = []
+    for hour, minute in times:
+        if hour is not None and minute is not None:
+            results.append(timedelta(hours=hour, minutes=minute).seconds)
+    if len(results):
+        result = sum(results) / len(results)
+        minutes, seconds = divmod(result, 60)
+        hours, minutes = divmod(minutes, 60)
 
-    if len(hours) and len(minutes):
-        hour = round(sum(hours))/len(hours)
-        minute = round(sum(minutes))/len(minutes)
-
-        return (round(hour), round(minute))
+        return (round(hours), round(minutes))
 
     return None
