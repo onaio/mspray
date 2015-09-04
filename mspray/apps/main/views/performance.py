@@ -40,7 +40,7 @@ def update_sprayed_structures(
     for a in spray_points_sprayed:
         date_sprayed = a.data.get('today')
         if per_so:
-            spray_operator = a.data.get('sprayed/sprayop_name')
+            spray_operator = a.data.get(SPRAY_OPERATOR_CODE)
             key = "%s-%s" % (date_sprayed, spray_operator)
         else:
             key = date_sprayed
@@ -154,7 +154,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             # calcuate Average structures sprayed per day per spray operator
             denominator = len(sprayed_structures.keys())
             numerator = sum(a for a in sprayed_structures.values())
-            avg_struct_per_user_per_so = round(numerator/denominator, 1) \
+            avg_struct_per_user_per_so = round(numerator/denominator) \
                 if numerator != 0 else 0
 
             result['avg_structures_per_user_per_so'] = \
@@ -201,7 +201,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             totals['sprayed_total_percentage'] = round((
                 totals['sprayed_total'] / totals['structures_found']) * 100)
         totals['avg_structures_per_user_per_so'] = round(
-            totals['avg_structures_per_user_per_so']/districts.count(), 0)
+            totals['avg_structures_per_user_per_so']/districts.count())
 
         if len(start_times) and len(end_times):
             totals['avg_start_time'] = avg_time_tuple(start_times)
@@ -319,7 +319,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             denominator = 1 if len(sprayed_structures.keys()) == 0 \
                 else len(sprayed_structures.keys())
             numerator = sum(a for a in sprayed_structures.values())
-            avg_structures_per_user_per_so = round(numerator/denominator, 1)
+            avg_structures_per_user_per_so = round(numerator/denominator)
 
             not_sprayed_total = refused.get(team_leader, 0) + \
                 other.get(team_leader, 0)
@@ -365,7 +365,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
         # calculate avg_structures_per_user_per_so total
         totals['avg_structures_per_user_per_so'] = round(
-            totals['avg_structures_per_user_per_so']/len(team_leaders), 0)
+            totals['avg_structures_per_user_per_so']/len(team_leaders))
 
         if len(start_times) and len(end_times):
             totals['avg_start_time'] = avg_time_tuple(start_times)
@@ -455,7 +455,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
             denominator = 1 if no_of_days_worked == 0 else no_of_days_worked
             numerator = sum(a for a in sprayed_structures.values())
-            avg_structures_per_so = round(numerator/denominator, 1)
+            avg_structures_per_so = round(numerator/denominator)
 
             not_sprayed_total = refused.get(spray_operator_code, 0) + \
                 other.get(spray_operator_code, 0)
@@ -499,7 +499,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
         if len(list(spray_operators)) != 0:
             totals['avg_structures_per_so'] = round(
-                totals['avg_structures_per_so'] / len(list(spray_operators)), 1
+                totals['avg_structures_per_so'] / len(list(spray_operators))
             )
 
         totals['avg_start_time'] = avg_time_tuple(start_times)
