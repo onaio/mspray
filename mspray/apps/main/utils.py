@@ -160,6 +160,20 @@ def delete_cached_target_area_keys(sprayday):
         cache.delete_many(keys.split())
 
 
+def avg_time_per_group(results):
+        partition = {}
+        for op, day, hour, minute in results:
+            if op not in partition:
+                partition[op] = []
+            partition[op].append((hour, minute))
+
+        times = []
+        for k, v in partition.items():
+            times.append(avg_time_tuple(v))
+
+        return avg_time_tuple(times) if len(times) else (None, None)
+
+
 def avg_time(qs, field):
     pks = list(qs.values_list('pk', flat=True))
     if len(pks) == 0:
@@ -174,33 +188,24 @@ def avg_time(qs, field):
         )
     ORDER = 'ASC' if field == END else 'DESC'
 
-    SQL_AVG_TIME = (
-        "SELECT AVG(t1) AS hour, AVG(t2) AS minute FROM ("
-        "SELECT  today, AVG("
-        "EXTRACT(HOUR FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
-        " AS t1, AVG(EXTRACT("
-        "MINUTE FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')))"
-        " AS t2 FROM (SELECT (data->>%s) "
-        "AS spray_operator, data->>'today' AS today, data->>%s AS endtime,"
-        " ROW_NUMBER() OVER ("
-        "PARTITION BY (data->>%s), data->>'today'"
-        " ORDER BY data->>%s " + ORDER + ") FROM main_sprayday "
-        "WHERE (data->%s) IS NOT NULL "
-        "AND data->>'today' = SUBSTRING(data->>%s, 0, 11) "
-        "AND id IN %s) AS Q1 "
-        "WHERE row_number = 1 GROUP BY today ORDER BY today) AS Q2;"
+    SQL = (
+        "SELECT spray_operator, today, "
+        "EXTRACT(HOUR FROM to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')) "
+        "as hour, EXTRACT(MINUTE FROM "
+        "to_timestamp(endtime,'YYYY-MM-DD HH24:MI:SS.MS')) as minute FROM "
+        "(SELECT (data->>%s) AS spray_operator, data->>'today' AS"
+        " today, data->>%s AS endtime, ROW_NUMBER() OVER (PARTITION BY "
+        "(data->>%s), data->>'today' ORDER BY data->>%s " + ORDER + ") "
+        "FROM main_sprayday WHERE (data->%s) IS NOT NULL AND "
+        "data->>'today' = SUBSTRING(data->>%s, 0, 11) AND id IN %s) as Q1"
+        " WHERE row_number = 1;"
     )
+    params = [SPRAY_OPERATOR_CODE, field, SPRAY_OPERATOR_CODE, field,
+              SPRAY_OPERATOR_CODE, field, tuple(pks)]
     cursor = connection.cursor()
-    cursor.execute(SQL_AVG_TIME, [
-        SPRAY_OPERATOR_CODE, field, SPRAY_OPERATOR_CODE, field,
-        SPRAY_OPERATOR_CODE, field, tuple(pks)
-    ])
-    hour, minute = 0, 0
-    for i in cursor.fetchall():
-        hour, minute = i
+    cursor.execute(SQL, params)
 
-    return (round(hour) if hour is not None else hour,
-            round(minute) if minute is not None else minute)
+    return avg_time_per_group(cursor.fetchall())
 
 
 def avg_time_tuple(times):
