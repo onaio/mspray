@@ -191,21 +191,23 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             totals['houses'] += district.structures
             results.append(result)
 
-        totals['found_percentage'] = round((
-            totals['found']/totals['target_areas']) * 100)
-        totals['found_gt_20_percentage'] = round((
-            totals['found_gt_20']/totals['target_areas']) * 100)
-        totals['sprayed_percentage'] = round((
-            totals['sprayed']/totals['target_areas']) * 100)
-        if totals['structures_found'] > 0:
-            totals['sprayed_total_percentage'] = round((
-                totals['sprayed_total'] / totals['structures_found']) * 100)
-        totals['avg_structures_per_user_per_so'] = round(
-            totals['avg_structures_per_user_per_so']/districts.count())
+        if totals['target_areas'] > 0:
+            totals['found_percentage'] = round((
+                totals['found']/totals['target_areas']) * 100)
+            totals['found_gt_20_percentage'] = round((
+                totals['found_gt_20']/totals['target_areas']) * 100)
+            totals['sprayed_percentage'] = round((
+                totals['sprayed']/totals['target_areas']) * 100)
+            if totals['structures_found'] > 0:
+                totals['sprayed_total_percentage'] = round((
+                    totals['sprayed_total'] / totals['structures_found'])
+                    * 100)
+            totals['avg_structures_per_user_per_so'] = round(
+                totals['avg_structures_per_user_per_so']/districts.count())
 
-        if len(start_times) and len(end_times):
-            totals['avg_start_time'] = avg_time_tuple(start_times)
-            totals['avg_end_time'] = avg_time_tuple(end_times)
+            if len(start_times) and len(end_times):
+                totals['avg_start_time'] = avg_time_tuple(start_times)
+                totals['avg_end_time'] = avg_time_tuple(end_times)
 
         context.update({
             'data': results, 'totals': totals
