@@ -35,6 +35,10 @@ class Command(BaseCommand):
                         except ValueError:
                             structures = 0
 
+                        status = row.get('status')
+                        if status is not None and status == 0:
+                            continue
+
                         parent = row['parent'].strip()
                         parent_loc = None
                         if parent != '' and parent is not None:
