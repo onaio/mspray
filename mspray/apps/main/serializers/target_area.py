@@ -112,6 +112,7 @@ class TargetAreaMixin(object):
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.ReadOnlyField()
+    level = serializers.ReadOnlyField()
     structures = serializers.ReadOnlyField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -126,12 +127,13 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
         fields = ('targetid', 'district_name',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds', 'spray_dates')
+                  'not_visited', 'bounds', 'spray_dates', 'level')
         model = TargetArea
 
 
 class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     targetid = serializers.ReadOnlyField()
+    level = serializers.ReadOnlyField()
     structures = serializers.ReadOnlyField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -144,6 +146,6 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited')
+                  'not_visited', 'level')
         model = TargetArea
         geo_field = 'geom'
