@@ -1,4 +1,5 @@
 from dateutil.parser import parse
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -40,13 +41,16 @@ class DistrictView(SiteNameMixin, ListView):
                                               if field in totals else 0)
         district_code = self.kwargs.get(self.slug_field)
         if district_code:
-            context['district_code'] = district_code
-            context['district_name'] = get_object_or_404(
+            district = get_object_or_404(
                 Location, code=district_code
-            ).name
+            )
+            context['district'] = district
+            context['district_code'] = district.code
+            context['district_name'] = district.name
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('code', 'name').order_by('name')
         context['district_totals'] = totals
+        context['ta_level'] = settings.MSPRAY_TA_LEVEL
 
         return context
 
