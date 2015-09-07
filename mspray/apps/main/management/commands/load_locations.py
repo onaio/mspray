@@ -9,7 +9,7 @@ from mspray.apps.main.models import Location
 
 
 class Command(BaseCommand):
-    args = '<path to shapefile>'
+    args = '<path to csv file>'
     help = _('Load locations')
 
     def handle(self, *args, **options):

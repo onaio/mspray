@@ -8,19 +8,25 @@ from mspray.apps.main.models import Location
 
 
 class Command(BaseCommand):
-    args = '<path to shapefile>'
     help = _('Load locations')
 
+    def add_arguments(self, parser):
+        parser.add_argument('csv_file', metavar="FILE")
+        parser.add_argument('--code',
+                            dest='code',
+                            default='ADM1_NAME',
+                            help="code field to use in the shape file")
+
     def handle(self, *args, **options):
-        if len(args) == 0:
+        if 'csv_file' not in options:
             raise CommandError(_('Missing locations shape file path'))
-        for path in args:
+        else:
             try:
-                path = os.path.abspath(path)
+                path = os.path.abspath(options['csv_file'])
             except Exception as e:
                 raise CommandError(_('Error: %(msg)s' % {"msg": e}))
             else:
-                code = 'ADM1_NAME'
+                code = options['code']
                 count = 0
                 ds = DataSource(path)
                 layer = ds[0]
