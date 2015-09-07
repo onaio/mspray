@@ -1,5 +1,6 @@
 import os
 
+from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
@@ -16,6 +17,10 @@ class Command(BaseCommand):
                             dest='code',
                             default='ADM1_NAME',
                             help="code field to use in the shape file")
+        parser.add_argument('--code-int',
+                            dest='code_is_integer',
+                            action='store_true',
+                            help="Coerce the code value to integer")
 
     def handle(self, *args, **options):
         if 'csv_file' not in options:
@@ -27,19 +32,31 @@ class Command(BaseCommand):
                 raise CommandError(_('Error: %(msg)s' % {"msg": e}))
             else:
                 code = options['code']
+                code_is_integer = options['code_is_integer']
                 count = 0
+                failed = 0
                 ds = DataSource(path)
                 layer = ds[0]
 
                 for feature in layer:
                     name = feature.get(code)
+                    name = int(name) if code_is_integer else name
                     try:
                         location = Location.objects.get(code=name)
                     except Location.DoesNotExist:
+                        failed += 1
                         continue
                     else:
-                        location.geom = feature.geom.wkt
+                        if isinstance(feature.geom, geometries.Polygon):
+                            geom = geometries.MultiPolygon('MULTIPOLYGON',
+                                                           srs=layer.srs)
+                            geom.add(feature.geom)
+                        else:
+                            geom = feature.geom
+                        location.geom = geom.wkt
                         location.save()
                         count += 1
 
-                print("Updated {} locations".format(count))
+                self.stdout.write("Updated {} locations, failed {}".format(
+                    count, failed
+                ))
