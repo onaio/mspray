@@ -2,6 +2,7 @@ import os
 
 from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
+from django.contrib.gis.gdal import SpatialReference
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
 
@@ -12,7 +13,7 @@ class Command(BaseCommand):
     help = _('Load locations')
 
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', metavar="FILE")
+        parser.add_argument('shape_file', metavar="FILE")
         parser.add_argument('--code',
                             dest='code',
                             default='ADM1_NAME',
@@ -23,11 +24,11 @@ class Command(BaseCommand):
                             help="Coerce the code value to integer")
 
     def handle(self, *args, **options):
-        if 'csv_file' not in options:
+        if 'shape_file' not in options:
             raise CommandError(_('Missing locations shape file path'))
         else:
             try:
-                path = os.path.abspath(options['csv_file'])
+                path = os.path.abspath(options['shape_file'])
             except Exception as e:
                 raise CommandError(_('Error: %(msg)s' % {"msg": e}))
             else:
@@ -35,6 +36,7 @@ class Command(BaseCommand):
                 code_is_integer = options['code_is_integer']
                 count = 0
                 failed = 0
+                srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
                 ds = DataSource(path)
                 layer = ds[0]
 
@@ -49,10 +51,10 @@ class Command(BaseCommand):
                     else:
                         if isinstance(feature.geom, geometries.Polygon):
                             geom = geometries.MultiPolygon('MULTIPOLYGON',
-                                                           srs=layer.srs)
-                            geom.add(feature.geom)
+                                                           srs=srs)
+                            geom.add(feature.geom.transform(srs, True))
                         else:
-                            geom = feature.geom
+                            geom = feature.geom.transform(srs, True)
                         location.geom = geom.wkt
                         location.save()
                         count += 1
