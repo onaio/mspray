@@ -94,11 +94,6 @@
         app.housesCount = {{ target_data.structures }};
         app.visitedTotal = {{ target_data.visited_total }};
 
-        if ( bounds.length ) {
-           // var buffers_url = "{{ request.get_host }}{% url 'householdsbuffer-list' %}?target_area={{ object.targetid }}";
-           // app.loadBufferAreas(buffers_url, undefined, true);
-        }
-        // app.loadTargetArea(taGeojson);
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' %}?target_area={{ object.targetid }}&spray_date={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
     </script>
