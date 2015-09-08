@@ -9,6 +9,7 @@ from mspray.apps.main.models import Location
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
+from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 
 
 class DistrictView(SiteNameMixin, ListView):
@@ -71,6 +72,12 @@ class TargetAreaView(SiteNameMixin, DetailView):
                         format='geojson')
         response.render()
         context['ta_geojson'] = response.content
+
+        hhview = TargetAreaHouseholdsViewSet.as_view({'get': 'retrieve'})
+        response = hhview(self.request, pk=context['object'].pk,
+                          format='geojson')
+        response.render()
+        context['hh_geojson'] = response.content
 
         spray_date = self.request.GET.get('spray_date')
         if spray_date:

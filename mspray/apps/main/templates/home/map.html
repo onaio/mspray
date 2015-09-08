@@ -87,7 +87,8 @@
     <script type="text/javascript">
         var bounds = {{ target_data.bounds|safe }};
         var targetAreaData = {{ ta_geojson|safe }};
-        var app = new App(undefined, targetAreaData);
+        var hhData = {{ hh_geojson|safe }};
+        var app = new App(undefined, targetAreaData, hhData);
         app.fitBounds(bounds);
 
         app.housesCount = {{ target_data.structures }};

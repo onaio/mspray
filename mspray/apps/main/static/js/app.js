@@ -1,5 +1,5 @@
 /* global L, $, Circles */
-var App = function(buffer, targetAreaData) {
+var App = function(buffer, targetAreaData, hhData) {
     "use strict";
     this.targetOptions = {
         fillColor: "#999999",
@@ -298,7 +298,32 @@ var App = function(buffer, targetAreaData) {
         app.targetLayer.addTo(app.map);
     };
 
+    this.loadHouseholds = function(data) {
+        var app = this,
+            geojson = data;
+        app.hhLayer = L.geoJson(geojson, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, app.hhOptions);
+            },
+            onEachFeature: function(feature, layer){
+                layer.on({
+                    mouseover: function(e){
+                        e.layer.openPopup();
+                    },
+                    mouseout: function(e){
+                        e.layer.closePopup();
+                    }
+                });
+            }
+        });
+        app.hhLayer.setStyle(app.hhOptions);
+        app.hhLayer.addTo(app.map);
+    };
+
     if ( targetAreaData !== undefined ) {
         this.loadTargetArea(targetAreaData);
+    }
+    if ( hhData !== undefined ) {
+        this.loadHouseholds(hhData);
     }
 };
