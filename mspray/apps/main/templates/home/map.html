@@ -78,6 +78,7 @@
     {{ block.super }}
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.0/mapbox.js'></script>
     <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
     <script src="{% static "js/Google.js" %}"></script>
     <script src="{% static "js/Bing.js" %}"></script>
     <script src="{% static "js/circles.min.js" %}"></script>
@@ -85,14 +86,18 @@
 
     <script type="text/javascript">
         var bounds = {{ target_data.bounds|safe }};
-        var app = new App();
+        var targetAreaData = {{ ta_geojson|safe }};
+        var app = new App(undefined, targetAreaData);
         app.fitBounds(bounds);
 
         app.housesCount = {{ target_data.structures }};
         app.visitedTotal = {{ target_data.visited_total }};
 
-        // var buffers_url = "{{ request.get_host }}{% url 'householdsbuffer-list' %}?target_area={{ object.targetid }}";
-        // app.loadBufferAreas(buffers_url, undefined, true);
+        if ( bounds.length ) {
+           // var buffers_url = "{{ request.get_host }}{% url 'householdsbuffer-list' %}?target_area={{ object.targetid }}";
+           // app.loadBufferAreas(buffers_url, undefined, true);
+        }
+        // app.loadTargetArea(taGeojson);
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' %}?target_area={{ object.targetid }}&spray_date={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
     </script>

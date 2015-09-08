@@ -8,6 +8,7 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import TargetArea
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
+from mspray.apps.main.views.target_area import TargetAreaViewSet
 
 
 class DistrictView(SiteNameMixin, ListView):
@@ -65,6 +66,11 @@ class TargetAreaView(SiteNameMixin, DetailView):
         serializer = TargetAreaSerializer(context['object'],
                                           context={'request': self.request})
         context['target_data'] = serializer.data
+        view = TargetAreaViewSet.as_view({'get': 'retrieve'})
+        response = view(self.request, pk=context['object'].pk,
+                        format='geojson')
+        response.render()
+        context['ta_geojson'] = response.content
 
         spray_date = self.request.GET.get('spray_date')
         if spray_date:

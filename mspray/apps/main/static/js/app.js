@@ -1,6 +1,13 @@
 /* global L, $, Circles */
-var App = function(buffer) {
+var App = function(buffer, targetAreaData) {
     "use strict";
+    this.targetOptions = {
+        fillColor: "#999999",
+        color: "#FFFFFF",
+        weight: 3,
+        fillOpacity: 0.1,
+        opacity: 1
+    };
     this.hhOptions = {
         radius: 4,
         fillColor: "#FFDC00",
@@ -30,7 +37,6 @@ var App = function(buffer) {
         , google = new L.Google()
         , bing = new L.BingLayer("Alt-3s6hwEWPw-f2IKRw3Fg4qsV1BItu4KbylMsVKY7jyWFGkT5D10Qntw9xr6MX", {type: "Aerial"});
     this.map.addLayer(google);
-    this.map.addLayer(bing);
     if(buffer !== undefined) {
         this.map.addLayer(bufferHouseholdsLayer);
         this.map.addControl(new L.control.layers({
@@ -273,4 +279,26 @@ var App = function(buffer) {
         });
     };
 
+    this.loadTargetArea = function(data) {
+        var app = this,
+            geojson = data;
+        app.targetLayer = L.geoJson(geojson, {
+            onEachFeature: function(feature, layer){
+                var props = feature.properties;
+                var content = "<h4>Target Area: " + props.targetid + "</h4>" +
+                    "Structures: " + props.structures;
+                layer.bindPopup(content, {closeButton: true});
+                var label = new L.Label({className: "ta-label"});
+                label.setContent("" + props.targetid);
+                label.setLatLng(layer.getBounds().getCenter());
+                app.map.showLabel(label);
+            }
+        });
+        app.targetLayer.setStyle(app.targetOptions);
+        app.targetLayer.addTo(app.map);
+    };
+
+    if ( targetAreaData !== undefined ) {
+        this.loadTargetArea(targetAreaData);
+    }
 };
