@@ -32,7 +32,7 @@ def cached_queryset_count(key, queryset, query=None):
 
 class TargetAreaMixin(object):
     def get_spray_queryset(self, obj):
-        if SPATIAL_QUERIES:
+        if SPATIAL_QUERIES and obj.geom is not None:
             return SprayDay.objects.filter(geom__coveredby=obj.geom)
 
         if obj.parent is None:
