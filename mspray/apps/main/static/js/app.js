@@ -148,33 +148,35 @@ var App = function(buffer) {
             app.k = geojson;
             app.sprayCount = 0; // reset counter
 
-            app.sprayLayer = L.geoJson(geojson, {
-                pointToLayer: function (feature, latlng) {
-                    if(feature.properties.sprayed === "no"){
-                        app.sprayOptions.fillColor = "#D82118";
-                    } else{
-                        app.sprayOptions.fillColor = "#2ECC40";
-                    }
-                    return L.circleMarker(latlng, app.sprayOptions);
-                },
-                onEachFeature: function(features){
-                    if (sprayed_status[features.properties.sprayed] === undefined) {
-                        sprayed_status[features.properties.sprayed] = 1;
-                    } else {
-                        sprayed_status[features.properties.sprayed]++;
-                    }
-
-                    if (features.properties.reason !== null) {
-                        if (reason_obj[reasons[features.properties.reason]] === undefined) {
-                            reason_obj[reasons[features.properties.reason]] = 1;
+            if(geojson.features !== undefined && geojson.features.length > 0) {
+                app.sprayLayer = L.geoJson(geojson, {
+                    pointToLayer: function (feature, latlng) {
+                        if(feature.properties.sprayed === "no"){
+                            app.sprayOptions.fillColor = "#D82118";
+                        } else{
+                            app.sprayOptions.fillColor = "#2ECC40";
+                        }
+                        return L.circleMarker(latlng, app.sprayOptions);
+                    },
+                    onEachFeature: function(features){
+                        if (sprayed_status[features.properties.sprayed] === undefined) {
+                            sprayed_status[features.properties.sprayed] = 1;
                         } else {
-                            reason_obj[reasons[features.properties.reason]]++;
+                            sprayed_status[features.properties.sprayed]++;
+                        }
+
+                        if (features.properties.reason !== null) {
+                            if (reason_obj[reasons[features.properties.reason]] === undefined) {
+                                reason_obj[reasons[features.properties.reason]] = 1;
+                            } else {
+                                reason_obj[reasons[features.properties.reason]]++;
+                            }
                         }
                     }
-                }
-            })
-            .addTo(app.map);
-            app.map.fitBounds(app.sprayLayer.getBounds());
+                })
+                .addTo(app.map);
+                app.map.fitBounds(app.sprayLayer.getBounds());
+            }
 
             $("#target-area-stats-structures").empty().append(
                 "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"
@@ -207,9 +209,11 @@ var App = function(buffer) {
                 other_percentage = app.calculatePercentage(total_of_other, app.visitedTotal);
 
             app.drawCircle(sprayed_percentage, "circle-sprayed");
-            $("#sprayed-ratio").text("(" + sprayed_status.yes + "/" + app.visitedTotal + ")");
-            $("#circle-refused").text(refused_percentage);
-            $("#circle-other").text(other_percentage);
+            if(geojson.features !== undefined && geojson.features.length > 0) {
+                $("#sprayed-ratio").text("(" + sprayed_status.yes + "/" + app.visitedTotal + ")");
+                $("#circle-refused").text(refused_percentage);
+                $("#circle-other").text(other_percentage);
+            }
 
             $("#target-area-stats-item").on("click", function() {
                 $(".info-panel").toggle();
