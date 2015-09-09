@@ -142,7 +142,7 @@ def add_spray_data(data):
     if location_code and not settings.MSPRAY_SPATIAL_QUERIES:
         location = Location.objects.get(code=location_code)
     else:
-        locations = Location.objects.use_for_related_fieldsfilter(
+        locations = Location.objects.filter(
             geom__contains=geom,
             level=settings.MSPRAY_TA_LEVEL
         )
