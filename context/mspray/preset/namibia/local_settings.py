@@ -34,7 +34,7 @@ ALLOWED_HOSTS = (
     'PROJECT.mspray.onalabs.org',
 )
 ADMINS = (
-    ('Ona Tech', 'mspray-' + SITE_NAME + '+tech@ona.io'),
+    ('Ona Tech', 'tech+mspray-' + SITE_NAME + '@ona.io'),
 )
 DEBUG = False
 EMAIL_BACKEND = 'django_ses_backend.SESBackend'
