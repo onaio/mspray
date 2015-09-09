@@ -232,3 +232,15 @@ def avg_time_tuple(times):
         return (round(hours), round(minutes))
 
     return None
+
+
+def get_ta_in_location(location):
+    locations = []
+
+    if location.level == settings.MSPRAY_TA_LEVEL:
+        locations = [location.pk]
+    else:
+        for loc in location.location_set.all():
+            locations.extend(get_ta_in_location(loc))
+
+    return locations

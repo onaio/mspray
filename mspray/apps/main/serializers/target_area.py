@@ -6,6 +6,7 @@ from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
+from mspray.apps.main.utils import get_ta_in_location
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
@@ -32,13 +33,17 @@ def cached_queryset_count(key, queryset, query=None):
 
 class TargetAreaMixin(object):
     def get_spray_queryset(self, obj):
-        if SPATIAL_QUERIES and obj.geom is not None:
-            return SprayDay.objects.filter(geom__coveredby=obj.geom)
+        key = '_spray_queryset_{}'.format(obj.pk)
 
-        if obj.parent is None:
-            return SprayDay.objects.filter(location__parent=obj)
+        if hasattr(self, key):
+            return getattr(self, key)
 
-        return SprayDay.objects.filter(location=obj)
+        qs = SprayDay.objects.filter(
+            location__pk__in=get_ta_in_location(obj)
+        )
+        setattr(self, key, qs)
+
+        return qs
 
     def get_spray_dates(self, obj):
         if obj:
