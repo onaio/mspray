@@ -16,4 +16,4 @@ flake8
 # deployment
 uwsgi
 boto
-django-ses
+django-ses-backend
