@@ -102,7 +102,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
-            if settings.MSPRAY_SPATIAL_QUERIES:
+            if settings.MSPRAY_SPATIAL_QUERIES and \
+                    len(target_areas.exclude(geom=None)):
                 qs = SprayDay.objects\
                     .filter(geom__coveredby=target_areas.collect())
             else:
@@ -119,7 +120,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             for target_area in target_areas:
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
-                if settings.MSPRAY_SPATIAL_QUERIES:
+                if settings.MSPRAY_SPATIAL_QUERIES and target_area.geom:
                     spray_day = SprayDay.objects.filter(
                         geom__coveredby=target_area.geom)
                 else:
@@ -365,9 +366,10 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         sprayed_success_rate = round((numerator/denominator) * 100, 1)
         totals['spray_success_rate'] = sprayed_success_rate
 
-        # calculate avg_structures_per_user_per_so total
-        totals['avg_structures_per_user_per_so'] = round(
-            totals['avg_structures_per_user_per_so']/len(team_leaders))
+        if len(team_leaders):
+            # calculate avg_structures_per_user_per_so total
+            totals['avg_structures_per_user_per_so'] = round(
+                totals['avg_structures_per_user_per_so']/len(team_leaders))
 
         if len(start_times) and len(end_times):
             totals['avg_start_time'] = avg_time_tuple(start_times)
