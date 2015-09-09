@@ -30,6 +30,9 @@ CORS_ORIGIN_WHITELIST = (
 
 SITE_NAME = 'PROJECT'
 
+ALLOWED_HOSTS = (
+    'PROJECT.mspray.onalabs.org',
+)
 ADMINS = (
     'mspray-' + SITE_NAME + '+tech@ona.io',
 )
