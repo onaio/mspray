@@ -50,8 +50,8 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
     def create(self, request, *args, **kwargs):
-        has_id = request.DATA.get(DATA_ID_FIELD)
-        spray_date = request.DATA.get(DATE_FIELD)
+        has_id = request.data.get(DATA_ID_FIELD)
+        spray_date = request.data.get(DATE_FIELD)
 
         if not has_id or not spray_date:
             data = {
@@ -61,7 +61,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             status_code = status.HTTP_400_BAD_REQUEST
         else:
             try:
-                sprayday = add_spray_data(request.DATA)
+                sprayday = add_spray_data(request.data)
             except ValidationError as e:
                 data = {"error": "%s" % e}
                 status_code = status.HTTP_400_BAD_REQUEST
