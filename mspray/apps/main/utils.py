@@ -137,15 +137,25 @@ def add_spray_data(data):
     gps_field = data.get(STRUCTURE_GPS_FIELD,
                          data.get(NON_STRUCTURE_GPS_FIELD))
     geom = geojson_from_gps_string(gps_field)
+    location_code = data.get(settings.MSPRAY_LOCATION_FIELD)
+    location = None
+    if location_code and not settings.MSPRAY_SPATIAL_QUERIES:
+        location = Location.objects.get(code=location_code)
+    else:
+        locations = Location.objects.use_for_related_fieldsfilter(
+            geom__contains=geom,
+            level=settings.MSPRAY_TA_LEVEL
+        )
+        if locations:
+            location = locations[0]
+
     sprayday, created = SprayDay.objects.get_or_create(
         submission_id=submission_id,
         spray_date=spray_date,
-        geom=geom)
+        geom=geom,
+        location=location
+    )
     sprayday.data = data
-
-    location_code = data.get(settings.MSPRAY_LOCATION_FIELD)
-    if location_code:
-        sprayday.location = Location.objects.get(code=location_code)
 
     sprayday.save()
 
