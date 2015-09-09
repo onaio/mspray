@@ -37,7 +37,7 @@ ADMINS = (
     'mspray-' + SITE_NAME + '+tech@ona.io',
 )
 DEBUG = False
-MAIL_BACKEND = 'django_ses.SESBackend'
+EMAIL_BACKEND = 'django_ses.SESBackend'
 AWS_ACCESS_KEY_ID = 'AKIAJZ3Q7GDBGZANQV3A'
 AWS_SECRET_ACCESS_KEY = 'AuqewjYmFRfmOfPGujAmEMbV0+CZxF3qNn0NaiQGlGjg'
 AWS_SES_REGION_NAME = 'us-east-1'
