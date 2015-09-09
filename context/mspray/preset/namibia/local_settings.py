@@ -29,6 +29,19 @@ CORS_ORIGIN_WHITELIST = (
 )
 
 SITE_NAME = 'PROJECT'
+
+ADMINS = (
+    'mspray-' + SITE_NAME + '+tech@ona.io',
+)
+DEBUG = False
+MAIL_BACKEND = 'django_ses.SESBackend'
+AWS_ACCESS_KEY_ID = 'AKIAJZ3Q7GDBGZANQV3A'
+AWS_SECRET_ACCESS_KEY = 'AuqewjYmFRfmOfPGujAmEMbV0+CZxF3qNn0NaiQGlGjg'
+AWS_SES_REGION_NAME = 'us-east-1'
+AWS_SES_REGION_ENDPOINT = 'email.us-east-1.amazonaws.com'
+DEFAULT_FROM_EMAIL = 'noreply+mspray@ona.io'
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
 MSPRAY_STRUCTURE_GPS_FIELD = 'structuredetails/homestead_gps'
 MSPRAY_LOCATION_FIELD = 'target_area'
 # MSPRAY_SPATIAL_QUERIES = False
