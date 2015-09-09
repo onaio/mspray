@@ -12,6 +12,28 @@ from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 
 
+def get_location_dict(code):
+    data = {}
+    if code:
+        district = get_object_or_404(Location, code=code)
+        data['district'] = district
+        data['district_code'] = district.code
+        data['district_name'] = district.name
+        data['sub_locations'] = district.location_set.all()\
+            .order_by('name')
+        data['top_level'] = Location.objects.filter(parent=None)\
+            .order_by('name')
+        data['locations'] = Location.objects\
+            .filter(parent=district.parent)\
+            .order_by('name')
+    if 'top_level' not in data:
+        data['locations'] = Location.objects.filter(parent=None)\
+            .order_by('name')
+    data['ta_level'] = settings.MSPRAY_TA_LEVEL
+
+    return data
+
+
 class DistrictView(SiteNameMixin, ListView):
     template_name = 'home/district.html'
     model = Location
@@ -42,25 +64,8 @@ class DistrictView(SiteNameMixin, ListView):
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
         district_code = self.kwargs.get(self.slug_field)
-        if district_code:
-            district = get_object_or_404(
-                Location, code=district_code
-            )
-            context['district'] = district
-            context['district_code'] = district.code
-            context['district_name'] = district.name
-            context['sub_locations'] = district.location_set.all()\
-                .order_by('name')
-            context['top_level'] = Location.objects.filter(parent=None)\
-                .order_by('name')
-            context['locations'] = Location.objects\
-                .filter(parent=district.parent)\
-                .order_by('name')
-        if 'top_level' not in context:
-            context['locations'] = Location.objects.filter(parent=None)\
-                .order_by('name')
+        context.update(get_location_dict(district_code))
         context['district_totals'] = totals
-        context['ta_level'] = settings.MSPRAY_TA_LEVEL
 
         return context
 
@@ -102,11 +107,6 @@ class TargetAreaView(SiteNameMixin, DetailView):
             .values_list('code', 'name').order_by('name')
 
         district_code = self.kwargs.get('district_name')
-        if district_code:
-            district = get_object_or_404(
-                Location, code=district_code
-            )
-            context['district_code'] = district.code
-            context['district_name'] = district.name
+        context.update(get_location_dict(district_code))
 
         return context

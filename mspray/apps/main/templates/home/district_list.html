@@ -2,7 +2,13 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
-                                <span class="dist_label">{% if district %} {{ district.parent.level|title }} : {{ district.parent.name }}{% else %} {{ top_level.0.level|title }} All{% endif%}</span>
+                                <span class="dist_label">
+                                    {% if district %}
+                                    {{ district.parent.level|title }} : {{ district.parent.name }}
+                                    {% else %}
+                                    {{ top_level.0.level|title }} All
+                                    {% endif%}
+                                </span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
@@ -35,7 +41,14 @@
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
                                 <span class="dist_label">
-                                    {% with sub1=sub_locations|first %} {{ sub1.level|title }}: All{% endwith %}
+                                    {% with sub1=sub_locations|first %}
+                                        {{ sub1.level|title }}:
+                                        {% if sub1.level == object.level %}
+                                            {{ object.name }}
+                                        {% else %}
+                                            : All
+                                        {% endif %}
+                                    {% endwith %}
                                 </span>
                                 <b class="caret"></b>
                             </a>
