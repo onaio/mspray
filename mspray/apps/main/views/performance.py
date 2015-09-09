@@ -13,6 +13,7 @@ from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
+from mspray.apps.main.utils import get_ta_in_location
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
@@ -102,12 +103,9 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
-            if settings.MSPRAY_SPATIAL_QUERIES and \
-                    len(target_areas.exclude(geom=None)):
-                qs = SprayDay.objects\
-                    .filter(geom__coveredby=target_areas.collect())
-            else:
-                qs = SprayDay.objects.filter(location__parent=district)
+            qs = SprayDay.objects.filter(
+                location__pk__in=get_ta_in_location(district)
+            )
 
             _end_time = avg_time(qs, 'start')
             result['avg_end_time'] = _end_time
@@ -120,11 +118,9 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             for target_area in target_areas:
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
-                if settings.MSPRAY_SPATIAL_QUERIES and target_area.geom:
-                    spray_day = SprayDay.objects.filter(
-                        geom__coveredby=target_area.geom)
-                else:
-                    spray_day = SprayDay.objects.filter(location=target_area)
+                spray_day = SprayDay.objects.filter(
+                    location__pk__in=get_ta_in_location(target_area)
+                )
                 # found
                 spray_points_founds = spray_day.filter().count()
                 # data__contains='"sprayable_structure":"yes"').count()
@@ -273,15 +269,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'spray_success_rate': 0
         }
 
-        if SPATIAL_QUERIES:
-            target_areas_geom = Location.objects.filter(
-                parent=district
-            ).collect()
-            spraypoints_qs = SprayDay.objects.filter(
-                geom__coveredby=target_areas_geom
-            )
-        else:
-            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
+        spraypoints_qs = SprayDay.objects.filter(
+            location__pk__in=get_ta_in_location(district)
+        )
         spraypoints = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
             select_params=['team_leader']
