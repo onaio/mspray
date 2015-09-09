@@ -47,7 +47,7 @@ class NumberOfHouseholdsIndicatorView(views.APIView):
         }
 
     def get(self, request, *args, **kwargs):
-        pk_target = request.QUERY_PARAMS.get('target', None)
+        pk_target = request.query_params.get('target', None)
         data = []
 
         if pk_target:

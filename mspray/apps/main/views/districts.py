@@ -14,7 +14,7 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = DistrictSerializer
 
     def get_serializer_class(self):
-        district = self.request.QUERY_PARAMS.get('district')
+        district = self.request.query_params.get('district')
 
         if district:
             return TargetAreaSerializer
@@ -22,7 +22,7 @@ class DistrictViewSet(viewsets.ReadOnlyModelViewSet):
         return super(DistrictViewSet, self).get_serializer_class()
 
     def filter_queryset(self, queryset):
-        district = self.request.QUERY_PARAMS.get('district')
+        district = self.request.query_params.get('district')
 
         if district:
             queryset = TargetArea.objects.filter(

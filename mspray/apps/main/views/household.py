@@ -13,7 +13,7 @@ class HouseholdViewSet(viewsets.ReadOnlyModelViewSet):
     bbox_filter_include_overlapping = True  # Optional
 
     def filter_queryset(self, queryset):
-        targetid = self.request.QUERY_PARAMS.get('target_area')
+        targetid = self.request.query_params.get('target_area')
 
         if targetid:
             target = get_object_or_404(TargetArea, targetid=targetid,

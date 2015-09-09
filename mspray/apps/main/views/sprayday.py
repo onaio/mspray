@@ -35,7 +35,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     ordering = ('spray_date',)
 
     def filter_queryset(self, queryset):
-        targetid = self.request.QUERY_PARAMS.get('target_area')
+        targetid = self.request.query_params.get('target_area')
 
         if targetid:
             target = get_object_or_404(Location, code=targetid)
@@ -75,7 +75,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         return Response(data, status=status_code)
 
     def list(self, request, *args, **kwargs):
-        if request.QUERY_PARAMS.get('dates_only') == 'true':
+        if request.query_params.get('dates_only') == 'true':
             self.object_list = self.filter_queryset(self.get_queryset())
             data = self.object_list\
                 .values_list('spray_date', flat=True).distinct()
