@@ -3,11 +3,13 @@
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
                                 <span class="dist_label">
-                                    {% if district %}
+                                {% if district.level == top_level.0.level %}
+                                    {{ district.level|title }} : {{ district.name }}
+                                {% elif district %}
                                     {{ district.parent.level|title }} : {{ district.parent.name }}
-                                    {% else %}
+                                {% else %}
                                     {{ top_level.0.level|title }} All
-                                    {% endif%}
+                                {% endif%}
                                 </span>
                                 <b class="caret"></b>
                             </a>

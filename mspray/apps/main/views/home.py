@@ -25,6 +25,7 @@ def get_location_dict(code):
             .order_by('name')
         data['locations'] = Location.objects\
             .filter(parent=district.parent)\
+            .exclude(parent=None)\
             .order_by('name')
     if 'top_level' not in data:
         data['locations'] = Location.objects.filter(parent=None)\
