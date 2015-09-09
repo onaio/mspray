@@ -49,8 +49,16 @@ class DistrictView(SiteNameMixin, ListView):
             context['district'] = district
             context['district_code'] = district.code
             context['district_name'] = district.name
-        context['districts'] = Location.objects.filter(parent=None)\
-            .values_list('code', 'name').order_by('name')
+            context['sub_locations'] = district.location_set.all()\
+                .order_by('name')
+            context['top_level'] = Location.objects.filter(parent=None)\
+                .order_by('name')
+            context['locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .order_by('name')
+        if 'top_level' not in context:
+            context['locations'] = Location.objects.filter(parent=None)\
+                .order_by('name')
         context['district_totals'] = totals
         context['ta_level'] = settings.MSPRAY_TA_LEVEL
 
@@ -95,9 +103,10 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
         district_code = self.kwargs.get('district_name')
         if district_code:
-            context['district_code'] = district_code
-            context['district_name'] = get_object_or_404(
+            district = get_object_or_404(
                 Location, code=district_code
-            ).name
+            )
+            context['district_code'] = district.code
+            context['district_name'] = district.name
 
         return context

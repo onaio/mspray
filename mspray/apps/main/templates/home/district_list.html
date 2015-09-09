@@ -1,14 +1,52 @@
-                        {% if districts %}
+                        {% if top_level %}
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
-                                <span class="dist_label">Districts :{% if district_name %} {{ district_name }}{% else %} All{% endif%}</span>
+                                <span class="dist_label">{% if district %} {{ district.parent.level|title }} : {{ district.parent.name }}{% else %} {{ top_level.0.level|title }} All{% endif%}</span>
                                 <b class="caret"></b>
                             </a>
-                            <ul class="dropdown-menu" id="districts_list">
-                            {% for code, name in districts %}
+                            <ul class="dropdown-menu">
+                            {% for loc in top_level %}
                                 <li>
-                                    <a href="{% url 'district' code %}">{{ name }}</a>
+                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if locations %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown">
+                                <span class="dist_label">{% if district %} {{ district.level|title }} : {{ district.name }}{% else %} {{ locations.0.level|title }} All{% endif%}</span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                            {% for loc in locations %}
+                                <li>
+                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </li>
+                        {% endif %}
+                        {% if sub_locations %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown">
+                                <span class="dist_label">
+                                    {% with sub1=sub_locations|first %} {{ sub1.level|title }}: All{% endwith %}
+                                </span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu" id="sub_locations_list">
+                            {% for loc in sub_locations %}
+                                <li>
+                                    {% if loc.level == ta_level%}
+                                    <a href="{% url 'target_area' district.code loc.code %}">{{ loc.name }}</a>
+                                    {% else %}
+                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                             </ul>
