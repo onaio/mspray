@@ -2,7 +2,7 @@ from django.contrib.gis.db import models
 
 
 class TeamLeader(models.Model):
-    code = models.CharField(max_length=10, unique=True)
+    code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=255, db_index=1)
 
     class Meta:
