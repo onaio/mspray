@@ -10,6 +10,7 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 
 from mspray.apps.main.models.location import Location
@@ -26,6 +27,7 @@ from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+TA_LEVEL = settings.MSPRAY_TA_LEVEL
 
 
 def geojson_from_gps_string(geolocation):
@@ -237,10 +239,12 @@ def avg_time_tuple(times):
 def get_ta_in_location(location):
     locations = []
 
-    if location.level == settings.MSPRAY_TA_LEVEL:
+    if location.level == TA_LEVEL:
         locations = [location.pk]
     else:
-        for loc in location.location_set.all():
-            locations.extend(get_ta_in_location(loc))
+        locations = Location.objects.filter(level=TA_LEVEL)\
+            .filter(
+                Q(parent=location) | Q(parent__in=location.location_set.all())
+            ).values_list('pk', flat=True)
 
     return locations
