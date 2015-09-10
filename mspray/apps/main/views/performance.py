@@ -102,8 +102,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
-            if settings.MSPRAY_SPATIAL_QUERIES and \
-                    len(target_areas.exclude(geom=None)):
+            if SPATIAL_QUERIES and target_areas.exclude(geom=None).count():
                 qs = SprayDay.objects\
                     .filter(geom__coveredby=target_areas.collect())
             else:
@@ -120,7 +119,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             for target_area in target_areas:
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
-                if settings.MSPRAY_SPATIAL_QUERIES and target_area.geom:
+                if SPATIAL_QUERIES and target_area.geom:
                     spray_day = SprayDay.objects.filter(
                         geom__coveredby=target_area.geom)
                 else:
