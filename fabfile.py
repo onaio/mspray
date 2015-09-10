@@ -118,6 +118,8 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
     with lcd(current_working_dir):
         change_local_settings(env.django_module, dbname, dbuser, dbpass,
                               project=project)
+        put('context/etc/nginx/nginx.conf', '/etc/nginx/nginx.conf',
+            use_sudo=True)
         nginx_conf = '/etc/nginx/conf.d/%(project)s.conf' % env
         put('context/etc/nginx/sites-available/nginx.conf', nginx_conf,
             use_sudo=True)
