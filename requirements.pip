@@ -17,3 +17,4 @@ flake8
 uwsgi
 boto
 django-ses-backend
+django-debug-toolbar

@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'mspray.apps.main',
+    'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = (
