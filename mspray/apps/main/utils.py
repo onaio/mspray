@@ -238,13 +238,17 @@ def avg_time_tuple(times):
 
 def get_ta_in_location(location):
     locations = []
+    level = location['level'] if isinstance(location, dict) else location.level
+    pk = location['pk'] if isinstance(location, dict) else location.pk
 
-    if location.level == TA_LEVEL:
-        locations = [location.pk]
+    if level == TA_LEVEL:
+        locations = [pk]
     else:
+        qs = Location.objects.filter(parent__pk=pk) \
+            if isinstance(location, dict) else location.location_set.all()
+
         locations = Location.objects.filter(level=TA_LEVEL)\
-            .filter(
-                Q(parent=location) | Q(parent__in=location.location_set.all())
-            ).values_list('pk', flat=True)
+            .filter(Q(parent__pk=pk) | Q(parent__in=qs))\
+            .values_list('pk', flat=True)
 
     return locations
