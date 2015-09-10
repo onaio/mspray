@@ -20,15 +20,19 @@ def get_location_dict(code):
         data['district_code'] = district.code
         data['district_name'] = district.name
         data['sub_locations'] = district.location_set.all()\
+            .values('code', 'level', 'name', 'parent')\
             .order_by('name')
         data['top_level'] = Location.objects.filter(parent=None)\
+            .values('code', 'level', 'name', 'parent')\
             .order_by('name')
         data['locations'] = Location.objects\
             .filter(parent=district.parent)\
             .exclude(parent=None)\
+            .values('code', 'level', 'name', 'parent')\
             .order_by('name')
     if 'top_level' not in data:
         data['locations'] = Location.objects.filter(parent=None)\
+            .values('code', 'level', 'name', 'parent')\
             .order_by('name')
     data['ta_level'] = settings.MSPRAY_TA_LEVEL
 
@@ -53,7 +57,16 @@ class DistrictView(SiteNameMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
-        serializer = TargetAreaSerializer(context['object_list'], many=True,
+        qs = context['object_list'].extra(select={
+            "xmin": 'ST_xMin("main_location"."geom")',
+            "ymin": 'ST_yMin("main_location"."geom")',
+            "xmax": 'ST_xMax("main_location"."geom")',
+            "ymax": 'ST_yMax("main_location"."geom")'
+        }).values(
+            'pk', 'code', 'level', 'name', 'parent', 'structures',
+            'xmin', 'ymin', 'xmax', 'ymax'
+        )
+        serializer = TargetAreaSerializer(qs, many=True,
                                           context={'request': self.request})
         context['district_list'] = serializer.data
         fields = ['structures', 'visited_total', 'visited_sprayed',

@@ -33,7 +33,7 @@ def cached_queryset_count(key, queryset, query=None):
 
 class TargetAreaMixin(object):
     def get_spray_queryset(self, obj):
-        key = '_spray_queryset_{}'.format(obj.pk)
+        key = '_spray_queryset_{}'.format(obj['pk'])
 
         if hasattr(self, key):
             return getattr(self, key)
@@ -54,7 +54,7 @@ class TargetAreaMixin(object):
 
     def get_visited_total(self, obj):
         if obj:
-            key = "%s_visited_total" % obj.pk
+            key = "%s_visited_total" % obj['pk']
             queryset = self.get_spray_queryset(obj)
             #    .filter(data__contains='"sprayable_structure":"yes"')
 
@@ -62,7 +62,7 @@ class TargetAreaMixin(object):
 
     def get_visited_sprayed(self, obj):
         if obj:
-            key = "%s_visited_sprayed" % obj.pk
+            key = "%s_visited_sprayed" % obj['pk']
             queryset = self.get_spray_queryset(obj)\
                 .extra(where=['data->>%s = %s'],
                        params=[WAS_SPRAYED_FIELD, "yes"])
@@ -71,7 +71,7 @@ class TargetAreaMixin(object):
 
     def get_visited_not_sprayed(self, obj):
         if obj:
-            key = "%s_visited_not_sprayed" % obj.pk
+            key = "%s_visited_not_sprayed" % obj['pk']
             queryset = self.get_spray_queryset(obj)\
                 .extra(where=['data->>%s = %s'],
                        params=[WAS_SPRAYED_FIELD, "no"])
@@ -80,7 +80,7 @@ class TargetAreaMixin(object):
 
     def get_visited_refused(self, obj):
         if obj:
-            key = "%s_visited_refused" % obj.pk
+            key = "%s_visited_refused" % obj['pk']
             queryset = self.get_spray_queryset(obj)\
                 .extra(where=['data->>%s = %s'],
                        params=["unsprayed/reason", REASON_REFUSED])
@@ -89,7 +89,7 @@ class TargetAreaMixin(object):
 
     def get_visited_other(self, obj):
         if obj:
-            key = "%s_visited_other" % obj.pk
+            key = "%s_visited_other" % obj['pk']
             queryset = self.get_spray_queryset(obj)\
                 .extra(where=[
                     "data->>%s IN ({})".format(
@@ -101,22 +101,32 @@ class TargetAreaMixin(object):
 
     def get_not_visited(self, obj):
         if obj:
-            key = "%s_not_visited" % obj.pk
+            key = "%s_not_visited" % obj['pk']
             queryset = self.get_spray_queryset(obj)
             #    .filter(data__contains='"sprayable_structure":"yes"')
             count = cached_queryset_count(key, queryset)
 
-            return obj.structures - count
+            return obj['structures'] - count
 
     def get_bounds(self, obj):
-        if obj and obj.geom:
-            return list(obj.geom.boundary.extent)
+        if obj:
+            bounds = [obj.get('xmin'), obj.get('ymin'),
+                      obj.get('xmax'), obj.get('ymax')]
+
+            return bounds
 
         return []
 
+    def get_district_name(self, obj):
+        return obj.get('name')
+
+    def get_targetid(self, obj):
+        return obj.get('code')
+
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
-    targetid = serializers.ReadOnlyField()
+    targetid = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.ReadOnlyField()
     visited_total = serializers.SerializerMethodField()
@@ -137,7 +147,8 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
 
 
 class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
-    targetid = serializers.ReadOnlyField()
+    targetid = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.ReadOnlyField()
     visited_total = serializers.SerializerMethodField()
