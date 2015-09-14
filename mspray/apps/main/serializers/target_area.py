@@ -51,7 +51,8 @@ class TargetAreaMixin(object):
             queryset = self.get_spray_queryset(obj)
             # .filter(data__contains='"sprayable_structure":"yes"')
 
-            return queryset.values_list('spray_date', flat=True).distinct()
+            return queryset.values_list('spray_date', flat=True)\
+                .order_by('spray_date').distinct()
 
     def get_visited_total(self, obj):
         if obj:
