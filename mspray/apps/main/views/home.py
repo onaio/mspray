@@ -35,6 +35,7 @@ def get_location_dict(code):
             .values('code', 'level', 'name', 'parent')\
             .order_by('name')
     data['ta_level'] = settings.MSPRAY_TA_LEVEL
+    data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
 

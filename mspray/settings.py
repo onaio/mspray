@@ -217,3 +217,4 @@ MPSRYA_NON_STRUCTURE_GPS_FIELD = 'non_structure_gps'
 MSPRAY_SPRAY_OPERATOR_NAME = 'sprayed/sprayop_name'
 MSPRAY_SPRAY_OPERATOR_CODE = 'sprayed/sprayop_code'
 MSPRAY_TA_LEVEL = 'ta'
+HIGHER_LEVEL_MAP = True
