@@ -26,8 +26,12 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
     serializer_class = HouseholdSerializer
 
     def retrieve(self, request, **kwargs):
+        data = []
         location = self.get_object()
-        households = Household.objects.filter(geom__coveredby=location.geom)
-        serializer = self.get_serializer(households, many=True)
+        if location.geom is not None:
+            households = Household.objects.filter(
+                geom__coveredby=location.geom)
+            serializer = self.get_serializer(households, many=True)
+            data = serializer.data
 
-        return Response(serializer.data)
+        return Response(data)
