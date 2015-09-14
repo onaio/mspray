@@ -13,6 +13,7 @@ from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
+from mspray.apps.main.utils import get_ta_in_location
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
@@ -102,11 +103,13 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
+            ta_pks = []
             if SPATIAL_QUERIES and target_areas.exclude(geom=None).count():
                 qs = SprayDay.objects\
                     .filter(geom__coveredby=target_areas.collect())
             else:
-                qs = SprayDay.objects.filter(location__parent=district)
+                ta_pks = get_ta_in_location(district)
+                qs = SprayDay.objects.filter(location__pk__in=ta_pks)
 
             _end_time = avg_time(qs, 'start')
             result['avg_end_time'] = _end_time
@@ -272,7 +275,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'spray_success_rate': 0
         }
 
-        if SPATIAL_QUERIES:
+        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
+                .exclude(geom=None).count():
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
@@ -280,7 +284,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
+            ta_pks = get_ta_in_location(district)
+            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
         spraypoints = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
             select_params=['team_leader']
@@ -300,7 +305,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 "name": "(select name from main_teamleader"
                 " where code = data->>'team_leader')"
             }
-        ).values_list('team_leader', 'name').distinct()
+        ).values_list('team_leader', 'name').order_by('name').distinct()
 
         start_times = []
         end_times = []
@@ -405,7 +410,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorSummaryView, self)\
             .get_context_data(**kwargs)
         district = context['object']
-        if SPATIAL_QUERIES:
+        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
+                .exclude(geom=None).count():
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
@@ -413,7 +419,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
+            ta_pks = get_ta_in_location(district)
+            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
         team_leader = self.kwargs.get('team_leader')
         spraypoints = spraypoints_qs.extra(
             select={'spray_operator_code': 'data->>%s'},
@@ -433,7 +440,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 "spray_operator_name": "(select name from main_sprayoperator"
                 " where code = (data->>'{}'))".format(SPRAY_OPERATOR_CODE)
             }
-        ).values_list('spray_operator_code', 'spray_operator_name').distinct()
+        ).values_list('spray_operator_code', 'spray_operator_name')\
+            .order_by('spray_operator_code').distinct()
         start_times = []
         end_times = []
 
@@ -542,7 +550,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorDailyView, self)\
             .get_context_data(**kwargs)
         district = context['object']
-        if SPATIAL_QUERIES:
+        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
+                .exclude(geom=None).count():
             target_areas_geom = Location.objects.filter(
                 parent=district
             ).collect()
@@ -550,7 +559,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 geom__coveredby=target_areas_geom
             )
         else:
-            spraypoints_qs = SprayDay.objects.filter(location__parent=district)
+            ta_pks = get_ta_in_location(district)
+            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
 
         team_leader = self.kwargs.get('team_leader')
         spray_operator = self.kwargs.get('spray_operator')
