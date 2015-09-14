@@ -1,5 +1,6 @@
 import os
 
+from django.conf import settings
 from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import SpatialReference
@@ -23,6 +24,27 @@ class Command(BaseCommand):
                             action='store_true',
                             help="Coerce the code value to integer")
 
+    def _get_location(self, feature, code, code_is_integer=False):
+        name = feature.get(code)
+        name = int(name) if code_is_integer else name
+        if settings.SITE_NAME == 'zambia':
+            location = self._get_zambia_location(feature)
+        else:
+            location = Location.objects.get(code=name)
+
+        return location
+
+    def _get_zambia_location(self, feature):
+        district = feature.get('district_1')
+        rank = int(feature.get('rank_1'))
+        structures = int(feature.get('structur_1'))
+
+        code = '{}_{}'.format(rank, structures)
+
+        location = Location.objects.get(code=code, parent__name=district)
+
+        return location
+
     def handle(self, *args, **options):
         if 'shape_file' not in options:
             raise CommandError(_('Missing locations shape file path'))
@@ -41,10 +63,10 @@ class Command(BaseCommand):
                 layer = ds[0]
 
                 for feature in layer:
-                    name = feature.get(code)
-                    name = int(name) if code_is_integer else name
                     try:
-                        location = Location.objects.get(code=name)
+                        location = self._get_location(
+                            feature, code, code_is_integer
+                        )
                     except Location.DoesNotExist:
                         failed += 1
                         continue
