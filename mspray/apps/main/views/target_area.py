@@ -7,6 +7,7 @@ from mspray.apps.main.models import Household
 from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
+from mspray.apps.main.serializers.household import HouseholdBSerializer
 from mspray.apps.main.utils import get_ta_in_location
 
 
@@ -26,12 +27,18 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
     queryset = Location.objects.filter()
     serializer_class = HouseholdSerializer
 
+    def get_serializer_class(self):
+        serializer_class = self.serializer_class
+        if self.kwargs.get('bgeom'):
+            serializer_class = HouseholdBSerializer
+        return serializer_class
+
     def retrieve(self, request, **kwargs):
         data = []
         location = self.get_object()
         if location.geom is not None:
             households = Household.objects.filter(
-                location__in=get_ta_in_location(location))
+                location__in=list(get_ta_in_location(location)))
             serializer = self.get_serializer(households, many=True)
             data = serializer.data
 
