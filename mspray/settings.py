@@ -45,6 +45,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'django_nose',
     'rest_framework',
+    'rest_framework_gis',
     'mspray.apps.main',
     'debug_toolbar',
 )
@@ -218,3 +219,4 @@ MSPRAY_SPRAY_OPERATOR_NAME = 'sprayed/sprayop_name'
 MSPRAY_SPRAY_OPERATOR_CODE = 'sprayed/sprayop_code'
 MSPRAY_TA_LEVEL = 'ta'
 HIGHER_LEVEL_MAP = True
+HH_BUFFER = False

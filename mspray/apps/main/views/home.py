@@ -101,10 +101,11 @@ class TargetAreaView(SiteNameMixin, DetailView):
                             format='geojson')
             response.render()
             context['ta_geojson'] = response.content
+            bgeom = settings.HH_BUFFER
 
             hhview = TargetAreaHouseholdsViewSet.as_view({'get': 'retrieve'})
             response = hhview(self.request, pk=context['object'].pk,
-                              format='geojson')
+                              bgeom=bgeom, format='geojson')
             response.render()
             context['hh_geojson'] = response.content
 
