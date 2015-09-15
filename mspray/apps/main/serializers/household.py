@@ -21,6 +21,14 @@ class HouseholdSerializer(GeoFeatureModelSerializer):
         geo_field = 'geom'
 
 
+class HouseholdBSerializer(GeoFeatureModelSerializer):
+    bgeom = GeometryField()
+
+    class Meta:
+        model = Household
+        geo_field = 'bgeom'
+
+
 class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
     spray_points = serializers.SerializerMethodField()
     percentage_sprayed = serializers.SerializerMethodField('get_perc_sprayed')
