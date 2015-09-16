@@ -138,12 +138,13 @@ def add_spray_data(data):
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
     gps_field = data.get(STRUCTURE_GPS_FIELD,
                          data.get(NON_STRUCTURE_GPS_FIELD))
-    geom = geojson_from_gps_string(gps_field)
+    geom = geojson_from_gps_string(gps_field) \
+        if gps_field is not None else None
     location_code = data.get(settings.MSPRAY_LOCATION_FIELD)
     location = None
     if location_code and not settings.MSPRAY_SPATIAL_QUERIES:
         location = Location.objects.get(code=location_code)
-    else:
+    elif geom is not None:
         locations = Location.objects.filter(
             geom__contains=geom,
             level=settings.MSPRAY_TA_LEVEL
