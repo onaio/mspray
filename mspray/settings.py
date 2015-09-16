@@ -220,3 +220,4 @@ MSPRAY_SPRAY_OPERATOR_CODE = 'sprayed/sprayop_code'
 MSPRAY_TA_LEVEL = 'ta'
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
+ONA_URI = 'https://ona.io'
