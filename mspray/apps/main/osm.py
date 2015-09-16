@@ -1,15 +1,12 @@
 from django.contrib.gis.geos import LineString
 from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import Polygon
-from io import StringIO
 from lxml import etree
 
 
 def _get_xml_obj(xml):
 
-    xml = xml.replace('<?xml version="1.0" encoding="UTF-8"?>', '')
-
-    return etree.parse(StringIO(xml))
+    return etree.fromstring(xml.strip().encode())
 
 
 def _get_node(ref, root):
