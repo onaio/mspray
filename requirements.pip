@@ -20,3 +20,4 @@ django-ses-backend
 django-debug-toolbar
 lxml
 requests
+httmock

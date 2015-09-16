@@ -1,3 +1,4 @@
+from httmock import urlmatch, HTTMock
 from django.test import TestCase
 
 from mspray.apps.main.ona import fetch_osm_xml
@@ -18,7 +19,15 @@ SUBMISSION_DATA = {
 }
 
 
+@urlmatch(netloc=r'(.*\.)?ona\.io$')
+def onaio_mock(url, request):
+    return OSMXML.strip()
+
+
 class TestOna(TestCase):
     def test_fetch_osm_xml(self):
-        xml = fetch_osm_xml(SUBMISSION_DATA)
-        self.assertEqual(xml, OSMXML.strip().encode())
+        with HTTMock(onaio_mock):
+            xml = fetch_osm_xml(SUBMISSION_DATA)
+            if isinstance(xml, str):
+                xml = xml.encode()
+            self.assertEqual(xml, OSMXML.strip().encode())
