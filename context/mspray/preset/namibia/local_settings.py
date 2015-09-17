@@ -49,3 +49,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 MSPRAY_STRUCTURE_GPS_FIELD = 'structuredetails/homestead_gps'
 MSPRAY_LOCATION_FIELD = 'target_area'
 MSPRAY_SPATIAL_QUERIES = False
+
+BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
+    SITE_NAME, SITE_NAME, SITE_NAME
+)

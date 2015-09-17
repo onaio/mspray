@@ -46,3 +46,7 @@ AWS_SES_REGION_ENDPOINT = 'email.us-east-1.amazonaws.com'
 DEFAULT_FROM_EMAIL = 'noreply+mspray@ona.io'
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
 HH_BUFFER = True
+
+BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
+    SITE_NAME, SITE_NAME, SITE_NAME
+)

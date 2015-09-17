@@ -158,9 +158,22 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
     sudo('supervisorctl reload')
 
 
+def setup_rabbitmq(deployment_name, project='mspray'):
+    setup_env(deployment_name, project)
+    sudo('which rabbitmqctl || apt-get install -yq rabbitmq-server')
+    sudo('sudo rabbitmqctl add_vhost /{} || echo vhost_exists'.format(project))
+    sudo('sudo rabbitmqctl add_user {} {} || echo user_exists'.format(
+        project, project
+    ))
+    sudo('sudo rabbitmqctl set_permissions -p /{} {} ".*" ".*" ".*"'.format(
+        project, project
+    ))
+
+
 def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd",
            dbname='dbuser', port='8008', project='mspray-project'):
     setup_env(deployment_name, project)
+    setup_rabbitmq(deployment_name, project)
 
     with cd(env.home):
         run('cd {} && git fetch && git checkout origin/{}'

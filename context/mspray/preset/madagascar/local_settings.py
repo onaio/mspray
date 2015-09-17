@@ -61,3 +61,7 @@ MSPRAY_STRUCTURE_GPS_FIELD = 'structure_gps'
 MSPRAY_SPRAY_OPERATOR_NAME = 'sprayop_name'
 MSPRAY_SPRAY_OPERATOR_CODE = 'sprayop_code'
 MSPRAY_TA_LEVEL = 'fokontany'
+
+BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
+    SITE_NAME, SITE_NAME, SITE_NAME
+)
