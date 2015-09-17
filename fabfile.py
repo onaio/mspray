@@ -104,6 +104,7 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
                  dbpass="dbpwd", dbname='dbuser', port='8008',
                  project='mspray-project'):
     setup_env(deployment_name, project)
+    setup_rabbitmq(deployment_name, project)
 
     sudo('mkdir -p %s' % env.home)
     sudo('chown -R ubuntu %s' % env.home)
