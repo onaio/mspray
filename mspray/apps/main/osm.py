@@ -5,8 +5,10 @@ from lxml import etree
 
 
 def _get_xml_obj(xml):
+    if not isinstance(xml, bytes):
+        xml = xml.strip().encode()
 
-    return etree.fromstring(xml.strip().encode())
+    return etree.fromstring(xml)
 
 
 def _get_node(ref, root):
