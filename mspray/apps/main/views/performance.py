@@ -96,7 +96,6 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             target_areas = Location.objects.filter(parent=district)\
                 .order_by('name')
             result = {'location': district}
-
             sprayed_structures = {}
             target_areas_found_total = 0
             target_areas_sprayed_total = 0
@@ -104,12 +103,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             spray_points_total = 0
             found_gt_20 = 0
             ta_pks = []
-            if SPATIAL_QUERIES and target_areas.exclude(geom=None).count():
-                qs = SprayDay.objects\
-                    .filter(geom__coveredby=target_areas.collect())
-            else:
-                ta_pks = get_ta_in_location(district)
-                qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+            ta_pks = get_ta_in_location(district)
+            qs = SprayDay.objects.filter(location__pk__in=ta_pks)
 
             _end_time = avg_time(qs, 'start')
             result['avg_end_time'] = _end_time
@@ -120,13 +115,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             start_times.append(_start_time)
 
             for target_area in target_areas:
+                locations = list(get_ta_in_location(target_area))
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
-                if SPATIAL_QUERIES and target_area.geom:
-                    spray_day = SprayDay.objects.filter(
-                        geom__coveredby=target_area.geom)
-                else:
-                    spray_day = SprayDay.objects.filter(location=target_area)
+                spray_day = SprayDay.objects.filter(location__in=locations)
                 # found
                 spray_points_founds = spray_day.filter().count()
                 # data__contains='"sprayable_structure":"yes"').count()
