@@ -170,10 +170,20 @@ def add_spray_data(data):
 
 
 def delete_cached_target_area_keys(sprayday):
-    for t in TargetArea.objects.filter(geom__contains=sprayday.geom):
+    locations = []
+
+    if sprayday.geom is not None:
+        locations = Location.objects.exclude(geom=None)
+    elif sprayday.location is not None:
+        locations = Location.objects.filter(
+            Q(location=sprayday.location) |
+            Q(location=sprayday.location.parent)
+        )
+
+    for location in locations:
         keys = "%(key)s_not_visited %(key)s_visited_other "\
             "%(key)s_visited_refused %(key)s_visited_sprayed "\
-            "%(key)s_visited_total" % {'key': t.pk}
+            "%(key)s_visited_total" % {'key': location.pk}
         cache.delete_many(keys.split())
 
 
