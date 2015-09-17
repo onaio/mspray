@@ -25,6 +25,7 @@ from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+from mspray.apps.main.tasks import link_spraypoint_with_osm
 
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
@@ -161,6 +162,9 @@ def add_spray_data(data):
     sprayday.data = data
 
     sprayday.save()
+
+    if settings.OSM_SUBMISSIONS:
+        link_spraypoint_with_osm.delay(sprayday.pk)
 
     return sprayday
 

@@ -50,3 +50,5 @@ HH_BUFFER = True
 BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
     SITE_NAME, SITE_NAME, SITE_NAME
 )
+
+OSM_SUBMISSIONS = True

@@ -223,3 +223,4 @@ HH_BUFFER = False
 ONA_URI = 'https://ona.io'
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
+OSM_SUBMISSIONS = False
