@@ -52,3 +52,14 @@ BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
 )
 
 OSM_SUBMISSIONS = True
+
+MSPRAY_WAS_SPRAYED_FIELD = 'sprayable/was_sprayed'
+MSPRAY_UNSPRAYED_REASON_OTHER = {
+    "S": "Sick",
+    "L": "Locked",
+    "F": "Funeral",
+    "R": "Refused",
+    "M": "No one home/Missed",
+    "O": "Other"
+}
+MSPRAY_UNSPRAYED_REASON_REFUSED = "R"
