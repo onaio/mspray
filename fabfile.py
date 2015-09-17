@@ -90,7 +90,7 @@ def system_setup(deployment_name, dbuser='dbuser', dbpass="dbpwd",
          '/repos/apt/ACCC4CF8.asc | apt-key add -')
     sudo('apt-get update')
     sudo('apt-get install -y nginx git python3 python3-setuptools'
-         ' python3-dev binutils'
+         ' python3-dev binutils libxslt-dev libxml2-dev rabbitmq-server'
          ' libproj-dev gdal-bin Postgresql-9.3 postgresql-9.3-postgis-2.1'
          ' postgresql-9.3-postgis-2.1-scripts libpq-dev supervisor')
     sudo('easy_install3 pip')
