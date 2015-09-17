@@ -5,7 +5,8 @@ from django.conf import settings
 
 
 ATTACHMENTS_KEY = '_attachments'
-ONA_URI = settings.ONA_URI
+ONA_URI = getattr(settings, 'ONA_URI', 'https://ona.io')
+ONA_TOKEN = getattr(settings, 'ONA_API_TOKEN', '')
 
 
 def fetch_osm_xml(data):
@@ -22,3 +23,16 @@ def fetch_osm_xml(data):
                     break
 
     return xml
+
+
+def fetch_form_data(formid):
+    url = urljoin(ONA_URI, '/api/v1/data/{}.json'.format(formid))
+    headers = {
+        'Authorization': 'Token {}'.format(ONA_TOKEN)
+    }
+    data = None
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+
+    return data
