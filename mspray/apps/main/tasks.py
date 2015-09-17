@@ -1,3 +1,6 @@
+from __future__ import absolute_import
+
+from celery import shared_task
 from django.conf import settings
 
 from mspray.apps.main.models import Location
@@ -6,6 +9,7 @@ from mspray.apps.main.ona import fetch_osm_xml
 from mspray.apps.main.osm import parse_osm_ways
 
 
+@shared_task
 def link_spraypoint_with_osm(pk):
     try:
         sp = SprayDay.objects.get(pk=pk)
