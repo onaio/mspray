@@ -21,7 +21,9 @@ class Command(BaseCommand):
         formid = int(options['formid']) if 'formid' in options else FORMID
 
         if formid != 0:
-            data = fetch_form_data(formid)
+            latest = SprayDay.objects.filter().order_by('-submission_id')\
+                .values_list('submission_id', flat=True).first()
+            data = fetch_form_data(formid, latest)
             if data is not None and isinstance(data, list):
                 for rec in data:
                     if SprayDay.objects.filter(submission_id=rec.get('_id'))\

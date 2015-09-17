@@ -25,13 +25,18 @@ def fetch_osm_xml(data):
     return xml
 
 
-def fetch_form_data(formid):
+def fetch_form_data(formid, latest):
+    query = None
+    if latest:
+        query = {
+            'query': '{"_id":{"$gte":%s}}' % (latest)
+        }
     url = urljoin(ONA_URI, '/api/v1/data/{}.json'.format(formid))
     headers = {
         'Authorization': 'Token {}'.format(ONA_TOKEN)
     }
     data = None
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, params=query)
     if response.status_code == 200:
         data = response.json()
 
