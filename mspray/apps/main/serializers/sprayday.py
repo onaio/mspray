@@ -8,20 +8,7 @@ from mspray.apps.main.models.spray_day import SprayDay
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 
 
-class SprayDaySerializer(GeoFeatureModelSerializer):
-    sprayed = serializers.SerializerMethodField()
-    reason = serializers.SerializerMethodField()
-    spray_operator = serializers.SerializerMethodField()
-    spray_operator_code = serializers.SerializerMethodField()
-    irs_sticker_num = serializers.SerializerMethodField()
-    geom = GeometryField()
-
-    class Meta:
-        model = SprayDay
-        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
-                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
-        geo_field = 'geom'
-
+class SprayBase(object):
     def get_sprayed(self, obj):
         if obj:
             return obj.data.get(WAS_SPRAYED_FIELD)
@@ -45,3 +32,33 @@ class SprayDaySerializer(GeoFeatureModelSerializer):
     def get_irs_sticker_num(self, obj):
         if obj:
             return obj.data.get('irs_sticker_num')
+
+
+class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
+    sprayed = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    spray_operator = serializers.SerializerMethodField()
+    spray_operator_code = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+    geom = GeometryField()
+
+    class Meta:
+        model = SprayDay
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+        geo_field = 'geom'
+
+
+class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
+    sprayed = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    spray_operator = serializers.SerializerMethodField()
+    spray_operator_code = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+    bgeom = GeometryField()
+
+    class Meta:
+        model = SprayDay
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+        geo_field = 'bgeom'

@@ -13,6 +13,7 @@ from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
+from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
 
@@ -33,6 +34,12 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     filter_fields = ('spray_date',)
     ordering_fields = ('spray_date',)
     ordering = ('spray_date',)
+
+    def get_serializer_class(self):
+        if settings.OSM_SUBMISSIONS:
+            return SprayDayShapeSerializer
+
+        return super(SprayDayViewSet, self).get_serializer_class()
 
     def filter_queryset(self, queryset):
         targetid = self.request.query_params.get('target_area')
