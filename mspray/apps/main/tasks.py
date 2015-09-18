@@ -28,6 +28,7 @@ def link_spraypoint_with_osm(pk):
                 if locations.count():
                     location = locations.first()
                     sp.geom = way.centroid
+                    sp.bgeom = way
                     sp.location = location
                     sp.save()
 

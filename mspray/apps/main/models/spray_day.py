@@ -17,6 +17,7 @@ class SprayDay(models.Model):
     submission_id = models.PositiveIntegerField(unique=True)
     spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326, null=True)
+    bgeom = models.GeometryField(srid=4326, null=True)
     data = JsonField(default={})
     location = models.ForeignKey('Location', null=True)
 
