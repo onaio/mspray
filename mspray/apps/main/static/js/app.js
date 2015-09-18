@@ -164,6 +164,14 @@ var App = function(buffer, targetAreaData, hhData) {
                         }
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
+                    style: function (feature) {
+                        if(feature.properties.sprayed === "no"){
+                            app.sprayOptions.fillColor = "#D82118";
+                        } else{
+                            app.sprayOptions.fillColor = "#2ECC40";
+                        }
+                        return app.sprayOptions;
+                    },
                     onEachFeature: function(features){
                         if (sprayed_status[features.properties.sprayed] === undefined) {
                             sprayed_status[features.properties.sprayed] = 1;
