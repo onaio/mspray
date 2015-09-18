@@ -14,6 +14,7 @@ from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import get_ta_in_location
+from mspray.apps.main.utils import sprayable_queryset
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
@@ -102,9 +103,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
-            ta_pks = []
             ta_pks = get_ta_in_location(district)
-            qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+            qs = sprayable_queryset(
+                SprayDay.objects.filter(location__pk__in=ta_pks)
+            )
 
             _end_time = avg_time(qs, 'start')
             result['avg_end_time'] = _end_time
@@ -118,7 +120,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 locations = list(get_ta_in_location(target_area))
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
-                spray_day = SprayDay.objects.filter(location__in=locations)
+                spray_day = qs.filter(location__in=locations)
                 # found
                 spray_points_founds = spray_day.filter().count()
                 # data__contains='"sprayable_structure":"yes"').count()
@@ -267,17 +269,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'spray_success_rate': 0
         }
 
-        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
-                .exclude(geom=None).count():
-            target_areas_geom = Location.objects.filter(
-                parent=district
-            ).collect()
-            spraypoints_qs = SprayDay.objects.filter(
-                geom__coveredby=target_areas_geom
-            )
-        else:
-            ta_pks = get_ta_in_location(district)
-            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        ta_pks = get_ta_in_location(district)
+        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
         spraypoints = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
             select_params=['team_leader']
