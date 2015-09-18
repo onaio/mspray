@@ -7,12 +7,12 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
+from mspray.apps.main.utils import sprayable_queryset
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
-HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -30,16 +30,6 @@ def cached_queryset_count(key, queryset, query=None):
     cache.set(key, count)
 
     return count
-
-
-def sprayable_queryset(queryset):
-    if HAS_SPRAYABLE_QUESTION:
-        queryset = queryset.extra(
-            where=['data->>%s = %s'],
-            params=['sprayable_structure', 'yes']
-        )
-
-    return queryset
 
 
 class TargetAreaMixin(object):

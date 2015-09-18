@@ -27,6 +27,7 @@ from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 
+HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 
@@ -267,3 +268,13 @@ def get_ta_in_location(location):
             .values_list('pk', flat=True)
 
     return locations
+
+
+def sprayable_queryset(queryset):
+    if HAS_SPRAYABLE_QUESTION:
+        queryset = queryset.extra(
+            where=['data->>%s = %s'],
+            params=['sprayable_structure', 'yes']
+        )
+
+    return queryset
