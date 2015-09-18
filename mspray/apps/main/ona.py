@@ -25,7 +25,7 @@ def fetch_osm_xml(data):
     return xml
 
 
-def fetch_form_data(formid, latest):
+def fetch_form_data(formid, latest=None):
     query = None
     if latest:
         query = {

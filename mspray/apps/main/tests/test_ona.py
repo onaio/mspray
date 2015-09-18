@@ -53,3 +53,6 @@ class TestOna(TestCase):
         with HTTMock(onaio_json_mock):
             data = fetch_form_data(3563261)
             self.assertEqual(SUBMISSION_DATA[0], data[0])
+
+            data = fetch_form_data(3563261, 3563260)
+            self.assertEqual(SUBMISSION_DATA[0], data[0])
