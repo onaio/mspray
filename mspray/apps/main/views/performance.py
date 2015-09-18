@@ -17,11 +17,13 @@ from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
+REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 
 
 def calculate(numerator, denominator, percentage):
@@ -36,8 +38,8 @@ def calculate(numerator, denominator, percentage):
     return 0
 
 
-def update_sprayed_structures(
-        spray_points_sprayed, sprayed_structures, per_so=True):
+def update_sprayed_structures(spray_points_sprayed, sprayed_structures,
+                              per_so=True):
     # set structures sprayed per day per spray operator
     for a in spray_points_sprayed:
         date_sprayed = a.data.get('today')
@@ -217,10 +219,6 @@ def get_totals(spraypoints, condition):
     if spraypoints:
         if condition == "sprayable":
             resultset = dict(spraypoints.annotate(c=Count('data')))
-            # resultset = dict(spraypoints.extra(
-            #     where=['data->>%s = %s'],
-            #     params=['sprayable_structure', 'yes']).annotate(
-            #         c=Count('data')))
         elif condition == "non-sprayable":
             resultset = dict(spraypoints.extra(
                 where=['data->>%s = %s'],
@@ -235,14 +233,14 @@ def get_totals(spraypoints, condition):
             resultset = dict(
                 spraypoints.extra(
                     where=['data->>%s = %s'],
-                    params=['unsprayed/reason', REASON_REFUSED]).annotate(
+                    params=[REASON_FIELD, REASON_REFUSED]).annotate(
                         c=Count('data')))
         elif condition == "other":
             resultset = dict(
                 spraypoints.extra(
                     where=["data->>%s IN ({})".format(
                         ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
-                    params=['unsprayed/reason']).annotate(c=Count('data')))
+                    params=[REASON_FIELD]).annotate(c=Count('data')))
 
         return resultset
 
@@ -271,25 +269,26 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
         ta_pks = get_ta_in_location(district)
         spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
-        spraypoints = spraypoints_qs.extra(
+        spraypoints_qs = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
-            select_params=['team_leader']
-        ).values_list('team_leader')
-        sprayable_qs = spraypoints
-        # .extra(
-        #     where=['data->>%s = %s'],
-        #     params=['sprayable_structure', 'yes']
-        # )
-        sprayable = dict(sprayable_qs.annotate(c=Count('data')))
+            select_params=[TEAM_LEADER_CODE]
+        )
+        spraypoints = spraypoints_qs.values_list('team_leader')
         non_sprayable = get_totals(spraypoints, "non-sprayable")
+        spraypoints = sprayable_queryset(spraypoints)
+        spraypoints_qs = sprayable_queryset(spraypoints_qs)
+        sprayable = dict(
+            spraypoints.values_list('team_leader').annotate(c=Count('data'))
+        )
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
         team_leaders = spraypoints.extra(
             select={
                 "name": "(select name from main_teamleader"
-                " where code = data->>'team_leader')"
-            }
+                " where code = data->>%s)"
+            },
+            select_params=[TEAM_LEADER_CODE]
         ).values_list('team_leader', 'name').order_by('name').distinct()
 
         start_times = []
@@ -297,7 +296,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
         for team_leader, team_leader_name in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
-                                      params=["team_leader", team_leader])
+                                      params=[TEAM_LEADER_CODE, team_leader])
             numerator = sprayed.get(team_leader, 0)
             denominator = 1 if sprayable.get(team_leader, 0) == 0 \
                 else sprayable.get(team_leader)
@@ -395,27 +394,21 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorSummaryView, self)\
             .get_context_data(**kwargs)
         district = context['object']
-        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
-                .exclude(geom=None).count():
-            target_areas_geom = Location.objects.filter(
-                parent=district
-            ).collect()
-            spraypoints_qs = SprayDay.objects.filter(
-                geom__coveredby=target_areas_geom
-            )
-        else:
-            ta_pks = get_ta_in_location(district)
-            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
         team_leader = self.kwargs.get('team_leader')
-        spraypoints = spraypoints_qs.extra(
+        ta_pks = get_ta_in_location(district)
+        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        spraypoints_qs = spraypoints_qs.extra(
             select={'spray_operator_code': 'data->>%s'},
             select_params=[SPRAY_OPERATOR_CODE],
             where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
             params=[SPRAY_OPERATOR_CODE, "team_leader", team_leader]
-        ).values_list('spray_operator_code')
+        )
+        spraypoints = spraypoints_qs.values_list('spray_operator_code')
+        non_sprayable = get_totals(spraypoints, "non-sprayable")
+        spraypoints = sprayable_queryset(spraypoints)
+        spraypoints_qs = sprayable_queryset(spraypoints_qs)
 
         sprayable = get_totals(spraypoints, "sprayable")
-        non_sprayable = get_totals(spraypoints, "non-sprayable")
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
@@ -535,17 +528,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorDailyView, self)\
             .get_context_data(**kwargs)
         district = context['object']
-        if SPATIAL_QUERIES and Location.objects.filter(parent=district)\
-                .exclude(geom=None).count():
-            target_areas_geom = Location.objects.filter(
-                parent=district
-            ).collect()
-            spraypoints_qs = SprayDay.objects.filter(
-                geom__coveredby=target_areas_geom
-            )
-        else:
-            ta_pks = get_ta_in_location(district)
-            spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        ta_pks = get_ta_in_location(district)
+        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
 
         team_leader = self.kwargs.get('team_leader')
         spray_operator = self.kwargs.get('spray_operator')
@@ -556,8 +540,10 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                     spray_operator]
         ).values_list('today')
 
-        sprayable = get_totals(spraypoints, "sprayable")
         non_sprayable = get_totals(spraypoints, "non-sprayable")
+        spraypoints = sprayable_queryset(spraypoints)
+
+        sprayable = get_totals(spraypoints, "sprayable")
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")

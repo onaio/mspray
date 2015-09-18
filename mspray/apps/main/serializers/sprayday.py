@@ -6,6 +6,10 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models.spray_day import SprayDay
 
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
+IRS_NUM_FIELD = settings.MSPRAY_IRS_NUM_FIELD
+SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
+SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 
 
 class SprayBase(object):
@@ -15,7 +19,7 @@ class SprayBase(object):
 
     def get_reason(self, obj):
         if obj:
-            reason = obj.data.get('unsprayed/reason')
+            reason = obj.data.get(REASON_FIELD)
             if isinstance(reason, str):
                 reason = reason.lower()
 
@@ -23,15 +27,15 @@ class SprayBase(object):
 
     def get_spray_operator(self, obj):
         if obj:
-            return obj.data.get('sprayed/sprayop_name')
+            return obj.data.get(SPRAY_OPERATOR_NAME)
 
     def get_spray_operator_code(self, obj):
         if obj:
-            return obj.data.get('sprayed/sprayop_code')
+            return obj.data.get(SPRAY_OPERATOR_CODE)
 
     def get_irs_sticker_num(self, obj):
         if obj:
-            return obj.data.get('irs_sticker_num')
+            return obj.data.get(IRS_NUM_FIELD)
 
 
 class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):

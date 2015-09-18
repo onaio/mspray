@@ -54,6 +54,7 @@ BROKER_URL = 'amqp://{}:{}@localhost//{}'.format(
 OSM_SUBMISSIONS = True
 
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayable/was_sprayed'
+MSPRAY_UNSPRAYED_REASON_FIELD = "sprayable/unsprayed/reason"
 MSPRAY_UNSPRAYED_REASON_OTHER = {
     "S": "Sick",
     "L": "Locked",
@@ -63,4 +64,9 @@ MSPRAY_UNSPRAYED_REASON_OTHER = {
     "O": "Other"
 }
 MSPRAY_UNSPRAYED_REASON_REFUSED = "R"
+MSPRAY_SPRAY_OPERATOR_NAME = 'sprayable/sprayop_name'
+MSPRAY_SPRAY_OPERATOR_CODE = 'sprayable/sprayop_code'
+MSPRAY_TEAM_LEADER_NAME = 'team_name'
+MSPRAY_TEAM_LEADER_CODE = 'team_code'
+MSPRAY_IRS_NUM_FIELD = 'irs_card_num'
 HAS_SPRAYABLE_QUESTION = True

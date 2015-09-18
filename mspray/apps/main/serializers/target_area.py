@@ -11,6 +11,7 @@ from mspray.apps.main.utils import sprayable_queryset
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 
@@ -89,7 +90,7 @@ class TargetAreaMixin(object):
             key = "%s_visited_refused" % pk
             queryset = self.get_spray_queryset(obj)\
                 .extra(where=['data->>%s = %s'],
-                       params=["unsprayed/reason", REASON_REFUSED])
+                       params=[REASON_FIELD, REASON_REFUSED])
 
             return cached_queryset_count(key, queryset)
 
@@ -102,7 +103,7 @@ class TargetAreaMixin(object):
                     "data->>%s IN ({})".format(
                         ",".join(["'{}'".format(i) for i in REASON_OTHER])
                     )
-                ], params=['unsprayed/reason'])
+                ], params=[REASON_FIELD])
 
             return cached_queryset_count(key, queryset)
 
