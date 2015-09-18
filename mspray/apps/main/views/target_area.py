@@ -1,9 +1,11 @@
+from django.conf import settings
 from rest_framework import viewsets
 from rest_framework import mixins
 from rest_framework.response import Response
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import Household
+from mspray.apps.main.models import SprayDay
 from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
@@ -37,8 +39,16 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
         data = []
         location = self.get_object()
         if location.geom is not None:
-            households = Household.objects.filter(
-                location__in=list(get_ta_in_location(location)))
+            tas = list(get_ta_in_location(location))
+            households = Household.objects.filter(location__in=tas)
+
+            if settings.OSM_SUBMISSIONS:
+                spray_points = SprayDay.objects.exclude(geom=None)\
+                    .filter(location__in=tas).values('geom')
+                exclude = households.filter(geom__in=spray_points)\
+                    .values_list('pk', flat=True)
+                households = households.exclude(pk__in=exclude)
+
             serializer = self.get_serializer(households, many=True)
             data = serializer.data
 
