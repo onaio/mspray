@@ -12,6 +12,7 @@ SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
+HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -31,6 +32,16 @@ def cached_queryset_count(key, queryset, query=None):
     return count
 
 
+def sprayable_queryset(queryset):
+    if HAS_SPRAYABLE_QUESTION:
+        queryset = queryset.extra(
+            where=['data->>%s = %s'],
+            params=['sprayable_structure', 'yes']
+        )
+
+    return queryset
+
+
 class TargetAreaMixin(object):
     def get_spray_queryset(self, obj):
         pk = obj['pk'] if isinstance(obj, dict) else obj.pk
@@ -42,6 +53,7 @@ class TargetAreaMixin(object):
         qs = SprayDay.objects.filter(
             location__pk__in=get_ta_in_location(obj)
         )
+        qs = sprayable_queryset(qs)
         setattr(self, key, qs)
 
         return qs
@@ -49,7 +61,6 @@ class TargetAreaMixin(object):
     def get_spray_dates(self, obj):
         if obj:
             queryset = self.get_spray_queryset(obj)
-            # .filter(data__contains='"sprayable_structure":"yes"')
 
             return queryset.values_list('spray_date', flat=True)\
                 .order_by('spray_date').distinct()
@@ -59,7 +70,6 @@ class TargetAreaMixin(object):
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             key = "%s_visited_total" % pk
             queryset = self.get_spray_queryset(obj)
-            #    .filter(data__contains='"sprayable_structure":"yes"')
 
             return cached_queryset_count(key, queryset)
 
@@ -113,7 +123,6 @@ class TargetAreaMixin(object):
                 if isinstance(obj, dict) else obj.structures
             key = "%s_not_visited" % pk
             queryset = self.get_spray_queryset(obj)
-            #    .filter(data__contains='"sprayable_structure":"yes"')
             count = cached_queryset_count(key, queryset)
 
             return structures - count
