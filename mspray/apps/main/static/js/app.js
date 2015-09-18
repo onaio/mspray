@@ -51,6 +51,7 @@ var App = function(buffer, targetAreaData, hhData) {
             "Bing": bing
         }));
     }
+    L.control.locate().addTo(this.map);
 
     this.buildLegend = function() {
         var legend = L.control({

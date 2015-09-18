@@ -2,6 +2,12 @@
 
 {% load staticfiles %}
 
+{% block styles %}
+    {{ block.super }}
+        <link href='{% static "css/L.Control.Locate.min.css" %}' rel='stylesheet' />
+{% endblock %}
+
+
 {% block spray_dates  %}
                         <li class="dropdown" id="spray_date_picker">
                             <a href="#" class="dropdown-toggle"
@@ -79,6 +85,7 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.0/mapbox.js'></script>
     <script src="http://maps.google.com/maps/api/js?v=3&sensor=false"></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
+    <script src="{% static "js/L.Control.Locate.min.js" %}"></script>
     <script src="{% static "js/Google.js" %}"></script>
     <script src="{% static "js/Bing.js" %}"></script>
     <script src="{% static "js/circles.min.js" %}"></script>
