@@ -152,11 +152,13 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
             run_in_virtualenv("python3 manage.py collectstatic --noinput"
                               " --settings='%s'" % env.django_module)
 
-    sudo('/etc/init.d/nginx restart')
+    sudo('/etc/init.d/nginx reload')
     sudo('mkdir -p /var/log/uwsgi')
     sudo('chown -R ubuntu /var/log/uwsgi')
     sudo('mkdir -p /var/log/mspray')
-    sudo('supervisorctl reload')
+    sudo('supervisorctl reread')
+    sudo('supervisorctl update')
+    sudo('supervisorctl restart {}.mspray celery.{}'.format(project, project))
 
 
 def setup_rabbitmq(deployment_name, project='mspray'):
@@ -198,7 +200,9 @@ def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd",
                               " --settings='%s'" % env.django_module)
 
     sudo('/etc/init.d/nginx reload')
-    sudo('supervisorctl reload')
+    sudo('supervisorctl reread')
+    sudo('supervisorctl update')
+    sudo('supervisorctl restart {}.mspray celery.{}'.format(project, project))
 
 
 def create_buffers(deployment_name, distance=15, dbuser='dbuser',
