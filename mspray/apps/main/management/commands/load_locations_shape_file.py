@@ -28,20 +28,29 @@ class Command(BaseCommand):
         name = feature.get(code)
         name = int(name) if code_is_integer else name
         if settings.SITE_NAME == 'zambia':
-            location = self._get_zambia_location(feature)
+            location = self._get_zambia_location(feature, code)
         else:
             location = Location.objects.get(code=name)
 
         return location
 
-    def _get_zambia_location(self, feature):
+    def _get_zambia_location(self, feature, code):
         district = feature.get('district_1')
-        rank = int(feature.get('rank_1'))
         structures = int(feature.get('structur_1'))
+        name = feature.get('psa_id_1')
+        loc_code = feature.get(code)
 
-        code = '{}_{}'.format(rank, structures)
-
-        location = Location.objects.get(code=code, parent__name=district)
+        try:
+            location = Location.objects.get(code=name, parent__name=district)
+        except Location.DoesNotExist:
+            parent = Location.objects.get(name=district)
+            location = Location.objects.create(
+                name=name,
+                code=loc_code,
+                structures=structures,
+                parent=parent,
+                level=settings.MSPRAY_TA_LEVEL
+            )
 
         return location
 
@@ -63,6 +72,8 @@ class Command(BaseCommand):
                 layer = ds[0]
 
                 for feature in layer:
+                    if feature.get('manual_c_1') != 'Targeted':
+                        continue
                     try:
                         location = self._get_location(
                             feature, code, code_is_integer
