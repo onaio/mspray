@@ -45,7 +45,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         targetid = self.request.query_params.get('target_area')
 
         if targetid:
-            target = get_object_or_404(Location, code=targetid)
+            target = get_object_or_404(Location, pk=targetid)
             if settings.MSPRAY_SPATIAL_QUERIES:
                 queryset = queryset.filter(geom__coveredby=target.geom)
             else:
