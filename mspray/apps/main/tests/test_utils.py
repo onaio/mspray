@@ -1,7 +1,24 @@
 from django.test import TestCase
 
+from mspray.apps.main.models import SprayDay
+from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import avg_time_per_group
+
+SUBMISSION_DATA = [{
+    "osm_building": "OSMWay-1760.osm",
+    "today": "2015-09-21",
+    "_id": 3563261,
+    "_attachments": [{
+        "mimetype": "text/xml",
+        "download_url": "/api/v1/files/583377?filename=osm_experiments/attachments/OSMWay-1942.osm",  # noqa
+        "filename": "osm_experiments/attachments/OSMWay-1942.osm",
+        "instance": 3542171,
+        "id": 583377,
+        "xform": 79639
+    }],
+    "meta/instanceID": "uuid:da51a5c9-e87d-49df-9559-43f670f2079b"
+}]
 
 
 class TestUtils(TestCase):
@@ -29,3 +46,8 @@ class TestUtils(TestCase):
 
         self.assertEqual(avg_time_per_group(results), (13, 54))
         self.assertEqual(avg_time_per_group([]), (None, None))
+
+    def test_add_spray_data(self):
+        count = SprayDay.objects.count()
+        add_spray_data(SUBMISSION_DATA[0])
+        self.assertTrue(SprayDay.objects.count() > count)
