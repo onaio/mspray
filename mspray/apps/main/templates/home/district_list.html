@@ -16,7 +16,7 @@
                             <ul class="dropdown-menu">
                             {% for loc in top_level %}
                                 <li>
-                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                    <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                 </li>
                             {% endfor %}
                             </ul>
@@ -32,7 +32,7 @@
                             <ul class="dropdown-menu">
                             {% for loc in locations %}
                                 <li>
-                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                    <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                 </li>
                             {% endfor %}
                             </ul>
@@ -58,9 +58,9 @@
                             {% for loc in sub_locations %}
                                 <li>
                                     {% if loc.level == ta_level%}
-                                    <a href="{% url 'target_area' district.code loc.code %}">{{ loc.name }}</a>
+                                    <a href="{% url 'target_area' district.id loc.id %}">{{ loc.name }}</a>
                                     {% else %}
-                                    <a href="{% url 'district' loc.code %}">{{ loc.name }}</a>
+                                    <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                     {% endif %}
                                 </li>
                             {% endfor %}

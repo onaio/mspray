@@ -43,9 +43,9 @@ urlpatterns = patterns(
 
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
-    url(r'^(?P<district_name>\w+)$', home.DistrictView.as_view(),
+    url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
         name='district'),
-    url(r'^(?P<district_name>\w+)/(?P<slug>\w+)$',
+    url(r'^(?P<district_pk>\d+)/(?P<slug>\d+)$',
         home.TargetAreaView.as_view(),
         name='target_area'),
     url(r'indicators/number_of_households',

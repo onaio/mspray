@@ -294,11 +294,11 @@ var App = function(buffer, targetAreaData, hhData) {
         app.targetLayer = L.geoJson(geojson, {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
-                var content = "<h4>Target Area: " + props.targetid + "</h4>" +
+                var content = "<h4>Target Area: " + props.district_name + "</h4>" +
                     "Structures: " + props.structures;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
-                label.setContent("" + props.targetid);
+                label.setContent("" + props.district_name);
                 label.setLatLng(layer.getBounds().getCenter());
                 app.map.showLabel(label);
             }

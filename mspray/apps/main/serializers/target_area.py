@@ -133,7 +133,7 @@ class TargetAreaMixin(object):
         return obj.get('name') if isinstance(obj, dict) else obj.name
 
     def get_targetid(self, obj):
-        return obj.get('code') if isinstance(obj, dict) else obj.code
+        return obj.get('pk') if isinstance(obj, dict) else obj.pk
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
