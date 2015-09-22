@@ -39,6 +39,7 @@ class Command(BaseCommand):
         structures = int(feature.get('structur_1'))
         name = feature.get('psa_id_1')
         loc_code = feature.get(code)
+        district = 'Chienge' if district == 'Chiengi' else district
 
         try:
             location = Location.objects.get(code=name, parent__name=district)
