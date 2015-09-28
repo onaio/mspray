@@ -94,7 +94,8 @@ class TargetAreaView(SiteNameMixin, DetailView):
         serializer = TargetAreaSerializer(context['object'],
                                           context={'request': self.request})
         context['target_data'] = serializer.data
-        if settings.MSPRAY_SPATIAL_QUERIES:
+        if settings.MSPRAY_SPATIAL_QUERIES or \
+                context['object'].geom is not None:
             view = TargetAreaViewSet.as_view({'get': 'retrieve'})
             response = view(self.request, pk=context['object'].pk,
                             format='geojson')
