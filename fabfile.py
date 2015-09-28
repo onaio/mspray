@@ -158,7 +158,10 @@ def server_setup(deployment_name, branch='master', dbuser='dbuser',
     sudo('mkdir -p /var/log/mspray')
     sudo('supervisorctl reread')
     sudo('supervisorctl update')
-    sudo('supervisorctl restart {}.mspray celery.{}'.format(project, project))
+
+    if project in ['zambia']:
+        sudo('supervisorctl restart {}.mspray celery.{}'.format(project,
+                                                                project))
 
 
 def setup_rabbitmq(deployment_name, project='mspray'):
@@ -202,7 +205,9 @@ def deploy(deployment_name, branch='master', dbuser='dbuser', dbpass="dbpwd",
     sudo('/etc/init.d/nginx reload')
     sudo('supervisorctl reread')
     sudo('supervisorctl update')
-    sudo('supervisorctl restart {}.mspray celery.{}'.format(project, project))
+    if project in ['zambia']:
+        sudo('supervisorctl restart {}.mspray celery.{}'.format(project,
+                                                                project))
 
 
 def create_buffers(deployment_name, distance=15, dbuser='dbuser',
