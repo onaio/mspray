@@ -229,3 +229,4 @@ ONA_URI = 'https://ona.io'
 BROKER_URL = 'amqp://guest:guest@localhost//'
 OSM_SUBMISSIONS = False
 HAS_SPRAYABLE_QUESTION = False
+SITE_NAME = 'mspray'
