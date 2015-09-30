@@ -11,6 +11,7 @@ from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
 from django.db.models import Q
+from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 
 from mspray.apps.main.models.location import Location
@@ -24,12 +25,14 @@ from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
+from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
+WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 
 
 def geojson_from_gps_string(geolocation):
@@ -167,7 +170,32 @@ def add_spray_data(data):
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)
 
+    unique_field = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
+    if unique_field:
+        add_unique_data(sprayday, unique_field)
+
     return sprayday
+
+
+def add_unique_data(sprayday, unique_field):
+    sp = None
+    data_id = sprayday.data.get(unique_field)
+
+    if data_id:
+        try:
+            sp, created = SprayPoint.objects.get_or_create(
+                sprayday=sprayday,
+                data_id=data_id
+            )
+        except IntegrityError:
+            sp = SprayPoint.objects.select_related().get(data_id=data_id)
+            was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
+
+            if was_sprayed != 'yes':
+                sp.sprayday = sprayday
+                sp.save()
+
+    return sp
 
 
 def delete_cached_target_area_keys(sprayday):
