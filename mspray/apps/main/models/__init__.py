@@ -6,3 +6,4 @@ from .district import District  # noqa
 from .team_leader import TeamLeader  # noqa
 from .spray_operator import SprayOperator  # noqa
 from .location import Location  # noqa
+from .spraypoint import SprayPoint  # noqa
