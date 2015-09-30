@@ -5,6 +5,7 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
@@ -14,6 +15,7 @@ WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
+HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -44,6 +46,8 @@ class TargetAreaMixin(object):
         qs = SprayDay.objects.filter(
             location__pk__in=get_ta_in_location(obj)
         )
+        if HAS_UNIQUE_FIELD:
+            qs = qs.filter(pk__in=SprayPoint.objects.values('sprayday'))
         qs = sprayable_queryset(qs)
         setattr(self, key, qs)
 

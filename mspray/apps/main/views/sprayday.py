@@ -9,6 +9,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from mspray.apps.main.models import Location
+from mspray.apps.main.models import SprayPoint
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
@@ -53,6 +54,11 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                     queryset = queryset.filter(location__parent=target)
                 else:
                     queryset = queryset.filter(location=target)
+
+        if getattr(settings, 'MSPRAY_UNIQUE_FIELD'):
+            queryset = queryset.filter(
+                pk__in=SprayPoint.objects.values('sprayday')
+            )
 
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
