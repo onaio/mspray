@@ -15,6 +15,7 @@ from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
+from mspray.apps.main.utils import unique_spray_points
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
@@ -107,7 +108,9 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             found_gt_20 = 0
             ta_pks = get_ta_in_location(district)
             qs = sprayable_queryset(
-                SprayDay.objects.filter(location__pk__in=ta_pks)
+                unique_spray_points(
+                    SprayDay.objects.filter(location__pk__in=ta_pks)
+                )
             )
 
             _end_time = avg_time(qs, 'start')
@@ -268,7 +271,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         }
 
         ta_pks = get_ta_in_location(district)
-        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        spraypoints_qs = unique_spray_points(
+            SprayDay.objects.filter(location__pk__in=ta_pks)
+        )
         spraypoints_qs = spraypoints_qs.extra(
             select={'team_leader': 'data->>%s'},
             select_params=[TEAM_LEADER_CODE]
@@ -396,7 +401,9 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         district = context['object']
         team_leader = self.kwargs.get('team_leader')
         ta_pks = get_ta_in_location(district)
-        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        spraypoints_qs = unique_spray_points(
+            SprayDay.objects.filter(location__pk__in=ta_pks)
+        )
         spraypoints_qs = spraypoints_qs.extra(
             select={'spray_operator_code': 'data->>%s'},
             select_params=[SPRAY_OPERATOR_CODE],
@@ -529,7 +536,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
         ta_pks = get_ta_in_location(district)
-        spraypoints_qs = SprayDay.objects.filter(location__pk__in=ta_pks)
+        spraypoints_qs = unique_spray_points(
+            SprayDay.objects.filter(location__pk__in=ta_pks)
+        )
 
         team_leader = self.kwargs.get('team_leader')
         spray_operator = self.kwargs.get('spray_operator')

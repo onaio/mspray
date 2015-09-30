@@ -33,6 +33,7 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
 
 
 def geojson_from_gps_string(geolocation):
@@ -303,6 +304,15 @@ def sprayable_queryset(queryset):
         queryset = queryset.extra(
             where=['data->>%s = %s'],
             params=['sprayable_structure', 'yes']
+        )
+
+    return queryset
+
+
+def unique_spray_points(queryset):
+    if HAS_UNIQUE_FIELD:
+        queryset = queryset.filter(
+            pk__in=SprayPoint.objects.values('sprayday')
         )
 
     return queryset
