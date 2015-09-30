@@ -10,6 +10,7 @@ REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 IRS_NUM_FIELD = settings.MSPRAY_IRS_NUM_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER
 
 
 class SprayBase(object):
@@ -20,6 +21,7 @@ class SprayBase(object):
     def get_reason(self, obj):
         if obj:
             reason = obj.data.get(REASON_FIELD)
+            reason = REASONS.get(reason)
             if isinstance(reason, str):
                 reason = reason.lower()
 
