@@ -16,6 +16,7 @@ REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASON_OTHER = settings.MSPRAY_UNSPRAYED_REASON_OTHER.keys()
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
+HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 
 
 def cached_queryset_count(key, queryset, query=None):
@@ -36,19 +37,23 @@ def cached_queryset_count(key, queryset, query=None):
 
 
 class TargetAreaMixin(object):
-    def get_spray_queryset(self, obj):
-        pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-        key = '_spray_queryset_{}'.format(pk)
-
-        if hasattr(self, key):
-            return getattr(self, key)
+    def get_queryset(self, obj):
 
         qs = SprayDay.objects.filter(
             location__pk__in=get_ta_in_location(obj)
         )
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values('sprayday'))
-        qs = sprayable_queryset(qs)
+
+        return qs
+
+    def get_spray_queryset(self, obj):
+        pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+        key = '_spray_queryset_{}'.format(pk)
+        if hasattr(self, key):
+            return getattr(self, key)
+
+        qs = sprayable_queryset(self.get_queryset(obj))
         setattr(self, key, qs)
 
         return qs
@@ -116,6 +121,8 @@ class TargetAreaMixin(object):
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             structures = obj['structures'] \
                 if isinstance(obj, dict) else obj.structures
+            not_sprayable = self.get_not_sprayable(obj)
+            structures -= not_sprayable
             key = "%s_not_visited" % pk
             queryset = self.get_spray_queryset(obj)
             count = cached_queryset_count(key, queryset)
@@ -139,12 +146,36 @@ class TargetAreaMixin(object):
     def get_targetid(self, obj):
         return obj.get('pk') if isinstance(obj, dict) else obj.pk
 
+    def get_structures(self, obj):
+        structures = obj.get('structures') \
+            if isinstance(obj, dict) else obj.structures
+
+        count = self.get_not_sprayable(obj)
+        structures -= count
+
+        return structures
+
+    def get_not_sprayable(self, obj):
+        count = 0
+        queryset = self.get_queryset(obj)
+
+        if HAS_SPRAYABLE_QUESTION:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            queryset = queryset.extra(
+                where=['data->>%s = %s'],
+                params=['sprayable_structure', 'no']
+            )
+            key = "%s_not_sprayable" % pk
+            count = cached_queryset_count(key, queryset)
+
+        return count
+
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
-    structures = serializers.ReadOnlyField()
+    structures = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
@@ -166,7 +197,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
-    structures = serializers.ReadOnlyField()
+    structures = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
