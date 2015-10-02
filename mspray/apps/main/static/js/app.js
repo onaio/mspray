@@ -160,6 +160,8 @@ var App = function(buffer, targetAreaData, hhData) {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === "no"){
                             app.sprayOptions.fillColor = "#D82118";
+                        } else if (feature.properties.sprayed === null) {
+                            app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
                         }
@@ -168,6 +170,8 @@ var App = function(buffer, targetAreaData, hhData) {
                     style: function (feature) {
                         if(feature.properties.sprayed === "no"){
                             app.sprayOptions.fillColor = "#D82118";
+                        } else if (feature.properties.sprayed === null) {
+                            app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
                         }
