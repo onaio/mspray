@@ -71,3 +71,4 @@ MSPRAY_TEAM_LEADER_CODE = 'team_code'
 MSPRAY_IRS_NUM_FIELD = 'irs_card_num'
 HAS_SPRAYABLE_QUESTION = True
 MSPRAY_UNIQUE_FIELD = 'osmstructure'
+MSPRAY_STRUCTURE_GPS_FIELD = 'newstructure/gps'
