@@ -33,7 +33,7 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
-HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
+HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 
 
 def geojson_from_gps_string(geolocation):
@@ -175,7 +175,7 @@ def add_spray_data(data):
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)
 
-    unique_field = getattr(settings, 'MSPRAY_UNIQUE_FIELD')
+    unique_field = HAS_UNIQUE_FIELD
     if unique_field:
         add_unique_data(sprayday, unique_field)
 
