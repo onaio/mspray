@@ -166,6 +166,10 @@ def add_spray_data(data):
     )
     sprayday.data = data
 
+    if settings.OSM_SUBMISSIONS and geom is not None:
+        sprayday.geom = geom
+        sprayday.bgeom = sprayday.geom.buffer(0.00004, 1)
+
     sprayday.save()
 
     if settings.OSM_SUBMISSIONS:
@@ -181,6 +185,11 @@ def add_spray_data(data):
 def add_unique_data(sprayday, unique_field):
     sp = None
     data_id = sprayday.data.get(unique_field)
+    if settings.OSM_SUBMISSIONS and \
+            sprayday.data.get('newstructure/nostructure') == 'OK':
+        gps = sprayday.data.get(STRUCTURE_GPS_FIELD)
+        if gps and isinstance(gps, str):
+            data_id = ' '.join(gps.split()[:2])
 
     if data_id:
         try:
