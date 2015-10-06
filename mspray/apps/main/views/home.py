@@ -7,6 +7,7 @@ from django.views.generic import ListView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
+from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 
@@ -66,8 +67,10 @@ class DistrictView(SiteNameMixin, ListView):
             'pk', 'code', 'level', 'name', 'parent', 'structures',
             'xmin', 'ymin', 'xmax', 'ymax'
         )
-        serializer = TargetAreaSerializer(qs, many=True,
-                                          context={'request': self.request})
+        serializer_class = TargetAreaQuerySerializer \
+            if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
+        serializer = serializer_class(qs, many=True,
+                                      context={'request': self.request})
         context['district_list'] = serializer.data
         fields = ['structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
@@ -91,8 +94,10 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)
-        serializer = TargetAreaSerializer(context['object'],
-                                          context={'request': self.request})
+        serializer_class = TargetAreaQuerySerializer \
+            if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
+        serializer = serializer_class(context['object'],
+                                      context={'request': self.request})
         context['target_data'] = serializer.data
         if settings.MSPRAY_SPATIAL_QUERIES or \
                 context['object'].geom is not None:

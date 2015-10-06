@@ -19,7 +19,7 @@ HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 
 
-def cached_queryset_count(key, queryset, query=None):
+def cached_queryset_count(key, queryset, query=None, params=[]):
     count = cache.get(key)
 
     if count is not None:
@@ -28,8 +28,10 @@ def cached_queryset_count(key, queryset, query=None):
     if query is None:
         count = queryset.count()
     else:
-        for item in queryset.objects.raw(query):
+        for item in queryset.raw(query, params):
             count = item.id
+        if count is None:
+            count = 0
 
     cache.set(key, count)
 
@@ -171,7 +173,107 @@ class TargetAreaMixin(object):
         return count
 
 
+class TargetAreaQueryMixin(TargetAreaMixin):
+    def get_visited_total(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_total" % pk
+            queryset = self.get_spray_queryset(obj)
+            query = ("SELECT SUM((data->>'number_sprayable')::int) as id "
+                     "FROM main_sprayday WHERE location_id IN %s")
+            location_pks = list(get_ta_in_location(obj))
+            if len(location_pks) == 0:
+                return 0
+            params = [tuple(location_pks)]
+
+            return cached_queryset_count(key, queryset, query, params)
+
+    def get_visited_sprayed(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_sprayed" % pk
+            queryset = self.get_spray_queryset(obj)
+
+            query = ("SELECT SUM((data->>'sprayed/sprayed_DDT')::int + "
+                     "(data->>'sprayed/sprayed_Deltamethrin')::int) as id "
+                     "FROM main_sprayday WHERE location_id IN %s")
+            location_pks = list(get_ta_in_location(obj))
+            if len(location_pks) == 0:
+                return 0
+            params = [tuple(location_pks)]
+
+            return cached_queryset_count(key, queryset, query, params)
+
+    def get_visited_not_sprayed(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_not_sprayed" % pk
+            queryset = self.get_spray_queryset(obj)
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s")
+            location_pks = list(get_ta_in_location(obj))
+            if len(location_pks) == 0:
+                return 0
+            params = [tuple(location_pks)]
+
+            return cached_queryset_count(key, queryset, query, params)
+
+    def get_visited_refused(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_refused" % pk
+            queryset = self.get_spray_queryset(obj)
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s"
+                     " AND data->>%s = %s")
+            location_pks = list(get_ta_in_location(obj))
+            if len(location_pks) == 0:
+                return 0
+            params = [tuple(location_pks), REASON_FIELD, REASON_REFUSED]
+
+            return cached_queryset_count(key, queryset, query, params)
+
+    def get_visited_other(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_other" % pk
+            queryset = self.get_spray_queryset(obj)
+
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s"
+                     " AND data->>%s IN %s")
+            location_pks = list(get_ta_in_location(obj))
+            if len(location_pks) == 0:
+                return 0
+            params = [tuple(location_pks), REASON_FIELD, tuple(REASON_OTHER)]
+
+            return cached_queryset_count(key, queryset, query, params)
+
+
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
+    targetid = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
+    level = serializers.ReadOnlyField()
+    structures = serializers.SerializerMethodField()
+    visited_total = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
+    not_visited = serializers.SerializerMethodField()
+    bounds = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ('targetid', 'district_name',
+                  'structures', 'visited_total', 'visited_sprayed',
+                  'visited_not_sprayed', 'visited_refused', 'visited_other',
+                  'not_visited', 'bounds', 'spray_dates', 'level')
+        model = TargetArea
+
+
+class TargetAreaQuerySerializer(TargetAreaQueryMixin,
+                                serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
