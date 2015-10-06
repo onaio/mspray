@@ -200,8 +200,8 @@ var App = function(buffer, targetAreaData, hhData) {
             $("#target-area-stats-structures").empty().append(
                 "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"
             );
-            target_area_stats += "<dt class='reason reason-sprayed'>" + ((sprayed_status.yes === undefined) ? 0 : sprayed_status.yes) + "</dt><dd>Sprayed</dd>";
-            target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((sprayed_status.no === undefined) ? 0 : sprayed_status.no) + "</dt><dd>Not Sprayed</dd>";
+            target_area_stats += "<dt class='reason reason-sprayed'>" + ((app.visitedSprayed === undefined) ? 0 : app.visitedSprayed) + "</dt><dd>Sprayed</dd>";
+            target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((app.visitedNotSprayed === undefined) ? 0 : app.visitedNotSprayed) + "</dt><dd>Not Sprayed</dd>";
             $("#target-area-stats").empty().append(target_area_stats);
 
             target_area_stats = "";
@@ -223,13 +223,13 @@ var App = function(buffer, targetAreaData, hhData) {
 
             $(".perc_label").text(app.sprayCount);
 
-            var sprayed_percentage = app.calculatePercentage(sprayed_status.yes, app.visitedTotal, false),
-                refused_percentage = app.calculatePercentage(reason_obj.refused, app.visitedTotal),
-                other_percentage = app.calculatePercentage(total_of_other, app.visitedTotal);
+            var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.visitedTotal, false),
+                refused_percentage = app.calculatePercentage(app.visitedRefused, app.visitedTotal),
+                other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal);
 
             app.drawCircle(sprayed_percentage, "circle-sprayed");
             if(geojson.features !== undefined && geojson.features.length > 0) {
-                $("#sprayed-ratio").text("(" + sprayed_status.yes + "/" + app.visitedTotal + ")");
+                $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
                 $("#circle-refused").text(refused_percentage);
                 $("#circle-other").text(other_percentage);
             }
