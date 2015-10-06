@@ -40,7 +40,35 @@ class SprayBase(object):
             return obj.data.get(IRS_NUM_FIELD)
 
 
+class SprayBaseNamibia(SprayBase):
+    def get_sprayed(self, obj):
+        if obj:
+            dm = obj.data.get('sprayed/sprayed_Deltamethrin')
+            dm = 0 if dm is None else int(dm)
+            ddt = obj.data.get('sprayed/sprayed_DDT')
+            ddt = 0 if ddt is None else int(ddt)
+
+            sprayed = 'yes' if ddt + dm > 0 else 'no'
+
+            return sprayed
+
+
 class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
+    sprayed = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    spray_operator = serializers.SerializerMethodField()
+    spray_operator_code = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+    geom = GeometryField()
+
+    class Meta:
+        model = SprayDay
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+        geo_field = 'geom'
+
+
+class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     spray_operator = serializers.SerializerMethodField()

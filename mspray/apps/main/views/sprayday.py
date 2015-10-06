@@ -14,6 +14,7 @@ from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
+from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
@@ -40,6 +41,9 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         if settings.OSM_SUBMISSIONS:
             return SprayDayShapeSerializer
 
+        if settings.SITE_NAME == 'namibia':
+            return SprayDayNamibiaSerializer
+
         return super(SprayDayViewSet, self).get_serializer_class()
 
     def filter_queryset(self, queryset):
@@ -55,7 +59,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                 else:
                     queryset = queryset.filter(location=target)
 
-        if getattr(settings, 'MSPRAY_UNIQUE_FIELD'):
+        if getattr(settings, 'MSPRAY_UNIQUE_FIELD', None):
             queryset = queryset.filter(
                 pk__in=SprayPoint.objects.values('sprayday')
             )
