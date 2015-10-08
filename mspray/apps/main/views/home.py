@@ -74,7 +74,7 @@ class DistrictView(SiteNameMixin, ListView):
         context['district_list'] = serializer.data
         fields = ['structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited']
+                  'not_visited', 'found']
         totals = {}
         for rec in serializer.data:
             for field in fields:

@@ -75,6 +75,14 @@ class TargetAreaMixin(object):
 
             return cached_queryset_count(key, queryset)
 
+    def get_found(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_found" % pk
+            queryset = self.get_spray_queryset(obj)
+
+            return cached_queryset_count(key, queryset)
+
     def get_visited_sprayed(self, obj):
         if obj:
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
@@ -174,10 +182,10 @@ class TargetAreaMixin(object):
 
 
 class TargetAreaQueryMixin(TargetAreaMixin):
-    def get_visited_total(self, obj):
+    def get_found(self, obj):
         if obj:
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_total" % pk
+            key = "%s_found" % pk
             queryset = self.get_spray_queryset(obj)
             query = ("SELECT SUM((data->>'number_sprayable')::int) as id "
                      "FROM main_sprayday WHERE location_id IN %s")
@@ -255,6 +263,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
+    found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
@@ -265,7 +274,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     spray_dates = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('targetid', 'district_name',
+        fields = ('targetid', 'district_name', 'found',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level')
@@ -278,6 +287,7 @@ class TargetAreaQuerySerializer(TargetAreaQueryMixin,
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
+    found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
@@ -288,7 +298,7 @@ class TargetAreaQuerySerializer(TargetAreaQueryMixin,
     spray_dates = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('targetid', 'district_name',
+        fields = ('targetid', 'district_name', 'found',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level')
@@ -300,6 +310,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
+    found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
@@ -311,6 +322,6 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'level', 'district_name')
+                  'not_visited', 'level', 'district_name', 'found')
         model = TargetArea
         geo_field = 'geom'
