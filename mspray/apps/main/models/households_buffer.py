@@ -1,11 +1,9 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
 
-from mspray.apps.main.models.target_area import TargetArea
-
 
 class HouseholdsBuffer(models.Model):
-    target_area = models.ForeignKey(TargetArea)
+    location = models.ForeignKey('Location')
     num_households = models.IntegerField(default=0)
     geom = models.PolygonField(srid=4326)
 

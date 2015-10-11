@@ -100,12 +100,11 @@ def set_household_buffer(distance=15, wkt=None):
 
 def create_households_buffer(distance=15, recreate=False, target=None):
     ta = None
-    ta_qs = TargetArea.objects.filter()
+    ta_qs = Location.objects.filter(level=TA_LEVEL)
     wkt = None
 
     if target:
-        ta = TargetArea.objects.get(rank_house=target)
-        ta_qs = ta_qs.filter(pk=ta.pk)
+        ta_qs = ta_qs.filter(code=target)
         wkt = ta.geom.wkt
 
     set_household_buffer(distance, wkt)
@@ -119,7 +118,8 @@ def create_households_buffer(distance=15, recreate=False, target=None):
         buffer_qs.delete()
 
     for ta in queryset_iterator(ta_qs, 10):
-        hh_buffers = Household.objects.filter(geom__coveredby=ta.geom)\
+        print(ta.name)
+        hh_buffers = Household.objects.filter(location=ta)\
             .values_list('bgeom', flat=True)
         if len(hh_buffers) == 0:
             continue
@@ -129,7 +129,7 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             if not isinstance(b, Polygon):
                 continue
             obj, created = \
-                HouseholdsBuffer.objects.get_or_create(geom=b, target_area=ta)
+                HouseholdsBuffer.objects.get_or_create(geom=b, location=ta)
             obj.num_households = \
                 Household.objects.filter(geom__coveredby=b).count()
             obj.save()
