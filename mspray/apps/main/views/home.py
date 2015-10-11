@@ -106,7 +106,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
                             format='geojson')
             response.render()
             context['ta_geojson'] = response.content
-            bgeom = settings.HH_BUFFER
+            bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
             hhview = TargetAreaHouseholdsViewSet.as_view({'get': 'retrieve'})
             response = hhview(self.request, pk=context['object'].pk,
