@@ -14,19 +14,16 @@
                             <th rowspan="2">District</th>
                             <th colspan="2">Targeted</th>
                             <th rowspan="2">Structures Found</th>
-                            <th colspan="2">TA's with >20% Found coverage<sup title="Found coverage is defined as the number of structures found / number of structures enumerated">[a]</sup></th>
-                            <th colspan="2">TA's with >95% Found coverage<sup title="Found coverage is defined as the number of structures found / number of structures enumerated">[a]</sup></th>
-                            <th colspan="2">TA's with >85% Spray coverage<sup title="Spray coverage is defined as number of structures sprayed / number of structures found">[b]</sup></th>
-                            <th colspan="2">Spray Progress</th>
+                            <th colspan="2">TA's Visited<sup title="TA's visited are TA's with >20% found coverage - number of structures found / number of structures enumerated">[a]</sup></th>
+                            <th colspan="2">TA's Completed<sup title="TA's completed are TAs with >85% spray progress - number of structures sprayed / number of structures targeted">[b]</sup></th>
+                            <th colspan="2">District Spray Coverage by structure</th>
                             <th rowspan="2">Average structures sprayed per SOP per day</th>
-                            <th rowspan="2">Average start time<sup title="Start time is determined from the time the first form is completed per day per operator">[c]</sup></th>
-                            <th rowspan="2">Average end time<sup title="Finish time is determined from the time the last form is started per day per operator">[d]</sup></th>
+                            <th rowspan="2">Average data collection start time<sup title="Start time is determined from the time the first form is completed per day per operator">[c]</sup></th>
+                            <th rowspan="2">Average data collection end time<sup title="Finish time is determined from the time the last form is started per day per operator">[d]</sup></th>
                         </tr>
                         <tr>
                             <th>No. of Structures</th>
                             <th>Target areas</th>
-                            <th>Number</th>
-                            <th>%</th>
                             <th>Number</th>
                             <th>%</th>
                             <th>Number</th>
@@ -44,8 +41,6 @@
                             <td class='numbers'>{{ row.structures_found|intcomma  }}</td>
                             <td class='numbers'>{{ row.found_gt_20|intcomma  }}</td>
                             <td class='numbers'>{{ row.found_gt_20_percentage }}%</td>
-                            <td class='numbers'>{{ row.found|intcomma  }}</td>
-                            <td class='numbers'>{{ row.found_percentage }}%</td>
                             <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
                             <td class='numbers'>{{ row.sprayed_percentage }}%</td>
                             <td class='numbers'>{{ row.sprayed_total|intcomma  }}</td>
@@ -66,8 +61,6 @@
                             <td class='numbers'>{{ totals.structures_found|intcomma }}</td>
                             <td class='numbers'>{{ totals.found_gt_20|intcomma  }}</td>
                             <td class='numbers'>{{ totals.found_gt_20_percentage }}%</td>
-                            <td class='numbers'>{{ totals.found|intcomma }}</td>
-                            <td class='numbers'>{{ totals.found_percentage }}%</td>
                             <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
                             <td class='numbers'>{{ totals.sprayed_percentage }}%</td>
                             <td class='numbers'>{{ totals.sprayed_total|intcomma }}</td>
