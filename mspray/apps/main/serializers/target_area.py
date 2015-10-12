@@ -156,17 +156,28 @@ class TargetAreaMixin(object):
     def get_targetid(self, obj):
         return obj.get('pk') if isinstance(obj, dict) else obj.pk
 
+    def get_new_structures(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_new_structures" % pk
+            queryset = self.get_spray_queryset(obj).extra(
+                where=["(data->>%s) IS NULL"], params=["osmstructure"]
+            )
+
+            return cached_queryset_count(key, queryset)
+
+        return 0
+
     def get_structures(self, obj):
         structures = obj.get('structures') \
             if isinstance(obj, dict) else obj.structures
 
         count = self.get_not_sprayable(obj)
         structures -= count
-        new_structures = self.get_spray_queryset(obj).extra(
-            where=["(data->>%s) IS NULL"], params=["osmstructure"]
-        ).count()
+        new_structures = self.get_new_structures(obj)
+        structures += new_structures
 
-        return structures + new_structures
+        return structures
 
     def get_not_sprayable(self, obj):
         count = 0
