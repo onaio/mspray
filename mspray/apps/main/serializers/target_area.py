@@ -162,8 +162,11 @@ class TargetAreaMixin(object):
 
         count = self.get_not_sprayable(obj)
         structures -= count
+        new_structures = self.get_spray_queryset(obj).extra(
+            where=["(data->>%s) IS NULL"], params=["osmstructure"]
+        ).count()
 
-        return structures
+        return structures + new_structures
 
     def get_not_sprayable(self, obj):
         count = 0
