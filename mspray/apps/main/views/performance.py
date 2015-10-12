@@ -561,9 +561,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         end_times = []
 
         for index, _date in enumerate(dates):
-            numerator = sprayed.get(_date)
+            numerator = sprayed.get(_date, 0)
             denominator = 1 if sprayable.get(_date) == 0 \
-                else sprayable.get(_date)
+                else sprayable.get(_date, 1)
             spray_success_rate = round((numerator/denominator) * 100, 1)
 
             not_sprayed_total = refused.get(_date, 0) + \
