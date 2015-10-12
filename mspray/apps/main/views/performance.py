@@ -1,4 +1,4 @@
-# from django.core.cache import cache
+from datetime import datetime
 from django.db.models import Count
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -578,7 +578,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
             data.append({
                 'day': index + 1,
-                'date': _date,
+                'date': datetime.strptime(_date, '%Y-%m-%d'),
                 'sprayable': sprayable.get(_date, 0),
                 'not_sprayable': non_sprayable.get(_date, 0),
                 'sprayed': sprayed.get(_date, 0),

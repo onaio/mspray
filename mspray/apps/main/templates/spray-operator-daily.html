@@ -19,10 +19,11 @@
                         <thead>
                             <tr>
                                 <th rowspan="3">Day</th>
+                                <th rowspan="3">Date</th>
                                 <th colspan="5">Number of Structures</th>
-                                <th rowspan="3">Spray success rate</th>
-                                <th rowspan="3">Start time</th>
-                                <th rowspan="3">End time</th>
+                                <th rowspan="3">Spray Coverage</th>
+                                <th rowspan="3">Data collection start time</th>
+                                <th rowspan="3">Data collection end time</th>
                                 <th rowspan="3">Duration in field</th>
                             </tr>
                             <tr>
@@ -40,6 +41,7 @@
                             {% for row in data %}
                                 <tr>
                                     <td>{{ row.day }}</a></td>
+                                    <td>{{ row.date|date:'d-M' }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
                                     <td class='numbers'>{{ row.refused|intcomma  }}</td>
@@ -54,7 +56,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td>Totals</td>
+                                <td colspan="2">Totals</td>
                                 <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.refused|intcomma  }}</td>
