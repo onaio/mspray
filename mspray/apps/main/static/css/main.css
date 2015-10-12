@@ -497,7 +497,7 @@ a.distrct-links {
     background-color: #f5f5f5;
 }
 
-#sprayed-ratio {
+#sprayed-ratio, #progress-ratio {
     font-size: 12px;
     padding-left: 32px;
     margin-top: -15px;

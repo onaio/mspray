@@ -96,7 +96,7 @@ var App = function(buffer, targetAreaData, hhData) {
         return percentage;
     };
 
-    this.drawCircle = function(percent, circle_id) {
+    this.drawCircle = function(percent, circle_id, radius) {
         var fillColor;
         if(percent < 30){
             fillColor = "#FFA500";
@@ -113,11 +113,11 @@ var App = function(buffer, targetAreaData, hhData) {
         else if(percent >= 90 && percent <= 100){
             fillColor = "#31A354";
         }
-
+        radius = radius === undefined ? 50 : radius;
         Circles.create({
             id: circle_id,
             value: parseInt(" " + percent, 10),
-            radius: 50,
+            radius: radius,
             width: 12,
             maxValue: 100,
             text: function(value){return value + "%"; },
@@ -225,11 +225,14 @@ var App = function(buffer, targetAreaData, hhData) {
 
             var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.visitedTotal, false),
                 refused_percentage = app.calculatePercentage(app.visitedRefused, app.visitedTotal),
-                other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal);
+                other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal),
+                progress_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false);
 
-            app.drawCircle(sprayed_percentage, "circle-sprayed");
+            app.drawCircle(sprayed_percentage, "circle-coverage", 40);
+            app.drawCircle(progress_percentage, "circle-progress", 50);
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
+                $("#progress-ratio").text("(" + app.visitedSprayed + "/" + app.housesCount + ")");
                 $("#circle-refused").text(refused_percentage);
                 $("#circle-other").text(other_percentage);
             }
