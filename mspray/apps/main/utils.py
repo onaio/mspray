@@ -27,6 +27,8 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+from mspray.apps.main.models.spray_operator import SprayOperator
+from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -34,6 +36,8 @@ SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
+SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 
 
 def geojson_from_gps_string(geolocation):
@@ -170,6 +174,14 @@ def add_spray_data(data):
         sprayday.geom = geom
         sprayday.bgeom = sprayday.geom.buffer(0.00004, 1)
 
+    so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
+    if so:
+        sprayday.spray_operator = so
+
+    team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
+    if team_leader:
+        sprayday.team_leader = team_leader
+
     sprayday.save()
 
     if settings.OSM_SUBMISSIONS:
@@ -180,6 +192,24 @@ def add_spray_data(data):
         add_unique_data(sprayday, unique_field)
 
     return sprayday
+
+
+def get_team_leader(code):
+    try:
+        return TeamLeader.objects.get(code=code)
+    except TeamLeader.DoesNotExist:
+        pass
+
+    return None
+
+
+def get_spray_operator(code):
+    try:
+        return SprayOperator.objects.get(code=code)
+    except SprayOperator.DoesNotExist:
+        pass
+
+    return None
 
 
 def add_unique_data(sprayday, unique_field):

@@ -16,10 +16,13 @@ NON_STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_NON_STRUCTURE_GPS_FIELD',
 class SprayDay(models.Model):
     submission_id = models.PositiveIntegerField(unique=True)
     spray_date = models.DateField(db_index=True)
-    geom = models.PointField(srid=4326, null=True)
-    bgeom = models.GeometryField(srid=4326, null=True)
+    geom = models.PointField(srid=4326, db_index=True, null=True)
+    bgeom = models.GeometryField(srid=4326, db_index=True, null=True)
     data = JsonField(default={})
-    location = models.ForeignKey('Location', null=True)
+    location = models.ForeignKey('Location', db_index=True, null=True)
+    team_leader = models.ForeignKey('TeamLeader', db_index=True, null=True)
+    spray_operator = models.ForeignKey('SprayOperator', db_index=True,
+                                       null=True)
 
     objects = models.GeoManager()
 
