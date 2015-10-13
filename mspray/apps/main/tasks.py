@@ -8,6 +8,8 @@ from mspray.apps.main.ona import fetch_osm_xml
 from mspray.apps.main.osm import parse_osm_ways
 from mspray.celery import app
 
+HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
+
 
 @app.task
 def link_spraypoint_with_osm(pk):
@@ -16,6 +18,8 @@ def link_spraypoint_with_osm(pk):
     except SprayDay.DoesNotExist:
         pass
     else:
+        from mspray.apps.main.utils import add_unique_data
+        unique_field = HAS_UNIQUE_FIELD
         osm_xml = fetch_osm_xml(sp.data)
         if osm_xml is not None:
             ways = parse_osm_ways(osm_xml)
@@ -31,5 +35,7 @@ def link_spraypoint_with_osm(pk):
                     sp.bgeom = way
                     sp.location = location
                     sp.save()
+                    if unique_field:
+                        add_unique_data(sp, unique_field, location)
 
                     return sp.pk

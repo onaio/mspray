@@ -16,8 +16,8 @@ class Command(BaseCommand):
             settings.stderr.write('MSPRAY_UNIQUE_FIELD is not defined')
             return
 
-        for sprayday in SprayDay.objects.iterator():
-            add_unique_data(sprayday, unique_field)
+        for sprayday in SprayDay.objects.exclude(location=None).iterator():
+            add_unique_data(sprayday, unique_field, sprayday.location)
 
         self.stdout.write("{} unique data points of {}.".format(
             SprayPoint.objects.count(), SprayDay.objects.count()

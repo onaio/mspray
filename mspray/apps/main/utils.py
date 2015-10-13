@@ -188,8 +188,8 @@ def add_spray_data(data):
         link_spraypoint_with_osm.delay(sprayday.pk)
 
     unique_field = HAS_UNIQUE_FIELD
-    if unique_field:
-        add_unique_data(sprayday, unique_field)
+    if unique_field and location:
+        add_unique_data(sprayday, unique_field, location)
 
     return sprayday
 
@@ -212,7 +212,7 @@ def get_spray_operator(code):
     return None
 
 
-def add_unique_data(sprayday, unique_field):
+def add_unique_data(sprayday, unique_field, location):
     sp = None
     data_id = sprayday.data.get(unique_field)
     if settings.OSM_SUBMISSIONS and \
@@ -221,14 +221,16 @@ def add_unique_data(sprayday, unique_field):
         if gps and isinstance(gps, str):
             data_id = ' '.join(gps.split()[:2])
 
-    if data_id:
+    if data_id and location:
         try:
             sp, created = SprayPoint.objects.get_or_create(
                 sprayday=sprayday,
-                data_id=data_id
+                data_id=data_id,
+                location=location
             )
         except IntegrityError:
-            sp = SprayPoint.objects.select_related().get(data_id=data_id)
+            sp = SprayPoint.objects.select_related().get(data_id=data_id,
+                                                         location=location)
             was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
 
             if was_sprayed != 'yes':
