@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.conf import settings
-from django.db import connection
-from django.db.models import Count
+from django.db.models import Count, F
+from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -222,33 +222,32 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
 
 def get_totals(spraypoints, condition):
-    if spraypoints:
-        if condition == "sprayable":
-            resultset = dict(spraypoints.annotate(c=Count('data')))
-        elif condition == "non-sprayable":
-            resultset = dict(spraypoints.extra(
+    if condition == "sprayable":
+        resultset = dict(spraypoints.annotate(c=Count('data')))
+    elif condition == "non-sprayable":
+        resultset = dict(spraypoints.extra(
+            where=['data->>%s = %s'],
+            params=['sprayable_structure', 'no']).annotate(
+                c=Count('data')))
+    elif condition == "sprayed":
+        resultset = dict(spraypoints
+                         .extra(where=['data->>%s = %s'],
+                                params=[WAS_SPRAYED_FIELD, 'yes'])
+                         .annotate(c=Count('data')))
+    elif condition == "refused":
+        resultset = dict(
+            spraypoints.extra(
                 where=['data->>%s = %s'],
-                params=['sprayable_structure', 'no']).annotate(
+                params=[REASON_FIELD, REASON_REFUSED]).annotate(
                     c=Count('data')))
-        elif condition == "sprayed":
-            resultset = dict(spraypoints
-                             .extra(where=['data->>%s = %s'],
-                                    params=[WAS_SPRAYED_FIELD, 'yes'])
-                             .annotate(c=Count('data')))
-        elif condition == "refused":
-            resultset = dict(
-                spraypoints.extra(
-                    where=['data->>%s = %s'],
-                    params=[REASON_FIELD, REASON_REFUSED]).annotate(
-                        c=Count('data')))
-        elif condition == "other":
-            resultset = dict(
-                spraypoints.extra(
-                    where=["data->>%s IN ({})".format(
-                        ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
-                    params=[REASON_FIELD]).annotate(c=Count('data')))
+    elif condition == "other":
+        resultset = dict(
+            spraypoints.extra(
+                where=["data->>%s IN ({})".format(
+                    ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
+                params=[REASON_FIELD]).annotate(c=Count('data')))
 
-        return resultset
+    return resultset
 
 
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
@@ -277,55 +276,32 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         spraypoints_qs = unique_spray_points(
             SprayDay.objects.filter(location__pk__in=ta_pks)
         )
-        spraypoints_qs = spraypoints_qs.extra(
-            select={'team_leader': 'data->>%s'},
-            select_params=[TEAM_LEADER_CODE]
-        )
-        spraypoints = spraypoints_qs.values_list('team_leader')
+        spraypoints = spraypoints_qs.values_list('team_leader__code')
         non_sprayable = get_totals(spraypoints, "non-sprayable")
         spraypoints = sprayable_queryset(spraypoints)
         spraypoints_qs = sprayable_queryset(spraypoints_qs)
         sprayable = dict(
-            spraypoints.values_list('team_leader').annotate(c=Count('data'))
+            spraypoints.annotate(c=Count('data'))
         )
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
-        team_leaders = spraypoints.extra(
-            select={
-                "name": "(select name from main_teamleader"
-                " where code = data->>%s)"
-            },
-            select_params=[TEAM_LEADER_CODE]
-        ).values_list('team_leader', 'name').order_by('name').distinct()
+        team_leaders = spraypoints.values_list(
+            'team_leader__code', 'team_leader__name'
+        ).distinct()
 
         start_times = []
         end_times = []
-
-        AVG_SSPD_SQL = """
-        SELECT data->>%s AS team_code, COUNT(id) as count_sprayed,
-        COUNT(DISTINCT CONCAT(spray_date,' ', data->>%s))
-        AS count_days FROM "main_sprayday"
-        WHERE ("main_sprayday"."location_id" IN %s AND
-        "main_sprayday"."id" IN (
-        SELECT U0."sprayday_id" FROM "main_spraypoint" U0)
-        {}
-        AND (data->>%s = 'yes'))
-        group by team_code;"""
-        if HAS_SPRAYABLE_QUESTION:
-            AVG_SSPD_SQL = AVG_SSPD_SQL.format(
-                "AND (data->>'sprayable_structure' = 'yes') "
-            )
-        else:
-            AVG_SSPD_SQL = AVG_SSPD_SQL.format("")
-        cursor = connection.cursor()
-        cursor.execute(AVG_SSPD_SQL, params=[
-            TEAM_LEADER_CODE, SPRAY_OPERATOR_CODE,
-            tuple(ta_pks),
-            WAS_SPRAYED_FIELD,
-        ])
+        sprayed_per_spray_operator_per_day = spraypoints.extra(
+            where=['data->>%s = %s'], params=[WAS_SPRAYED_FIELD, 'yes']
+        ).values_list('team_leader__code')\
+            .annotate(a=Count('spray_operator'),
+                      b=Count(Concat(F('spray_date'),
+                                     F('spray_operator__code')),
+                              distinct=True))\
+            .values_list('team_leader__code', 'a', 'b')
         sprayed_structures = {}
-        for t, a, b in cursor.fetchall():
+        for t, a, b in sprayed_per_spray_operator_per_day:
             sprayed_structures[t] = (a, b)
         for team_leader, team_leader_name in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
