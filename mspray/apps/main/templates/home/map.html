@@ -113,7 +113,7 @@
         app.visitedRefused = {{ target_data.visited_refused }};
         app.visitedOther = {{ target_data.visited_other }};
 
-        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
+        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
     </script>
 {% endblock %}
