@@ -1,6 +1,7 @@
 from datetime import datetime
-from django.db.models import Count
 from django.conf import settings
+from django.db import connection
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -17,6 +18,7 @@ from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 from mspray.apps.main.utils import unique_spray_points
 
+HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
@@ -25,6 +27,7 @@ WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
+TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
 
 
 def calculate(numerator, denominator, percentage):
@@ -270,7 +273,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'spray_success_rate': 0
         }
 
-        ta_pks = get_ta_in_location(district)
+        ta_pks = list(get_ta_in_location(district))
         spraypoints_qs = unique_spray_points(
             SprayDay.objects.filter(location__pk__in=ta_pks)
         )
@@ -299,6 +302,31 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         start_times = []
         end_times = []
 
+        AVG_SSPD_SQL = """
+        SELECT data->>%s AS team_code, COUNT(id) as count_sprayed,
+        COUNT(DISTINCT CONCAT(spray_date,' ', data->>%s))
+        AS count_days FROM "main_sprayday"
+        WHERE ("main_sprayday"."location_id" IN %s AND
+        "main_sprayday"."id" IN (
+        SELECT U0."sprayday_id" FROM "main_spraypoint" U0)
+        {}
+        AND (data->>%s = 'yes'))
+        group by team_code;"""
+        if HAS_SPRAYABLE_QUESTION:
+            AVG_SSPD_SQL = AVG_SSPD_SQL.format(
+                "AND (data->>'sprayable_structure' = 'yes') "
+            )
+        else:
+            AVG_SSPD_SQL = AVG_SSPD_SQL.format("")
+        cursor = connection.cursor()
+        cursor.execute(AVG_SSPD_SQL, params=[
+            TEAM_LEADER_CODE, SPRAY_OPERATOR_CODE,
+            tuple(ta_pks),
+            WAS_SPRAYED_FIELD,
+        ])
+        sprayed_structures = {}
+        for t, a, b in cursor.fetchall():
+            sprayed_structures[t] = (a, b)
         for team_leader, team_leader_name in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
                                       params=[TEAM_LEADER_CODE, team_leader])
@@ -307,14 +335,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 else sprayable.get(team_leader)
             sprayed_success_rate = round((numerator/denominator) * 100, 1)
 
-            # calcuate Average structures sprayed per day per SO
-            spray_points_sprayed = qs.extra(where=["data->>%s = %s"],
-                                            params=[WAS_SPRAYED_FIELD, "yes"])
-            sprayed_structures = update_sprayed_structures(
-                spray_points_sprayed, {})
-            denominator = 1 if len(sprayed_structures.keys()) == 0 \
-                else len(sprayed_structures.keys())
-            numerator = sum(a for a in sprayed_structures.values())
+            numerator, denominator = sprayed_structures.get(team_leader,
+                                                            (0, 1))
+            denominator = 1 if denominator == 0 else denominator
             avg_structures_per_user_per_so = round(numerator/denominator)
 
             not_sprayed_total = refused.get(team_leader, 0) + \
