@@ -23,11 +23,15 @@ class Command(BaseCommand):
                     sprayday.save()
                     count += 1
                 else:
-                    pk = link_spraypoint_with_osm(sprayday.pk)
-                    if pk == sprayday.pk:
-                        sp = SprayDay.objects.get(pk=pk)
-                        if sp.location is not None:
-                            count += 1
+                    try:
+                        pk = link_spraypoint_with_osm(sprayday.pk)
+                    except Exception as e:
+                        self.stderr.write("{}: {}".format(sprayday.pk, e))
+                    else:
+                        if pk == sprayday.pk:
+                            sp = SprayDay.objects.get(pk=pk)
+                            if sp.location is not None:
+                                count += 1
             except Location.DoesNotExist:
                 pass
 
