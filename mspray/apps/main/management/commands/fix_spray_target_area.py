@@ -3,6 +3,7 @@ from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import Location
+from mspray.apps.main.tasks import link_spraypoint_with_osm
 
 
 class Command(BaseCommand):
@@ -21,6 +22,12 @@ class Command(BaseCommand):
                     sprayday.location = location
                     sprayday.save()
                     count += 1
+                else:
+                    pk = link_spraypoint_with_osm(sprayday.pk)
+                    if pk == sprayday.pk:
+                        sp = SprayDay.objects.get(pk=pk)
+                        if sp.location is not None:
+                            count += 1
             except Location.DoesNotExist:
                 pass
 
