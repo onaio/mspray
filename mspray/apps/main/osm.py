@@ -7,8 +7,13 @@ from lxml import etree
 def _get_xml_obj(xml):
     if not isinstance(xml, bytes):
         xml = xml.strip().encode()
+    try:
+        return etree.fromstring(xml)
+    except etree.XMLSyntaxError as e:
+        if 'Attribute action redefined' in e.msg:
+            xml = xml.replace(b'action="modify" ', b'')
 
-    return etree.fromstring(xml)
+            return _get_xml_obj(xml)
 
 
 def _get_node(ref, root):

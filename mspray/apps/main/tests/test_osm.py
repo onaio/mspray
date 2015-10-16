@@ -42,6 +42,14 @@ OSMNode = """
   </node>
 </osm>
 """  # noqa
+OSMNodeFaulty = """
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="OpenMapKit 0.12" user="theoutpost">
+  <node id="-1" action="modify" lat="-9.24311382416424" lon="28.805980682373047" action="modify">
+    <tag k="spray_status" v="sprayed" />
+  </node>
+</osm>
+"""  # noqa
 
 
 class TestOsm(TestCase):
@@ -53,6 +61,12 @@ class TestOsm(TestCase):
 
     def test_parse_osm_node(self):
         nodes = parse_osm_nodes(OSMNode.strip())
+        self.assertTrue(len(nodes) > 0)
+        node = nodes[0]
+        self.assertIsInstance(node, GEOSGeometry)
+
+    def test_parse_osm_node_faulty(self):
+        nodes = parse_osm_nodes(OSMNodeFaulty.strip())
         self.assertTrue(len(nodes) > 0)
         node = nodes[0]
         self.assertIsInstance(node, GEOSGeometry)
