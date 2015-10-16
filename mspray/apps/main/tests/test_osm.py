@@ -2,8 +2,9 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.test import TestCase
 
 from mspray.apps.main.osm import parse_osm_ways
+from mspray.apps.main.osm import parse_osm_nodes
 
-OSMXML = """
+OSMWay = """
 <?xml version="1.0" encoding="UTF-8"?>
 <osm version="0.6" generator="OpenMapKit 0.7" user="theoutpost">
     <node id="-1943" lat="-11.202901601" lon="28.883830387" />
@@ -33,11 +34,25 @@ OSMXML = """
     </way>
 </osm>
 """
+OSMNode = """
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="OpenMapKit 0.12" user="theoutpost">
+  <node id="-1" action="modify" lat="-9.24311382416424" lon="28.805980682373047">
+    <tag k="spray_status" v="sprayed" />
+  </node>
+</osm>
+"""  # noqa
 
 
 class TestOsm(TestCase):
     def test_parse_osm_ways(self):
-        ways = parse_osm_ways(OSMXML.strip())
+        ways = parse_osm_ways(OSMWay.strip())
         self.assertTrue(len(ways) > 0)
         way = ways[0]
         self.assertIsInstance(way, GEOSGeometry)
+
+    def test_parse_osm_node(self):
+        nodes = parse_osm_nodes(OSMNode.strip())
+        self.assertTrue(len(nodes) > 0)
+        node = nodes[0]
+        self.assertIsInstance(node, GEOSGeometry)

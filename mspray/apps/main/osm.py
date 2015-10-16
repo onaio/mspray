@@ -38,3 +38,17 @@ def parse_osm_ways(osm_xml):
             items.append(LineString(points))
 
     return items
+
+
+def parse_osm_nodes(osm_xml):
+    """Converts an OSM XMl to a list of GEOSGeometry objects """
+    items = []
+
+    root = _get_xml_obj(osm_xml)
+
+    for node in root.findall('node'):
+        x, y = float(node.get('lon')), float(node.get('lat'))
+        point = Point(x, y)
+        items.append(point)
+
+    return items
