@@ -42,7 +42,7 @@ class TargetAreaMixin(object):
     def get_queryset(self, obj):
 
         qs = SprayDay.objects.filter(
-            location__pk__in=get_ta_in_location(obj)
+            location__pk__in=list(get_ta_in_location(obj))
         )
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values('sprayday'))
