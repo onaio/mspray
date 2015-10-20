@@ -17,6 +17,7 @@ from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 from mspray.apps.main.utils import unique_spray_points
+from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
@@ -109,7 +110,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             structures_sprayed_totals = 0
             spray_points_total = 0
             found_gt_20 = 0
-            ta_pks = get_ta_in_location(district)
+            ta_pks = list(get_ta_in_location(district))
             qs = sprayable_queryset(
                 unique_spray_points(
                     SprayDay.objects.filter(location__pk__in=ta_pks)
@@ -124,14 +125,24 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             result['avg_start_time'] = _start_time
             start_times.append(_start_time)
 
-            for target_area in target_areas:
-                locations = list(get_ta_in_location(target_area))
-                structures = 0 \
-                    if target_area.structures < 0 else target_area.structures
-                spray_day = qs.filter(location__in=locations)
+            sprayed_per_spray_operator_per_day = qs.extra(
+                where=['data->>%s = %s'], params=[WAS_SPRAYED_FIELD, 'yes']
+            ).values_list('location__code')\
+                .annotate(a=Count('spray_operator'),
+                          b=Count(Concat(F('spray_date'),
+                                         F('spray_operator__code')),
+                                  distinct=True))\
+                .values_list('location__code', 'a', 'b')
+            sprayed_structures = {}
+            for t, a, b in sprayed_per_spray_operator_per_day:
+                sprayed_structures[t] = (a, b)
+
+            serializer = TargetAreaSerializer(target_areas, many=True)
+            for target_area in serializer.data:
+                structures = target_area['structures']
+                structures = 0 if structures < 0 else structures
                 # found
-                spray_points_founds = spray_day.filter().count()
-                # data__contains='"sprayable_structure":"yes"').count()
+                spray_points_founds = target_area['found']
                 spray_points_total += spray_points_founds
 
                 if spray_points_founds > 0:
@@ -141,24 +152,15 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                                              0.20)
 
                 # sprayed
-                spray_points_sprayed = spray_day.extra(
-                    where=["data->>%s = %s"],
-                    params=[WAS_SPRAYED_FIELD, "yes"]
-                )
-
-                spray_points_sprayed_count = spray_points_sprayed.count()
+                spray_points_sprayed_count = target_area['visited_sprayed']
                 if spray_points_sprayed_count > 0:
                     target_areas_sprayed_total += calculate(
                         spray_points_sprayed_count, structures, 0.85)
                     structures_sprayed_totals += spray_points_sprayed_count
 
-                    # update sprayed structures
-                    sprayed_structures = update_sprayed_structures(
-                        spray_points_sprayed, sprayed_structures)
-
             # calcuate Average structures sprayed per day per spray operator
-            denominator = len(sprayed_structures.keys())
-            numerator = sum(a for a in sprayed_structures.values())
+            denominator = sum([b for a, b in sprayed_structures.values()])
+            numerator = sum([a for a, b in sprayed_structures.values()])
             avg_struct_per_user_per_so = round(numerator/denominator) \
                 if numerator != 0 else 0
 
