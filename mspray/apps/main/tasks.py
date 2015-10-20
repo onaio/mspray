@@ -47,3 +47,19 @@ def link_spraypoint_with_osm(pk):
                         add_unique_data(sp, unique_field, location)
 
                     return sp.pk
+                else:
+                    district = sp.data.get('district')
+                    target_area = sp.data.get('target_area')
+                    try:
+                        location = Location.objects.get(name=target_area,
+                                                        parent__code=district)
+                    except Location.DoesNotExist:
+                        pass
+                    else:
+                        sp.geom = geom.centroid if not is_node else geom
+                        sp.bgeom = geom \
+                            if not is_node else sp.geom.buffer(0.00004, 1)
+                        sp.location = location
+                        sp.save()
+                        if unique_field:
+                            add_unique_data(sp, unique_field, location)
