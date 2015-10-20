@@ -117,11 +117,12 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 )
             )
 
-            _end_time = avg_time(qs, 'start')
+            pks = list(qs.values_list('id', flat=True))
+            _end_time = avg_time(pks, 'start')
             result['avg_end_time'] = _end_time
             end_times.append(_end_time)
 
-            _start_time = avg_time(qs, 'end')
+            _start_time = avg_time(pks, 'end')
             result['avg_start_time'] = _start_time
             start_times.append(_start_time)
 
@@ -294,7 +295,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
         start_times = []
         end_times = []
-        sprayed_per_spray_operator_per_day = spraypoints.extra(
+        sprayed_per_spray_operator_per_day = spraypoints.select_related()\
+            .extra(
             where=['data->>%s = %s'], params=[WAS_SPRAYED_FIELD, 'yes']
         ).values_list('team_leader__code')\
             .annotate(a=Count('spray_operator'),
@@ -321,10 +323,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             not_sprayed_total = refused.get(team_leader, 0) + \
                 other.get(team_leader, 0)
 
-            _end_time = avg_time(qs, 'start')
+            pks = list(qs.values_list('id', flat=True))
+            _end_time = avg_time(pks, 'start')
             end_times.append(_end_time)
 
-            _start_time = avg_time(qs, 'end')
+            _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
             data.append({
@@ -457,9 +460,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             not_sprayed_total = refused.get(spray_operator_code, 0) + \
                 other.get(spray_operator_code, 0)
 
-            _end_time = avg_time(qs, 'start')
+            pks = list(qs.values_list('id', flat=True))
+            _end_time = avg_time(pks, 'start')
             end_times.append(_end_time)
-            _start_time = avg_time(qs, 'end')
+            _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
             data.append({
@@ -572,9 +576,10 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
             qs = spraypoints.extra(where=["data->>%s = %s"],
                                    params=["today", _date])
-            _end_time = avg_time(qs, 'start')
+            pks = list(qs.values_list('id', flat=True))
+            _end_time = avg_time(pks, 'start')
             end_times.append(_end_time)
-            _start_time = avg_time(qs, 'end')
+            _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
             data.append({

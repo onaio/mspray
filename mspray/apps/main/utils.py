@@ -278,8 +278,8 @@ def avg_time_per_group(results):
         return avg_time_tuple(times) if len(times) else (None, None)
 
 
-def avg_time(qs, field):
-    pks = list(qs.values_list('pk', flat=True))
+def avg_time(pks, field):
+    # pks = list(qs.values_list('pk', flat=True))
     if len(pks) == 0:
         return (None, None)
 
