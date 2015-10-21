@@ -35,7 +35,7 @@ def get_new_structure_location(data, geom):
     return location, geom
 
 
-def get_location_from_data(data, geom):
+def get_location_from_data(data):
     district = data.get('district')
     target_area = data.get('target_area')
     location = None
