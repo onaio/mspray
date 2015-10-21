@@ -21,7 +21,7 @@ def get_new_structure_location(data, geom):
     from mspray.apps.main.utils import geojson_from_gps_string
     gps_field = data.get(STRUCTURE_GPS_FIELD,
                          data.get(NON_STRUCTURE_GPS_FIELD))
-    geom = geojson_from_gps_string(gps_field) \
+    geom = geojson_from_gps_string(gps_field, True) \
         if gps_field is not None else geom
     location = None
     if geom is not None:

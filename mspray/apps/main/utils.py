@@ -13,6 +13,7 @@ from django.db import connection
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
+from django.contrib.gis.geos import Point
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
@@ -41,12 +42,14 @@ TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
 
 
-def geojson_from_gps_string(geolocation):
+def geojson_from_gps_string(geolocation, geom=False):
     if not isinstance(geolocation, str):
         raise ValidationError('Expecting a a string for gps')
 
     geolocation = [float(p) for p in geolocation.split()[:2]]
     geolocation.reverse()
+    if geom:
+        return Point(geolocation[0], geolocation[1])
 
     return json.dumps(
         {'type': 'point', 'coordinates': geolocation})
