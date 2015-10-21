@@ -71,6 +71,8 @@ def get_location_from_osm(data):
             )
             if locations:
                 location = locations.first()
+        else:
+            location = get_location_from_data(data)
 
     return location, geom, is_node
 
