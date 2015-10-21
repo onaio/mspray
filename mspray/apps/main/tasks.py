@@ -23,6 +23,7 @@ def get_new_structure_location(data, geom):
                          data.get(NON_STRUCTURE_GPS_FIELD))
     geom = geojson_from_gps_string(gps_field) \
         if gps_field is not None else geom
+    location = None
     if geom is not None:
         locations = Location.objects.filter(
             geom__contains=geom,
