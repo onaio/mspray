@@ -34,8 +34,23 @@ class Command(BaseCommand):
 
         return sprayday
 
+    def link_spray_point(self, sprayday):
+        try:
+            pk = link_spraypoint_with_osm(sprayday.pk)
+        except Exception as e:
+            self.stderr.write("{}: {}".format(sprayday.pk, e))
+        else:
+            if pk == sprayday.pk:
+                sp = SprayDay.objects.get(pk=pk)
+                if sp.location is not None:
+                    self.count += 1
+                else:
+                    sp = self.new_structure_gps(sp)
+                    if sp.location is not None:
+                        self.count += 1
+
     def handle(self, *args, **options):
-        count = 0
+        self.count = 0
         points = SprayDay.objects.filter(location=None)
         final_count = points.count()
         for sprayday in points.iterator():
@@ -48,26 +63,14 @@ class Command(BaseCommand):
                 if not osm_structure:
                     sprayday.location = location
                     sprayday.save()
-                    count += 1
+                    self.count += 1
                 else:
-                    try:
-                        pk = link_spraypoint_with_osm(sprayday.pk)
-                    except Exception as e:
-                        self.stderr.write("{}: {}".format(sprayday.pk, e))
-                    else:
-                        if pk == sprayday.pk:
-                            sp = SprayDay.objects.get(pk=pk)
-                            if sp.location is not None:
-                                count += 1
-                            else:
-                                sp = self.new_structure_gps(sp)
-                                if sp.location is not None:
-                                    count += 1
+                    self.link_spray_point(sprayday)
             except Location.DoesNotExist:
-                pass
+                self.link_spray_point(sprayday)
 
         self.stdout.write(
             "{} points of {} linked to location.".format(
-                count, final_count
+                self.count, final_count
             )
         )
