@@ -25,13 +25,21 @@ def fetch_osm_xml(data):
     return xml
 
 
-def fetch_form_data(formid, latest=None):
+def fetch_form_data(formid, latest=None, dataid=None, dataids_only=False):
     query = None
     if latest:
         query = {
             'query': '{"_id":{"$gte":%s}}' % (latest)
         }
-    url = urljoin(ONA_URI, '/api/v1/data/{}.json'.format(formid))
+    if dataids_only:
+        query = {} if query is None else query
+        query['fields'] = '["_id"]'
+
+    if dataid is not None:
+        url = urljoin(ONA_URI,
+                      '/api/v1/data/{}/{}.json'.format(formid, dataid))
+    else:
+        url = urljoin(ONA_URI, '/api/v1/data/{}.json'.format(formid))
     headers = {
         'Authorization': 'Token {}'.format(ONA_TOKEN)
     }
