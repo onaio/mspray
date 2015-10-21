@@ -24,22 +24,27 @@ class Command(BaseCommand):
             old_data = SprayDay.objects.filter().order_by('-submission_id')\
                 .values_list('submission_id', flat=True)
             raw_data = fetch_form_data(formid, dataids_only=True)
-            all_data = [rec['_id'] for rec in raw_data]
-            if all_data is not None and isinstance(all_data, list):
-                new_data = list(set(all_data) - set(old_data))
-                count = len(new_data)
-                counter = 0
-                self.stdout.write(
-                    "Need to pull {} records from Ona.".format(count)
-                )
-                for dataid in new_data:
-                    counter += 1
+            if isinstance(raw_data, list):
+                all_data = [rec['_id'] for rec in raw_data]
+                if all_data is not None and isinstance(all_data, list):
+                    new_data = list(set(all_data) - set(old_data))
+                    count = len(new_data)
+                    counter = 0
                     self.stdout.write(
-                        "Pulling {} of {}".format(counter, count)
+                        "Need to pull {} records from Ona.".format(count)
                     )
-                    rec = fetch_form_data(formid, dataid=dataid)
-                    if isinstance(rec, dict):
-                        try:
-                            add_spray_data(rec)
-                        except IntegrityError:
-                            continue
+                    for dataid in new_data:
+                        counter += 1
+                        self.stdout.write(
+                            "Pulling {} of {}".format(counter, count)
+                        )
+                        rec = fetch_form_data(formid, dataid=dataid)
+                        if isinstance(rec, dict):
+                            try:
+                                add_spray_data(rec)
+                            except IntegrityError:
+                                continue
+            else:
+                self.stdout.write("DATA not fetched: {}".format(raw_data))
+        else:
+            self.stdout.write("Missing or Invalid formid {}".format(formid))
