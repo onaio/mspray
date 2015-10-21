@@ -40,9 +40,11 @@ class Command(BaseCommand):
         final_count = points.count()
         for sprayday in points.iterator():
             ta = sprayday.data.get('target_area')
+            district = sprayday.data.get('district')
             osm_structure = sprayday.data.get('osmstructure')
             try:
-                location = Location.objects.get(name=ta.replace('_', ' / '))
+                location = Location.objects.get(name=ta.replace('_', ' / '),
+                                                parent__code=district)
                 if not osm_structure:
                     sprayday.location = location
                     sprayday.save()
