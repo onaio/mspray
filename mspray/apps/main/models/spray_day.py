@@ -23,6 +23,8 @@ class SprayDay(models.Model):
     team_leader = models.ForeignKey('TeamLeader', db_index=True, null=True)
     spray_operator = models.ForeignKey('SprayOperator', db_index=True,
                                        null=True)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
 
     objects = models.GeoManager()
 
