@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
@@ -80,6 +81,9 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             try:
                 sprayday = add_spray_data(request.data)
             except ValidationError as e:
+                data = {"error": "%s" % e}
+                status_code = status.HTTP_400_BAD_REQUEST
+            except IntegrityError as e:
                 data = {"error": "%s" % e}
                 status_code = status.HTTP_400_BAD_REQUEST
             else:
