@@ -194,7 +194,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     }
                 })
                 .addTo(app.map);
-                app.map.fitBounds(app.sprayLayer.getBounds());
+                // app.map.fitBounds(app.sprayLayer.getBounds());
             }
 
             $("#target-area-stats-structures").empty().append(
