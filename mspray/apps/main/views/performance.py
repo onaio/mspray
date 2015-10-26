@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.conf import settings
-from django.db.models import Count, F
+from django.db.models import Count, F, Sum
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -10,6 +10,7 @@ from django.views.generic import TemplateView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SprayPointView
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
@@ -88,7 +89,13 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(DistrictPerfomanceView, self)\
             .get_context_data(**kwargs)
-        districts = context.get('object_list')
+        districts = Location.objects.filter(parent=None).annotate(
+            num_target_area=Count('location'),
+            total_structures=Sum('location__structures')
+        )
+        structures_found_by_district = Location.objects.filter(parent=None)\
+            .values('name').filter(districts__sprayable_structure='yes')\
+            .annotate(k=Count('districts', distinct=True))
         totals = {
             'avg_structures_per_user_per_so': 0,
             'found': 0,
