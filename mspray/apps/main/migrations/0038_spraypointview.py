@@ -1,25 +1,15 @@
-from django.contrib.gis.db import models
-from django.db import connection
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
+from django.db import migrations, models
 
 
-class SprayPoint(models.Model):
-    data_id = models.CharField(max_length=50)
-    sprayday = models.ForeignKey('SprayDay')
-    location = models.ForeignKey('Location')
-    irs_number = models.CharField(max_length=50)
-
-    class Meta:
-        app_label = 'main'
-        unique_together = (('data_id', 'location', 'irs_number'))
-
-    def __str__(self):
-        return self.data_id
-
-
-MATERIALIZED_VIEW = """
+sql = """
 CREATE MATERIALIZED VIEW main_spray_point_view AS (SELECT DISTINCT ON ("main_sprayday"."id") "main_sprayday"."id", (data->>'sprayable_structure') AS "sprayable_structure",
                                           (data->>'sprayable/unsprayed/reason') AS "unsprayed_reason",
+                                          "main_sprayday"."location_id" as location_id,
                                           "main_location"."code" as location_code,
+                                          T3."id" as district_id,
                                           T3."code" as district_code,
                                           "main_sprayday"."team_leader_id",
                                           "main_teamleader"."code" as team_leader_code,
@@ -38,31 +28,16 @@ WHERE "main_sprayday"."id" IN
     (SELECT U0."sprayday_id"
      FROM "main_spraypoint" U0));
 """  # noqa
+reverse_sql = """DROP MATERIALIZED VIEW main_spray_point_view;"""
 
 
-class SprayPointView(models.Model):
-    sprayable_structure = models.CharField(max_length=10)
-    unsprayed_reason = models.CharField(max_length=50)
-    location_code = models.CharField(max_length=50)
-    district_code = models.CharField(max_length=50)
-    team_leader_id = models.IntegerField()
-    team_leader_code = models.CharField(max_length=50)
-    team_leader_name = models.CharField(max_length=255)
-    spray_operator_id = models.IntegerField()
-    sprayoperator_code = models.CharField(max_length=10)
-    spray_date = models.DateField()
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    district = models.ForeignKey('Location', related_name='districts')
-    location = models.ForeignKey('Location', related_name='target_areas')
+class Migration(migrations.Migration):
 
-    class Meta:
-        db_table = 'main_spray_point_view'
-        managed = False
+    dependencies = [
+        ('main', '0037_sprayoperator_team_leader'),
+    ]
 
-    @classmethod
-    def refresh_view(cls):
-        cursor = connection.cursor()
-        cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
-            cls._meta.db_table
-        ))
+    operations = [
+        migrations.RunSQL(reverse_sql, sql),
+        migrations.RunSQL(sql, reverse_sql)
+    ]
