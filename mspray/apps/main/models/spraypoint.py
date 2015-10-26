@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models
+from django.db import connection
 
 
 class SprayPoint(models.Model):
@@ -56,3 +57,10 @@ class SprayPointView(models.Model):
     class Meta:
         db_table = 'main_spray_point_view'
         managed = False
+
+    @classmethod
+    def refresh_view(cls):
+        cursor = connection.cursor()
+        cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
+            cls._meta.db_table
+        ))
