@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.conf import settings
-from django.db.models import Count, F, Sum
+from django.db.models import Count, F, Sum, FloatField, ExpressionWrapper
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -96,6 +96,14 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         structures_found_by_district = Location.objects.filter(parent=None)\
             .values('name').filter(districts__sprayable_structure='yes')\
             .annotate(k=Count('districts', distinct=True))
+        gte_20_tas = Location.objects.filter(parent=1, structures__gt=0)\
+            .values('name', 'structures')\
+            .annotate(k=ExpressionWrapper(
+                Count('target_areas', distinct=True) * 100 / (F('structures')),
+                output_field=FloatField())
+            ).values_list('k', flat=True)\
+            .filter(k__gte=20)\
+            .count()
         totals = {
             'avg_structures_per_user_per_so': 0,
             'found': 0,
