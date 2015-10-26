@@ -5,6 +5,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
 
+from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.models import SprayOperator
 
 
@@ -31,3 +32,10 @@ class Command(BaseCommand):
                             )
                         if created:
                             print(row)
+                        team_code = row['team_leader'].strip()
+                        if team_code:
+                            team_leader = TeamLeader.objects.get(
+                                code=team_code
+                            )
+                            spray_operator.team_leader = team_leader
+                            spray_operator.save()
