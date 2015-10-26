@@ -291,9 +291,10 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
-        team_leaders = spraypoints.values_list(
-            'team_leader__code', 'team_leader__name'
-        ).distinct()
+        team_leaders = spraypoints.filter(team_leader__location=district)\
+            .values_list(
+                'team_leader__code', 'team_leader__name'
+            ).distinct()
 
         start_times = []
         end_times = []
