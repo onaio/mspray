@@ -306,6 +306,7 @@ class TargetAreaQuerySerializer(TargetAreaQueryMixin,
 
 
 class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
+    id = serializers.SerializerMethodField('get_targetid')
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
@@ -322,6 +323,6 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     class Meta:
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'level', 'district_name', 'found')
+                  'not_visited', 'level', 'district_name', 'found', 'id')
         model = TargetArea
         geo_field = 'geom'

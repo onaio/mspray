@@ -64,7 +64,8 @@ class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
     class Meta:
         model = SprayDay
         fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
-                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num',
+                  'id')
         geo_field = 'geom'
 
 
@@ -79,7 +80,8 @@ class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
     class Meta:
         model = SprayDay
         fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
-                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num',
+                  'id')
         geo_field = 'geom'
 
 
@@ -94,5 +96,6 @@ class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
     class Meta:
         model = SprayDay
         fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
-                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num',
+                  'id')
         geo_field = 'bgeom'
