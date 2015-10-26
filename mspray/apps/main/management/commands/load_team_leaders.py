@@ -5,6 +5,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
 
+from mspray.apps.main.models import Location
 from mspray.apps.main.models import TeamLeader
 
 
@@ -31,3 +32,8 @@ class Command(BaseCommand):
                             )
                         if created:
                             print(row)
+                        district = row['district'].strip()
+                        if district:
+                            location = Location.objects.get(code=district)
+                            team_leader.location = location
+                            team_leader.save()
