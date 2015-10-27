@@ -19,7 +19,12 @@ class SprayPoint(models.Model):
 MATERIALIZED_VIEW = """
 CREATE MATERIALIZED VIEW main_spray_point_view AS (SELECT DISTINCT ON ("main_sprayday"."id") "main_sprayday"."id", (data->>'sprayable_structure') AS "sprayable_structure",
                                           (data->>'sprayable/unsprayed/reason') AS "unsprayed_reason",
+                                          (data->>'sprayable/was_sprayed') AS "was_sprayed",
+                                          (data->>'sprayable/irs_card_num') AS "irs_card_num",
+                                          (data->>'osmstructure') AS "osmstructure",
+                                          "main_sprayday"."location_id" as location_id,
                                           "main_location"."code" as location_code,
+                                          T3."id" as district_id,
                                           T3."code" as district_code,
                                           "main_sprayday"."team_leader_id",
                                           "main_teamleader"."code" as team_leader_code,
