@@ -42,6 +42,9 @@ WHERE "main_sprayday"."id" IN
 
 class SprayPointView(models.Model):
     sprayable_structure = models.CharField(max_length=10)
+    was_sprayed = models.CharField(max_length=10)
+    irs_card_num = models.CharField(max_length=10)
+    osmstructure = models.CharField(max_length=50)
     unsprayed_reason = models.CharField(max_length=50)
     location_code = models.CharField(max_length=50)
     district_code = models.CharField(max_length=50)
