@@ -89,21 +89,19 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(DistrictPerfomanceView, self)\
             .get_context_data(**kwargs)
-        districts = Location.objects.filter(parent=None).annotate(
+        qs = Location.objects.filter(parent=None)
+        districts = qs.annotate(
             num_target_area=Count('location'),
             total_structures=Sum('location__structures')
         )
-        structures_found_by_district = Location.objects.filter(parent=None)\
-            .values('name').filter(districts__sprayable_structure='yes')\
-            .annotate(k=Count('districts', distinct=True))
-        gte_20_tas = Location.objects.filter(parent=1, structures__gt=0)\
-            .values('name', 'structures')\
-            .annotate(k=ExpressionWrapper(
-                Count('target_areas', distinct=True) * 100 / (F('structures')),
-                output_field=FloatField())
-            ).values_list('k', flat=True)\
-            .filter(k__gte=20)\
-            .count()
+    
+        structures_found_by_district = {
+            a.get('name'): a.get('k')
+            for a in qs.values('name').filter(
+                districts__sprayable_structure='yes'
+            ).annotate(k=Count('districts', distinct=True))
+        }
+
         gte_85_tas = Location.objects.filter(parent=1, structures__gt=0)\
             .values('name', 'structures')\
             .filter(target_areas__sprayable_structure='yes')\
@@ -172,13 +170,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 structures = 0 if structures < 0 else structures
                 # found
                 spray_points_founds = target_area['found']
-                spray_points_total += spray_points_founds
 
                 if spray_points_founds > 0:
                     target_areas_found_total += calculate(spray_points_founds,
                                                           structures, 0.95)
-                    found_gt_20 += calculate(spray_points_founds, structures,
-                                             0.20)
 
                 # sprayed
                 spray_points_sprayed_count = target_area['visited_sprayed']
@@ -200,13 +195,27 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
             result['found'] = target_areas_found_total
             totals['found'] += target_areas_found_total
+
+            found_gt_20 = Location.objects.filter(
+                    parent=district.id, structures__gt=0)\
+                .values('name', 'structures')\
+                .annotate(k=ExpressionWrapper(
+                    Count('target_areas',
+                          distinct=True) * 100 / (F('structures')),
+                    output_field=FloatField())
+                ).values_list('k', flat=True)\
+                .filter(k__gte=20)\
+                .count()
             result['found_gt_20'] = found_gt_20
             totals['found_gt_20'] += found_gt_20
 
             result['found_percentage'] = round((
                 target_areas_found_total / target_areas.count()) * 100, 0)
-            result['structures_found'] = spray_points_total
-            totals['structures_found'] += spray_points_total
+
+            result['structures_found'] = int(
+                structures_found_by_district.get(district.name))
+            totals['structures_found'] += int(
+                structures_found_by_district.get(district.name))
             result['found_gt_20_percentage'] = round((
                 found_gt_20 / target_areas.count()) * 100, 0)
 
@@ -221,6 +230,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             if spray_points_total > 0:
                 result['sprayed_total_percentage'] = round(
                     (structures_sprayed_totals / spray_points_total * 100), 0)
+
             result['target_areas'] = target_areas.count()
             totals['target_areas'] += target_areas.count()
 
