@@ -219,7 +219,6 @@ def get_spray_operator(code):
 def add_unique_data(sprayday, unique_field, location):
     sp = None
     data_id = sprayday.data.get(unique_field)
-    irs_number = sprayday.data.get(IRS_NUMBER, 'xxxxxx')
     if settings.OSM_SUBMISSIONS and \
             sprayday.data.get('newstructure/nostructure') == 'OK':
         gps = sprayday.data.get(STRUCTURE_GPS_FIELD)
@@ -231,14 +230,12 @@ def add_unique_data(sprayday, unique_field, location):
             sp, created = SprayPoint.objects.get_or_create(
                 sprayday=sprayday,
                 data_id=data_id,
-                irs_number=irs_number,
                 location=location
             )
         except IntegrityError:
             sp = SprayPoint.objects.select_related().get(
                 data_id=data_id,
                 location=location,
-                irs_number=irs_number
             )
             was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
 
