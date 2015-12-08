@@ -94,35 +94,3 @@ def parse_osm(osm_xml, include_osm_id=False):
     result.extend(nodes)
 
     return result
-
-
-# def parse_osm_ways(osm_xml):
-#     """Converts an OSM XMl to a list of GEOSGeometry objects """
-#     items = []
-
-#     root = _get_xml_obj(osm_xml)
-
-#     for way in root.findall('way'):
-#         points = []
-#         for nd in way.findall('nd'):
-#             points.append(_get_node(nd.get('ref'), root))
-#         try:
-#             items.append(Polygon(points))
-#         except:
-#             items.append(LineString(points))
-
-#     return items
-
-
-# def parse_osm_nodes(osm_xml):
-#     """Converts an OSM XMl to a list of GEOSGeometry objects """
-#     items = []
-
-#     root = _get_xml_obj(osm_xml)
-
-#     for node in root.findall('node'):
-#         x, y = float(node.get('lon')), float(node.get('lat'))
-#         point = Point(x, y)
-#         items.append(point)
-
-#     return items

@@ -64,7 +64,7 @@ def get_location_from_osm(data):
         else:
             geoms = parse_osm_ways(osm_xml)
         if len(geoms):
-            geom = geoms[0]
+            geom = geoms[0]['geom']
             locations = Location.objects.filter(
                 geom__covers=geom.centroid if not is_node else geom,
                 level=settings.MSPRAY_TA_LEVEL
