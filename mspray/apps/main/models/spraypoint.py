@@ -74,3 +74,40 @@ class SprayPointView(models.Model):
         cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
             cls._meta.db_table
         ))
+
+
+class Hhcsv(models.Model):
+    osmid = models.IntegerField()
+    y = models.FloatField()
+    x3 = models.FloatField()
+    shape_area = models.FloatField()
+    shape_length = models.FloatField()
+
+    class Meta:
+        db_table = 'households'
+        managed = False
+
+
+class OsmData(models.Model):
+    osmid = models.IntegerField()
+    target_area = models.CharField(max_length=100)
+    district = models.CharField(max_length=20)
+    building = models.CharField(max_length=3)
+    shape_area = models.FloatField()
+    shape_length = models.FloatField()
+
+    class Meta:
+        db_table = 'osm_data'
+        managed = False
+
+
+class MatchedData(models.Model):
+    osmpk = models.IntegerField(unique=True)
+    osmid = models.IntegerField()
+    target_area = models.CharField(max_length=100)
+    district = models.CharField(max_length=20)
+    building = models.CharField(max_length=3)
+    shape_area = models.FloatField()
+    shape_length = models.FloatField()
+    y = models.FloatField()
+    x3 = models.FloatField()

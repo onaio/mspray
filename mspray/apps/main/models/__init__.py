@@ -8,3 +8,6 @@ from .spray_operator import SprayOperator  # noqa
 from .location import Location  # noqa
 from .spraypoint import SprayPoint  # noqa
 from .spraypoint import SprayPointView  # noqa
+from .spraypoint import Hhcsv  # noqa
+from .spraypoint import OsmData  # noqa
+from .spraypoint import MatchedData  # noqa
