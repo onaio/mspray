@@ -1,5 +1,4 @@
 django
-django-pgjson
 jsonfield<1
 psycopg2
 django_nose

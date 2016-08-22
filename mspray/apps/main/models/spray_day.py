@@ -1,7 +1,7 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.conf import settings
 from django.contrib.gis.db import models
-from django_pgjson.fields import JsonField
+from django.contrib.postgres.fields import JSONField
 
 DATA_FILTER = getattr(settings, 'MSPRAY_DATA_FILTER',
                       '"sprayable_structure":"yes"')
@@ -18,7 +18,7 @@ class SprayDay(models.Model):
     spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326, null=True)
     bgeom = models.GeometryField(srid=4326, null=True)
-    data = JsonField(default={})
+    data = JSONField(default={})
     location = models.ForeignKey('Location', null=True)
 
     objects = models.GeoManager()
