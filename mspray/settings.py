@@ -30,6 +30,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'debug': False
         },
     },
 ]
@@ -42,8 +43,6 @@ SECRET_KEY = 'u3rh4x=!%7j4@e4*ctww1v+rt4614%kgiow(k@74qsl0-s6yn^'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
