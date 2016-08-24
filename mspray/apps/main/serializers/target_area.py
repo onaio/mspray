@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import Count
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
@@ -7,6 +8,7 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
+from mspray.apps.main.models.location import Location
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 
@@ -295,6 +297,42 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level')
         model = TargetArea
+
+    def get_per_district_queryset(self, queryset):
+        # group queryset by target areas visited
+        ta_visited = queryset.values(
+            'location__name'
+        ).annotate(
+            location_count=Count('location__name')
+        )
+
+        ta_dict = {
+            a.get('location__name'): a.get('location_count')
+            for a in ta_visited
+        }
+
+        # get ids of target areas with at least 20% visit rate
+        visited_ta_gt_20 = [
+            a.id
+            for a in Location.objects.filter(name__in=ta_dict.keys())
+            if ((ta_dict.get(a.name) / self.get_structures(a)) * 100) >= 20
+        ]
+
+        # filter queryset to only have data with 20% visit rate
+        queryset = queryset.filter(location_id__in=visited_ta_gt_20)
+
+        return queryset
+
+    def get_visited_total(self, obj):
+        if obj:
+            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            key = "%s_visited_total" % pk
+            queryset = self.get_spray_queryset(obj)
+
+            if obj.get('parent') is None:
+                queryset = self.get_per_district_queryset(queryset)
+
+            return cached_queryset_count(key, queryset)
 
 
 class TargetAreaQuerySerializer(TargetAreaQueryMixin,
