@@ -3,22 +3,25 @@
 {% load humanize %}
 {% load staticfiles %}
 {% load performance_extras %}
+{% load progress_extras %}
 
 {% block content %}
         <div class="container" id="district_table">
             <div "col-sm-12" id="table-container">
                 <h1 id="district-name">District:{% if district_name %} {{ district_name }}{% else %} All{% endif%}</h1>
-                <table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap data-sortable data-sortable-switch>
+                <table id="target_areas" class="table table-stripe">
                     <thead>
                         <tr>
-                            <th data-priority="persist" data-sortable-col data-sortable-default-col>Target Area</th>
-                            <th data-sortable-col>Targeted</th>
-                            <th data-sortable-col>Found</th>
-                            <th data-sortable-col>Spray Progress</th>
-                            <th data-sortable-col>Spray Coverage</th>
-                            <th data-sortable-col>Not Sprayed</th>
-                            <th data-sortable-col>Not Sprayed - Refused</th>
-                            <th data-sortable-col>Not Found</th>
+                            <th rowspan="2">District</th>
+                            <th rowspan="2">TA's Targeted</th>
+                            <th colspan="2">TA's Visited</th>
+                            <th colspan="2">TA's Sprayed Effectively</th>
+                        </tr>
+                        <tr>
+                            <th>Number</th>
+                            <th>%</th>
+                            <th>Number</th>
+                            <th>%</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,12 +43,11 @@
                                 {% endif %}
                             </td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>
-                            <td class='numbers'>{{ district.found|intcomma }} {% if site_name != 'namibia' %}({% percentage district.found district.structures %}){% endif %}</td>
-                            <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.structures %})</td>
-                            <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district.not_visited|intcomma }} ({% percentage district.not_visited district.structures %})</td>
+                            <td class='numbers'>{{ district.visited_total|intcomma }}</td>
+                            <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district.visited_total district.structures %} {% endif %}</td>
+                            <td class='numbers'>{{ district.visited_sprayed|intcomma }}</td>
+                            {% calc_percentage district.visited_sprayed district.structures as calculated_percentage %}
+                            <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -53,12 +55,11 @@
                         <tr>
                             <td>Totals</a></td>
                             <td class='numbers'>{{ district_totals.structures|intcomma  }}</td>
-                            <td class='numbers'>{{ district_totals.found|intcomma  }}  {% if site_name != 'namibia' %}({% percentage district_totals.found district_totals.structures %}){% endif %}</td>
-                            <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.structures %})</td>
+                            <td class='numbers'>{{ district_totals.visited_total|intcomma  }}</td>
+                            <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district_totals.found district_totals.structures %} {% endif %}</td>
                             <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_not_sprayed|intcomma  }} ({% percentage district_totals.visited_not_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_refused|intcomma  }} ({% percentage district_totals.visited_refused district_totals.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district_totals.not_visited|intcomma  }} ({% percentage district_totals.not_visited district_totals.structures %})</td>
+                            {% calc_percentage district_totals.visited_sprayed district_totals.structures as total_calculated_percentage %}
+                            <td class='numbers {{ total_calculated_percentage|sprayed_effectively_color }}'>{{ total_calculated_percentage }}</td>
                         </tr>
                     </tfoot>
                 </table>
