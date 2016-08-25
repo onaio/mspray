@@ -16,11 +16,11 @@ def sprayed_effectively_color(value):
 
     color = 'green'
 
-    if 75 < value < 85:
+    if 75 < value <= 85:
         color = 'orange'
-    elif 20 < value < 75:
+    elif 20 < value <= 75:
         color = 'red'
-    elif value < 20:
+    elif value <= 20:
         color = 'yellow'
 
     return color
