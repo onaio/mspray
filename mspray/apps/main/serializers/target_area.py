@@ -329,7 +329,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             key = "%s_visited_total" % pk
             queryset = self.get_spray_queryset(obj)
 
-            if obj.get('parent') is None:
+            if isinstance(obj, dict) and obj.get('parent') is None:
                 queryset = self.get_per_district_queryset(queryset)
 
             return cached_queryset_count(key, queryset)
