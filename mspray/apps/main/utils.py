@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from django.conf import settings
+from django.contrib.gis.gdal import SpatialReference
 from django.contrib.gis.geos import Polygon
 from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
@@ -67,7 +68,9 @@ def queryset_iterator(queryset, chunksize=100):
 
 
 def load_layer_mapping(model, shp_file, mapping, verbose=False, unique=None):
-    lm = LayerMapping(model, shp_file, mapping, transform=True, unique=unique)
+    wgs84 = SpatialReference('WGS84')
+    lm = LayerMapping(model, shp_file, mapping, transform=True, unique=unique,
+                      source_srs=wgs84)
     lm.save(strict=True, verbose=verbose)
 
 
@@ -90,7 +93,8 @@ def set_household_buffer(distance=15, wkt=None):
     cursor = connection.cursor()
     where = ""
     if wkt is not None:
-        where = "WHERE ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" \
+        where = \
+            "WHERE ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" \
             % wkt
 
     cursor.execute(
