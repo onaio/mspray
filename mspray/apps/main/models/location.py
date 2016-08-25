@@ -7,6 +7,7 @@ class Location(models.Model):
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     code = models.PositiveIntegerField()
     rank = models.PositiveIntegerField()
+    homesteads = models.PositiveIntegerField(default=0)
     structures = models.PositiveIntegerField(default=0)
     geom = models.MultiPolygonField(srid=4326, null=True)
 
