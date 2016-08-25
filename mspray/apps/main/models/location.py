@@ -3,9 +3,10 @@ from django.contrib.gis.db import models
 
 class Location(models.Model):
     name = models.CharField(max_length=255, db_index=1)
-    code = models.CharField(max_length=50, db_index=1, unique=True)
     level = models.CharField(db_index=1, max_length=50)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
+    code = models.PositiveIntegerField()
+    rank = models.PositiveIntegerField()
     structures = models.PositiveIntegerField(default=0)
     geom = models.MultiPolygonField(srid=4326, null=True)
 
@@ -13,6 +14,7 @@ class Location(models.Model):
 
     class Meta:
         app_label = 'main'
+        unique_together = ('code', 'rank', 'level')
 
     def __str__(self):
         return self.name
