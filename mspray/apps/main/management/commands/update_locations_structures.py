@@ -12,12 +12,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         locations = Location.objects.filter(structures__gt=0)\
             .exclude(parent=None)\
-            .values('parent').annotate(total_structures=Sum('structures'))\
-            .values_list('total_structures', 'parent')
+            .values('parent').annotate(
+                total_structures=Sum('structures'),
+                total_homesteads=Sum('homesteads')
+            ).values_list('parent', 'total_structures', 'total_homesteads')
 
-        for structures, parent in locations:
+        for parent, structures, homesteads in locations:
             location = Location.objects.get(pk=parent)
             location.structures = structures
+            location.homesteads = homesteads
             location.save()
 
-        print("Updated {} Locations".format(len(locations)))
+        print("Updated {} Locations".format(locations.count()))
