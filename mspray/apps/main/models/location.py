@@ -15,7 +15,7 @@ class Location(models.Model):
 
     class Meta:
         app_label = 'main'
-        unique_together = ('code', 'rank', 'level')
+        unique_together = ('code', 'rank', 'level', 'parent')
 
     def __str__(self):
         return self.name
