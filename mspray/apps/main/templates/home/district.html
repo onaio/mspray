@@ -26,21 +26,21 @@
                         <tr>
                             <td>
                                 {% if higher_level_map and not district_name %}
-                                <a href="{% url 'target_area' district.targetid district.targetid %}">
+                                <a href="{% url 'target_area' district.pk district.rank %}">
                                     <i class="fa fa-map"></i>
                                 </a>
                                 {% endif %}
                                 {% if district_name and district.level == ta_level %}
-                                <a href="{% url 'target_area' district_code district.targetid %}">
+                                <a href="{% url 'target_area' district.pk district.name %}">
                                     <i class="fa fa-map"></i>
                                     {{ district.district_name }}
                                 </a>
                                 {% else %}
-                                <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                                <a href="{% url 'district' district.pk %}">{{ district.name }}</a>
                                 {% endif %}
                             </td>
+                            <td class='numbers'>{{ district.homesteads|intcomma }}</td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>
-                            <td class='numbers'>{{ district.found|intcomma }} {% if site_name != 'namibia' %}({% percentage district.found district.structures %}){% endif %}</td>
                             <td class='numbers'>{{ district.visited_total|intcomma }} ({% percentage district.visited_total district.structures %})</td>
                             <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.found %})</td>
                             <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.found %})</td>

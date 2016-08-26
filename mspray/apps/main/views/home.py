@@ -6,6 +6,8 @@ from django.views.generic import ListView
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
+from mspray.apps.main.serializers.target_area import \
+    NamibiaTargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
@@ -49,7 +51,7 @@ class DistrictView(SiteNameMixin, ListView):
         qs = super(DistrictView, self).get_queryset()
         pk = self.kwargs.get(self.slug_field)
         if pk is not None:
-            qs = qs.filter(parent__pk=pk)
+            qs = qs.filter(parent__pk=pk).order_by('rank')
         else:
             qs = super(DistrictView, self).get_queryset()\
                 .filter(parent=None).order_by('name')
@@ -64,25 +66,24 @@ class DistrictView(SiteNameMixin, ListView):
             "xmax": 'ST_xMax("main_location"."geom")',
             "ymax": 'ST_yMax("main_location"."geom")'
         }).values(
-            'pk', 'code', 'level', 'name', 'parent', 'structures',
-            'xmin', 'ymin', 'xmax', 'ymax'
+            'pk', 'code', 'level', 'name', 'parent', 'rank', 'structures',
+            'homesteads', 'xmin', 'ymin', 'xmax', 'ymax'
         )
-        serializer_class = TargetAreaQuerySerializer \
-            if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
+        serializer_class = NamibiaTargetAreaSerializer
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
-        fields = ['structures', 'visited_total', 'visited_sprayed',
-                  'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'found']
-        totals = {}
-        for rec in serializer.data:
-            for field in fields:
-                totals[field] = rec[field] + (totals[field]
-                                              if field in totals else 0)
+        # fields = ['structures', 'visited_total', 'visited_sprayed',
+        #           'visited_not_sprayed', 'visited_refused', 'visited_other',
+        #           'not_visited', 'found']
+        # totals = {}
+        # for rec in serializer.data:
+        #     for field in fields:
+        #         totals[field] = rec[field] + (totals[field]
+        #                                       if field in totals else 0)
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
-        context['district_totals'] = totals
+        # context['district_totals'] = totals
 
         return context
 

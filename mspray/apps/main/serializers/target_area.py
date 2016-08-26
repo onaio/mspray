@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
+from mspray.apps.main.models import Location
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
@@ -256,6 +257,12 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             params = [tuple(location_pks), REASON_FIELD, tuple(REASON_OTHER)]
 
             return cached_queryset_count(key, queryset, query, params)
+
+
+class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('pk', 'name', 'code', 'rank', 'homesteads', 'structures')
+        model = Location
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
