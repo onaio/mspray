@@ -31,7 +31,7 @@
                                 </a>
                                 {% endif %}
                                 {% if district.level == ta_level %}
-                                <a href="{% url 'target_area' district.pk district.name %}">
+                                <a href="{% url 'target_area' district.parent_id district.pk %}">
                                     <i class="fa fa-map"></i>
                                     {{ district.name }}
                                 </a>

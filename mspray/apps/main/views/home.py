@@ -66,7 +66,7 @@ class DistrictView(SiteNameMixin, ListView):
             "xmax": 'ST_xMax("main_location"."geom")',
             "ymax": 'ST_yMax("main_location"."geom")'
         }).values(
-            'pk', 'code', 'level', 'name', 'parent', 'rank', 'structures',
+            'pk', 'code', 'level', 'name', 'parent_id', 'rank', 'structures',
             'homesteads', 'xmin', 'ymin', 'xmax', 'ymax'
         )
         serializer_class = NamibiaTargetAreaSerializer

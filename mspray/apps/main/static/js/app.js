@@ -33,11 +33,12 @@ var App = function(buffer, targetAreaData, hhData) {
 
     L.mapbox.accessToken = "pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ";
     this.map = L.mapbox.map("map");
-    var bufferHouseholdsLayer = L.mapbox.tileLayer("ona.j6c49d56")
-        , google = new L.Google()
-        , bing = new L.BingLayer("Alt-3s6hwEWPw-f2IKRw3Fg4qsV1BItu4KbylMsVKY7jyWFGkT5D10Qntw9xr6MX", {type: "Aerial"});
+    var bufferHouseholdsLayer = L.mapbox.tileLayer("ona.j6c49d56"),
+        google = new L.Google(),
+        bing = new L.BingLayer("Alt-3s6hwEWPw-f2IKRw3Fg4qsV1BItu4KbylMsVKY7jyWFGkT5D10Qntw9xr6MX", {type: "Aerial"});
     this.map.addLayer(google);
     if(buffer !== undefined) {
+        consoe.log("Here");
         this.map.addLayer(bufferHouseholdsLayer);
         this.map.addControl(new L.control.layers({
             "Google": google,
@@ -194,7 +195,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     }
                 })
                 .addTo(app.map);
-                // app.map.fitBounds(app.sprayLayer.getBounds());
+                app.map.fitBounds(app.sprayLayer.getBounds());
             }
 
             $("#target-area-stats-structures").empty().append(

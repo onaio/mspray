@@ -261,7 +261,7 @@ class TargetAreaQueryMixin(TargetAreaMixin):
 
 class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ('pk', 'name', 'code', 'rank', 'level',
+        fields = ('pk', 'name', 'code', 'rank', 'level', 'parent_id',
                   'homesteads', 'structures')
         model = Location
 
