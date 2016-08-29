@@ -15,8 +15,10 @@
                                 <th colspan="7">Number of Structures</th>
                                 <th rowspan="3">Spray Coverage</th>
                                 <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
-                                <th rowspan="3">Average data collection start time</th>
-                                <th rowspan="3">Average data collection end time</th>
+                                <th rowspan="3">Average start time</th>
+                                <th rowspan="3">Average end time</th>
+                                <th rowspan="3">Data Quality Check</th>
+                                <th rowspan="3">Average Spray Quality Score</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Targeted</th>
@@ -36,17 +38,19 @@
                     {% for row in data %}
                         <tr>
                             <td><a href="{% url "performance:team-leaders" row.location.code %}">{{ row.location.name }}</a></td>
-                            <td class='numbers'>{{ row.target_areas|intcomma }}</td>
-                            <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                            <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
-                            <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
-                            <td class='numbers'>{{ row.refused|intcomma  }}</td>
-                            <td class='numbers'>{{ row.other|intcomma  }}</td>
-                            <td class='numbers'>{{ row.not_sprayed_total }}</td>
+                            <td class='numbers'>{{ row.location.structures|intcomma }}</td>
+                            <td class='numbers'>{{ row.sprayable|intcomma }}</td>
+                            <td class='numbers'>{{ row.not_sprayable|intcomma }}</td>
+                            <td class='numbers'>{{ row.sprayed|intcomma }}</td>
+                            <td class='numbers'>{{ row.refused|intcomma }}</td>
+                            <td class='numbers'>{{ row.other|intcomma }}</td>
+                            <td class='numbers'>{{ row.not_sprayed_total|intcomma }}</td>
                             <td class='numbers'>{{ row.spray_success_rate }}%</td>
                             <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>{{ row.avg_structures_per_user_per_so }}</td>
                             <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                             <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
+                            <td></td>
+                            <td></td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -54,17 +58,18 @@
                         <tr>
                             <td>Totals</td>
                             <td class='numbers'>{{ totals.houses|intcomma }}</td>
-                            <td class='numbers'>{{ totals.target_areas|intcomma }}</td>
-                            <td class='numbers'>{{ totals.structures_found|intcomma }}</td>
-                            <td class='numbers'>{{ totals.found_gt_20|intcomma  }}</td>
-                            <td class='numbers'>{{ totals.found_gt_20_percentage }}%</td>
+                            <td class='numbers'>{{ totals.sprayable|intcomma }}</td>
+                            <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
                             <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
-                            <td class='numbers'>{{ totals.sprayed_percentage }}%</td>
-                            <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
-                                {{ totals.avg_structures_per_user_per_so }}
-                            </td>
+                            <td class='numbers'>{{ totals.refused|intcomma }}</td>
+                            <td class='numbers'>{{ totals.other|intcomma }}</td>
+                            <td class='numbers'>{{ totals.not_sprayed_total|intcomma }}</td>
+                            <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                            <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>{{ totals.avg_structures_per_user_per_so }}</td>
                             <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                             <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
+                            <td></td>
+                            <td></td>
                         </tr>
                     </tfoot>
                 </table>

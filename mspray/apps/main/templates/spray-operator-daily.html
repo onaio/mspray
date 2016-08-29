@@ -18,23 +18,20 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th rowspan="3">Day</th>
-                                <th rowspan="3">Date</th>
-                                <th colspan="5">Number of Structures</th>
-                                <th rowspan="3">Spray Coverage</th>
-                                <th rowspan="3">Data collection start time</th>
-                                <th rowspan="3">Data collection end time</th>
-                                <th rowspan="3">Duration in field</th>
+                                <th rowspan="2">Day</th>
+                                <th rowspan="2">Date</th>
+                                <th colspan="3">Structures</th>
+                                <th rowspan="2">Spray Coverage</th>
+                                <th rowspan="2">Start time</th>
+                                <th rowspan="2">End time</th>
+                                <th rowspan="2">Duration in field</th>
+                                <th rowspan="2">Data Quality Check</th>
+                                <th rowspan="2">Average Spray Quality Score</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Found</th>
                                 <th rowspan="2">Sprayed</th>
-                                <th colspan="3">Not sprayed</th>
-                            </tr>
-                            <tr>
-                                <th>Refused</th>
-                                <th>Other</th>
-                                <th>Total</th>
+                                <th rowspan="2">Not sprayed</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -42,30 +39,30 @@
                                 <tr>
                                     <td>{{ row.day }}</a></td>
                                     <td>{{ row.date|date:'d-M' }}</a></td>
-                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
+                                    <td class='numbers'>{{ row.sprayable|intcomma }}</td>
+                                    <td class='numbers'>{{ row.sprayed|intcomma }}</td>
                                     <td class='numbers'>{{ row.not_sprayed_total }}</td>
                                     <td class='numbers'>{{ row.spray_success_rate }}%</td>
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
                                     <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
+                                    <td></td>
+                                    <td></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="2">Totals</td>
-                                <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.refused|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.other|intcomma  }}</td>
+                                <td class='numbers'>{{ totals.sprayable|intcomma }}</td>
+                                <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
                                 <td class='numbers'>{{ totals.not_sprayed_total }}</td>
                                 <td class='numbers'>{{ totals.spray_success_rate }}%</td>
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
                                 <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
+                                <td></td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>
