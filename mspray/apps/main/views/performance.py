@@ -10,13 +10,16 @@ from django.views.generic import TemplateView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
-from mspray.apps.main.models import SprayPointView
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
+from mspray.apps.main.utils import not_sprayable_queryset
+from mspray.apps.main.utils import sprayed_queryset
+from mspray.apps.main.utils import refused_queryset
+from mspray.apps.main.utils import other_queryset
 from mspray.apps.main.utils import unique_spray_points
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
@@ -38,7 +41,7 @@ def calculate(numerator, denominator, percentage):
     if denominator == 0:
         return 0
 
-    coverage = numerator/denominator
+    coverage = numerator / denominator
 
     if coverage > percentage:
         return 1
@@ -94,7 +97,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             num_target_area=Count('location'),
             total_structures=Sum('location__structures')
         )
-    
+
         structures_found_by_district = {
             a.get('name'): a.get('k')
             for a in qs.values('name').filter(
@@ -121,11 +124,18 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             'sprayed': 0,
             'sprayed_total': 0,
             'target_areas': 0,
-            'houses': 0
+            'houses': 0,
+            'sprayable': 0,
+            'not_sprayable': 0,
+            'refused': 0,
+            'other': 0,
+            'not_sprayed_total': 0,
+            'spray_success_rate':[]
         }
         start_times = []
         end_times = []
         results = []
+
         for district in districts:
             target_areas = Location.objects.filter(parent=district)\
                 .order_by('name')
@@ -143,6 +153,16 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 )
             )
 
+            not_sprayable_qs = not_sprayable_queryset(
+                unique_spray_points(
+                    SprayDay.objects.filter(location__pk__in=ta_pks)
+                )
+            )
+
+            result['sprayable'] = qs.count()
+            totals['sprayable'] += result['sprayable']
+            result['not_sprayable'] = not_sprayable_qs.count()
+            totals['not_sprayable'] += result['not_sprayable']
             pks = list(qs.values_list('id', flat=True))
             _end_time = avg_time(pks, 'start')
             result['avg_end_time'] = _end_time
@@ -185,7 +205,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             # calcuate Average structures sprayed per day per spray operator
             denominator = sum([b for a, b in sprayed_structures.values()])
             numerator = sum([a for a, b in sprayed_structures.values()])
-            avg_struct_per_user_per_so = round(numerator/denominator) \
+            avg_struct_per_user_per_so = round(numerator / denominator) \
                 if numerator != 0 else 0
 
             result['avg_structures_per_user_per_so'] = \
@@ -219,13 +239,22 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             result['found_gt_20_percentage'] = round((
                 found_gt_20 / target_areas.count()) * 100, 0)
 
-            result['sprayed'] = target_areas_sprayed_total
+            result['sprayed'] = sprayed_queryset(qs).count()
+            totals['sprayed'] += result['sprayed']
+            result['refused'] = refused_queryset(qs).count()
+            totals['refused'] += result['refused']
+            result['other'] = other_queryset(qs).count()
+            totals['other'] += result['other']
+            result['not_sprayed_total'] = result['refused'] + result['other']
+            totals['not_sprayed_total'] += result['not_sprayed_total']
+            # result['sprayed'] = target_areas_sprayed_total
             totals['sprayed'] += target_areas_sprayed_total
 
-            result['sprayed_percentage'] = round(
-                (target_areas_sprayed_total / target_areas.count()) * 100, 0)
+            result['spray_success_rate'] = round(
+                (result['sprayed'] / result['sprayable']) * 100, 0)
             result['sprayed_total'] = structures_sprayed_totals
             totals['sprayed_total'] += structures_sprayed_totals
+            totals['spray_success_rate'].append(result['spray_success_rate'])
 
             if spray_points_total > 0:
                 result['sprayed_total_percentage'] = round(
@@ -237,19 +266,22 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             totals['houses'] += district.structures
             results.append(result)
 
+        totals['spray_success_rate'] = round(
+            sum(totals['spray_success_rate']) /
+            len(totals['spray_success_rate']), 0)
         if totals['target_areas'] > 0:
             totals['found_percentage'] = round((
-                totals['found']/totals['target_areas']) * 100)
+                totals['found'] / totals['target_areas']) * 100)
             totals['found_gt_20_percentage'] = round((
-                totals['found_gt_20']/totals['target_areas']) * 100)
+                totals['found_gt_20'] / totals['target_areas']) * 100)
             totals['sprayed_percentage'] = round((
-                totals['sprayed']/totals['target_areas']) * 100)
+                totals['sprayed'] / totals['target_areas']) * 100)
             if totals['structures_found'] > 0:
-                totals['sprayed_total_percentage'] = round((
-                    totals['sprayed_total'] / totals['structures_found'])
-                    * 100)
+                totals['sprayed_total_percentage'] = round(
+                    (totals['sprayed_total'] / totals['structures_found']) *
+                    100)
             totals['avg_structures_per_user_per_so'] = round(
-                totals['avg_structures_per_user_per_so']/districts.count())
+                totals['avg_structures_per_user_per_so'] / districts.count())
 
             if len(start_times) and len(end_times):
                 totals['avg_start_time'] = avg_time_tuple(start_times)
