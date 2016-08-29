@@ -40,6 +40,11 @@ HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
+REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
+REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
+REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
+REASONS.pop(REASON_REFUSED)
+REASON_OTHER = REASONS.keys()
 
 
 def geojson_from_gps_string(geolocation, geom=False):
@@ -346,14 +351,47 @@ def get_ta_in_location(location):
     return locations
 
 
-def sprayable_queryset(queryset):
+def get_sprayable_or_nonsprayable_queryset(queryset, yes_or_no):
     if HAS_SPRAYABLE_QUESTION:
         queryset = queryset.extra(
             where=['data->>%s = %s'],
-            params=['sprayable_structure', 'yes']
+            params=['sprayable_structure', yes_or_no]
         )
 
     return queryset
+
+
+def sprayable_queryset(queryset):
+    return get_sprayable_or_nonsprayable_queryset(queryset, 'yes')
+
+
+def not_sprayable_queryset(queryset):
+    return get_sprayable_or_nonsprayable_queryset(queryset, 'no')
+
+
+def sprayed_queryset(queryset):
+    return queryset.extra(
+        where=['data->>%s = %s'],
+        params=[WAS_SPRAYED_FIELD, 'yes']
+    )
+
+
+def refused_queryset(queryset):
+    return queryset.extra(
+        where=['data->>%s = %s'],
+        params=[REASON_FIELD, REASON_REFUSED]
+    )
+
+
+def other_queryset(queryset):
+    return queryset.extra(
+        where=[
+            "data->>%s IN ({})".format(
+                ",".join(["'{}'".format(i) for i in REASON_OTHER])
+            )
+        ],
+        params=[REASON_FIELD]
+    )
 
 
 def unique_spray_points(queryset):
