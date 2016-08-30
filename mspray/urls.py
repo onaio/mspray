@@ -5,7 +5,7 @@ from mspray.apps.main.views import home
 from mspray.apps.main.views import performance
 
 from django.conf import settings
-from django.conf.urls import patterns, include, url, static
+from django.conf.urls import include, url, static
 from rest_framework import routers
 from django.contrib import admin
 admin.autodiscover()
@@ -35,12 +35,7 @@ performance_urls = [
         name='definitions-and-conditions'),
 ]
 
-urlpatterns = patterns(
-    '',
-    # Examples:
-    # url(r'^$', 'mspray.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-
+urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
     url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
@@ -53,4 +48,4 @@ urlpatterns = patterns(
         name='number_of_housesholds'),
     url(r'^performance/', include(performance_urls, namespace='performance')),
     url(r'^admin/', include(admin.site.urls)),
-) + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
