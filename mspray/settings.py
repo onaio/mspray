@@ -12,9 +12,30 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'mspray/apps/main/templates'),
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            # insert your TEMPLATE_DIRS here
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+                # list if you haven't customized them:
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'mspray.libs.context_processors.google_settings'
+            ],
+            'debug': False
+        },
+    },
+]
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,10 +47,7 @@ SECRET_KEY = 'u3rh4x=!%7j4@e4*ctww1v+rt4614%kgiow(k@74qsl0-s6yn^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-TEMPLATE_DEBUG = True
-
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -47,7 +65,6 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework_gis',
     'mspray.apps.main',
-    'debug_toolbar',
 )
 
 MIDDLEWARE_CLASSES = (
