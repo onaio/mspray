@@ -10,14 +10,13 @@ class Command(BaseCommand):
              " from target areas")
 
     def handle(self, *args, **options):
-        locations = Location.objects.filter(structures__gt=0)\
-            .exclude(parent=None)\
-            .values('parent').annotate(total_structures=Sum('structures'))\
-            .values_list('total_structures', 'parent')
+        def _update_location_level(level):
+            for loc in Location.objects.filter(level=level).iterator():
+                structures = \
+                    loc.location_set.aggregate(s=Sum('structures'))['s']
+                if structures:
+                    loc.structures = structures
+                    loc.save()
 
-        for structures, parent in locations:
-            location = Location.objects.get(pk=parent)
-            location.structures = structures
-            location.save()
-
-        print("Updated {} Locations".format(len(locations)))
+        for level in ['RHC', 'district']:
+            _update_location_level(level)
