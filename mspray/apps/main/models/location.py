@@ -3,7 +3,7 @@ from django.contrib.gis.db import models
 
 class Location(models.Model):
     name = models.CharField(max_length=255, db_index=1)
-    code = models.CharField(max_length=50, db_index=1, unique=True)
+    code = models.PositiveIntegerField(unique=True)
     level = models.CharField(db_index=1, max_length=50)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     structures = models.PositiveIntegerField(default=0)
@@ -13,6 +13,7 @@ class Location(models.Model):
 
     class Meta:
         app_label = 'main'
+        unique_together = ('code', 'level', 'parent')
 
     def __str__(self):
         return self.name
