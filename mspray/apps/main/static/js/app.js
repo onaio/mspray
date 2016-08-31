@@ -37,6 +37,7 @@ var App = function(buffer, targetAreaData, hhData) {
         google = new L.Google(),
         bing = new L.BingLayer("Alt-3s6hwEWPw-f2IKRw3Fg4qsV1BItu4KbylMsVKY7jyWFGkT5D10Qntw9xr6MX", {type: "Aerial"});
     this.map.addLayer(google);
+    L.mapbox.styleLayer('mapbox://styles/ona/cis0s5q9l0048g9m9lrd68vyj').addTo(this.map);
     if(buffer !== undefined) {
         consoe.log("Here");
         this.map.addLayer(bufferHouseholdsLayer);
