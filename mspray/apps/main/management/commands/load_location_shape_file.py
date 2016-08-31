@@ -30,6 +30,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('shape_file', metavar="FILE")
+        parser.add_argument('to_spray')
+        parser.add_argument('district_name')
+        parser.add_argument('code')
+        parser.add_argument('rank')
+        parser.add_argument('homesteads')
+        parser.add_argument('structures')
 
     def handle(self, *args, **options):
         if 'shape_file' not in options:
@@ -44,18 +50,25 @@ class Command(BaseCommand):
                 srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
                 ds = DataSource(path)
                 layer = ds[0]
+                district_name_field = options.get('district_name')
+                code_field = options.get('code')
+                rank_field = options.get('rank')
+                homesteads_field = options.get('homesteads')
+                structures_field = options.get('structures')
+                to_spray = options.get('to_spray')
 
                 for feature in layer:
-                    spray = int(feature.get('To_spray'))
+                    spray = int(feature.get(to_spray))
                     if spray == 0:
                         skipped += 1
                         continue
 
-                    district_name = feature.get('HDist_12')
-                    code = int(feature.get('Id_1'))
-                    rank = int(feature.get('NEW_Rank'))
-                    homesteads = int(feature.get('NumGPSpt_1'))
-                    structures = int(feature.get('EstHHsize')) * homesteads
+                    district_name = feature.get(district_name_field)
+                    code = int(feature.get(code_field))
+                    rank = int(feature.get(rank_field))
+                    homesteads = int(feature.get(homesteads_field))
+                    structures = \
+                        int(feature.get(structures_field)) * homesteads
                     name = '%s_%s' % (code, rank)
                     parent = get_or_create_parent(district_name)
                     if isinstance(feature.geom, geometries.Polygon):
