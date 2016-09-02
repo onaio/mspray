@@ -1,7 +1,7 @@
 # This is an auto-generated Django model module created by ogrinspect.
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import  JSONField
+from django.contrib.postgres.fields import JSONField
 
 DATA_FILTER = getattr(settings, 'MSPRAY_DATA_FILTER',
                       '"sprayable_structure":"yes"')
