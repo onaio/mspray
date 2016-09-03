@@ -10,7 +10,7 @@ var App = function(buffer, targetAreaData, hhData) {
     };
     this.hhOptions = {
         radius: 4,
-        fillColor: "#FFDC00",
+        fillColor: "#EBDEF0",
         color: "#222",
         weight: 1,
         opacity: 1,
@@ -175,7 +175,16 @@ var App = function(buffer, targetAreaData, hhData) {
                         } else if (feature.properties.sprayed === null) {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
-                            app.sprayOptions.fillColor = "#2ECC40";
+                            var value = feature.properties.sprayed_percentage,
+                                fillColor = '#8E44AD';
+                            if (value >= 90) {
+                                fillColor = '#2ECC40';
+                            } else if(value >= 40 && value < 90) {
+                                fillColor = '#FFDC00';
+                            } else if (value >= 0 && value < 40) {
+                                fillColor = '#D82118';
+                            }
+                            app.sprayOptions.fillColor = fillColor;
                         }
                         return app.sprayOptions;
                     },
