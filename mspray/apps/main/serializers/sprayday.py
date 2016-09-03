@@ -52,6 +52,17 @@ class SprayBaseNamibia(SprayBase):
 
             return sprayed
 
+    def get_sprayed_percentage(self, obj):
+        if obj:
+            dm = obj.data.get('sprayed/sprayed_Deltamethrin')
+            dm = 0 if dm is None else int(dm)
+            ddt = obj.data.get('sprayed/sprayed_DDT')
+            ddt = 0 if ddt is None else int(ddt)
+            sprayable = obj.data.get('number_sprayable')
+            sprayable = 0 if sprayable is None else int(sprayable)
+
+            return round(((ddt + dm) / sprayable) * 100) if sprayable else 0
+
 
 class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
@@ -71,6 +82,7 @@ class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
 
 class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
+    sprayed_percentage = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     spray_operator = serializers.SerializerMethodField()
     spray_operator_code = serializers.SerializerMethodField()
@@ -81,7 +93,7 @@ class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
         model = SprayDay
         fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
                   'spray_operator', 'spray_operator_code', 'irs_sticker_num',
-                  'id')
+                  'id', 'sprayed_percentage')
         geo_field = 'geom'
 
 
