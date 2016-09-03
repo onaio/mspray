@@ -10,7 +10,7 @@ from django.contrib.gis.geos import Polygon
 from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
-from django.db import connection
+from django.db import connection, connections
 from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
@@ -329,3 +329,17 @@ def unique_spray_points(queryset):
         )
 
     return queryset
+
+
+def import_from_2015():
+    def _data():
+        namibia = [
+            c for c in connections.all() if c.alias == 'namibia_2015'
+        ][0]
+        cursor = namibia.cursor()
+        cursor.execute('SELECT data FROM main_sprayday;')
+        for row in cursor.fetchall():
+            yield row[0]
+
+    for spray_data in _data():
+        add_spray_data(spray_data)
