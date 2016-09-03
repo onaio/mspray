@@ -266,6 +266,14 @@ class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
         model = Location
 
 
+class GeoNamibiaTargetAreaSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        fields = ('pk', 'name', 'code', 'rank', 'level', 'parent_id',
+                  'homesteads', 'structures')
+        model = Location
+        geo_field = 'geom'
+
+
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()

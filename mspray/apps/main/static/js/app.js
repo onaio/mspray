@@ -300,11 +300,13 @@ var App = function(buffer, targetAreaData, hhData) {
         app.targetLayer = L.geoJson(geojson, {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
-                var content = "<h4>Target Area: " + props.district_name + "</h4>" +
-                    "Structures: " + props.structures;
+                var content = "<h4>Target Area: " + props.name + "</h4>" +
+                    "# of enumerated households:  " + props.homesteads +
+                    "<br />estimated # of structures: " + props.structures +
+                    "<br />Sprayed structures: ";
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
-                label.setContent("" + props.district_name);
+                label.setContent("" + props.name);
                 label.setLatLng(layer.getBounds().getCenter());
                 app.map.showLabel(label);
             }

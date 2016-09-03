@@ -8,6 +8,8 @@ from mspray.apps.main.models import Household
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
+from mspray.apps.main.serializers.target_area import (
+    NamibiaTargetAreaSerializer, GeoNamibiaTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
 from mspray.apps.main.serializers.household import HouseholdBSerializer
 from mspray.apps.main.utils import get_ta_in_location
@@ -15,11 +17,11 @@ from mspray.apps.main.utils import get_ta_in_location
 
 class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Location.objects.filter()
-    serializer_class = TargetAreaSerializer
+    serializer_class = NamibiaTargetAreaSerializer
 
     def get_serializer_class(self):
         if self.format_kwarg == 'geojson':
-            return GeoTargetAreaSerializer
+            return GeoNamibiaTargetAreaSerializer
 
         return super(TargetAreaViewSet, self).get_serializer_class()
 
