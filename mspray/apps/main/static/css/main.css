@@ -427,6 +427,18 @@ h2{
     opacity: 0.7;
 }
 
+.over-89p {
+    background-color: #2ECC40;
+}
+.over-39p {
+    background-color: #FFDC00;
+}
+.over-0p {
+    background-color: #D82118;
+}
+.visited-not-sprayed {
+    background-color: #8E44AD;
+}
 .structures {
     background-color: #ffdc00;
     color: black;

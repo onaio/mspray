@@ -47,11 +47,6 @@
                     </dl>
                 </div>
                 <hr>
-                <div id="not-sprayed-reasons">
-                    <p>Not Sprayed</p>
-                    <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
-                    </dl>
-                </div>
             </div>
         </section>
 
@@ -102,10 +97,14 @@
 
         app.housesCount = {{ target_data.structures }};
         app.visitedTotal = {{ target_data.found }};
+        app.visitedHHTotal = {{ target_data.visited_total }};
         app.visitedSprayed = {{ target_data.visited_sprayed }};
         app.visitedNotSprayed = {{ target_data.visited_not_sprayed }};
         app.visitedRefused = {{ target_data.visited_refused }};
         app.visitedOther = {{ target_data.visited_other }};
+        app.coverageOver89p = {{ target_data.coverage_over_90 }};
+        app.coverageOver39p = {{ target_data.coverage_40_to_89 }};
+        app.coverageOver0p = {{ target_data.coverage_0_to_39 }};
 
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' %}.json?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);

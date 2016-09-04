@@ -1,5 +1,9 @@
 from django.conf import settings
 from django.core.cache import cache
+from django.db.models import F
+from django.db.models import Sum
+from django.db.models.expressions import RawSQL
+
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
@@ -44,6 +48,17 @@ class TargetAreaMixin(object):
 
         qs = SprayDay.objects.filter(
             location__pk__in=get_ta_in_location(obj)
+        ).annotate(
+            num_sprayable=RawSQL('((data->>%s)::numeric)',
+                                 ('number_sprayable',)),
+            ddt=RawSQL('((data->>%s)::numeric)', ('sprayed/sprayed_DDT',)),
+            deltamethrin=RawSQL('((data->>%s)::numeric)',
+                                ('sprayed/sprayed_Deltamethrin', ))
+        ).annotate(
+            num_sprayed=F('ddt') + F('deltamethrin'),
+            sprayed_percentage=(
+                (F('ddt') + F('deltamethrin')) * 100 / F('num_sprayable')
+            )
         )
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values('sprayday'))
@@ -258,6 +273,28 @@ class TargetAreaQueryMixin(TargetAreaMixin):
 
             return cached_queryset_count(key, queryset, query, params)
 
+    def get_coverage_over_90(self, obj):
+        if obj:
+            queryset = self.get_spray_queryset(obj)
+
+            return queryset.filter(sprayed_percentage__gte=90)\
+                .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
+    def get_coverage_40_to_89(self, obj):
+        if obj:
+            queryset = self.get_spray_queryset(obj)
+
+            return queryset.filter(sprayed_percentage__gte=40,
+                                   sprayed_percentage__lt=90)\
+                .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
+    def get_coverage_0_to_39(self, obj):
+        if obj:
+            queryset = self.get_spray_queryset(obj)
+
+            return queryset.filter(sprayed_percentage__lt=40)\
+                .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
 
 class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -266,10 +303,15 @@ class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
         model = Location
 
 
-class GeoNamibiaTargetAreaSerializer(GeoFeatureModelSerializer):
+class GeoNamibiaTargetAreaSerializer(TargetAreaQueryMixin,
+                                     GeoFeatureModelSerializer):
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_total = serializers.SerializerMethodField()
+
     class Meta:
         fields = ('pk', 'name', 'code', 'rank', 'level', 'parent_id',
-                  'homesteads', 'structures')
+                  'homesteads', 'structures', 'visited_sprayed',
+                  'visited_total')
         model = Location
         geo_field = 'geom'
 
@@ -312,12 +354,16 @@ class TargetAreaQuerySerializer(TargetAreaQueryMixin,
     not_visited = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
     spray_dates = serializers.SerializerMethodField()
+    coverage_over_90 = serializers.SerializerMethodField()
+    coverage_40_to_89 = serializers.SerializerMethodField()
+    coverage_0_to_39 = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('targetid', 'district_name', 'found',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds', 'spray_dates', 'level')
+                  'not_visited', 'bounds', 'spray_dates', 'level',
+                  'coverage_over_90', 'coverage_40_to_89', 'coverage_0_to_39')
         model = TargetArea
 
 

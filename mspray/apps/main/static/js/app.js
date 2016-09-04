@@ -209,29 +209,15 @@ var App = function(buffer, targetAreaData, hhData) {
             }
 
             $("#target-area-stats-structures").empty().append(
-                "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"
+                "<dt class='reason over-89p'>" + ((app.coverageOver89p === undefined) ? 0 : app.coverageOver89p) + "</dt><dd> &gt;= 90%</dd>" +
+                "<dt class='reason over-39p'>" + ((app.coverageOver39p === undefined) ? 0 : app.coverageOver39p) + "</dt><dd>10-89%</dd>" +
+                "<dt class='reason over-0p'>" + ((app.coverageOver0p === undefined) ? 0 : app.coverageOver0p) + "</dt><dd>0-39%</dd>" +
+                "<dt class='reason visited-not-sprayed'>" + ((app.visitedHHTotal === undefined) ? 0 : app.visitedHHTotal) + "</dt><dd>Enumerated HH</dd>"
             );
             target_area_stats += "<dt class='reason reason-sprayed'>" + ((app.visitedSprayed === undefined) ? 0 : app.visitedSprayed) + "</dt><dd>Sprayed</dd>";
             target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((app.visitedNotSprayed === undefined) ? 0 : app.visitedNotSprayed) + "</dt><dd>Not Sprayed</dd>";
             $("#target-area-stats").empty().append(target_area_stats);
-
-            target_area_stats = "";
-            var total_of_other = 0;
-            $.each(reasons, function(key, value) {
-                target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, "-");
-                if (reason_obj[value]){
-                    target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
-                    if (value !== "refused") {
-                        total_of_other += reason_obj[value];
-                    }
-                } else {
-                    target_area_stats += "'>0</dt><dd >" + value + "</dd>";
-                }
-            });
-
-            $("#target-area-stats-not-sprayed").empty().append(target_area_stats);
             $("#not-sprayed-reasons").show();
-
             $(".perc_label").text(app.sprayCount);
 
             var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.visitedTotal, false),
@@ -310,9 +296,9 @@ var App = function(buffer, targetAreaData, hhData) {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
                 var content = "<h4>Target Area: " + props.name + "</h4>" +
-                    "# of enumerated households:  " + props.homesteads +
+                    "# of enumerated households:  " + props.visited_total +
                     "<br />estimated # of structures: " + props.structures +
-                    "<br />Sprayed structures: ";
+                    "<br />Sprayed structures: " + props.visited_sprayed;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
                 label.setContent("" + props.name);
