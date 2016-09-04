@@ -41,24 +41,24 @@
                             </td>
                             <td class='numbers'>{{ district.homesteads|intcomma }}</td>
                             <td class='numbers'>{{ district.structures|intcomma }}</td>
-                            <td class='numbers'>{{ district.visited_total|intcomma }} ({% percentage district.visited_total district.structures %})</td>
-                            <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district.not_visited|intcomma }} ({% percentage district.not_visited district.structures %})</td>
+                            <td class='numbers'>({{ district.visited_total|intcomma }}; {% percentage district.visited_total district.homesteads %})</td>
+                            <td class='numbers'>({{ district.found|intcomma }}; {% percentage district.found district.structures %})</td>
+                            <td class='numbers'>({{ district.visited_sprayed|intcomma }}; {% percentage district.visited_sprayed district.structures %})</td>
+                            <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.found %})</td>
+                            <td class='numbers'>({{ district.visited_other|intcomma }}; {% percentage district.visited_other district.found %})</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
                             <td>Totals</a></td>
+                            <td class='numbers'>{{ district_totals.homesteads|intcomma  }}</td>
                             <td class='numbers'>{{ district_totals.structures|intcomma  }}</td>
-                            <td class='numbers'>{{ district_totals.found|intcomma  }}  {% if site_name != 'namibia' %}({% percentage district_totals.found district_totals.structures %}){% endif %}</td>
-                            <td class='numbers'>{{ district_totals.visited_total|intcomma  }} ({% percentage district_totals.visited_total district_totals.structures %})</td>
-                            <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_not_sprayed|intcomma  }} ({% percentage district_totals.visited_not_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_refused|intcomma  }} ({% percentage district_totals.visited_refused district_totals.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district_totals.not_visited|intcomma  }} ({% percentage district_totals.not_visited district_totals.structures %})</td>
+                            <td class='numbers'>{{ district_totals.visited_total|intcomma  }} ({% percentage district_totals.visited_total district_totals.homesteads %})</td>
+                            <td class='numbers'>{{ district_totals.found|intcomma  }} ({% percentage district_totals.found district_totals.structures %})</td>
+                            <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.structures %})</td>
+                            <td class='numbers'>{{ district_totals.visited_refused|intcomma  }} ({% percentage district_totals.visited_refused district_totals.found %})</td>
+                            <td class='numbers'>{{ district_totals.visited_other|intcomma  }} ({% percentage district_totals.visited_other district_totals.found %})</td>
                         </tr>
                     </tfoot>
                 </table>

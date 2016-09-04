@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.db.models import F
 from django.db.models import Sum
+from django.db.models import Case
+from django.db.models import When
 from django.db.models.expressions import RawSQL
 
 from rest_framework import serializers
@@ -56,8 +58,11 @@ class TargetAreaMixin(object):
                                 ('sprayed/sprayed_Deltamethrin', ))
         ).annotate(
             num_sprayed=F('ddt') + F('deltamethrin'),
-            sprayed_percentage=(
-                (F('ddt') + F('deltamethrin')) * 100 / F('num_sprayable')
+            sprayed_percentage=Case(
+                When(num_sprayable=0, then=0),
+                default=(
+                    (F('ddt') + F('deltamethrin')) * 100 / F('num_sprayable')
+                )
             )
         )
         if HAS_UNIQUE_FIELD:
@@ -296,22 +301,33 @@ class TargetAreaQueryMixin(TargetAreaMixin):
                 .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
 
 
-class NamibiaTargetAreaSerializer(serializers.ModelSerializer):
+class NamibiaTargetAreaSerializer(TargetAreaQueryMixin,
+                                  serializers.ModelSerializer):
+    found = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_total = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
+
     class Meta:
         fields = ('pk', 'name', 'code', 'rank', 'level', 'parent_id',
-                  'homesteads', 'structures')
+                  'homesteads', 'structures', 'visited_sprayed',
+                  'visited_total', 'visited_refused', 'visited_other', 'found')
         model = Location
 
 
 class GeoNamibiaTargetAreaSerializer(TargetAreaQueryMixin,
                                      GeoFeatureModelSerializer):
+    found = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('pk', 'name', 'code', 'rank', 'level', 'parent_id',
                   'homesteads', 'structures', 'visited_sprayed',
-                  'visited_total')
+                  'visited_total', 'visited_refused', 'visited_other', 'found')
         model = Location
         geo_field = 'geom'
 

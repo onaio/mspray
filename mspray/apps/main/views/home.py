@@ -73,17 +73,21 @@ class DistrictView(SiteNameMixin, ListView):
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
-        # fields = ['structures', 'visited_total', 'visited_sprayed',
-        #           'visited_not_sprayed', 'visited_refused', 'visited_other',
-        #           'not_visited', 'found']
-        # totals = {}
+        fields = ['structures', 'visited_total', 'visited_sprayed',
+                  'homesteads', 'visited_refused', 'visited_other',
+                  'found']
+
+        totals = {}
+        for field in fields:
+            totals[field] = sum(d[field] for d in serializer.data)
+
         # for rec in serializer.data:
         #     for field in fields:
         #         totals[field] = rec[field] + (totals[field]
         #                                       if field in totals else 0)
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
-        # context['district_totals'] = totals
+        context['district_totals'] = totals
 
         return context
 
