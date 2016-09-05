@@ -21,6 +21,7 @@ CREATE MATERIALIZED VIEW main_spray_point_view AS (SELECT DISTINCT ON ("main_spr
                                           (data->>'sprayable/was_sprayed') AS "was_sprayed",
                                           (data->>'sprayable/irs_card_num') AS "irs_card_num",
                                           (data->>'osmstructure') AS "osmstructure",
+                                          (data->>'sprayformid') AS "sprayformid",
                                           "main_sprayday"."location_id" as location_id,
                                           "main_location"."code" as location_code,
                                           T3."id" as district_id,
@@ -59,6 +60,7 @@ class SprayPointView(models.Model):
     sprayoperator_code = models.CharField(max_length=10)
     spray_date = models.DateField()
     start_time = models.DateTimeField()
+    sprayformid = models.CharField(max_length=50)
     end_time = models.DateTimeField()
     district = models.ForeignKey('Location', related_name='districts')
     location = models.ForeignKey('Location', related_name='target_areas')
