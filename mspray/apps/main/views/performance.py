@@ -6,11 +6,15 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
+from django.db import connection
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
+from mspray.apps.main.models import SprayPointView
+from mspray.apps.main.models import SprayOperatorDailySummary
+from mspray.apps.main.models import DirectlyObservedSprayingForm
 from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
@@ -35,6 +39,70 @@ SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
+
+
+def get_avg_quality_score_dict(column, value, use_in=False):
+    """
+    retrieves the average quality score dictionary based
+    - valid column values are 'district', 'health_facility',
+      'sprayop_code_name' or 'tl_code_name'
+    - return: {'2012-1-1': '10',
+               '2015-10-1': '5'}
+    """
+    cursor = connection.cursor()
+
+    where_clause = " "
+    if use_in:
+        # add quotation marks to values in the list
+        value = ["\'%s\'" % a for a in value]
+        where_clause = """
+        where
+            main_directlyobservedsprayingform.sprayop_code_name in ({value})
+        """.format(**{'value': ', '.join(value)})
+    else:
+        where_clause = """
+        where
+            main_directlyobservedsprayingform.sprayop_code_name = '{value}'
+        """.format(**{'value': value})
+
+    sql_statement = """
+select
+    {column},
+    sum(column_a_yes)+sum(column_b_yes)+sum(column_c_yes)+sum(column_d_yes)
+    +sum(column_e_yes)+sum(column_f_yes)+sum(column_g_yes)+sum(column_h_yes)
+    +sum(column_i_yes)+sum(column_j_yes) as yes
+from
+    (select
+        {column},
+        sum(case when correct_removal = 'yes' then 1 else 0 end) column_a_yes,
+        sum(case when correct_mix = 'yes' then 1 else 0 end) column_b_yes,
+        sum(case when rinse = 'yes' then 1 else 0 end) column_c_yes,
+        sum(case when "PPE" = 'yes' then 1 else 0 end) column_d_yes,
+        sum(case when "CFV" = 'yes' then 1 else 0 end) column_e_yes,
+        sum(case when correct_covering = 'yes' then 1 else 0 end) column_f_yes,
+        sum(case when leak_free = 'yes' then 1 else 0 end) column_g_yes,
+        sum(case when correct_distance = 'yes' then 1 else 0 end) column_h_yes,
+        sum(case when correct_speed = 'yes' then 1 else 0 end) column_i_yes,
+        sum(case when correct_overlap = 'yes' then 1 else 0 end) column_j_yes
+    from
+      main_directlyobservedsprayingform
+    {where_clause}
+    group by
+        {column}) as filtered_directlyobservedsprayingform
+group by {column};
+    """.format(**{'column': column,
+                  'where_clause': where_clause})
+
+
+    cursor.execute(sql_statement)
+
+    queryset = cursor.cursor.fetchall()
+
+    return {
+        # spraydate: number of 'yes'
+        a[0]: int(a[1].to_eng_string())
+        for a in queryset
+    }
 
 
 def calculate(numerator, denominator, percentage):
@@ -130,7 +198,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             'refused': 0,
             'other': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate':[]
+            'spray_success_rate': []
         }
         start_times = []
         end_times = []
@@ -328,6 +396,73 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
     slug_field = 'code'
     template_name = 'team-leaders.html'
 
+    def get_spray_operators_list(self, district):
+        if district:
+            team_leaders = district.teamleader_set.all()
+            return [
+                a.code
+                for a in SprayOperator.objects.filter(
+                    team_leader__in=team_leaders
+                )
+            ]
+
+        return district
+
+    def get_hh_submission_dict(self, district, spray_operators_list):
+        hh_submission_list = SprayPointView.objects.filter(
+            sprayoperator_code__in=spray_operators_list
+        ).values(
+            'team_leader_code'
+        ).annotate(
+            sprayformid_count=Count('sprayformid'),
+            sprayed_count=Count('was_sprayed')
+        )
+
+        return {
+            a.get('team_leader_code'): [
+                a.get('sprayformid_count'),
+                a.get('sprayed_count')
+            ]
+            for a in hh_submission_list
+        }
+
+    def get_sop_submission_dict(self, district, spray_operators_list):
+        sop_submission_list = SprayOperatorDailySummary.objects.filter(
+            sprayoperator_code__in=spray_operators_list
+        ).values(
+            'sprayoperator_code'
+        ).annotate(
+            found_count=Count('found'),
+            sprayed_count=Count('sprayed')
+        )
+
+        spray_operators = SprayOperator.objects.filter(
+            code__in=spray_operators_list
+        ).values('team_leader__code', 'code')
+
+        spray_operators = {
+            a.get('code'): a.get('team_leader__code')
+            for a in spray_operators
+        }
+
+        result = {}
+        for a in sop_submission_list:
+            sprayoperator_code = a.get('sprayoperator_code')
+            team_leader = spray_operators.get(sprayoperator_code)
+            if team_leader:
+                if result.get(team_leader):
+                    result[team_leader]['found_count'] += a.get('found_count')
+                    result[team_leader]['sprayed_count'] += a.get(
+                        'sprayed_count'
+                    )
+                else:
+                    result[team_leader] = {
+                        'found_count': a.get('found_count'),
+                        'sprayed_count': a.get('sprayed_count')
+                    }
+
+        return result
+
     def get_context_data(self, **kwargs):
         context = super(TeamLeadersPerformanceView, self)\
             .get_context_data(**kwargs)
@@ -342,7 +477,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'sprayable': 0,
             'not_sprayable': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': 0
+            'spray_success_rate': 0,
+            'data_quality_check': True,
+            'avg_quality_score': 0
         }
 
         ta_pks = list(get_ta_in_location(district))
@@ -376,6 +513,43 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                               distinct=True))\
             .values_list('team_leader__code', 'a', 'b')
         sprayed_structures = {}
+
+        spray_operators_list = self.get_spray_operators_list(district)
+
+        # from HH Submission form total submissions
+        hh_submissions_dict = self.get_hh_submission_dict(
+            district, spray_operators_list
+        )
+
+        # from SOP Summary form
+        sop_submissions_dict = self.get_sop_submission_dict(
+            district, spray_operators_list
+        )
+
+        avg_quality_score_dict = get_avg_quality_score_dict(
+            'sprayop_code_name', spray_operators_list, True
+        )
+
+        dosf = DirectlyObservedSprayingForm.objects.filter(
+            sprayop_code_name__in=spray_operators_list
+        ).values(
+            'sprayop_code_name'
+        ).annotate(
+            id_count=Count('sprayop_code_name')
+        )
+
+        # reassign dosf with a dictionary representation of initial dosf value
+        dosf = {
+            a.get('sprayop_code_name'): a.get('id_count')
+            for a in dosf
+        }
+
+        # calculate average quality sccore
+        avg_quality_score_dict = {
+            a: round(b / dosf.get(a), 2)
+            for a, b in avg_quality_score_dict.items()
+        }
+
         for t, a, b in sprayed_per_spray_operator_per_day:
             sprayed_structures[t] = (a, b)
         for team_leader, team_leader_name in team_leaders:
@@ -384,12 +558,12 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             numerator = sprayed.get(team_leader, 0)
             denominator = 1 if sprayable.get(team_leader, 0) == 0 \
                 else sprayable.get(team_leader)
-            sprayed_success_rate = round((numerator/denominator) * 100, 1)
+            sprayed_success_rate = round((numerator / denominator) * 100, 1)
 
             numerator, denominator = sprayed_structures.get(team_leader,
                                                             (0, 1))
             denominator = 1 if denominator == 0 else denominator
-            avg_structures_per_user_per_so = round(numerator/denominator)
+            avg_structures_per_user_per_so = round(numerator / denominator)
 
             not_sprayed_total = refused.get(team_leader, 0) + \
                 other.get(team_leader, 0)
@@ -400,6 +574,26 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
+
+            hh_submission_row_val = hh_submissions_dict.get(team_leader)
+            sop_found_count = None
+            if hh_submission_row_val:
+                hh_sprayformid_count = hh_submission_row_val[0]
+                hh_sprayed_count = hh_submission_row_val[1]
+
+                sop_submission_row = sop_submissions_dict.get(team_leader)
+                if sop_submission_row:
+                    sop_found_count = sop_submission_row[0]
+                    sop_sprayed_count = sop_submission_row[1]
+
+            data_quality_check = False
+            if sop_found_count is not None:
+                # check HH Submission Form total submissions count is equal to
+                # SOP Summary Form 'found' count and HH Submission Form
+                # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+                # count and both checks should be based on 'sprayformid'
+                data_quality_check = sop_found_count == hh_sprayformid_count\
+                    and sop_sprayed_count == hh_sprayed_count
 
             data.append({
                 'team_leader': team_leader,
@@ -414,7 +608,10 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 avg_structures_per_user_per_so,
                 'not_sprayed_total': not_sprayed_total,
                 'avg_start_time': _start_time,
-                'avg_end_time': _end_time
+                'avg_end_time': _end_time,
+                'data_quality_check': data_quality_check,
+                'avg_quality_score': avg_quality_score_dict.get(
+                    team_leader) or 0
             })
 
             # calculate totals
@@ -426,18 +623,20 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             totals['not_sprayed_total'] += not_sprayed_total
             totals['avg_structures_per_user_per_so'] += \
                 avg_structures_per_user_per_so
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
 
         # calculate spray_success_rate total
         numerator = totals['sprayed']
         denominator = 1 if totals['sprayable'] == 0 \
             else totals['sprayable']
-        sprayed_success_rate = round((numerator/denominator) * 100, 1)
+        sprayed_success_rate = round((numerator / denominator) * 100, 1)
         totals['spray_success_rate'] = sprayed_success_rate
 
         if len(team_leaders):
             # calculate avg_structures_per_user_per_so total
             totals['avg_structures_per_user_per_so'] = round(
-                totals['avg_structures_per_user_per_so']/len(team_leaders))
+                totals['avg_structures_per_user_per_so'] / len(team_leaders))
 
         if len(start_times) and len(end_times):
             totals['avg_start_time'] = avg_time_tuple(start_times)
@@ -458,6 +657,53 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     model = Location
     slug_field = 'code'
 
+    def get_spray_operators_list(self, team_leader):
+        tl = TeamLeader.objects.filter(code=team_leader)[0]
+
+        if tl:
+            return [
+                a.get('code')
+                for a in tl.sprayoperator_set.all().values('code')
+            ]
+
+        return tl
+
+    def get_hh_submission_dict(self, team_leader, spray_operators_list):
+        hh_submission_list = SprayPointView.objects.filter(
+            sprayoperator_code__in=spray_operators_list
+        ).values(
+            'sprayoperator_code'
+        ).annotate(
+            sprayformid_count=Count('sprayformid'),
+            sprayed_count=Count('was_sprayed')
+        )
+
+        return {
+            a.get('sprayoperator_code'): [
+                a.get('sprayformid_count'),
+                a.get('sprayed_count')
+            ]
+            for a in hh_submission_list
+        }
+
+    def get_sop_submission_dict(self, team_leader, spray_operators_list):
+        sop_submission_list = SprayOperatorDailySummary.objects.filter(
+            sprayoperator_code__in=spray_operators_list
+        ).values(
+            'sprayoperator_code'
+        ).annotate(
+            found_count=Count('found'),
+            sprayed_count=Count('sprayed')
+        )
+
+        return {
+            a.get('sprayoperator_code'): [
+                a.get('found_count'),
+                a.get('sprayed_count')
+            ]
+            for a in sop_submission_list
+        }
+
     def get_context_data(self, **kwargs):
         data = []
         totals = {
@@ -469,7 +715,9 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             'sprayable': 0,
             'not_sprayable': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': 0
+            'spray_success_rate': 0,
+            'avg_quality_score': 0,
+            'data_quality_check': True
         }
         context = super(SprayOperatorSummaryView, self)\
             .get_context_data(**kwargs)
@@ -505,6 +753,42 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         start_times = []
         end_times = []
 
+        spray_operators_list = self.get_spray_operators_list(team_leader)
+
+        # from HH Submission form total submissions
+        hh_submissions_dict = self.get_hh_submission_dict(
+            team_leader, spray_operators_list
+        )
+
+        # from SOP Summary form
+        sop_submissions_dict = self.get_sop_submission_dict(
+            team_leader, spray_operators_list
+        )
+
+        avg_quality_score_dict = get_avg_quality_score_dict(
+            'sprayop_code_name', spray_operators_list, True
+        )
+
+        dosf = DirectlyObservedSprayingForm.objects.filter(
+            sprayop_code_name__in=spray_operators_list
+        ).values(
+            'sprayop_code_name'
+        ).annotate(
+            id_count=Count('sprayop_code_name')
+        )
+
+        # reassign dosf with a dictionary representation of initial dosf value
+        dosf = {
+            a.get('sprayop_code_name'): a.get('id_count')
+            for a in dosf
+        }
+
+        # calculate average quality sccore
+        avg_quality_score_dict = {
+            a: round(b / dosf.get(a), 2)
+            for a, b in avg_quality_score_dict.items()
+        }
+
         for spray_operator_code, spray_operator_name in spray_operators:
             qs = spraypoints_qs.extra(
                 where=["data->>%s = %s"],
@@ -513,7 +797,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             numerator = sprayed.get(spray_operator_code)
             denominator = 1 if sprayable.get(spray_operator_code) == 0 \
                 else sprayable.get(spray_operator_code)
-            spray_success_rate = round((numerator/denominator) * 100, 1)
+            spray_success_rate = round((numerator / denominator) * 100, 1)
 
             # calcuate Average structures sprayed per day per SO
             spray_points_sprayed = qs.extra(
@@ -526,7 +810,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
             denominator = 1 if no_of_days_worked == 0 else no_of_days_worked
             numerator = sum(a for a in sprayed_structures.values())
-            avg_structures_per_so = round(numerator/denominator)
+            avg_structures_per_so = round(numerator / denominator)
 
             not_sprayed_total = refused.get(spray_operator_code, 0) + \
                 other.get(spray_operator_code, 0)
@@ -536,6 +820,30 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             end_times.append(_end_time)
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
+
+            hh_submission_row_val = hh_submissions_dict.get(
+                spray_operator_code
+            )
+            sop_found_count = None
+            if hh_submission_row_val:
+                hh_sprayformid_count = hh_submission_row_val[0]
+                hh_sprayed_count = hh_submission_row_val[1]
+
+                sop_submission_row = sop_submissions_dict.get(
+                    spray_operator_code
+                )
+                if sop_submission_row:
+                    sop_found_count = sop_submission_row[0]
+                    sop_sprayed_count = sop_submission_row[1]
+
+            data_quality_check = False
+            if sop_found_count is not None:
+                # check HH Submission Form total submissions count is equal to
+                # SOP Summary Form 'found' count and HH Submission Form
+                # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+                # count and both checks should be based on 'sprayformid'
+                data_quality_check = sop_found_count == hh_sprayformid_count\
+                    and sop_sprayed_count == hh_sprayed_count
 
             data.append({
                 'spray_operator_code': spray_operator_code,
@@ -550,7 +858,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 'avg_structures_per_so': avg_structures_per_so,
                 'not_sprayed_total': not_sprayed_total,
                 'avg_start_time': _start_time,
-                'avg_end_time': _end_time
+                'avg_end_time': _end_time,
+                'data_quality_check': data_quality_check,
+                'avg_quality_score': avg_quality_score_dict.get(
+                    spray_operator_code) or 0
             })
 
             # totals
@@ -563,6 +874,11 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             totals['not_sprayed_total'] += not_sprayed_total
             totals['no_of_days_worked'] += no_of_days_worked
             totals['avg_structures_per_so'] += avg_structures_per_so
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
+
+            totals['avg_quality_score'] += avg_quality_score_dict.get(
+                spray_operator_code) or 0
 
         numerator = totals['sprayed']
         denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
@@ -576,6 +892,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
         totals['avg_start_time'] = avg_time_tuple(start_times)
         totals['avg_end_time'] = avg_time_tuple(end_times)
+
+        totals['avg_quality_score'] = round(
+            totals['avg_quality_score'] / len(spray_operators), 2
+        )
 
         context.update(
             {
@@ -597,6 +917,43 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     model = Location
     slug_field = 'code'
 
+    def get_hh_submission_dict(self, spray_operator):
+        hh_submission_list = SprayPointView.objects.filter(
+            sprayoperator_code=spray_operator
+        ).values(
+            'sprayformid', 'spray_date'
+        ).annotate(
+            sprayformid_count=Count('sprayformid'),
+            sprayed_count=Count('was_sprayed')
+        )
+
+        return {
+            a.get('spray_date').strftime('%Y-%m-%d'): [
+                a.get('sprayformid'),
+                a.get('sprayformid_count'),
+                a.get('sprayed_count')
+            ]
+            for a in hh_submission_list
+        }
+
+    def get_sop_submission_dict(self, spray_operator):
+        sop_submission_list = SprayOperatorDailySummary.objects.filter(
+            sprayoperator_code=spray_operator
+        ).values(
+            'spray_form_id'
+        ).annotate(
+            found_count=Count('found'),
+            sprayed_count=Count('sprayed')
+        )
+
+        return {
+            a.get('spray_form_id'): [
+                a.get('found_count'),
+                a.get('sprayed_count')
+            ]
+            for a in sop_submission_list
+        }
+
     def get_context_data(self, **kwargs):
         data = []
         totals = {
@@ -606,7 +963,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             'sprayable': 0,
             'not_sprayable': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': 0
+            'spray_success_rate': 0,
+            'avg_quality_score': 0,
+            'data_quality_check': True
         }
         context = super(SprayOperatorDailyView, self)\
             .get_context_data(**kwargs)
@@ -618,6 +977,17 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
         team_leader = self.kwargs.get('team_leader')
         spray_operator = self.kwargs.get('spray_operator')
+
+        # from HH Submission form total submissions
+        hh_submissions_dict = self.get_hh_submission_dict(spray_operator)
+
+        # from SOP Summary form
+        sop_submissions_dict = self.get_sop_submission_dict(spray_operator)
+
+        avg_quality_score_dict = get_avg_quality_score_dict(
+            'spray_date', spray_operator
+        )
+
         spraypoints = spraypoints_qs.extra(
             select={'today': 'data->>%s'}, select_params=['today'],
             where=["data->>%s =  %s", "data->>%s =  %s"],
@@ -640,7 +1010,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             numerator = sprayed.get(_date, 0)
             denominator = 1 if sprayable.get(_date) == 0 \
                 else sprayable.get(_date, 1)
-            spray_success_rate = round((numerator/denominator) * 100, 1)
+            spray_success_rate = round((numerator / denominator) * 100, 1)
 
             not_sprayed_total = refused.get(_date, 0) + \
                 other.get(_date, 0)
@@ -653,6 +1023,27 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
+            hh_submission_row_val = hh_submissions_dict.get(_date)
+            sop_found_count = None
+            if hh_submission_row_val:
+                spray_form_id = hh_submission_row_val[0]
+                hh_sprayformid_count = hh_submission_row_val[1]
+                hh_sprayed_count = hh_submission_row_val[2]
+
+                sop_submission_row = sop_submissions_dict.get(spray_form_id)
+                if sop_submission_row:
+                    sop_found_count = sop_submission_row[0]
+                    sop_sprayed_count = sop_submission_row[1]
+
+            data_quality_check = False
+            if sop_found_count is not None:
+                # check HH Submission Form total submissions count is equal to
+                # SOP Summary Form 'found' count and HH Submission Form
+                # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+                # count and both checks should be based on 'sprayformid'
+                data_quality_check = sop_found_count == hh_sprayformid_count\
+                    and sop_sprayed_count == hh_sprayed_count
+
             data.append({
                 'day': index + 1,
                 'date': datetime.strptime(_date, '%Y-%m-%d'),
@@ -664,7 +1055,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 'spray_success_rate': spray_success_rate,
                 'not_sprayed_total': not_sprayed_total,
                 'avg_start_time': _start_time,
-                'avg_end_time': _end_time
+                'avg_end_time': _end_time,
+                'data_quality_check': data_quality_check,
+                'avg_quality_score': avg_quality_score_dict.get(_date) or 0
             })
 
             # calculate totals
@@ -675,15 +1068,24 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             totals['other'] += other.get(_date, 0)
             totals['not_sprayed_total'] += not_sprayed_total
 
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
+
+            totals['avg_quality_score'] += avg_quality_score_dict.get(
+                _date) or 0
+
         numerator = totals['sprayed']
         denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
-        sprayed_success_rate = round((numerator/denominator) * 100, 1)
+        sprayed_success_rate = round((numerator / denominator) * 100, 1)
         totals['spray_success_rate'] = sprayed_success_rate
         totals['avg_start_time'] = avg_time_tuple(start_times)
         totals['avg_end_time'] = avg_time_tuple(end_times)
         totals['avg_sprayed'] = 0
         if len(dates) != 0:
             totals['avg_sprayed'] = round(numerator / len(dates))
+        totals['avg_quality_score'] = round(
+            totals['avg_quality_score'] / len(dates), 2
+        )
 
         context.update(
             {
