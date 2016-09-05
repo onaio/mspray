@@ -19,6 +19,14 @@ h2{
     font-size:2em;
 }
 
+i.red {
+    color: red;
+}
+
+i.green {
+    color: green;
+}
+
 /* Tables */
 .table{
     border-top:1px solid #ccc;
