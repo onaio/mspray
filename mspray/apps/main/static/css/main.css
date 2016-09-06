@@ -19,6 +19,15 @@ h2{
     font-size:2em;
 }
 
+i.red {
+    color: red;
+}
+
+i.green {
+    color: green;
+}
+
+
 /* Tables */
 .table{
     border-top:1px solid #ccc;
@@ -59,8 +68,10 @@ h2{
 /* Table color-coding */
 .table > tbody > tr > td.red,
 .table > tbody > tr > td.green,
+.table > tbody > tr > td.orange,
 .table > tfoot > tr > td.red,
-.table > tfoot > tr > td.green{
+.table > tfoot > tr > td.green,
+.table > tfoot > tr > td.orange{
     color:#fff;
     opacity:0.8;
 }
@@ -75,6 +86,10 @@ h2{
 .table > tbody > tr > td.green,
 .table > tfoot > tr > td.green{
     background:#090;
+}
+.table > tbody > tr > td.orange,
+.table > tfoot > tr > td.orange{
+    background:#f60;
 }
 
 /* Containers */
