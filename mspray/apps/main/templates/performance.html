@@ -5,73 +5,80 @@
 {% load performance_extras %}
 
 {% block content %}
-        <div class="container">
-            <div class="row">
-                <h2>Performance (District)</h2>
-                <table class="table table-stripe">
-                    <thead>
-                        <tr>
-                            <th rowspan="2">District</th>
-                            <th colspan="2">Targeted</th>
-                            <th rowspan="2">Structures Found</th>
-                            <th colspan="2">TA's Visited<sup title="TA's visited are TA's with >20% found coverage - number of structures found / number of structures enumerated">[a]</sup></th>
-                            <th colspan="2">TA's Completed<sup title="TA's completed are TAs with >85% spray progress - number of structures sprayed / number of structures targeted">[b]</sup></th>
-                            <th rowspan="2">Average structures sprayed per SOP per day</th>
-                            <th rowspan="2">Average data collection start time<sup title="Start time is determined from the time the first form is completed per day per operator">[c]</sup></th>
-                            <th rowspan="2">Average data collection end time<sup title="Finish time is determined from the time the last form is started per day per operator">[d]</sup></th>
-                        </tr>
-                        <tr>
-                            <th>No. of Structures</th>
-                            <th>Target areas</th>
-                            <th>Number</th>
-                            <th>%</th>
-                            <th>Number</th>
-                            <th>%</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for row in data %}
-                        <tr>
-                            <td><a href="{% url "performance:team-leaders" row.location.code %}">{{ row.location.name }}</a></td>
-                            <td class='numbers'>{{ row.location.structures|intcomma }}</td>
-                            <td class='numbers'>{{ row.target_areas|intcomma }}</td>
-                            <td class='numbers'>{{ row.structures_found|intcomma  }}</td>
-                            <td class='numbers'>{{ row.found_gt_20|intcomma  }}</td>
-                            <td class='numbers'>{{ row.found_gt_20_percentage }}%</td>
-                            <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
-                            <td class='numbers'>{{ row.sprayed_percentage }}%</td>
-                            <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>
-                                {{ row.avg_structures_per_user_per_so }}
-                            </td>
-                            <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
-                            <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>Totals</td>
-                            <td class='numbers'>{{ totals.houses|intcomma }}</td>
-                            <td class='numbers'>{{ totals.target_areas|intcomma }}</td>
-                            <td class='numbers'>{{ totals.structures_found|intcomma }}</td>
-                            <td class='numbers'>{{ totals.found_gt_20|intcomma  }}</td>
-                            <td class='numbers'>{{ totals.found_gt_20_percentage }}%</td>
-                            <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
-                            <td class='numbers'>{{ totals.sprayed_percentage }}%</td>
-                            <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
-                                {{ totals.avg_structures_per_user_per_so }}
-                            </td>
-                            <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
-                            <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
-                        </tr>
-                    </tfoot>
-                </table>
-                <p class="definitions">
-                    <a href="{% url "performance:definitions-and-conditions" %}">
-                        <span class="glyphicon glyphicon-info-sign"></span> Definitions and Conditions
-                    </a>
-                </p>
-            </div>
-        </div>
+<div class="container">
+    <div class="row">
+        <h2>Performance (District)</h2>
+        <table class="table table-stripe">
+            <thead>
+                    <tr>
+                        <th rowspan="3">District</th>
+                        <th colspan="7">Number of Structures</th>
+                        <th rowspan="3">Spray Coverage</th>
+                        <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
+                        <th rowspan="3">Average start time</th>
+                        <th rowspan="3">Average end time</th>
+                        <th rowspan="3">Data Quality Check</th>
+                        <th rowspan="3">Average Spray Quality Score</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">Targeted</th>
+                        <th colspan="2">Found</th>
+                        <th rowspan="2">Sprayed</th>
+                        <th colspan="3">Not sprayed</th>
+                    </tr>
+                    <tr>
+                        <th>Sprayable</th>
+                        <th>Non-Sprayable</th>
+                        <th>Refused</th>
+                        <th>Other</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+            <tbody>
+            {% for row in data %}
+                <tr>
+                    <td><a href="{% url "performance:team-leaders" row.location.id %}">{{ row.location.name }}</a></td>
+                    <td class='numbers'>{{ row.location.structures|intcomma }}</td>
+                    <td class='numbers'>{{ row.sprayable|intcomma }}</td>
+                    <td class='numbers'>{{ row.not_sprayable|intcomma }}</td>
+                    <td class='numbers'>{{ row.sprayed|intcomma }}</td>
+                    <td class='numbers'>{{ row.refused|intcomma }}</td>
+                    <td class='numbers'>{{ row.other|intcomma }}</td>
+                    <td class='numbers'>{{ row.not_sprayed_total|intcomma }}</td>
+                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                    <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>{{ row.avg_structures_per_user_per_so }}</td>
+                    <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
+                    <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Totals</td>
+                    <td class='numbers'>{{ totals.houses|intcomma }}</td>
+                    <td class='numbers'>{{ totals.sprayable|intcomma }}</td>
+                    <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
+                    <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
+                    <td class='numbers'>{{ totals.refused|intcomma }}</td>
+                    <td class='numbers'>{{ totals.other|intcomma }}</td>
+                    <td class='numbers'>{{ totals.not_sprayed_total|intcomma }}</td>
+                    <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                    <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>{{ totals.avg_structures_per_user_per_so }}</td>
+                    <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
+                    <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+        <p class="definitions">
+            <a href="{% url "performance:definitions-and-conditions" %}">
+                <span class="glyphicon glyphicon-info-sign"></span> Definitions and Conditions
+            </a>
+        </p>
+    </div>
+</div>
 
 {% endblock %}
