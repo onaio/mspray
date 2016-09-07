@@ -16,7 +16,7 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th rowspan="3">Team Leader</th>
+                                <th rowspan="3">Data Entry Clerk</th>
                                 <th colspan="6">Number of Structures</th>
                                 <th rowspan="3">Spray Coverage</th>
                                 <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
@@ -40,7 +40,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "performance:spray-operator-summary" district.code row.team_leader %}">{{ row.team_leader_name }}</a></td>
+                                    <td><a href="{% url "performance:spray-operator-summary" district.id row.team_leader %}">{{ row.team_leader_name }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
