@@ -250,7 +250,7 @@ def get_totals(spraypoints, condition):
 
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
     model = Location
-    slug_field = 'code'
+    slug_field = 'id'
     template_name = 'team-leaders.html'
 
     def get_context_data(self, **kwargs):
@@ -288,13 +288,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         sprayed = get_totals(spraypoints, "sprayed")
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
-        team_leaders = spraypoints.extra(
-            select={
-                "name": "(select name from main_teamleader"
-                " where code = data->>%s)"
-            },
-            select_params=[TEAM_LEADER_CODE]
-        ).values_list('team_leader', 'name').order_by('name').distinct()
+        team_leaders = spraypoints.values_list('team_leader', 'team_leader')\
+            .order_by('team_leader').distinct()
 
         start_times = []
         end_times = []

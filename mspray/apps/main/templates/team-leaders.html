@@ -17,36 +17,15 @@
                         <thead>
                             <tr>
                                 <th rowspan="3">Team Leader</th>
-                                <th colspan="6">Number of Structures</th>
-                                <th rowspan="3">Spray success rate</th>
                                 <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
                                 <th rowspan="3">Average start time</th>
                                 <th rowspan="3">Average end time</th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">Found</th>
-                                <th rowspan="2">Sprayed</th>
-                                <th colspan="3">Not sprayed</th>
-                            </tr>
-                            <tr>
-                                <th>Sprayable</th>
-                                <th>Non-Sprayable</th>
-                                <th>Refused</th>
-                                <th>Other</th>
-                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "performance:spray-operator-summary" district.code row.team_leader %}">{{ row.team_leader_name }}</a></td>
-                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_sprayed_total }}</td>
-                                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                                    <td><a href="{% url "performance:spray-operator-summary" district.id row.team_leader %}">{{ row.team_leader_name }}</a></td>
                                     <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>
                                         {{ row.avg_structures_per_user_per_so }}
                                     </td>
@@ -58,13 +37,6 @@
                         <tfoot>
                             <tr>
                                 <td>Totals</td>
-                                <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.refused|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.other|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.not_sprayed_total }}</td>
-                                <td class='numbers'>{{ totals.spray_success_rate }}%</td>
                                 <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
                                     {{ totals.avg_structures_per_user_per_so }}
                                 </td>
