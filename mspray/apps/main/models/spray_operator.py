@@ -1,5 +1,5 @@
 from django.contrib.gis.db import models
-# from django_pgjson.fields import JsonField
+from django.contrib.postgres.fields import JSONField
 
 
 class SprayOperator(models.Model):
@@ -21,7 +21,7 @@ class SprayOperatorDailySummary(models.Model):
     sprayed = models.IntegerField()
     found = models.IntegerField()
     sprayoperator_code = models.CharField(max_length=10)
-    # data = JsonField(default={})
+    data = JSONField(default={})
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
 
@@ -47,7 +47,7 @@ class DirectlyObservedSprayingForm(models.Model):
     supervisor_name = models.CharField(max_length=10)
     sprayop_code_name = models.CharField(max_length=10)
     tl_code_name = models.CharField(max_length=10)
-    # data = JsonField(default={})
+    data = JSONField(default={})
     spray_date = models.CharField(max_length=10)
     date_modified = models.DateTimeField(auto_now=True)
 

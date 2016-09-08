@@ -26,6 +26,7 @@ class SprayOperatorDailyViewSet(viewsets.ModelViewSet):
                 sprayed=sprayed,
                 found=found,
                 sprayoperator_code=spray_operator_code,
+                data=request.data,
             )
             self.calculate_data_quality_check(
                 spray_form_id, spray_operator_code
