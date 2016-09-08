@@ -6,7 +6,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework import status
 
 from mspray.apps.main.models import(
-    SprayOperatorDailySummary, SprayPointView, SprayOperator, TeamLeader
+    SprayOperatorDailySummary, SprayPointView, SprayOperator
 )
 from mspray.apps.main.serializers.sprayday import SprayOperatorDailySerializer
 
@@ -26,7 +26,6 @@ class SprayOperatorDailyViewSet(viewsets.ModelViewSet):
                 sprayed=sprayed,
                 found=found,
                 sprayoperator_code=spray_operator_code,
-                data=request.data,
             )
             self.calculate_data_quality_check(
                 spray_form_id, spray_operator_code

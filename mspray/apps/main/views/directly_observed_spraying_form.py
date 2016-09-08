@@ -36,7 +36,6 @@ class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
                 supervisor_name=request.data.get('supervisor_name'),
                 sprayop_code_name=spray_operator_code,
                 tl_code_name=request.data.get('tl_code_name'),
-                data=request.data,
                 spray_date=request.data.get('today'),
             )
 
