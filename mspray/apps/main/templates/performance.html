@@ -49,8 +49,14 @@
                     <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>{{ row.avg_structures_per_user_per_so }}</td>
                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
-                    <td></td>
-                    <td></td>
+                    <td>
+                        {% if row.data_quality_check %}
+                            <i class="fa fa-check green" aria-hidden="true"></i>
+                        {% else %}
+                            <i class="fa fa-times red" aria-hidden="true"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ row.avg_quality_score }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -68,8 +74,14 @@
                     <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>{{ totals.avg_structures_per_user_per_so }}</td>
                     <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                     <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
-                    <td></td>
-                    <td></td>
+                    <td>
+                        {% if totals.data_quality_check %}
+                            <i class="fa fa-check green" aria-hidden="true"></i>
+                        {% else %}
+                            <i class="fa fa-times red" aria-hidden="true"></i>
+                        {% endif %}
+                    </td>
+                    <td>{{ totals.avg_quality_score }}</td>
                 </tr>
             </tfoot>
         </table>
