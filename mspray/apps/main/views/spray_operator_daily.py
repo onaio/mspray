@@ -6,7 +6,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework import status
 
 from mspray.apps.main.models import(
-    SprayOperatorDailySummary, SprayPointView, SprayOperator
+    SprayOperatorDailySummary, SprayPointView, SprayOperator, TeamLeader
 )
 from mspray.apps.main.serializers.sprayday import SprayOperatorDailySerializer
 
@@ -16,19 +16,25 @@ class SprayOperatorDailyViewSet(viewsets.ModelViewSet):
     serializer_class = SprayOperatorDailySerializer
 
     def create(self, request, *args, **kwargs):
-        message = "Successfully created"
         try:
+            spray_form_id = request.data.get('sprayformid')
+            sprayed = request.data.get('sprayed')
+            found = request.data.get('found')
+            spray_operator_code = request.data.get('sprayop_code')
             SprayOperatorDailySummary.objects.create(
-                spray_form_id=request.data.get('sprayformid'),
-                sprayed=request.data.get('sprayed'),
-                found=request.data.get('found'),
-                sprayoperator_code=request.data.get('sprayop_code'),
+                spray_form_id=spray_form_id,
+                sprayed=sprayed,
+                found=found,
+                sprayoperator_code=spray_operator_code,
                 data=request.data,
+            )
+            self.calculate_data_quality_check(
+                spray_form_id, spray_operator_code
             )
         except Exception as e:
             raise ParseError(e)
 
-        return Response(message, status=status.HTTP_201_CREATED)
+        return Response("Successfully created", status=status.HTTP_201_CREATED)
 
     def get_hh_submission(self, spray_form_id):
         hh_submission = SprayPointView.objects.filter(
@@ -38,21 +44,21 @@ class SprayOperatorDailyViewSet(viewsets.ModelViewSet):
         ).annotate(
             sprayformid_count=Count('sprayformid'),
             sprayed_count=Count('was_sprayed')
-        ).first()
+        )
 
-        return hh_submission
+        return hh_submission and hh_submission.first() or {}
 
     def get_sop_submission(self, spray_form_id):
         sop_submission = SprayOperatorDailySummary.objects.filter(
-            sprayformid=spray_form_id
+            spray_form_id=spray_form_id
         ).values(
             'spray_form_id'
         ).annotate(
             found_count=Count('found'),
             sprayed_count=Count('sprayed')
-        ).first()
+        )
 
-        return sop_submission
+        return sop_submission and sop_submission.first() or {}
 
     def calculate_data_quality_check(self, spray_form_id, spray_operator_code):
         # from HH Submission form total submissions
@@ -82,5 +88,39 @@ class SprayOperatorDailyViewSet(viewsets.ModelViewSet):
 
         so = SprayOperator.objects.filter(code=spray_operator_code)[0]
         if so:
+            # update spray operator
             so.data_quality_check = data_quality_check
             so.save()
+
+            team_leader = so.team_leader
+            if data_quality_check:
+                # if data_quality_check is True, check if all data quality
+                # values for the rest of the spray operators is true before
+                # saving
+                data_quality_check = all(
+                    [
+                        a.get('data_quality_check')
+                        for a in team_leader.sprayoperator_set.values(
+                            'data_quality_check'
+                        )
+                    ]
+                )
+
+            # update team leader
+            team_leader.data_quality_check = data_quality_check
+            team_leader.save()
+
+            # update district
+            district = team_leader.location
+            if data_quality_check:
+                data_quality_check = all(
+                    [
+                        a.get('data_quality_check')
+                        for a in district.teamleader_set.values(
+                            'data_quality_check'
+                        )
+                    ]
+                )
+
+            district.data_quality_check = data_quality_check
+            district.save()
