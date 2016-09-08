@@ -40,7 +40,7 @@ TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
 
 
-def get_avg_quality_score_dict(sop_code, use_in=False):
+def get_avg_quality_score_dict(sop_code):
     """
     retrieves the average quality score dictionary based
     - return: {'2012-1-1': '10',
@@ -302,6 +302,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             avg_quality_score = dqc_and_asqs.get(
                 'average_spray_quality_score'
             )
+            avg_quality_score = round(avg_quality_score, 2)
 
             result['avg_quality_score'] = avg_quality_score
             totals['avg_quality_score'] += avg_quality_score
@@ -451,20 +452,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
 
-        # IMPORTANT: only use this for testing. Otherwise remove it and use the
-        # code below
-        team_leaders = TeamLeader.objects.filter(
-            location=district
+        team_leaders = spraypoints.filter(
+            team_leader__location=district
         ).values_list(
-            'code', 'name', 'data_quality_check', 'average_spray_quality_score'
-        )
-
-        # IMPORTANT: uncomment this before pusing
-        # team_leaders = spraypoints.filter(
-        #     team_leader__location=district
-        # ).values_list(
-        #     'team_leader__code', 'team_leader__name'
-        # ).distinct()
+            'team_leader__code', 'team_leader__name'
+        ).distinct()
 
         start_times = []
         end_times = []
@@ -487,11 +479,6 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         for t, a, b in sprayed_per_spray_operator_per_day:
             sprayed_structures[t] = (a, b)
             team_leaders_code_list.append(t)
-
-        # IMPORTANT: only use this for testing and remove if after testing
-        team_leaders_code_list = [
-            code for code, name, dqc, asqs in team_leaders
-        ]
 
         dqc_and_asqs_queryset = TeamLeader.objects.filter(
             code__in=team_leaders_code_list
@@ -536,6 +523,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             avg_quality_score = dqc_and_asqs.get(
                 'average_spray_quality_score'
             )
+            avg_quality_score = round(avg_quality_score, 2)
 
             data.append({
                 'team_leader': team_leader,
@@ -719,6 +707,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             avg_quality_score = dqc_and_asqs.get(
                 'average_spray_quality_score'
             )
+            avg_quality_score = round(avg_quality_score, 2)
+
             data.append({
                 'spray_operator_code': spray_operator_code,
                 'spray_operator_name': spray_operator_name,
@@ -872,9 +862,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         # from SOP Summary form
         sop_submissions_dict = self.get_sop_submission_dict(spray_operator)
 
-        avg_quality_score_dict = get_avg_quality_score_dict(
-            'spray_date', spray_operator
-        )
+        avg_quality_score_dict = get_avg_quality_score_dict(spray_operator)
 
         for index, _date in enumerate(dates):
             numerator = sprayed.get(_date, 0)
@@ -914,6 +902,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 data_quality_check = sop_found_count == hh_sprayformid_count\
                     and sop_sprayed_count == hh_sprayed_count
 
+            avg_quality_score = avg_quality_score_dict.get(_date) or 0
+            avg_quality_score = round(avg_quality_score, 2)
             data.append({
                 'day': index + 1,
                 'date': datetime.strptime(_date, '%Y-%m-%d'),
@@ -927,7 +917,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 'avg_start_time': _start_time,
                 'avg_end_time': _end_time,
                 'data_quality_check': data_quality_check,
-                'avg_quality_score': avg_quality_score_dict.get(_date) or 0
+                'avg_quality_score': avg_quality_score
             })
 
             # calculate totals
@@ -939,8 +929,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             totals['not_sprayed_total'] += not_sprayed_total
             if not data_quality_check:
                 totals['data_quality_check'] = data_quality_check
-            totals['avg_quality_score'] += avg_quality_score_dict.get(
-                _date) or 0
+            totals['avg_quality_score'] += avg_quality_score
 
         numerator = totals['sprayed']
         denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
