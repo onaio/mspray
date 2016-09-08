@@ -180,11 +180,27 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             'refused': 0,
             'other': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': []
+            'spray_success_rate': [],
+            'avg_quality_score': 0,
+            'data_quality_check': False
         }
         start_times = []
         end_times = []
         results = []
+
+        dqc_and_asqs_queryset = districts.values(
+            'data_quality_check', 'average_spray_quality_score', 'code'
+        )
+
+        dqc_and_asqs_dict = {}
+        for a in dqc_and_asqs_queryset:
+            dqc_and_asqs_dict[a.get('code')] = {
+                'data_quality_check': a.get('data_quality_check'),
+                'average_spray_quality_score': a.get(
+                    'average_spray_quality_score'
+                )
+            }
+
         for district in districts:
             target_areas = Location.objects.filter(parent=district)\
                 .order_by('name')
@@ -281,6 +297,19 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 k__gte=20
             ).count()
 
+            dqc_and_asqs = dqc_and_asqs_dict.get(district.code)
+            data_quality_check = dqc_and_asqs.get('data_quality_check')
+            avg_quality_score = dqc_and_asqs.get(
+                'average_spray_quality_score'
+            )
+
+            result['avg_quality_score'] = avg_quality_score
+            totals['avg_quality_score'] += avg_quality_score
+
+            result['data_quality_check'] = data_quality_check
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
+
             result['found_gt_20'] = found_gt_20
             totals['found_gt_20'] += found_gt_20
 
@@ -322,6 +351,12 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         totals['spray_success_rate'] = round(
             sum(totals['spray_success_rate']) /
             len(totals['spray_success_rate']), 0)
+
+        districts_count = districts.count()
+        if districts_count > 0:
+            totals['avg_quality_score'] = round(
+                totals['avg_quality_score'] / districts_count, 2
+            )
 
         if totals['target_areas'] > 0:
             totals['found_percentage'] = round((
@@ -396,7 +431,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'sprayable': 0,
             'not_sprayable': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': 0
+            'spray_success_rate': 0,
+            'avg_quality_score': 0,
+            'data_quality_check': True
         }
 
         ta_pks = list(get_ta_in_location(district))
@@ -419,7 +456,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         team_leaders = TeamLeader.objects.filter(
             location=district
         ).values_list(
-            'code', 'name'
+            'code', 'name', 'data_quality_check', 'average_spray_quality_score'
         )
 
         # IMPORTANT: uncomment this before pusing
@@ -446,10 +483,32 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                                   F('spray_operator__code')), distinct=True)
                    ).values_list('team_leader__code', 'a', 'b')
         sprayed_structures = {}
+        team_leaders_code_list = []
         for t, a, b in sprayed_per_spray_operator_per_day:
             sprayed_structures[t] = (a, b)
+            team_leaders_code_list.append(t)
 
-        for team_leader, team_leader_name in team_leaders:
+        # IMPORTANT: only use this for testing and remove if after testing
+        team_leaders_code_list = [
+            code for code, name, dqc, asqs in team_leaders
+        ]
+
+        dqc_and_asqs_queryset = TeamLeader.objects.filter(
+            code__in=team_leaders_code_list
+        ).values(
+            'data_quality_check', 'average_spray_quality_score', 'code'
+        )
+
+        dqc_and_asqs_dict = {}
+        for a in dqc_and_asqs_queryset:
+            dqc_and_asqs_dict[a.get('code')] = {
+                'data_quality_check': a.get('data_quality_check'),
+                'average_spray_quality_score': a.get(
+                    'average_spray_quality_score'
+                )
+            }
+
+        for team_leader, team_leader_name, dqc, asqs in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
                                       params=[TEAM_LEADER_CODE, team_leader])
             numerator = sprayed.get(team_leader, 0)
@@ -472,6 +531,12 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
+            dqc_and_asqs = dqc_and_asqs_dict.get(team_leader)
+            data_quality_check = dqc_and_asqs.get('data_quality_check')
+            avg_quality_score = dqc_and_asqs.get(
+                'average_spray_quality_score'
+            )
+
             data.append({
                 'team_leader': team_leader,
                 'team_leader_name': team_leader_name,
@@ -485,7 +550,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 avg_structures_per_user_per_so,
                 'not_sprayed_total': not_sprayed_total,
                 'avg_start_time': _start_time,
-                'avg_end_time': _end_time
+                'avg_end_time': _end_time,
+                'data_quality_check': data_quality_check,
+                'avg_quality_score': avg_quality_score
             })
 
             # calculate totals
@@ -495,8 +562,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             totals['refused'] += refused.get(team_leader, 0)
             totals['other'] += other.get(team_leader, 0)
             totals['not_sprayed_total'] += not_sprayed_total
+            totals['avg_quality_score'] += avg_quality_score
             totals['avg_structures_per_user_per_so'] += \
                 avg_structures_per_user_per_so
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
 
         # calculate spray_success_rate total
         numerator = totals['sprayed']
@@ -509,6 +579,9 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             # calculate avg_structures_per_user_per_so total
             totals['avg_structures_per_user_per_so'] = round(
                 totals['avg_structures_per_user_per_so'] / len(team_leaders))
+            totals['avg_quality_score'] = round(
+                totals['avg_quality_score'] / len(list(team_leaders)), 2
+            )
 
         if len(start_times) and len(end_times):
             totals['avg_start_time'] = avg_time_tuple(start_times)
@@ -540,7 +613,9 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             'sprayable': 0,
             'not_sprayable': 0,
             'not_sprayed_total': 0,
-            'spray_success_rate': 0
+            'spray_success_rate': 0,
+            'avg_quality_score': 0,
+            'data_quality_check': True
         }
         context = super(SprayOperatorSummaryView, self)\
             .get_context_data(**kwargs)
@@ -589,6 +664,22 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             'code'
         ).distinct()
 
+        spray_operators_code_list = [a for a, b in spray_operators]
+        dqc_and_asqs_queryset = SprayOperator.objects.filter(
+            code__in=spray_operators_code_list
+        ).values(
+            'data_quality_check', 'average_spray_quality_score', 'code'
+        )
+
+        dqc_and_asqs_dict = {}
+        for a in dqc_and_asqs_queryset:
+            dqc_and_asqs_dict[a.get('code')] = {
+                'data_quality_check': a.get('data_quality_check'),
+                'average_spray_quality_score': a.get(
+                    'average_spray_quality_score'
+                )
+            }
+
         for spray_operator_code, spray_operator_name in spray_operators:
             qs = spraypoints_qs.extra(
                 where=["data->>%s = %s"],
@@ -623,6 +714,11 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
+            dqc_and_asqs = dqc_and_asqs_dict.get(spray_operator_code)
+            data_quality_check = dqc_and_asqs.get('data_quality_check')
+            avg_quality_score = dqc_and_asqs.get(
+                'average_spray_quality_score'
+            )
             data.append({
                 'spray_operator_code': spray_operator_code,
                 'spray_operator_name': spray_operator_name,
@@ -636,7 +732,9 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 'avg_structures_per_so': avg_structures_per_so,
                 'not_sprayed_total': not_sprayed_total,
                 'avg_start_time': _start_time,
-                'avg_end_time': _end_time
+                'avg_end_time': _end_time,
+                'data_quality_check': data_quality_check,
+                'avg_quality_score': avg_quality_score
             })
 
             # totals
@@ -649,6 +747,9 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             totals['not_sprayed_total'] += not_sprayed_total
             totals['no_of_days_worked'] += no_of_days_worked
             totals['avg_structures_per_so'] += avg_structures_per_so
+            totals['avg_quality_score'] += avg_quality_score
+            if not data_quality_check:
+                totals['data_quality_check'] = data_quality_check
 
         numerator = totals['sprayed']
         denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
@@ -658,6 +759,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         if len(list(spray_operators)) != 0:
             totals['avg_structures_per_so'] = round(
                 totals['avg_structures_per_so'] / len(list(spray_operators))
+            )
+
+            totals['avg_quality_score'] = round(
+                totals['avg_quality_score'] / len(list(spray_operators)), 2
             )
 
         totals['avg_start_time'] = avg_time_tuple(start_times)
