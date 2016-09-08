@@ -376,7 +376,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     template_name = 'spray-operator-summary.html'
     model = Location
-    slug_field = 'code'
+    slug_field = 'pk'
 
     def get_context_data(self, **kwargs):
         data = []
@@ -420,7 +420,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 "spray_operator_name": "(select name from main_sprayoperator"
                 " where code = (data->>'{}'))".format(SPRAY_OPERATOR_CODE)
             }
-        ).values_list('spray_operator_code', 'spray_operator_name')\
+        ).values_list('spray_operator_code', 'spray_operator_code')\
             .order_by('spray_operator_code').distinct()
         start_times = []
         end_times = []

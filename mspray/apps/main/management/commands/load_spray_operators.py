@@ -12,22 +12,25 @@ class Command(BaseCommand):
     args = '<path to spray operators csv with columns code|name>'
     help = _('Load spray operators')
 
+    def add_arguments(self, parser):
+        parser.add_argument('csv_file', metavar="FILE")
+
     def handle(self, *args, **options):
-        if len(args) == 0:
+        if 'csv_file' not in options:
             raise CommandError(_('Missing csv file path'))
-        for path in args:
-            try:
-                path = os.path.abspath(path)
-            except Exception as e:
-                raise CommandError(_('Error: %(msg)s' % {"msg": e}))
-            else:
-                with codecs.open(path, encoding='utf-8') as f:
-                    csv_reader = csv.DictReader(f)
-                    for row in csv_reader:
-                        spray_operator, created = \
-                            SprayOperator.objects.get_or_create(
-                                code=row['code'].strip(),
-                                name=row['name']
-                            )
-                        if created:
-                            print(row)
+        path = options['csv_file']
+        try:
+            path = os.path.abspath(path)
+        except Exception as e:
+            raise CommandError(_('Error: %(msg)s' % {"msg": e}))
+        else:
+            with codecs.open(path, encoding='utf-8') as f:
+                csv_reader = csv.DictReader(f)
+                for row in csv_reader:
+                    spray_operator, created = \
+                        SprayOperator.objects.get_or_create(
+                            code=row['code'].strip(),
+                            name=row['name']
+                        )
+                    if created:
+                        print(row)
