@@ -495,7 +495,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 )
             }
 
-        for team_leader, team_leader_name, dqc, asqs in team_leaders:
+        for team_leader, team_leader_name in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
                                       params=[TEAM_LEADER_CODE, team_leader])
             numerator = sprayed.get(team_leader, 0)
@@ -841,7 +841,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         spraypoints = spraypoints_qs.extra(
             select={'today': 'data->>%s'}, select_params=['today'],
             where=["data->>%s =  %s", "data->>%s =  %s"],
-            params=["team_leader", team_leader, SPRAY_OPERATOR_CODE,
+            params=["dec_leader", team_leader, SPRAY_OPERATOR_CODE,
                     spray_operator]
         ).values_list('today')
 
