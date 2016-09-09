@@ -1,5 +1,6 @@
 from mspray.apps.main.views import (
-    target_area, household, household_buffer, sprayday, indicators, districts
+    target_area, household, household_buffer, sprayday, indicators, districts,
+    spray_operator_daily, directly_observed_spraying_form
 )
 from mspray.apps.main.views import home
 from mspray.apps.main.views import performance
@@ -48,4 +49,15 @@ urlpatterns = [
         name='number_of_housesholds'),
     url(r'^performance/', include(performance_urls, namespace='performance')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^spray-operator-daily/',
+        spray_operator_daily.SprayOperatorDailyViewSet.as_view(
+            {'post': 'create'}
+        ),
+        name='spray-operator-daily'),
+    url(r'^directly-observed-spraying-form/',
+        directly_observed_spraying_form.DirectlyObservedSprayingFormViewSet.as_view(  # noqa
+            {'post': 'create'}
+        ),
+        name='directly-observed-spraying-form'),
+
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -5,78 +5,96 @@
 {% load performance_extras %}
 
 {% block content %}
-        <div class="container">
-            <h1>{{ district_name }}</h1>
-            <ol class="breadcrumb">
-              <li><a href="{% url "performance:districts" %}">Province</a></li>
-              <li class="active">District</li>
-            </ol>
-            <div class="row">
-                <div class="col-md-12">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th rowspan="3">Team Leader</th>
-                                <th colspan="6">Number of Structures</th>
-                                <th rowspan="3">Spray Coverage</th>
-                                <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
-                                <th rowspan="3">Average data collection start time</th>
-                                <th rowspan="3">Average data collection end time</th>
-                                <th rowspan="3">Average duration in field (hrs)</th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">Found</th>
-                                <th rowspan="2">Sprayed</th>
-                                <th colspan="3">Not sprayed</th>
-                            </tr>
-                            <tr>
-                                <th>Sprayable</th>
-                                <th>Non-Sprayable</th>
-                                <th>Refused</th>
-                                <th>Other</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for row in data %}
-                                <tr>
-                                    <td><a href="{% url "performance:spray-operator-summary" district.code row.team_leader %}">{{ row.team_leader_name }}</a></td>
-                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_sprayed_total }}</td>
-                                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
-                                    <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>
-                                        {{ row.avg_structures_per_user_per_so }}
-                                    </td>
-                                    <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
-                                    <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
-                                    <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td>Totals</td>
-                                <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.refused|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.other|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.not_sprayed_total }}</td>
-                                <td class='numbers'>{{ totals.spray_success_rate }}%</td>
-                                <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
-                                    {{ totals.avg_structures_per_user_per_so }}
-                                </td>
-                                <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
-                                <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
-                                <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
+<div class="container">
+    <h1>{{ district_name }}</h1>
+    <ol class="breadcrumb">
+      <li><a href="{% url "performance:districts" %}">Province</a></li>
+      <li class="active">District</li>
+    </ol>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th rowspan="3">Date Entry Clerk</th>
+                        <th colspan="6">Number of Structures</th>
+                        <th rowspan="3">Spray Coverage</th>
+                        <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
+                        <th rowspan="3">Average data collection start time</th>
+                        <th rowspan="3">Average data collection end time</th>
+                        <th rowspan="3">Average duration in field (hrs)</th>
+                        <th rowspan="3">Data Quality Check</th>
+                        <th rowspan="3">Average Spray Quality Score</th>
+                    </tr>
+                    <tr>
+                        <th colspan="2">Found</th>
+                        <th rowspan="2">Sprayed</th>
+                        <th colspan="3">Not sprayed</th>
+                    </tr>
+                    <tr>
+                        <th>Sprayable</th>
+                        <th>Non-Sprayable</th>
+                        <th>Refused</th>
+                        <th>Other</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr>
+                            <td><a href="{% url "performance:spray-operator-summary" district.code row.team_leader %}">{{ row.team_leader_name }}</a></td>
+                            <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
+                            <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
+                            <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
+                            <td class='numbers'>{{ row.refused|intcomma  }}</td>
+                            <td class='numbers'>{{ row.other|intcomma  }}</td>
+                            <td class='numbers'>{{ row.not_sprayed_total }}</td>
+                            <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                            <td class='numbers {{ row.avg_structures_per_user_per_so|sprayed_color }}'>
+                                {{ row.avg_structures_per_user_per_so }}
+                            </td>
+                            <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
+                            <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
+                            <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
+                            <td>
+                                {% if row.data_quality_check %}
+                                    <i class="fa fa-check green" aria-hidden="true"></i>
+                                {% else %}
+                                    <i class="fa fa-times red" aria-hidden="true"></i>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.avg_quality_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Totals</td>
+                        <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.refused|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.other|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.not_sprayed_total }}</td>
+                        <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                        <td class='numbers {{ totals.avg_structures_per_user_per_so|sprayed_color }}'>
+                            {{ totals.avg_structures_per_user_per_so }}
+                        </td>
+                        <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
+                        <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
+                        <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
+                        <td>
+                            {% if totals.data_quality_check %}
+                                <i class="fa fa-check green" aria-hidden="true"></i>
+                            {% else %}
+                                <i class="fa fa-times red" aria-hidden="true"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ totals.avg_quality_score }}</td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
+    </div>
+</div>
 {% endblock %}
