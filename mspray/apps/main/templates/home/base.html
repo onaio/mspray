@@ -35,12 +35,20 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
-                                <span>{% if performance_tables %}Performance{% else %}Progress{% endif %}</span>
+                                <span>
+                                    {% if performance_tables %}
+                                        Performance
+                                    {% elif directly_observed_spraying %}
+                                        Directly Observed Spraying
+                                    {% else %}
+                                        Spray Effectiveness
+                                    {% endif %}</span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'index' %}">Progress</a></li>
+                                <li><a href="{% url 'index' %}">Spray Effectiveness</a></li>
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
+                                <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
                             </ul>
                         </li>
                     </ul>
