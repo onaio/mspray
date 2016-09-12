@@ -1,3 +1,5 @@
+import json
+
 from dateutil.parser import parse
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -6,6 +8,8 @@ from django.views.generic import ListView
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
+from mspray.apps.main.serializers.target_area import \
+    GeoHealthFacilitySerializer
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
@@ -108,11 +112,21 @@ class TargetAreaView(SiteNameMixin, DetailView):
             context['ta_geojson'] = response.content
             bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
-            hhview = TargetAreaHouseholdsViewSet.as_view({'get': 'retrieve'})
-            response = hhview(self.request, pk=context['object'].pk,
-                              bgeom=bgeom, format='geojson')
-            response.render()
-            context['hh_geojson'] = response.content
+            if self.object.level == 'district':
+                data = GeoHealthFacilitySerializer(
+                    self.object.location_set.all(), many=True
+                ).data
+                context['hh_geojson'] = json.dumps(data)
+            elif self.object.level == 'RHC':
+                pass
+            else:
+                hhview = TargetAreaHouseholdsViewSet.as_view({
+                    'get': 'retrieve'
+                })
+                response = hhview(self.request, pk=context['object'].pk,
+                                  bgeom=bgeom, format='geojson')
+                response.render()
+                context['hh_geojson'] = response.content
 
         spray_date = self.request.GET.get('spray_date')
         if spray_date:

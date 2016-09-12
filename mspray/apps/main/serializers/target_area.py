@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
+from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
@@ -340,4 +341,10 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'level', 'district_name', 'found')
         model = TargetArea
+        geo_field = 'geom'
+
+class GeoHealthFacilitySerializer(GeoFeatureModelSerializer):
+
+    class Meta:
+        model = Location
         geo_field = 'geom'
