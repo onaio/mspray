@@ -32,7 +32,7 @@ def process_osm_file(path):
                             data=way.get('tags'),
                             location=location
                         )
-                    except Location.DoesNotExist:
+                    except Household.DoesNotExist:
                         pass
                     except IntegrityError:
                         pass
@@ -55,15 +55,15 @@ class Command(BaseCommand):
                     is_file = entry.is_file()
                     if not is_osm_file or (is_osm_file and not is_file):
                         continue
-                    count = Location.objects.count()
+                    count = Household.objects.count()
                     process_osm_file(entry.path)
-                    after_count = Location.objects.count()
+                    after_count = Household.objects.count()
                     self.stdout.write('%d structures added.' %
                                       after_count - count)
             else:
                 path = os.path.abspath(osmfile)
-                count = Location.objects.count()
+                count = Household.objects.count()
                 process_osm_file(path)
-                after_count = Location.objects.count()
+                after_count = Household.objects.count()
                 self.stdout.write('%d structures added.' %
                                   (after_count - count))
