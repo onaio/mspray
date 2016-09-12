@@ -51,7 +51,8 @@ class Command(BaseCommand):
             if os.path.isdir(osmfile):
                 entries = os.scandir(os.path.dirname(osmfile))
                 for entry in entries:
-                    is_osm_file = entry.name.endswith('osm')
+                    is_osm_file = entry.name.endswith('.osm') \
+                        or entry.name.endswith('.xml')
                     is_file = entry.is_file()
                     if not is_osm_file or (is_osm_file and not is_file):
                         continue
@@ -59,7 +60,7 @@ class Command(BaseCommand):
                     process_osm_file(entry.path)
                     after_count = Household.objects.count()
                     self.stdout.write('%d structures added.' %
-                                      after_count - count)
+                                      (after_count - count))
             else:
                 path = os.path.abspath(osmfile)
                 count = Household.objects.count()
