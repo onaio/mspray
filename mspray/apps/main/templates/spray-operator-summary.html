@@ -26,7 +26,8 @@
                                 <th rowspan="2">Average end time</th>
                                 <th rowspan="2">Duration in field</th>
                                 <th rowspan="2">Data Quality Check</th>
-                                <th rowspan="2">Average Spray Quality Score</th>
+                                <th rowspan="2">Found Difference TODAY</th>
+                                <th rowspan="2">Sprayed Difference TODAY</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Found</th>
@@ -56,7 +57,8 @@
                                             <i class="fa fa-times red" aria-hidden="true"></i>
                                         {% endif %}
                                     </td>
-                                    <td>{{ row.avg_quality_score }}</td>
+                                    <td>{{ row.found_difference }}</td>
+                                    <td>{{ row.sprayed_difference }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -81,7 +83,8 @@
                                         <i class="fa fa-times red" aria-hidden="true"></i>
                                     {% endif %}
                                 </td>
-                                <td>{{ totals.avg_quality_score }}</td>
+                                <td>{{ totals.found_difference }}</td>
+                                <td>{{ totals.sprayed_difference }}</td>
                             </tr>
                         </tfoot>
                     </table>
