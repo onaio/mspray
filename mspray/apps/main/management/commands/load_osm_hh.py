@@ -14,7 +14,8 @@ def process_osm_file(path):
         nodes = parse_osm(content.strip())
         ways = [
             way for way in nodes
-            if way.get('osm_type') == 'way'
+            if not way.get('osm_id').startswith('-')
+            and way.get('osm_type') == 'way'
         ]
         if ways:
             for way in ways:
@@ -23,16 +24,15 @@ def process_osm_file(path):
                     level='ta'
                 ).first()
                 if location:
-                    osm_id = way['tags'].get('id').split('/')[1]
                     try:
                         Household.objects.create(
-                            hh_id=osm_id,
+                            hh_id=way.get('osm_id'),
                             geom=way.get('geom').centroid,
                             bgeom=way.get('geom'),
                             data=way.get('tags'),
                             location=location
                         )
-                    except Household.DoesNotExist:
+                    except Location.DoesNotExist:
                         pass
                     except IntegrityError:
                         pass
@@ -55,15 +55,15 @@ class Command(BaseCommand):
                     is_file = entry.is_file()
                     if not is_osm_file or (is_osm_file and not is_file):
                         continue
-                    count = Household.objects.count()
+                    count = Location.objects.count()
                     process_osm_file(entry.path)
-                    after_count = Household.objects.count()
+                    after_count = Location.objects.count()
                     self.stdout.write('%d structures added.' %
-                                      (after_count - count))
+                                      after_count - count)
             else:
                 path = os.path.abspath(osmfile)
-                count = Household.objects.count()
+                count = Location.objects.count()
                 process_osm_file(path)
-                after_count = Household.objects.count()
+                after_count = Location.objects.count()
                 self.stdout.write('%d structures added.' %
                                   (after_count - count))
