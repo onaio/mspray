@@ -68,7 +68,9 @@ urlpatterns = [
         name="dos-district"
     ),
     url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)',
-        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view()),
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
+        name="dos-team-leader"
+        ),
     url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)//(?P<spray_operator>[^/]+)',
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view()),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
