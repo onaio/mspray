@@ -1,16 +1,50 @@
 from django.db import connection
+from django.views.generic import ListView
 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ParseError
+from rest_framework.renderers import TemplateHTMLRenderer
 
 from mspray.apps.main.models import (
-    DirectlyObservedSprayingForm, SprayOperator
+    DirectlyObservedSprayingForm, SprayOperator, Location
 )
 from mspray.apps.main.serializers.sprayday import (
     DirectlyObservedSprayingFormSerializer
 )
+from mspray.apps.main.utils import add_directly_observed_spraying_data
+
+
+def get_directly_observed_spraying_data(column):
+    cursor = connection.cursor()
+
+    sql_statement = """
+select
+    {column},
+    sum(case when correct_removal = 'yes' then 1 else 0 end) correct_removal_yes,
+    sum(case when correct_mix = 'yes' then 1 else 0 end) correct_mix_yes,
+    sum(case when rinse = 'yes' then 1 else 0 end) rinse_yes,
+    sum(case when "PPE" = 'yes' then 1 else 0 end) ppe_yes,
+    sum(case when "CFV" = 'yes' then 1 else 0 end) cfv_yes,
+    sum(case when correct_covering = 'yes' then 1 else 0 end) correct_covering_yes,
+    sum(case when leak_free = 'yes' then 1 else 0 end) leak_free_yes,
+    sum(case when correct_distance = 'yes' then 1 else 0 end) correct_distance_yes,
+    sum(case when correct_speed = 'yes' then 1 else 0 end) correct_speed_yes,
+    sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
+from
+    main_directlyobservedsprayingform
+group by
+    {column};
+""".format(**{'column': column})  # noqa
+
+    cursor.execute(sql_statement)
+    queryset = cursor.cursor.fetchall()
+
+    return {
+        a[0]: a[1:]
+        for a in queryset
+    }
 
 
 class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
@@ -19,81 +53,14 @@ class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            spray_operator_code = request.data.get('sprayop_code_name')
-            DirectlyObservedSprayingForm.objects.create(
-                correct_removal=request.data.get('correct_removal'),
-                correct_mix=request.data.get('correct_mix'),
-                rinse=request.data.get('rinse'),
-                PPE=request.data.get('PPE'),
-                CFV=request.data.get('CFV'),
-                correct_covering=request.data.get('correct_covering'),
-                leak_free=request.data.get('leak_free'),
-                correct_distance=request.data.get('correct_distance'),
-                correct_speed=request.data.get('correct_speed'),
-                correct_overlap=request.data.get('correct_overlap'),
-                district=request.data.get('district'),
-                health_facility=request.data.get('health_facility'),
-                supervisor_name=request.data.get('supervisor_name'),
-                sprayop_code_name=spray_operator_code,
-                tl_code_name=request.data.get('tl_code_name'),
-                data=request.data,
-                spray_date=request.data.get('today'),
-            )
-
-            self.calculate_average_spray_quality_score(spray_operator_code)
+            add_directly_observed_spraying_data(request.data)
         except Exception as e:
             raise ParseError(e)
 
         return Response("Successfully created", status=status.HTTP_201_CREATED)
 
-    def get_avg_quality_score_dict(self, sop_code):
-        """
-        retrieves the average quality score dictionary based
-        - return: {'2012-1-1': '10',
-                   '2015-10-1': '5'}
-            """
-        cursor = connection.cursor()
-
-        sql_statement = """
-select
-    spray_date,
-    sum(column_a_yes)+sum(column_b_yes)+sum(column_c_yes)+sum(column_d_yes)
-    +sum(column_e_yes)+sum(column_f_yes)+sum(column_g_yes)+sum(column_h_yes)
-    +sum(column_i_yes)+sum(column_j_yes) as yes
-from
-    (select
-        spray_date,
-        sum(case when correct_removal = 'yes' then 1 else 0 end) column_a_yes,
-        sum(case when correct_mix = 'yes' then 1 else 0 end) column_b_yes,
-        sum(case when rinse = 'yes' then 1 else 0 end) column_c_yes,
-        sum(case when "PPE" = 'yes' then 1 else 0 end) column_d_yes,
-        sum(case when "CFV" = 'yes' then 1 else 0 end) column_e_yes,
-        sum(case when correct_covering = 'yes' then 1 else 0 end) column_f_yes,
-        sum(case when leak_free = 'yes' then 1 else 0 end) column_g_yes,
-        sum(case when correct_distance = 'yes' then 1 else 0 end) column_h_yes,
-        sum(case when correct_speed = 'yes' then 1 else 0 end) column_i_yes,
-        sum(case when correct_overlap = 'yes' then 1 else 0 end) column_j_yes
-    from
-        main_directlyobservedsprayingform
-    where
-        main_directlyobservedsprayingform.sprayop_code_name = '{sop_code}'
-    group by
-        spray_date) as filtered_directlyobservedsprayingform
-group by spray_date;
-""".format(**{'sop_code': sop_code})
-
-        cursor.execute(sql_statement)
-
-        queryset = cursor.cursor.fetchall()
-
-        return {
-            # spraydate: number of 'yes'
-            a[0]: int(a[1].to_eng_string())
-            for a in queryset
-        }
-
     def calculate_average_spray_quality_score(self, spray_operator_code):
-        avg_quality_score_dict = self.get_avg_quality_score_dict(
+        avg_quality_score_dict = self.get_directly_observed_spraying_data(
             spray_operator_code
         )
 
@@ -138,3 +105,65 @@ group by spray_date;
 
             district.average_spray_quality_score = average_spray_quality_score
             district.save()
+
+
+class DirectlyObservedSprayingView(ListView):
+    model = DirectlyObservedSprayingForm
+    template_name = 'directly-observed-spraying.html'
+    renderer_classes = (TemplateHTMLRenderer,)
+
+    def get_district_data(self, districts, directly_observed_spraying_data):
+        data = {}
+        for a in districts:
+            code = str(a.get('code'))
+            name = a.get('name')
+
+            records = directly_observed_spraying_data.get(code)
+            if records:
+                data[name] = {
+                    'correct_removal': records[0],
+                    'correct_mix': records[1],
+                    'rinse': records[2],
+                    'ppe': records[3],
+                    'cfv': records[4],
+                    'correct_covering': records[5],
+                    'leak_free': records[6],
+                    'correct_distance': records[7],
+                    'correct_speed': records[8],
+                    'correct_overlap': records[9],
+                    'code': code
+                }
+            else:
+                data[name] = {
+                    'correct_removal': 0,
+                    'correct_mix': 0,
+                    'rinse': 0,
+                    'ppe': 0,
+                    'cfv': 0,
+                    'correct_covering': 0,
+                    'leak_free': 0,
+                    'correct_distance': 0,
+                    'correct_speed': 0,
+                    'correct_overlap': 0,
+                    'code': code
+                }
+
+        return data
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            DirectlyObservedSprayingView, self
+        ).get_context_data(
+            **kwargs
+        )
+        context['directly_observed_spraying'] = True
+
+        districts = Location.objects.filter(parent=None).values('name', 'code')
+        directly_observed_spraying_data = get_directly_observed_spraying_data(
+            'district'
+        )
+
+        context['data'] = self.get_district_data(
+            districts, directly_observed_spraying_data
+        )
+        return context
