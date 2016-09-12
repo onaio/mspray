@@ -8,7 +8,7 @@ from rest_framework.exceptions import ParseError
 from rest_framework.renderers import TemplateHTMLRenderer
 
 from mspray.apps.main.models import (
-    DirectlyObservedSprayingForm, SprayOperator, Location
+    DirectlyObservedSprayingForm, SprayOperator, Location, TeamLeader
 )
 from mspray.apps.main.serializers.sprayday import (
     DirectlyObservedSprayingFormSerializer
@@ -16,8 +16,17 @@ from mspray.apps.main.serializers.sprayday import (
 from mspray.apps.main.utils import add_directly_observed_spraying_data
 
 
-def get_directly_observed_spraying_data(column):
+def get_dos_data(column, where_params=None):
     cursor = connection.cursor()
+    where_clause = ''
+
+    if where_params:
+        sub_column = where_params.get('column')
+        value = where_params.get('value')
+        where_clause = """
+where
+    main_directlyobservedsprayingform.{sub_column} = '{value}'
+""".format(**{'sub_column': sub_column, 'value': value})
 
     sql_statement = """
 select
@@ -34,9 +43,10 @@ select
     sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
 from
     main_directlyobservedsprayingform
+{where_clause}
 group by
     {column};
-""".format(**{'column': column})  # noqa
+""".format(**{'column': column, 'where_clause': where_clause})  # noqa
 
     cursor.execute(sql_statement)
     queryset = cursor.cursor.fetchall()
@@ -60,7 +70,7 @@ class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
         return Response("Successfully created", status=status.HTTP_201_CREATED)
 
     def calculate_average_spray_quality_score(self, spray_operator_code):
-        avg_quality_score_dict = self.get_directly_observed_spraying_data(
+        avg_quality_score_dict = self.get_dos_data(
             spray_operator_code
         )
 
@@ -150,6 +160,44 @@ class DirectlyObservedSprayingView(ListView):
 
         return data
 
+    def get_team_leader_data(
+            self, team_leaders, directly_observed_spraying_data
+    ):
+        data = {}
+        for a in team_leaders:
+            code = str(a.get('code'))
+            name = a.get('name')
+
+            records = directly_observed_spraying_data.get(code)
+            if records:
+                data[name] = {
+                    'correct_removal': records[0],
+                    'correct_mix': records[1],
+                    'rinse': records[2],
+                    'ppe': records[3],
+                    'cfv': records[4],
+                    'correct_covering': records[5],
+                    'leak_free': records[6],
+                    'correct_distance': records[7],
+                    'correct_speed': records[8],
+                    'correct_overlap': records[9],
+                    'code': code
+                }
+            else:
+                data[name] = {
+                    'correct_removal': 0,
+                    'correct_mix': 0,
+                    'rinse': 0,
+                    'ppe': 0,
+                    'cfv': 0,
+                    'correct_covering': 0,
+                    'leak_free': 0,
+                    'correct_distance': 0,
+                    'correct_speed': 0,
+                    'correct_overlap': 0,
+                    'code': code
+                }
+
     def get_context_data(self, **kwargs):
         context = super(
             DirectlyObservedSprayingView, self
@@ -158,12 +206,37 @@ class DirectlyObservedSprayingView(ListView):
         )
         context['directly_observed_spraying'] = True
 
-        districts = Location.objects.filter(parent=None).values('name', 'code')
-        directly_observed_spraying_data = get_directly_observed_spraying_data(
-            'district'
-        )
+        path = self.request.get_full_path()
+        splitter = path.split('/')
 
-        context['data'] = self.get_district_data(
-            districts, directly_observed_spraying_data
-        )
+        if len(splitter) == 3 and splitter[2] == '':
+            districts = Location.objects.filter(
+                parent=None
+            ).values(
+                'name', 'code'
+            )
+            directly_observed_spraying_data = get_dos_data('district')
+
+            context['data'] = self.get_district_data(
+                districts, directly_observed_spraying_data
+            )
+
+        elif len(splitter) == 3:
+            district_code = splitter[2]
+            context['district_code'] = district_code
+
+            team_leaders = TeamLeader.objects.filter(
+                location__code=district_code
+            ).values(
+                'name', 'code'
+            )
+
+            directly_observed_spraying_data = get_dos_data(
+                'tl_code_name', {'column': 'district', 'value': district_code}
+            )
+
+            context['data'] = self.get_team_leader_data(
+                team_leaders, directly_observed_spraying_data
+            )
+
         return context
