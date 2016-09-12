@@ -207,7 +207,7 @@ var App = function(buffer, targetAreaData, hhData) {
             target_area_stats = "";
             var total_of_other = 0;
             $.each(reasons, function(key, value) {
-                target_area_stats += "<dt class='reason reason-" + value.replace(/ /g, "-");
+                target_area_stats += "<dt class='reason";  //  reason-" + value.replace(/ /g, "-");
                 if (reason_obj[value]){
                     target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
                     if (value !== "refused") {
