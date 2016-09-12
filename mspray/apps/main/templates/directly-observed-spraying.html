@@ -25,7 +25,11 @@
     <tbody>
         {% for key, row in data.items %}
         <tr>
+            {% if district_code %}
+            <td><a href="{% url "dos-team-leader" district_code row.code %}">{{ key }}</a></td>
+            {% else %}
             <td><a href="{% url "dos-district" row.code %}">{{ key }}</a></td>
+            {% endif %}
             <td class='numbers'>{{ row.correct_mix }}</td>
             <td class='numbers'>{{ row.rinse }}</td>
             <td class='numbers'>{{ row.ppe }}</td>
