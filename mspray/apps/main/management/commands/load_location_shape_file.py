@@ -12,13 +12,15 @@ from mspray.apps.main.models import Location
 
 def get_parent(geom, parent_level, parent_name):
     parent = Location.objects.filter(
-        geom__bbcontains=geom.wkt, level=parent_level
+        geom__contains=geom.wkt, level=parent_level
     ).first()
 
     if parent is None:
         parent = Location.objects.filter(
             geom__intersects=geom.wkt, level=parent_level, name=parent_name
         ).first()
+    else:
+        assert parent.name == parent_name
 
     return parent
 
