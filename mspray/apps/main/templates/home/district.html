@@ -52,6 +52,9 @@
                                 {{ district.district_name }}
                             </a>
                             {% else %}
+                            <a href="{% url 'target_area' district_code district.targetid %}">
+                                <i class="fa fa-map"></i>
+                            </a>
                             <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
                             {% endif %}
                         </td>

@@ -112,13 +112,11 @@ class TargetAreaView(SiteNameMixin, DetailView):
             context['ta_geojson'] = response.content
             bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
-            if self.object.level == 'district':
+            if self.object.level in ['district', 'RHC']:
                 data = GeoHealthFacilitySerializer(
                     self.object.location_set.all(), many=True
                 ).data
                 context['hh_geojson'] = json.dumps(data)
-            elif self.object.level == 'RHC':
-                pass
             else:
                 hhview = TargetAreaHouseholdsViewSet.as_view({
                     'get': 'retrieve'
