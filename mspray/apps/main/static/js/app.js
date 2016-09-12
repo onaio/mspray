@@ -228,13 +228,13 @@ var App = function(buffer, targetAreaData, hhData) {
                 other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal),
                 progress_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false);
 
-            app.drawCircle(sprayed_percentage, "circle-coverage", 40);
+            app.drawCircle(sprayed_percentage, "spray-coverage", 40);
+            app.drawCircle(sprayed_percentage, "found-coverage", 40);
             app.drawCircle(progress_percentage, "circle-progress", 50);
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
+                $("#found-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
                 $("#progress-ratio").text("(" + app.visitedSprayed + "/" + app.housesCount + ")");
-                $("#circle-refused").text(refused_percentage);
-                $("#circle-other").text(other_percentage);
             }
 
             $("#target-area-stats-item").on("click", function() {

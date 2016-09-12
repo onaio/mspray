@@ -56,7 +56,8 @@
         <div id="map"></div>
 
     <div id="map-legend">
-        <h2><span class="day_label">Spray Progress</span></h2>
+
+        <h2><span class="day_label">Spray Effectiveness</span></h2>
         <div class="big">
             <div class="circle-holder">
                 <div id="circle-progress"> </div>
@@ -64,26 +65,25 @@
                 <p id="progress-ratio"></p>
             </div>
         </div>
+
         <h2><span class="day_label">Spray Coverage</span></h2>
         <div class="legend big clearfix">
             <div class="circle-holder">
-                <div id="circle-coverage"> </div>
+                <div id="spray-coverage"> </div>
                 <p id="sprayed-label">Sprayed</p>
                 <p id="sprayed-ratio"></p>
             </div>
         </div>
 
-        <div class="legend small clearfix">
+        <h2><span class="day_label">Found Coverage</span></h2>
+        <div class="legend big clearfix">
             <div class="circle-holder">
-                <div id="circle-refused"> </div>
-                <p class="small-legend-label">Refused</p>
-            </div>
-
-            <div class="circle-holder">
-                <div id="circle-other"> </div>
-                <p class="small-legend-label">Other</p>
+                <div id="found-coverage"> </div>
+                <p id="found-label">Sprayed</p>
+                <p id="found-ratio"></p>
             </div>
         </div>
+
     </div>
 
 {% endblock %}
