@@ -59,5 +59,16 @@ urlpatterns = [
             {'post': 'create'}
         ),
         name='directly-observed-spraying-form'),
-
+    url(r'^directly-observed-spraying/',
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
+        name='directly-observed-spraying'
+    ),
+    url(r'^directly-observed-spraying/(?P<district>[^/]+)',
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
+        name="dos-district"
+    ),
+    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)',
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view()),
+    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)//(?P<spray_operator>[^/]+)',
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view()),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
