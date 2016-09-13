@@ -120,11 +120,17 @@
                 </tr>
             </tfoot>
         </table>
+        <p>* To sort a column, click on the column name</p>
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
     {{ block.super }}
     <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
-    <script src="{% static "js/tablesaw.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable();
+        } );
+    </script>
 {% endblock %}
