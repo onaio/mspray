@@ -61,16 +61,14 @@ urlpatterns = [
         name='directly-observed-spraying-form'),
     url(r'^directly-observed-spraying/',
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
-        name='directly-observed-spraying'
-    ),
+        name='directly-observed-spraying'),
     url(r'^directly-observed-spraying/(?P<district>[^/]+)',
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
-        name="dos-district"
-    ),
-    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)',
+        name="dos-district"),
+    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)',  # noqa
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
-        name="dos-team-leader"
-        ),
-    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)//(?P<spray_operator>[^/]+)',
-        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view()),
+        name="dos-team-leader"),
+    url(r'^directly-observed-spraying/(?P<district>[^/]+)/(?P<team_leader>[^/]+)/(?P<spray_operator>[^/]+)',  # noqa
+        directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
+        name="dos-spray-operator"),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
