@@ -122,67 +122,61 @@ class DirectlyObservedSprayingView(ListView):
     template_name = 'directly-observed-spraying.html'
     renderer_classes = (TemplateHTMLRenderer,)
 
-    def get_district_data(self, districts, directly_observed_spraying_data):
+    def get_data(self, user_list, directly_observed_spraying_data):
         data = {}
-        for a in districts:
-            code = str(a.get('code'))
-            name = a.get('name')
-
-            records = directly_observed_spraying_data.get(code)
-            if records:
-                data[name] = {
-                    'correct_removal': records[0],
-                    'correct_mix': records[1],
-                    'rinse': records[2],
-                    'ppe': records[3],
-                    'cfv': records[4],
-                    'correct_covering': records[5],
-                    'leak_free': records[6],
-                    'correct_distance': records[7],
-                    'correct_speed': records[8],
-                    'correct_overlap': records[9],
-                    'code': code
-                }
-            else:
-                data[name] = {
-                    'correct_removal': 0,
-                    'correct_mix': 0,
-                    'rinse': 0,
-                    'ppe': 0,
-                    'cfv': 0,
-                    'correct_covering': 0,
-                    'leak_free': 0,
-                    'correct_distance': 0,
-                    'correct_speed': 0,
-                    'correct_overlap': 0,
-                    'code': code
-                }
-
-        return data
-
-    def get_data(
-            self, user_list, directly_observed_spraying_data
-    ):
-        data = {}
+        totals = {
+            'correct_removal': 0,
+            'correct_mix': 0,
+            'rinse': 0,
+            'ppe': 0,
+            'cfv': 0,
+            'correct_covering': 0,
+            'leak_free': 0,
+            'correct_distance': 0,
+            'correct_speed': 0,
+            'correct_overlap': 0,
+        }
         for a in user_list:
             code = str(a.get('code'))
             name = a.get('name')
 
             records = directly_observed_spraying_data.get(code)
             if records:
+                correct_removal = records[0]
+                correct_mix = records[1]
+                rinse = records[2]
+                ppe = records[3]
+                cfv = records[4]
+                correct_covering = records[5]
+                leak_free = records[6]
+                correct_distance = records[7]
+                correct_speed = records[8]
+                correct_overlap = records[9]
+
                 data[name] = {
-                    'correct_removal': records[0],
-                    'correct_mix': records[1],
-                    'rinse': records[2],
-                    'ppe': records[3],
-                    'cfv': records[4],
-                    'correct_covering': records[5],
-                    'leak_free': records[6],
-                    'correct_distance': records[7],
-                    'correct_speed': records[8],
-                    'correct_overlap': records[9],
+                    'correct_removal': correct_removal,
+                    'correct_mix': correct_mix,
+                    'rinse': rinse,
+                    'ppe': ppe,
+                    'cfv': cfv,
+                    'correct_covering': correct_covering,
+                    'leak_free': leak_free,
+                    'correct_distance': correct_distance,
+                    'correct_speed': correct_speed,
+                    'correct_overlap': correct_overlap,
                     'code': code
                 }
+
+                totals['correct_removal'] += correct_removal
+                totals['correct_mix'] += correct_mix
+                totals['rinse'] += rinse
+                totals['ppe'] += ppe
+                totals['cfv'] += cfv
+                totals['correct_covering'] += correct_covering
+                totals['leak_free'] += leak_free
+                totals['correct_distance'] += correct_distance
+                totals['correct_speed'] += correct_speed
+                totals['correct_overlap'] += correct_overlap
             else:
                 data[name] = {
                     'correct_removal': 0,
@@ -198,7 +192,12 @@ class DirectlyObservedSprayingView(ListView):
                     'code': code
                 }
 
-        return data
+        for a, b in totals.items():
+            totals[a] = round(
+                b / len(user_list), 2
+            )
+
+        return data, totals
 
     def get_context_data(self, **kwargs):
         context = super(
@@ -219,9 +218,12 @@ class DirectlyObservedSprayingView(ListView):
             )
             directly_observed_spraying_data = get_dos_data('district')
 
-            context['data'] = self.get_district_data(
+            data, totals = self.get_data(
                 districts, directly_observed_spraying_data
             )
+
+            context['data'] = data
+            context['totals'] = totals
 
         elif len(splitter) == 3:
             district_code = splitter[2]
@@ -237,10 +239,11 @@ class DirectlyObservedSprayingView(ListView):
                 'tl_code_name', {'column': 'district', 'value': district_code}
             )
 
-            data = self.get_data(
+            data, totals = self.get_data(
                 team_leaders, directly_observed_spraying_data
             )
             context['data'] = data
+            context['totals'] = totals
 
         elif len(splitter) == 4:
             district_code = splitter[2]
@@ -259,9 +262,11 @@ class DirectlyObservedSprayingView(ListView):
                 {'column': 'tl_code_name', 'value': team_leader_code}
             )
 
-            context['data'] = self.get_data(
+            data, totals = self.get_data(
                 spray_operators, directly_observed_spraying_data
             )
+            context['data'] = data
+            context['totals'] = totals
 
         elif len(splitter) == 5:
             district_code = splitter[2]
@@ -275,23 +280,63 @@ class DirectlyObservedSprayingView(ListView):
 
             data = {}
             count = 1
+            totals = {
+                'correct_removal': 0,
+                'correct_mix': 0,
+                'rinse': 0,
+                'ppe': 0,
+                'cfv': 0,
+                'correct_covering': 0,
+                'leak_free': 0,
+                'correct_distance': 0,
+                'correct_speed': 0,
+                'correct_overlap': 0,
+            }
             for spray_date, records in directly_observed_spraying_data.items():
                 if records:
+                    correct_removal = records[0]
+                    correct_mix = records[1]
+                    rinse = records[2]
+                    ppe = records[3]
+                    cfv = records[4]
+                    correct_covering = records[5]
+                    leak_free = records[6]
+                    correct_distance = records[7]
+                    correct_speed = records[8]
+                    correct_overlap = records[9]
+
                     data[spray_date] = {
-                        'correct_removal': records[0],
-                        'correct_mix': records[1],
-                        'rinse': records[2],
-                        'ppe': records[3],
-                        'cfv': records[4],
-                        'correct_covering': records[5],
-                        'leak_free': records[6],
-                        'correct_distance': records[7],
-                        'correct_speed': records[8],
-                        'correct_overlap': records[9],
+                        'correct_removal': correct_removal,
+                        'correct_mix': correct_mix,
+                        'rinse': rinse,
+                        'ppe': ppe,
+                        'cfv': cfv,
+                        'correct_covering': correct_covering,
+                        'leak_free': leak_free,
+                        'correct_distance': correct_distance,
+                        'correct_speed': correct_speed,
+                        'correct_overlap': correct_overlap,
                         'day': count
                     }
+
+                    totals['correct_removal'] += correct_removal
+                    totals['correct_mix'] += correct_mix
+                    totals['rinse'] += rinse
+                    totals['ppe'] += ppe
+                    totals['cfv'] += cfv
+                    totals['correct_covering'] += correct_covering
+                    totals['leak_free'] += leak_free
+                    totals['correct_distance'] += correct_distance
+                    totals['correct_speed'] += correct_speed
+                    totals['correct_overlap'] += correct_overlap
                     count = count + 1
 
+            for a, b in totals.items():
+                totals[a] = round(
+                    b / len(directly_observed_spraying_data), 2
+                )
+
             context['data'] = data
+            context['totals'] = totals
 
         return context
