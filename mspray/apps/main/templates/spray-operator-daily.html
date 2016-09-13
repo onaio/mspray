@@ -25,6 +25,9 @@
                                 <th rowspan="3">Data collection start time</th>
                                 <th rowspan="3">Data collection end time</th>
                                 <th rowspan="3">Duration in field</th>
+                                <th rowspan="3">Data Quality Check</th>
+                                <th rowspan="3">Found Difference</th>
+                                <th rowspan="3">Sprayed Difference</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Found</th>
@@ -51,6 +54,15 @@
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
                                     <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
+                                    <td>
+                                        {% if row.data_quality_check %}
+                                            <i class="fa fa-check green" aria-hidden="true"></i>
+                                        {% else %}
+                                            <i class="fa fa-times red" aria-hidden="true"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ row.found_difference }}</td>
+                                    <td>{{ row.sprayed_difference }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -66,6 +78,15 @@
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
                                 <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
+                                <td>
+                                    {% if totals.data_quality_check %}
+                                        <i class="fa fa-check green" aria-hidden="true"></i>
+                                    {% else %}
+                                        <i class="fa fa-times red" aria-hidden="true"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ totals.found_difference }}</td>
+                                <td>{{ totals.sprayed_difference }}</td>
                             </tr>
                         </tfoot>
                     </table>

@@ -19,12 +19,11 @@
                         <th rowspan="3">Date Entry Clerk</th>
                         <th colspan="6">Number of Structures</th>
                         <th rowspan="3">Spray Coverage</th>
-                        <th rowspan="3">Average structures <br />sprayed per SOP per day</th>
+                        <th rowspan="3">Average structures <br />found per SOP per day</th>
                         <th rowspan="3">Average data collection start time</th>
                         <th rowspan="3">Average data collection end time</th>
                         <th rowspan="3">Average duration in field (hrs)</th>
                         <th rowspan="3">Data Quality Check</th>
-                        <th rowspan="3">Average Spray Quality Score</th>
                     </tr>
                     <tr>
                         <th colspan="2">Found</th>
@@ -63,7 +62,6 @@
                                     <i class="fa fa-times red" aria-hidden="true"></i>
                                 {% endif %}
                             </td>
-                            <td>{{ row.avg_quality_score }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -90,7 +88,6 @@
                                 <i class="fa fa-times red" aria-hidden="true"></i>
                             {% endif %}
                         </td>
-                        <td>{{ totals.avg_quality_score }}</td>
                     </tr>
                 </tfoot>
             </table>

@@ -14,9 +14,9 @@
                 {% if not district or district.level == 'district' %}
                 <tr>
                     <th rowspan="2">{% if district %} Health Facility {% else %} District {% endif%}</th>
-                    <th rowspan="2">TA's Targeted</th>
-                    <th colspan="2">TA's Visited</th>
-                    <th colspan="2">TA's Sprayed Effectively</th>
+                    <th rowspan="2">Eligible Structures within Spray Areas</th>
+                    <th colspan="2">Spray Areas Visited</th>
+                    <th colspan="2">Spray Areas Sprayed Effectively</th>
                 </tr>
                 <tr>
                     <th>Number</th>
@@ -120,11 +120,17 @@
                 </tr>
             </tfoot>
         </table>
+        <p>* To sort a column, click on the column name</p>
     </div>
 </div>
 {% endblock %}
 {% block scripts %}
     {{ block.super }}
     <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
-    <script src="{% static "js/tablesaw.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable();
+        } );
+    </script>
 {% endblock %}

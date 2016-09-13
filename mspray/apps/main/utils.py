@@ -27,6 +27,7 @@ from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spraypoint import SprayPoint
+from mspray.apps.main.models.spray_operator import DirectlyObservedSprayingForm
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spray_operator import SprayOperator
 from mspray.apps.main.models.team_leader import TeamLeader
@@ -201,6 +202,29 @@ def add_spray_data(data):
         add_unique_data(sprayday, unique_field, location)
 
     return sprayday
+
+
+def add_directly_observed_spraying_data(data):
+    spray_operator_code = data.get('sprayop_code_name')
+    DirectlyObservedSprayingForm.objects.create(
+        correct_removal=data.get('correct_removal'),
+        correct_mix=data.get('correct_mix'),
+        rinse=data.get('rinse'),
+        PPE=data.get('PPE'),
+        CFV=data.get('CFV'),
+        correct_covering=data.get('correct_covering'),
+        leak_free=data.get('leak_free'),
+        correct_distance=data.get('correct_distance'),
+        correct_speed=data.get('correct_speed'),
+        correct_overlap=data.get('correct_overlap'),
+        district=data.get('district'),
+        health_facility=data.get('health_facility'),
+        supervisor_name=data.get('supervisor_name'),
+        sprayop_code_name=spray_operator_code,
+        tl_code_name=data.get('tl_code_name'),
+        data=data,
+        spray_date=data.get('today'),
+    )
 
 
 def get_team_leader(code):
