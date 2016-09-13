@@ -68,6 +68,26 @@
         </tr>
         {% endfor %}
     </tbody>
-
+    <tfoot>
+        <tr>
+            {% if spray_operator_code %}
+            <td></td>
+            <td>TOTAL</td>
+            {% else %}
+            <td>TOTAL</td>
+            {% endif %}
+            <td class='numbers'>{{ totals.correct_mix }}</td>
+            <td class='numbers'>{{ totals.rinse }}</td>
+            <td class='numbers'>{{ totals.ppe }}</td>
+            <td class='numbers'>{{ totals.cfv }}</td>
+            <td class='numbers'>{{ totals.correct_removal }}</td>
+            <td class='numbers'>{{ totals.correct_covering }}</td>
+            <td class='numbers'>{{ totals.leak_free }}</td>
+            <td class='numbers'>{{ totals.correct_distance }}</td>
+            <td class='numbers'>{{ totals.correct_speed }}</td>
+            <td class='numbers'>{{ totals.correct_overlap }}</td>
+            <td></td>
+        </tr>
+    </tfoot>
 </table>
 {% endblock %}
