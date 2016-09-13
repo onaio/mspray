@@ -1,10 +1,29 @@
 {% extends 'home/base.html' %}
 {% block content %}
 
+{% if spray_operator_code %}
+<h2>Directly Observed Spraying: Spray Operator Daily Performance</h2>
+{% elif team_leader_code %}
+<h2>Directly Observed Spraying: Spray Operator Summary Performance</h2>
+{% elif district_code %}
+<h2>Directly Observed Spraying: Spray Operator Team Leader Performance</h2>
+{% else %}
+<h2>Directly Observed Spraying: District Performance</h2>
+{% endif %}
 <table class="table table-stripe">
     <thead>
         <tr>
+            {% if spray_operator_code %}
+            <th rowspan="3">Day</th>
+            <th rowspan="3">Date</th>
+            {% elif team_leader_code %}
+            <th rowspan="3">Spray Operator</th>
+            {% elif district_code %}
+            <th rowspan="3">Team Leader</th>
+            {% else %}
             <th rowspan="3">District</th>
+            {% endif %}
+
             <th colspan="2">Insecticide Mixing</th>
             <th colspan="8">Spray Technique</th>
             <th rowspan="3">Average DOS Score</th>
@@ -25,7 +44,12 @@
     <tbody>
         {% for key, row in data.items %}
         <tr>
-            {% if district_code %}
+            {% if spray_operator_code %}
+            <td>{{ row.day }}</td>
+            <td>{{ key }}</td>
+            {% elif team_leader_code %}
+            <td><a href="{% url "dos-spray-operator" district_code team_leader_code row.code %}">{{ key }}</a></td>
+            {% elif district_code %}
             <td><a href="{% url "dos-team-leader" district_code row.code %}">{{ key }}</a></td>
             {% else %}
             <td><a href="{% url "dos-district" row.code %}">{{ key }}</a></td>
