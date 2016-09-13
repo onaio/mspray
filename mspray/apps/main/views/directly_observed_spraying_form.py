@@ -160,11 +160,11 @@ class DirectlyObservedSprayingView(ListView):
 
         return data
 
-    def get_team_leader_data(
-            self, team_leaders, directly_observed_spraying_data
+    def get_data(
+            self, user_list, directly_observed_spraying_data
     ):
         data = {}
-        for a in team_leaders:
+        for a in user_list:
             code = str(a.get('code'))
             name = a.get('name')
 
@@ -197,6 +197,8 @@ class DirectlyObservedSprayingView(ListView):
                     'correct_overlap': 0,
                     'code': code
                 }
+
+        return data
 
     def get_context_data(self, **kwargs):
         context = super(
@@ -235,8 +237,61 @@ class DirectlyObservedSprayingView(ListView):
                 'tl_code_name', {'column': 'district', 'value': district_code}
             )
 
-            context['data'] = self.get_team_leader_data(
+            data = self.get_data(
                 team_leaders, directly_observed_spraying_data
             )
+            context['data'] = data
+
+        elif len(splitter) == 4:
+            district_code = splitter[2]
+            team_leader_code = splitter[3]
+            context['district_code'] = district_code
+            context['team_leader_code'] = team_leader_code
+
+            spray_operators = SprayOperator.objects.filter(
+                team_leader__code=team_leader_code
+            ).values(
+                'name', 'code'
+            )
+
+            directly_observed_spraying_data = get_dos_data(
+                'sprayop_code_name',
+                {'column': 'tl_code_name', 'value': team_leader_code}
+            )
+
+            context['data'] = self.get_data(
+                spray_operators, directly_observed_spraying_data
+            )
+
+        elif len(splitter) == 5:
+            district_code = splitter[2]
+            spray_operator_code = splitter[4]
+            context['spray_operator_code'] = spray_operator_code
+
+            directly_observed_spraying_data = get_dos_data(
+                'spray_date',
+                {'column': 'sprayop_code_name', 'value': spray_operator_code}
+            )
+
+            data = {}
+            count = 1
+            for spray_date, records in directly_observed_spraying_data.items():
+                if records:
+                    data[spray_date] = {
+                        'correct_removal': records[0],
+                        'correct_mix': records[1],
+                        'rinse': records[2],
+                        'ppe': records[3],
+                        'cfv': records[4],
+                        'correct_covering': records[5],
+                        'leak_free': records[6],
+                        'correct_distance': records[7],
+                        'correct_speed': records[8],
+                        'correct_overlap': records[9],
+                        'day': count
+                    }
+                    count = count + 1
+
+            context['data'] = data
 
         return context
