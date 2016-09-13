@@ -124,7 +124,7 @@ class DirectlyObservedSprayingView(ListView):
 
     def get_data(self, user_list, directly_observed_spraying_data):
         data = {}
-        totals = {
+        average = {
             'correct_removal': 0,
             'correct_mix': 0,
             'rinse': 0,
@@ -135,6 +135,7 @@ class DirectlyObservedSprayingView(ListView):
             'correct_distance': 0,
             'correct_speed': 0,
             'correct_overlap': 0,
+            'avg_dos_score': 0
         }
         for a in user_list:
             code = str(a.get('code'))
@@ -152,6 +153,7 @@ class DirectlyObservedSprayingView(ListView):
                 correct_distance = records[7]
                 correct_speed = records[8]
                 correct_overlap = records[9]
+                avg_dos_score = sum(records) / 10
 
                 data[name] = {
                     'correct_removal': correct_removal,
@@ -164,19 +166,21 @@ class DirectlyObservedSprayingView(ListView):
                     'correct_distance': correct_distance,
                     'correct_speed': correct_speed,
                     'correct_overlap': correct_overlap,
-                    'code': code
+                    'code': code,
+                    'avg_dos_score': avg_dos_score
                 }
 
-                totals['correct_removal'] += correct_removal
-                totals['correct_mix'] += correct_mix
-                totals['rinse'] += rinse
-                totals['ppe'] += ppe
-                totals['cfv'] += cfv
-                totals['correct_covering'] += correct_covering
-                totals['leak_free'] += leak_free
-                totals['correct_distance'] += correct_distance
-                totals['correct_speed'] += correct_speed
-                totals['correct_overlap'] += correct_overlap
+                average['correct_removal'] += correct_removal
+                average['correct_mix'] += correct_mix
+                average['rinse'] += rinse
+                average['ppe'] += ppe
+                average['cfv'] += cfv
+                average['correct_covering'] += correct_covering
+                average['leak_free'] += leak_free
+                average['correct_distance'] += correct_distance
+                average['correct_speed'] += correct_speed
+                average['correct_overlap'] += correct_overlap
+                average['avg_dos_score'] += avg_dos_score
             else:
                 data[name] = {
                     'correct_removal': 0,
@@ -192,12 +196,12 @@ class DirectlyObservedSprayingView(ListView):
                     'code': code
                 }
 
-        for a, b in totals.items():
-            totals[a] = round(
-                b / len(user_list), 2
+        for a, b in average.items():
+            average[a] = round(
+                b / (len(user_list) or 1), 2
             )
 
-        return data, totals
+        return data, average
 
     def get_context_data(self, **kwargs):
         context = super(
@@ -218,12 +222,12 @@ class DirectlyObservedSprayingView(ListView):
             )
             directly_observed_spraying_data = get_dos_data('district')
 
-            data, totals = self.get_data(
+            data, average = self.get_data(
                 districts, directly_observed_spraying_data
             )
 
             context['data'] = data
-            context['totals'] = totals
+            context['average'] = average
 
         elif len(splitter) == 3:
             district_code = splitter[2]
@@ -239,11 +243,11 @@ class DirectlyObservedSprayingView(ListView):
                 'tl_code_name', {'column': 'district', 'value': district_code}
             )
 
-            data, totals = self.get_data(
+            data, average = self.get_data(
                 team_leaders, directly_observed_spraying_data
             )
             context['data'] = data
-            context['totals'] = totals
+            context['average'] = average
 
         elif len(splitter) == 4:
             district_code = splitter[2]
@@ -262,11 +266,11 @@ class DirectlyObservedSprayingView(ListView):
                 {'column': 'tl_code_name', 'value': team_leader_code}
             )
 
-            data, totals = self.get_data(
+            data, average = self.get_data(
                 spray_operators, directly_observed_spraying_data
             )
             context['data'] = data
-            context['totals'] = totals
+            context['average'] = average
 
         elif len(splitter) == 5:
             district_code = splitter[2]
@@ -280,7 +284,7 @@ class DirectlyObservedSprayingView(ListView):
 
             data = {}
             count = 1
-            totals = {
+            average = {
                 'correct_removal': 0,
                 'correct_mix': 0,
                 'rinse': 0,
@@ -291,6 +295,7 @@ class DirectlyObservedSprayingView(ListView):
                 'correct_distance': 0,
                 'correct_speed': 0,
                 'correct_overlap': 0,
+                'avg_dos_score': 0
             }
             for spray_date, records in directly_observed_spraying_data.items():
                 if records:
@@ -304,8 +309,10 @@ class DirectlyObservedSprayingView(ListView):
                     correct_distance = records[7]
                     correct_speed = records[8]
                     correct_overlap = records[9]
+                    avg_dos_score = sum(records) / 10
 
                     data[spray_date] = {
+                        'day': count,
                         'correct_removal': correct_removal,
                         'correct_mix': correct_mix,
                         'rinse': rinse,
@@ -316,27 +323,28 @@ class DirectlyObservedSprayingView(ListView):
                         'correct_distance': correct_distance,
                         'correct_speed': correct_speed,
                         'correct_overlap': correct_overlap,
-                        'day': count
+                        'avg_dos_score': avg_dos_score
                     }
 
-                    totals['correct_removal'] += correct_removal
-                    totals['correct_mix'] += correct_mix
-                    totals['rinse'] += rinse
-                    totals['ppe'] += ppe
-                    totals['cfv'] += cfv
-                    totals['correct_covering'] += correct_covering
-                    totals['leak_free'] += leak_free
-                    totals['correct_distance'] += correct_distance
-                    totals['correct_speed'] += correct_speed
-                    totals['correct_overlap'] += correct_overlap
+                    average['correct_removal'] += correct_removal
+                    average['correct_mix'] += correct_mix
+                    average['rinse'] += rinse
+                    average['ppe'] += ppe
+                    average['cfv'] += cfv
+                    average['correct_covering'] += correct_covering
+                    average['leak_free'] += leak_free
+                    average['correct_distance'] += correct_distance
+                    average['correct_speed'] += correct_speed
+                    average['correct_overlap'] += correct_overlap
+                    average['avg_dos_score'] += avg_dos_score
                     count = count + 1
 
-            for a, b in totals.items():
-                totals[a] = round(
-                    b / len(directly_observed_spraying_data), 2
+            for a, b in average.items():
+                average[a] = round(
+                    b / (len(directly_observed_spraying_data) or 1), 2
                 )
 
             context['data'] = data
-            context['totals'] = totals
+            context['average'] = average
 
         return context
