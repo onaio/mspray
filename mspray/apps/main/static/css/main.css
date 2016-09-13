@@ -589,7 +589,7 @@ a.distrct-links {
     border: none;
 }
 td.numbers {
-    text-align: right;
+    text-align: center;
 }
 .tablesaw tfoot > tr > td {
     font-weight: bold;
