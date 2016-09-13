@@ -64,7 +64,7 @@
             <td class='numbers'>{{ row.correct_distance }}</td>
             <td class='numbers'>{{ row.correct_speed }}</td>
             <td class='numbers'>{{ row.correct_overlap }}</td>
-            <td class='numbers'></td>
+            <td class='numbers'>{{ row.avg_dos_score }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -76,17 +76,17 @@
             {% else %}
             <td>TOTAL</td>
             {% endif %}
-            <td class='numbers'>{{ totals.correct_mix }}</td>
-            <td class='numbers'>{{ totals.rinse }}</td>
-            <td class='numbers'>{{ totals.ppe }}</td>
-            <td class='numbers'>{{ totals.cfv }}</td>
-            <td class='numbers'>{{ totals.correct_removal }}</td>
-            <td class='numbers'>{{ totals.correct_covering }}</td>
-            <td class='numbers'>{{ totals.leak_free }}</td>
-            <td class='numbers'>{{ totals.correct_distance }}</td>
-            <td class='numbers'>{{ totals.correct_speed }}</td>
-            <td class='numbers'>{{ totals.correct_overlap }}</td>
-            <td></td>
+            <td class='numbers'>{{ average.correct_mix }}</td>
+            <td class='numbers'>{{ average.rinse }}</td>
+            <td class='numbers'>{{ average.ppe }}</td>
+            <td class='numbers'>{{ average.cfv }}</td>
+            <td class='numbers'>{{ average.correct_removal }}</td>
+            <td class='numbers'>{{ average.correct_covering }}</td>
+            <td class='numbers'>{{ average.leak_free }}</td>
+            <td class='numbers'>{{ average.correct_distance }}</td>
+            <td class='numbers'>{{ average.correct_speed }}</td>
+            <td class='numbers'>{{ average.correct_overlap }}</td>
+            <td class='numbers'>{{ average.avg_dos_score }}</td>
         </tr>
     </tfoot>
 </table>
