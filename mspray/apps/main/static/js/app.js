@@ -226,14 +226,15 @@ var App = function(buffer, targetAreaData, hhData) {
             var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.visitedTotal, false),
                 refused_percentage = app.calculatePercentage(app.visitedRefused, app.visitedTotal),
                 other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal),
+                found_percentage = app.calculatePercentage(app.visitedTotal, app.housesCount, false),
                 progress_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false);
 
             app.drawCircle(sprayed_percentage, "spray-coverage", 40);
-            app.drawCircle(sprayed_percentage, "found-coverage", 40);
+            app.drawCircle(found_percentage, "found-coverage", 40);
             app.drawCircle(progress_percentage, "circle-progress", 50);
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
-                $("#found-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
+                $("#found-ratio").text("(" + app.visitedTotal + "/" + app.housesCount + ")");
                 $("#progress-ratio").text("(" + app.visitedSprayed + "/" + app.housesCount + ")");
             }
 
