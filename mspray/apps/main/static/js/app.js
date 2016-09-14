@@ -301,6 +301,19 @@ var App = function(buffer, targetAreaData, hhData) {
         });
     };
 
+    this.drawCircles = function (props) {
+        var app = this;
+        var sprayed_percentage = app.calculatePercentage(props.visited_sprayed, props.visited_total, false),
+            found_percentage = app.calculatePercentage(props.visited_total, props.structures, false),
+            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.structures, false);
+        app.drawCircle(sprayed_percentage, "spray-coverage", 40);
+        app.drawCircle(found_percentage, "found-coverage", 40);
+        app.drawCircle(progress_percentage, "circle-progress", 50);
+        $("#sprayed-ratio").text("(" + props.visited_sprayed + "/" + props.visited_total + ")");
+        $("#found-ratio").text("(" + props.visited_total + "/" + props.structures + ")");
+        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.structures + ")");
+    };
+
     this.loadTargetArea = function(data) {
         var app = this,
             geojson = data;
@@ -314,6 +327,9 @@ var App = function(buffer, targetAreaData, hhData) {
                 label.setContent("" + props.district_name);
                 label.setLatLng(layer.getBounds().getCenter());
                 app.map.showLabel(label);
+                if (props.level != 'ta') {
+                    app.drawCircles(props);
+                }
             }
         });
         app.targetLayer.setStyle(app.targetOptions);
