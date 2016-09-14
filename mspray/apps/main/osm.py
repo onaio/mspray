@@ -1,7 +1,10 @@
+from datetime import datetime
 from django.contrib.gis.geos import LineString
 from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import Polygon
 from lxml import etree
+
+from mspray.apps.main.models import Node, Way
 
 
 def _get_xml_obj(xml):
@@ -94,3 +97,122 @@ def parse_osm(osm_xml, include_osm_id=False):
     result.extend(nodes)
 
     return result
+
+
+def get_date(string_date):
+    if string_date:
+        return datetime.strptime(string_date, '%Y-%m-%dT%H:%M:%SZ')
+
+    return None
+
+
+def get_nodes(osm_xml):
+    root = _get_xml_obj(osm_xml)
+
+    nodes = []
+    for node in root.findall('node'):
+        tags = {
+            tag.get('k'): tag.get('v')
+            for tag in node.findall('tag')
+        }
+        nodes.append({
+            'node_id': int(node.get('id')),
+            'longitude': float(node.get('lon')),
+            'latitude': float(node.get('lat')),
+            'version': int(node.get('version', 0)),
+            'changeset': int(node.get('changeset', 0)),
+            'timestamp': get_date(node.get('timestamp')),
+            'user': tags,
+        })
+
+    return nodes
+
+
+def add_node(node):
+    node_id = node.get('node_id')
+    version = node.get('version')
+    changeset = node.get('changeset')
+    user = node.get('user')
+    timestamp = node.get('timestamp')
+    longitude = node.get('longitude')
+    latitude = node.get('latitude')
+    tags = node.get('tags')
+
+    obj, created = Node.objects.update_or_create(
+        node_id=node_id,
+        longitude=longitude,
+        latitude=latitude,
+        defaults={
+            'version': version,
+            'changeset': changeset,
+            'user': user,
+            'timestamp': timestamp,
+            'tags': tags})
+
+    return obj
+
+
+def add_way(way):
+    way_id = way.get('id')
+    action = way.get('action')
+    version = way.get('version')
+    changeset = way.get('changeset')
+    user = way.get('user')
+    tags = way.get('tags')
+    timestamp = way.get('timestamp')
+    nd_path = ",".join([str(a) for a in way.get('nodes')])
+
+    obj, created = Way.objects.update_or_create(
+        way_id=way_id,
+        defaults={
+            'action': action,
+            'version': version,
+            'changeset': changeset,
+            'user': user,
+            'timestamp': timestamp,
+            'nd_path': nd_path,
+            'tags': tags
+        })
+
+    return obj
+
+
+def get_ways(osm_xml):
+    root = _get_xml_obj(osm_xml)
+    ways = []
+    for way in root.findall('way'):
+        id = way.get('id')
+        action = way.get('action')
+        version = int(way.get('version', 0))
+        changeset = int(way.get('changeset', 0))
+        timestamp = get_date(way.get('timestamp'))
+        user = way.get('user')
+        if not id.startswith("-"):
+            nodes = []
+            for nd in way.findall('nd'):
+                nodes.append(nd.get('ref'))
+
+            tags = {
+                tag.get('k'): tag.get('v')
+                for tag in way.findall('tag')
+            }
+
+            ways.append({
+                'id': id,
+                'nodes': nodes,
+                'tags': tags,
+                'action': action,
+                'version': version,
+                'changeset': changeset,
+                'timestamp': timestamp,
+                'user': user
+            })
+
+    return ways
+
+
+def get_osm_xml(osm_file):
+    with open(osm_file) as osm_file:
+        content = osm_file.read().strip()
+
+    return content
