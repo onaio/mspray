@@ -96,7 +96,7 @@ var App = function(buffer, targetAreaData, hhData) {
         return percentage;
     };
 
-    this.drawCircle = function(percent, circle_id, radius) {
+    this.getFillColor = function (percent) {
         var fillColor;
         if(percent < 30){
             fillColor = "#FFA500";
@@ -113,6 +113,11 @@ var App = function(buffer, targetAreaData, hhData) {
         else if(percent >= 90 && percent <= 100){
             fillColor = "#31A354";
         }
+        return fillColor;
+    };
+
+    this.drawCircle = function(percent, circle_id, radius) {
+        var fillColor = this.getFillColor(percent);
         radius = radius === undefined ? 50 : radius;
         Circles.create({
             id: circle_id,
@@ -322,18 +327,42 @@ var App = function(buffer, targetAreaData, hhData) {
             pointToLayer: function (feature, latlng) {
                 return L.circleMarker(latlng, app.hhOptions);
             },
+            style: function(feature) {
+                var props = feature.properties;
+                if(props.visited_total !== undefined && props.visited_total > 0){
+                    var percent = app.calculatePercentage(props.visited_sprayed, props.structures, false);
+                    app.hhOptions.fillColor = app.getFillColor(percent);
+                } else {
+                    app.hhOptions.fillColor = '#FFDC00';
+                }
+                app.hhOptions.fillOpacity = 0.4;
+                return app.hhOptions;
+            },
             onEachFeature: function(feature, layer){
-                layer.on({
-                    mouseover: function(e){
-                        e.layer.openPopup();
-                    },
-                    mouseout: function(e){
-                        e.layer.closePopup();
-                    }
-                });
+                var props = feature.properties;
+                if(props.level !== undefined) {
+                    var content = props.district_name + "<br/>" +
+                        "Structures: " + props.structures + "<br/>" +
+                        "Visited Total: " + props.visited_total + "<br/>" +
+                        "Not Sprayed: " + props.visited_not_sprayed + "<br/>" +
+                        "Sprayed: " + props.visited_sprayed;
+                    layer.bindPopup(content, {closeButton: true});
+                    var label = new L.Label();
+                    label.setContent(props.district_name);
+                    label.setLatLng(layer.getBounds().getCenter());
+                    app.map.showLabel(label);
+                    layer.on({
+                        mouseover: function(e){
+                            e.layer.openPopup();
+                        },
+                        mouseout: function(e){
+                            e.layer.closePopup();
+                        }
+                    });
+                }
             }
         });
-        app.hhLayer.setStyle(app.hhOptions);
+        // app.hhLayer.setStyle(app.hhOptions);
         app.hhLayer.addTo(app.map);
     };
 
