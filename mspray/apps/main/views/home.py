@@ -23,15 +23,27 @@ def get_location_dict(code):
         data['district'] = district
         data['district_code'] = district.pk
         data['district_name'] = district.name
-        data['sub_locations'] = district.location_set.all()\
-            .values('id', 'level', 'name', 'parent')\
-            .order_by('name')
+        if district.level == settings.MSPRAY_TA_LEVEL:
+            data['sub_locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+        else:
+            data['sub_locations'] = district.location_set.all()\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
         data['top_level'] = Location.objects.filter(parent=None)\
-            .values('id', 'level', 'name', 'parent')\
-            .order_by('name')
-        data['locations'] = Location.objects\
-            .filter(parent=district.parent)\
-            .exclude(parent=None)\
             .values('id', 'level', 'name', 'parent')\
             .order_by('name')
     if 'top_level' not in data:
@@ -133,11 +145,10 @@ class TargetAreaView(SiteNameMixin, DetailView):
             except ValueError:
                 pass
 
-        district_pk = self.kwargs['district_pk']
-
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('id', 'code', 'name').order_by('name')
 
-        context.update(get_location_dict(district_pk))
+        context.update({'map_menu': True})
+        context.update(get_location_dict(self.object.pk))
 
         return context
