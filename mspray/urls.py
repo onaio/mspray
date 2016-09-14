@@ -49,17 +49,17 @@ urlpatterns = [
         name='number_of_housesholds'),
     url(r'^performance/', include(performance_urls, namespace='performance')),
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^spray-operator-daily/',
+    url(r'^spray-operator-daily',
         spray_operator_daily.SprayOperatorDailyViewSet.as_view(
             {'post': 'create'}
         ),
         name='spray-operator-daily'),
-    url(r'^directly-observed-spraying-form/',
+    url(r'^directly-observed-spraying-form',
         directly_observed_spraying_form.DirectlyObservedSprayingFormViewSet.as_view(  # noqa
             {'post': 'create'}
         ),
         name='directly-observed-spraying-form'),
-    url(r'^directly-observed-spraying/',
+    url(r'^directly-observed-spraying',
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
         name='directly-observed-spraying'),
     url(r'^directly-observed-spraying/(?P<district>[^/]+)',
