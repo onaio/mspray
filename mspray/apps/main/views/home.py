@@ -9,7 +9,7 @@ from django.views.generic import ListView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.target_area import \
-    GeoHealthFacilitySerializer
+    GeoTargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
@@ -113,7 +113,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
             bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
             if self.object.level in ['district', 'RHC']:
-                data = GeoHealthFacilitySerializer(
+                data = GeoTargetAreaSerializer(
                     self.object.location_set.all(), many=True
                 ).data
                 context['hh_geojson'] = json.dumps(data)
