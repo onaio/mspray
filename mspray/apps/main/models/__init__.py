@@ -14,3 +14,5 @@ from .spraypoint import SprayPointView  # noqa
 from .spraypoint import Hhcsv  # noqa
 from .spraypoint import OsmData  # noqa
 from .spraypoint import MatchedData  # noqa
+from .osm import Node
+from .osm import Way
