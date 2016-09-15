@@ -1,4 +1,5 @@
 from django.db import connection
+from django.db.models import Count
 from django.views.generic import ListView
 
 from rest_framework import viewsets
@@ -55,6 +56,10 @@ group by
         a[0]: a[1:]
         for a in queryset
     }
+
+
+def calculate_percentage(numerator, denominator):
+    return round((numerator / denominator) * 100, 2)
 
 
 class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
@@ -122,7 +127,42 @@ class DirectlyObservedSprayingView(ListView):
     template_name = 'directly-observed-spraying.html'
     renderer_classes = (TemplateHTMLRenderer,)
 
-    def get_data(self, user_list, directly_observed_spraying_data):
+    def get_submission_count(self, kwargs):
+        level = kwargs.get('level')
+        filter_args = kwargs.get('filter-args')
+        column = ''
+        if level == "spray-operator":
+            column = 'sprayop_code_name'
+            qs = DirectlyObservedSprayingForm.objects.filter(
+                **filter_args
+            ).values(
+                column
+            ).annotate(
+                count=Count('sprayop_code_name')
+            )
+
+        elif level == "team-leader":
+            column = 'tl_code_name'
+
+            qs = DirectlyObservedSprayingForm.objects.filter(
+                **filter_args
+            ).values(
+                column
+            ).annotate(
+                count=Count('sprayop_code_name')
+            )
+
+        elif level == "district":
+            column = 'district'
+            qs = DirectlyObservedSprayingForm.objects.values(
+                'district'
+            ).annotate(
+                count=Count('sprayop_code_name')
+            )
+
+        return {a.get(column): a.get('count') for a in qs}
+
+    def get_data(self, user_list, directly_observed_spraying_data, kwargs):
         data = {}
         average = {
             'correct_removal': 0,
@@ -137,25 +177,42 @@ class DirectlyObservedSprayingView(ListView):
             'correct_overlap': 0,
             'avg_dos_score': 0
         }
+        total = {
+            'submission_count': 0
+        }
+        submissions_count = self.get_submission_count(kwargs)
+
         for a in user_list:
             code = str(a.get('code'))
             name = a.get('name')
 
             records = directly_observed_spraying_data.get(code)
             if records:
-                correct_removal = records[0]
-                correct_mix = records[1]
-                rinse = records[2]
-                ppe = records[3]
-                cfv = records[4]
-                correct_covering = records[5]
-                leak_free = records[6]
-                correct_distance = records[7]
-                correct_speed = records[8]
-                correct_overlap = records[9]
+                submission_count = submissions_count.get(code)
+                correct_removal = calculate_percentage(
+                    records[0], submission_count)
+                correct_mix = calculate_percentage(
+                    records[1], submission_count)
+                rinse = calculate_percentage(
+                    records[2], submission_count)
+                ppe = calculate_percentage(
+                    records[3], submission_count)
+                cfv = calculate_percentage(
+                    records[4], submission_count)
+                correct_covering = calculate_percentage(
+                    records[5], submission_count)
+                leak_free = calculate_percentage(
+                    records[6], submission_count)
+                correct_distance = calculate_percentage(
+                    records[7], submission_count)
+                correct_speed = calculate_percentage(
+                    records[8], submission_count)
+                correct_overlap = calculate_percentage(
+                    records[9], submission_count)
                 avg_dos_score = sum(records) / 10
 
                 data[name] = {
+                    'submission_count': submission_count,
                     'correct_removal': correct_removal,
                     'correct_mix': correct_mix,
                     'rinse': rinse,
@@ -167,7 +224,7 @@ class DirectlyObservedSprayingView(ListView):
                     'correct_speed': correct_speed,
                     'correct_overlap': correct_overlap,
                     'code': code,
-                    'avg_dos_score': avg_dos_score
+                    'avg_dos_score': avg_dos_score,
                 }
 
                 average['correct_removal'] += correct_removal
@@ -181,6 +238,7 @@ class DirectlyObservedSprayingView(ListView):
                 average['correct_speed'] += correct_speed
                 average['correct_overlap'] += correct_overlap
                 average['avg_dos_score'] += avg_dos_score
+                total['submission_count'] += submission_count
             else:
                 data[name] = {
                     'correct_removal': 0,
@@ -214,7 +272,7 @@ class DirectlyObservedSprayingView(ListView):
         path = self.request.get_full_path()
         splitter = path.split('/')
 
-        if len(splitter) == 3 and splitter[2] == '':
+        if len(splitter) == 2:
             districts = Location.objects.filter(
                 parent=None
             ).values(
@@ -222,8 +280,11 @@ class DirectlyObservedSprayingView(ListView):
             )
             directly_observed_spraying_data = get_dos_data('district')
 
+            kwargs = {
+                'level': 'district'
+            }
             data, average = self.get_data(
-                districts, directly_observed_spraying_data
+                districts, directly_observed_spraying_data, kwargs
             )
 
             context['data'] = data
@@ -243,8 +304,14 @@ class DirectlyObservedSprayingView(ListView):
                 'tl_code_name', {'column': 'district', 'value': district_code}
             )
 
+            kwargs = {
+                'level': 'team-leader',
+                'filter-args': {
+                    'district': district_code
+                }
+            }
             data, average = self.get_data(
-                team_leaders, directly_observed_spraying_data
+                team_leaders, directly_observed_spraying_data, kwargs
             )
             context['data'] = data
             context['average'] = average
@@ -266,8 +333,14 @@ class DirectlyObservedSprayingView(ListView):
                 {'column': 'tl_code_name', 'value': team_leader_code}
             )
 
+            kwargs = {
+                'level': 'spray-operator',
+                'filter-args': {
+                    'tl_code_name': team_leader_code
+                }
+            }
             data, average = self.get_data(
-                spray_operators, directly_observed_spraying_data
+                spray_operators, directly_observed_spraying_data, kwargs
             )
             context['data'] = data
             context['average'] = average
@@ -297,22 +370,47 @@ class DirectlyObservedSprayingView(ListView):
                 'correct_overlap': 0,
                 'avg_dos_score': 0
             }
+
+            total = {
+                'submission_count': 0
+            }
+
+            submissions_count = {
+                a.get('spray_date'): a.get('count')
+                for a in DirectlyObservedSprayingForm.objects.filter(
+                    sprayop_code_name=spray_operator_code
+                ).values(
+                    'spray_date'
+                ).annotate(
+                    count=Count('spray_date')
+                )
+            }
+
             for spray_date, records in directly_observed_spraying_data.items():
                 if records:
-                    correct_removal = records[0]
-                    correct_mix = records[1]
-                    rinse = records[2]
-                    ppe = records[3]
-                    cfv = records[4]
-                    correct_covering = records[5]
-                    leak_free = records[6]
-                    correct_distance = records[7]
-                    correct_speed = records[8]
-                    correct_overlap = records[9]
+                    submission_count = submissions_count.get(spray_date)
+                    correct_removal = calculate_percentage(
+                        records[0], submission_count)
+                    correct_mix = calculate_percentage(
+                        records[1], submission_count)
+                    rinse = calculate_percentage(records[2], submission_count)
+                    ppe = calculate_percentage(records[3], submission_count)
+                    cfv = calculate_percentage(records[4], submission_count)
+                    correct_covering = calculate_percentage(
+                        records[5], submission_count)
+                    leak_free = calculate_percentage(
+                        records[6], submission_count)
+                    correct_distance = calculate_percentage(
+                        records[7], submission_count)
+                    correct_speed = calculate_percentage(
+                        records[8], submission_count)
+                    correct_overlap = calculate_percentage(
+                        records[9], submission_count)
                     avg_dos_score = sum(records) / 10
 
                     data[spray_date] = {
                         'day': count,
+                        'submission_count': submission_count,
                         'correct_removal': correct_removal,
                         'correct_mix': correct_mix,
                         'rinse': rinse,
@@ -323,7 +421,7 @@ class DirectlyObservedSprayingView(ListView):
                         'correct_distance': correct_distance,
                         'correct_speed': correct_speed,
                         'correct_overlap': correct_overlap,
-                        'avg_dos_score': avg_dos_score
+                        'avg_dos_score': avg_dos_score,
                     }
 
                     average['correct_removal'] += correct_removal
@@ -337,6 +435,7 @@ class DirectlyObservedSprayingView(ListView):
                     average['correct_speed'] += correct_speed
                     average['correct_overlap'] += correct_overlap
                     average['avg_dos_score'] += avg_dos_score
+                    total['submission_count'] += submission_count
                     count = count + 1
 
             for a, b in average.items():
@@ -346,5 +445,6 @@ class DirectlyObservedSprayingView(ListView):
 
             context['data'] = data
             context['average'] = average
+            context['total'] = total
 
         return context
