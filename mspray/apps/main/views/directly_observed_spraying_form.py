@@ -131,19 +131,12 @@ class DirectlyObservedSprayingView(ListView):
         level = kwargs.get('level')
         filter_args = kwargs.get('filter-args')
         column = ''
-        if level == "spray-operator":
-            column = 'sprayop_code_name'
-            qs = DirectlyObservedSprayingForm.objects.filter(
-                **filter_args
-            ).values(
-                column
-            ).annotate(
-                count=Count('sprayop_code_name')
-            )
-
-        elif level == "team-leader":
-            column = 'tl_code_name'
-
+        if level in ["spray-operator", "team-leader"]:
+            columns = {
+                "spray-operator": 'sprayop_code_name',
+                "team-leader": 'tl_code_name'
+            }
+            column = columns.get(level)
             qs = DirectlyObservedSprayingForm.objects.filter(
                 **filter_args
             ).values(
@@ -153,7 +146,7 @@ class DirectlyObservedSprayingView(ListView):
             )
 
         elif level == "district":
-            column = 'district'
+            column = level
             qs = DirectlyObservedSprayingForm.objects.values(
                 'district'
             ).annotate(
@@ -241,6 +234,7 @@ class DirectlyObservedSprayingView(ListView):
                 total['submission_count'] += submission_count
             else:
                 data[name] = {
+                    'submission_count': 0,
                     'correct_removal': 0,
                     'correct_mix': 0,
                     'rinse': 0,
@@ -259,7 +253,7 @@ class DirectlyObservedSprayingView(ListView):
                 b / (len(user_list) or 1), 2
             )
 
-        return data, average
+        return data, average, total
 
     def get_context_data(self, **kwargs):
         context = super(
@@ -283,12 +277,13 @@ class DirectlyObservedSprayingView(ListView):
             kwargs = {
                 'level': 'district'
             }
-            data, average = self.get_data(
+            data, average, total = self.get_data(
                 districts, directly_observed_spraying_data, kwargs
             )
 
             context['data'] = data
             context['average'] = average
+            context['total'] = total
 
         elif len(splitter) == 3:
             district_code = splitter[2]
@@ -310,11 +305,12 @@ class DirectlyObservedSprayingView(ListView):
                     'district': district_code
                 }
             }
-            data, average = self.get_data(
+            data, average, total = self.get_data(
                 team_leaders, directly_observed_spraying_data, kwargs
             )
             context['data'] = data
             context['average'] = average
+            context['total'] = total
 
         elif len(splitter) == 4:
             district_code = splitter[2]
@@ -339,11 +335,12 @@ class DirectlyObservedSprayingView(ListView):
                     'tl_code_name': team_leader_code
                 }
             }
-            data, average = self.get_data(
+            data, average, total = self.get_data(
                 spray_operators, directly_observed_spraying_data, kwargs
             )
             context['data'] = data
             context['average'] = average
+            context['total'] = total
 
         elif len(splitter) == 5:
             district_code = splitter[2]
