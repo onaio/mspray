@@ -49,8 +49,6 @@ def calculate(numerator, denominator, percentage):
         return 1
 
     return 0
-
-
 def update_sprayed_structures(spray_points_sprayed, sprayed_structures,
                               per_so=True):
     # set structures sprayed per day per spray operator
@@ -140,24 +138,19 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         end_times = []
         results = []
 
-        dqc_and_asqs_queryset = districts.values(
-            'data_quality_check', 'average_spray_quality_score', 'code'
-        )
-
-        dqc_and_asqs_dict = {}
-        for a in dqc_and_asqs_queryset:
-            dqc_and_asqs_dict[a.get('code')] = {
-                'data_quality_check': a.get('data_quality_check'),
-                'average_spray_quality_score': a.get(
-                    'average_spray_quality_score'
-                )
-            }
+        so_per_district = {
+            a.get('team_leader__location__code'): a.get('count')
+            for a in SprayOperator.objects.values(
+                'team_leader__location__code'
+            ).annotate(
+                count=Count('code')
+            )
+        }
 
         for district in districts:
             target_areas = Location.objects.filter(parent=district)\
                 .order_by('name')
             result = {'location': district}
-            sprayed_structures = {}
             target_areas_found_total = 0
             target_areas_sprayed_total = 0
             structures_sprayed_totals = 0
@@ -221,8 +214,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                     structures_sprayed_totals += spray_points_sprayed_count
 
             # calcuate Average structures found per day per spray operator
-            denominator = sum([b for a, b in sprayable_structures.values()])
             numerator = sum([a for a, b in sprayable_structures.values()])
+            denominator = so_per_district.get(district.code)
             avg_struct_per_user_per_so = round(numerator / denominator) \
                 if numerator != 0 else 0
 
@@ -249,11 +242,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 k__gte=20
             ).count()
 
-            dqc_and_asqs = dqc_and_asqs_dict.get(district.code)
-            data_quality_check = dqc_and_asqs.get('data_quality_check')
-            avg_quality_score = dqc_and_asqs.get(
-                'average_spray_quality_score'
-            )
+            data_quality_check = district.data_quality_check
+            avg_quality_score = district.average_spray_quality_score
             avg_quality_score = round(avg_quality_score, 2)
 
             result['avg_quality_score'] = avg_quality_score
@@ -404,11 +394,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
 
-        team_leaders = spraypoints.filter(
-            team_leader__location=district
+        team_leaders = TeamLeader.objects.filter(
+            location=district
         ).values_list(
-            'team_leader__code', 'team_leader__name'
-        ).distinct()
+            'code', 'name', 'data_quality_check', 'average_spray_quality_score'
+        )
 
         start_times = []
         end_times = []
@@ -428,40 +418,39 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                    ).values_list('team_leader__code', 'a', 'b')
         sprayable_structures = {}
         team_leaders_code_list = []
+
+        so_per_team_leader = {
+            a.get('team_leader__code'): a.get('count')
+            for a in SprayOperator.objects.values(
+                'team_leader__code'
+            ).annotate(
+                count=Count('code')
+            )
+        }
+
         for t, a, b in sprayed_per_spray_operator_per_day:
-            sprayable_structures[t] = (a, b)
+            # replaced 'b' with value from so_per_team_leader because
+            # it contains a count of all sprayoperators per team leader
+            # meaning, even sprayoperators without data are included to
+            # calculate the correct average
+            sprayable_structures[t] = (a, so_per_team_leader.get(t))
             team_leaders_code_list.append(t)
 
-        dqc_and_asqs_queryset = TeamLeader.objects.filter(
-            code__in=team_leaders_code_list
-        ).values(
-            'data_quality_check', 'average_spray_quality_score', 'code'
-        )
-
-        dqc_and_asqs_dict = {}
-        for a in dqc_and_asqs_queryset:
-            dqc_and_asqs_dict[a.get('code')] = {
-                'data_quality_check': a.get('data_quality_check'),
-                'average_spray_quality_score': a.get(
-                    'average_spray_quality_score'
-                )
-            }
-
-        for team_leader, team_leader_name in team_leaders:
+        for code, name, dqc, asqs in team_leaders:
             qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
-                                      params=[TEAM_LEADER_CODE, team_leader])
-            numerator = sprayed.get(team_leader, 0)
-            denominator = 1 if sprayable.get(team_leader, 0) == 0 \
-                else sprayable.get(team_leader)
+                                      params=[TEAM_LEADER_CODE, code])
+            numerator = sprayed.get(code, 0)
+            denominator = 1 if sprayable.get(code, 0) == 0 \
+                else sprayable.get(code)
             sprayed_success_rate = round((numerator / denominator) * 100, 1)
 
             numerator, denominator = sprayable_structures.get(
-                team_leader, (0, 1))
+                code, (0, 1))
             denominator = 1 if denominator == 0 else denominator
             avg_structures_per_user_per_so = round(numerator / denominator)
 
-            not_sprayed_total = refused.get(team_leader, 0) + \
-                other.get(team_leader, 0)
+            not_sprayed_total = refused.get(code, 0) + \
+                other.get(code, 0)
 
             pks = list(qs.values_list('id', flat=True))
             _end_time = avg_time(pks, 'start')
@@ -470,21 +459,18 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
-            dqc_and_asqs = dqc_and_asqs_dict.get(team_leader)
-            data_quality_check = dqc_and_asqs.get('data_quality_check')
-            avg_quality_score = dqc_and_asqs.get(
-                'average_spray_quality_score'
-            )
+            data_quality_check = dqc
+            avg_quality_score = asqs
             avg_quality_score = round(avg_quality_score, 2)
 
             data.append({
-                'team_leader': team_leader,
-                'team_leader_name': team_leader_name,
-                'sprayable': sprayable.get(team_leader, 0),
-                'not_sprayable': non_sprayable.get(team_leader, 0),
-                'sprayed': sprayed.get(team_leader, 0),
-                'refused': refused.get(team_leader, 0),
-                'other': other.get(team_leader, 0),
+                'team_leader': code,
+                'team_leader_name': name,
+                'sprayable': sprayable.get(code, 0),
+                'not_sprayable': non_sprayable.get(code, 0),
+                'sprayed': sprayed.get(code, 0),
+                'refused': refused.get(code, 0),
+                'other': other.get(code, 0),
                 'spray_success_rate': sprayed_success_rate,
                 'avg_structures_per_user_per_so':
                 avg_structures_per_user_per_so,
@@ -496,11 +482,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             })
 
             # calculate totals
-            totals['sprayable'] += sprayable.get(team_leader, 0)
-            totals['not_sprayable'] += non_sprayable.get(team_leader, 0)
-            totals['sprayed'] += sprayed.get(team_leader, 0)
-            totals['refused'] += refused.get(team_leader, 0)
-            totals['other'] += other.get(team_leader, 0)
+            totals['sprayable'] += sprayable.get(code, 0)
+            totals['not_sprayable'] += non_sprayable.get(code, 0)
+            totals['sprayed'] += sprayed.get(code, 0)
+            totals['refused'] += refused.get(code, 0)
+            totals['other'] += other.get(code, 0)
             totals['not_sprayed_total'] += not_sprayed_total
             totals['avg_quality_score'] += avg_quality_score
             totals['avg_structures_per_user_per_so'] += \
@@ -607,6 +593,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
         team_leader = self.kwargs.get('team_leader')
+
         ta_pks = get_ta_in_location(district)
         spraypoints_qs = unique_spray_points(
             SprayDay.objects.filter(location__pk__in=ta_pks)
@@ -615,7 +602,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             select={'spray_operator_code': 'data->>%s'},
             select_params=[SPRAY_OPERATOR_CODE],
             where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
-            params=[SPRAY_OPERATOR_CODE, "team_leader", team_leader]
+            params=[SPRAY_OPERATOR_CODE, "dec_leader", team_leader]
         )
         spraypoints = spraypoints_qs.values_list('spray_operator_code')
         non_sprayable = get_totals(spraypoints, "non-sprayable")
@@ -636,8 +623,12 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                         " where code = (data->>'{}'))"
                     ).format(SPRAY_OPERATOR_CODE)
                 }
-            ).values_list('spray_operator_code', 'spray_operator_name')\
-                .order_by('spray_operator_code').distinct()
+            ).values_list(
+                'spray_operator_code'
+            ).order_by(
+                'spray_operator_code'
+            ).distinct()
+
         start_times = []
         end_times = []
 
@@ -679,13 +670,17 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 params=[WAS_SPRAYED_FIELD, "yes"]
             )
 
-            # FIX: update this to use sprayable/found instead of sprayed
             sprayed_structures = update_sprayed_structures(
                 spray_points_sprayed, {}, per_so=False)
             no_of_days_worked = len(sprayed_structures.keys())
 
-            denominator = 1 if no_of_days_worked == 0 else no_of_days_worked
-            numerator = sum(a for a in sprayed_structures.values())
+            # calculate average structures found per sop per day
+            sprayable_qs = qs.extra(
+                where=['data->>%s = %s'],
+                params=['sprayable_structure', 'yes']
+            )
+            numerator = sprayable_qs.count()
+            denominator = qs.values('spray_date').distinct().count() or 1
             avg_structures_per_so = round(numerator / denominator)
 
             not_sprayed_total = refused.get(sop_code, 0) + \
