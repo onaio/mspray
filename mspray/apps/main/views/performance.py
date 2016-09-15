@@ -885,6 +885,9 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
             hh_submission_row_val = hh_submissions_dict.get(_date)
             sop_found_count = 0
+            hh_sprayformid_count = 0
+            sop_sprayed_count = 0
+            hh_sprayed_count = 0
             if hh_submission_row_val:
                 spray_form_id = hh_submission_row_val[0]
                 hh_sprayformid_count = hh_submission_row_val[1]
