@@ -4,6 +4,7 @@ from .spray_day import SprayDay  # noqa
 from .target_area import TargetArea  # noqa
 from .district import District  # noqa
 from .team_leader import TeamLeader  # noqa
+from .team_leader_assistant import TeamLeaderAssistant  # noqa
 from .spray_operator import SprayOperator  # noqa
 from .spray_operator import SprayOperatorDailySummary  # noqa
 from .spray_operator import DirectlyObservedSprayingForm  # noqa
