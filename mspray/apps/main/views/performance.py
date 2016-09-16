@@ -13,6 +13,7 @@ from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayPointView
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeader
+from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
@@ -36,6 +37,7 @@ WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
+TEAM_LEADER_ASSISTANT_CODE = settings.MSPRAY_TEAM_LEADER_ASSISTANT_CODE
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
 
 
@@ -49,6 +51,8 @@ def calculate(numerator, denominator, percentage):
         return 1
 
     return 0
+
+
 def update_sprayed_structures(spray_points_sprayed, sprayed_structures,
                               per_so=True):
     # set structures sprayed per day per spray operator
@@ -383,7 +387,10 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         spraypoints_qs = unique_spray_points(
             SprayDay.objects.filter(location__pk__in=ta_pks)
         )
-        spraypoints = spraypoints_qs.values_list('team_leader__code')
+
+        spraypoints = spraypoints_qs.values_list(
+            'team_leader_assistant__code'
+        )
         non_sprayable = get_totals(spraypoints, "non-sprayable")
         spraypoints = sprayable_queryset(spraypoints)
         spraypoints_qs = sprayable_queryset(spraypoints_qs)
@@ -394,7 +401,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         refused = get_totals(spraypoints, "refused")
         other = get_totals(spraypoints, "other")
 
-        team_leaders = TeamLeader.objects.filter(
+        team_leaders = TeamLeaderAssistant.objects.filter(
             location=district
         ).values_list(
             'code', 'name', 'data_quality_check', 'average_spray_quality_score'
@@ -437,8 +444,10 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             team_leaders_code_list.append(t)
 
         for code, name, dqc, asqs in team_leaders:
-            qs = spraypoints_qs.extra(where=["data->>%s =  %s"],
-                                      params=[TEAM_LEADER_CODE, code])
+            qs = spraypoints_qs.extra(
+                where=["data->>%s =  %s"],
+                params=[TEAM_LEADER_ASSISTANT_CODE, code]
+            )
             numerator = sprayed.get(code, 0)
             denominator = 1 if sprayable.get(code, 0) == 0 \
                 else sprayable.get(code)
@@ -532,7 +541,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         # returns a dict of submissions submitted on the current day
         today = datetime.today().strftime('%Y-%m-%d')
         hh_submission_list = SprayPointView.objects.filter(
-            team_leader_code=team_leader_code, spray_date=today
+            team_leader_assistant_code=team_leader_code, spray_date=today
         ).values(
             'sprayoperator_code'
         ).annotate(
@@ -552,7 +561,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         spray_operators_list = [
             a.get('code')
             for a in SprayOperator.objects.filter(
-                team_leader__code=team_leader_code
+                team_leader_assistant__code=team_leader_code
             ).values('code')
         ]
 
@@ -602,7 +611,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             select={'spray_operator_code': 'data->>%s'},
             select_params=[SPRAY_OPERATOR_CODE],
             where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
-            params=[SPRAY_OPERATOR_CODE, "dec_leader", team_leader]
+            params=[SPRAY_OPERATOR_CODE, TEAM_LEADER_CODE, team_leader]
         )
         spraypoints = spraypoints_qs.values_list('spray_operator_code')
         non_sprayable = get_totals(spraypoints, "non-sprayable")
@@ -633,7 +642,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         end_times = []
 
         spray_operators = SprayOperator.objects.filter(
-            team_leader__code=team_leader
+            team_leader_assistant__code=team_leader
         ).values_list(
             'code', 'name', 'data_quality_check'
         ).order_by(
@@ -766,7 +775,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 'totals': totals,
                 'team_leader': team_leader,
                 'team_leader_name':
-                get_object_or_404(TeamLeader, code=team_leader).name,
+                get_object_or_404(TeamLeaderAssistant, code=team_leader).name,
                 'district': district,
                 'district_name': district.name
             }
@@ -845,7 +854,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         spraypoints = spraypoints_qs.extra(
             select={'today': 'data->>%s'}, select_params=['today'],
             where=["data->>%s =  %s", "data->>%s =  %s"],
-            params=["dec_leader", team_leader, SPRAY_OPERATOR_CODE,
+            params=[TEAM_LEADER_CODE, team_leader, SPRAY_OPERATOR_CODE,
                     spray_operator]
         ).values_list('today')
 
@@ -962,7 +971,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 'district_name': district.name,
                 'team_leader': team_leader,
                 'team_leader_name':
-                get_object_or_404(TeamLeader, code=team_leader).name,
+                get_object_or_404(TeamLeaderAssistant, code=team_leader).name,
             }
         )
 
