@@ -6,6 +6,7 @@ class SprayOperator(models.Model):
     code = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=255, db_index=1)
     team_leader = models.ForeignKey('TeamLeader', null=True)
+    team_leader_assistant = models.ForeignKey('TeamLeaderAssistant', null=True)
     data_quality_check = models.BooleanField(default=False)
     average_spray_quality_score = models.FloatField(default=0.0)
 
@@ -18,6 +19,7 @@ class SprayOperator(models.Model):
 
 class SprayOperatorDailySummary(models.Model):
     spray_form_id = models.CharField(max_length=50)
+    submission_id = models.IntegerField(default=0)
     sprayed = models.IntegerField()
     found = models.IntegerField()
     sprayoperator_code = models.CharField(max_length=10)
@@ -31,6 +33,7 @@ class SprayOperatorDailySummary(models.Model):
 
 class DirectlyObservedSprayingForm(models.Model):
     # max_length to 5 because they are yes/no answers
+    submission_id = models.IntegerField(default=0)
     correct_removal = models.CharField(max_length=5)
     correct_mix = models.CharField(max_length=5)
     rinse = models.CharField(max_length=5)

@@ -21,6 +21,9 @@ class SprayDay(models.Model):
     data = JSONField(default={})
     location = models.ForeignKey('Location', db_index=True, null=True)
     team_leader = models.ForeignKey('TeamLeader', db_index=True, null=True)
+    team_leader_assistant = models.ForeignKey(
+        'TeamLeaderAssistant', db_index=True, null=True
+    )
     spray_operator = models.ForeignKey('SprayOperator', db_index=True,
                                        null=True)
     start_time = models.DateTimeField(null=True)

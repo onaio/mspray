@@ -22,15 +22,16 @@ CREATE MATERIALIZED VIEW main_spray_point_view AS (SELECT DISTINCT ON ("main_spr
                                           (data->>'sprayable/irs_card_num') AS "irs_card_num",
                                           (data->>'osmstructure') AS "osmstructure",
                                           (data->>'sprayformid') AS "sprayformid",
-                                          "main_sprayday"."location_id" as location_id,
-                                          "main_location"."code" as location_code,
-                                          T3."id" as district_id,
-                                          T3."code" as district_code,
+                                          "main_sprayday"."location_id" AS location_id,
+                                          "main_location"."code" AS location_code,
+                                          T3."id" AS district_id,
+                                          T3."code" AS district_code,
                                           "main_sprayday"."team_leader_id",
-                                          "main_teamleader"."code" as team_leader_code,
-                                          "main_teamleader"."name" as team_leader_name,
+                                          "main_teamleader"."code" AS team_leader_code,
+                                          "main_teamleader"."name" AS team_leader_name,
+                                          "main_teamleaderassistant"."code" AS team_leader_assistant_code,
                                           "main_sprayday"."spray_operator_id",
-                                          "main_sprayoperator"."code" as sprayoperator_code,
+                                          "main_sprayoperator"."code" AS sprayoperator_code,
                                           "main_sprayday"."spray_date",
                                           "main_sprayday"."start_time",
                                           "main_sprayday"."end_time"
@@ -38,6 +39,7 @@ FROM "main_sprayday"
 LEFT OUTER JOIN "main_location" ON ("main_sprayday"."location_id" = "main_location"."id")
 LEFT OUTER JOIN "main_location" T3 ON ("main_location"."parent_id" = T3."id")
 LEFT OUTER JOIN "main_teamleader" ON ("main_sprayday"."team_leader_id" = "main_teamleader"."id")
+LEFT OUTER JOIN "main_teamleaderassistant" ON ("main_sprayday"."team_leader_assistant_id" = "main_teamleaderassistant"."id")
 LEFT OUTER JOIN "main_sprayoperator" ON ("main_sprayday"."spray_operator_id" = "main_sprayoperator"."id")
 WHERE "main_sprayday"."id" IN
     (SELECT U0."sprayday_id"
@@ -56,6 +58,7 @@ class SprayPointView(models.Model):
     team_leader_id = models.IntegerField()
     team_leader_code = models.CharField(max_length=50)
     team_leader_name = models.CharField(max_length=255)
+    team_leader_assistant_code = models.CharField(max_length=50)
     spray_operator_id = models.IntegerField()
     sprayoperator_code = models.CharField(max_length=10)
     spray_date = models.DateField()
