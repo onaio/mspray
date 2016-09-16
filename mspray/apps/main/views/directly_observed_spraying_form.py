@@ -1,4 +1,3 @@
-from django.db import connection
 from django.db.models import Count
 from django.views.generic import ListView
 
@@ -14,48 +13,9 @@ from mspray.apps.main.models import (
 from mspray.apps.main.serializers.sprayday import (
     DirectlyObservedSprayingFormSerializer
 )
-from mspray.apps.main.utils import add_directly_observed_spraying_data
-
-
-def get_dos_data(column, where_params=None):
-    cursor = connection.cursor()
-    where_clause = ''
-
-    if where_params:
-        sub_column = where_params.get('column')
-        value = where_params.get('value')
-        where_clause = """
-where
-    main_directlyobservedsprayingform.{sub_column} = '{value}'
-""".format(**{'sub_column': sub_column, 'value': value})
-
-    sql_statement = """
-select
-    {column},
-    sum(case when correct_removal = 'yes' then 1 else 0 end) correct_removal_yes,
-    sum(case when correct_mix = 'yes' then 1 else 0 end) correct_mix_yes,
-    sum(case when rinse = 'yes' then 1 else 0 end) rinse_yes,
-    sum(case when "PPE" = 'yes' then 1 else 0 end) ppe_yes,
-    sum(case when "CFV" = 'yes' then 1 else 0 end) cfv_yes,
-    sum(case when correct_covering = 'yes' then 1 else 0 end) correct_covering_yes,
-    sum(case when leak_free = 'yes' then 1 else 0 end) leak_free_yes,
-    sum(case when correct_distance = 'yes' then 1 else 0 end) correct_distance_yes,
-    sum(case when correct_speed = 'yes' then 1 else 0 end) correct_speed_yes,
-    sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
-from
-    main_directlyobservedsprayingform
-{where_clause}
-group by
-    {column};
-""".format(**{'column': column, 'where_clause': where_clause})  # noqa
-
-    cursor.execute(sql_statement)
-    queryset = cursor.cursor.fetchall()
-
-    return {
-        a[0]: a[1:]
-        for a in queryset
-    }
+from mspray.apps.main.utils import (
+    add_directly_observed_spraying_data, get_dos_data
+)
 
 
 def calculate_percentage(numerator, denominator):
@@ -73,53 +33,6 @@ class DirectlyObservedSprayingFormViewSet(viewsets.ModelViewSet):
             raise ParseError(e)
 
         return Response("Successfully created", status=status.HTTP_201_CREATED)
-
-    def calculate_average_spray_quality_score(self, spray_operator_code):
-        avg_quality_score_dict = self.get_dos_data(
-            spray_operator_code
-        )
-
-        yes_totals = sum([
-            yes_total
-            for spray_date, yes_total in avg_quality_score_dict.items()
-        ])
-
-        spray_date_totals = len(avg_quality_score_dict) or 1
-        average_spray_quality_score = yes_totals / spray_date_totals
-        so = SprayOperator.objects.filter(code=spray_operator_code)[0]
-        if so:
-            # update spray operator's average_spray_quality_score value
-            so.average_spray_quality_score = average_spray_quality_score
-            so.save()
-
-            tl = so.team_leader
-            spray_operators = tl.sprayoperator_set.values(
-                'average_spray_quality_score'
-            )
-
-            # re-calculate and update average of team leader
-            numerator = sum([
-                a.get('average_spray_quality_score') for a in spray_operators
-            ])
-            denominator = spray_operators.count()
-            average_spray_quality_score = numerator / denominator
-
-            tl.average_spray_quality_score = average_spray_quality_score
-            tl.save()
-
-            # re-calculate and update average of district
-            district = tl.location
-            team_leaders = district.teamleader_set.values(
-                'average_spray_quality_score'
-            )
-            numerator = sum([
-                a.get('average_spray_quality_score') for a in team_leaders
-            ])
-            denominator = team_leaders.count()
-            average_spray_quality_score = numerator / denominator
-
-            district.average_spray_quality_score = average_spray_quality_score
-            district.save()
 
 
 class DirectlyObservedSprayingView(ListView):
@@ -167,7 +80,8 @@ class DirectlyObservedSprayingView(ListView):
             'leak_free': 0,
             'correct_distance': 0,
             'correct_speed': 0,
-            'correct_overlap': 0
+            'correct_overlap': 0,
+            'total_yes': 0
         }
         total = {
             'submission_count': 0
@@ -180,46 +94,11 @@ class DirectlyObservedSprayingView(ListView):
             }
 
         submissions_count = self.get_submission_count(kwargs)
-        level = kwargs.get('level')
-        asqs_dict = {}
-        if level == "district":
-            locations = Location.objects.filter(
-                parent=None
-            ).values(
-                'code', 'average_spray_quality_score'
-            )
-            asqs_dict = get_average_spray_quality_score(
-                locations
-            )
-        elif level == "spray-operator":
-            filter_args = kwargs.get('filter-args')
-            if filter_args:
-                team_leader_code = filter_args.get('tl_code_name')
-                spray_operators = SprayOperator.objects.filter(
-                    team_leader__code=team_leader_code
-                ).values(
-                    'code', 'average_spray_quality_score'
-                )
-
-                asqs_dict = get_average_spray_quality_score(
-                    spray_operators
-                )
-        elif level == "team-leader":
-            filter_args = kwargs.get('filter-args')
-            if filter_args:
-                district_code = filter_args.get('district')
-                team_leaders = TeamLeader.objects.filter(
-                    location__code=district_code
-                ).values(
-                    'code', 'average_spray_quality_score'
-                )
-                asqs_dict = get_average_spray_quality_score(
-                    team_leaders
-                )
 
         for a in user_list:
             code = str(a.get('code'))
             name = a.get('name')
+            average_spray_quality_score = a.get('average_spray_quality_score')
 
             records = directly_observed_spraying_data.get(code)
             if records:
@@ -258,7 +137,7 @@ class DirectlyObservedSprayingView(ListView):
                     'correct_speed': correct_speed,
                     'correct_overlap': correct_overlap,
                     'code': code,
-                    'total_yes': asqs_dict.get(code, 0.0)
+                    'total_yes': average_spray_quality_score
                 }
 
                 average['correct_removal'] += correct_removal
@@ -271,6 +150,7 @@ class DirectlyObservedSprayingView(ListView):
                 average['correct_distance'] += correct_distance
                 average['correct_speed'] += correct_speed
                 average['correct_overlap'] += correct_overlap
+                average['total_yes'] += average_spray_quality_score
                 total['submission_count'] += submission_count
             else:
                 data[name] = {
@@ -415,7 +295,7 @@ class DirectlyObservedSprayingView(ListView):
             districts = Location.objects.filter(
                 parent=None
             ).values(
-                'name', 'code'
+                'name', 'code', 'average_spray_quality_score'
             )
             directly_observed_spraying_data = get_dos_data('district')
 
@@ -437,7 +317,7 @@ class DirectlyObservedSprayingView(ListView):
             team_leaders = TeamLeader.objects.filter(
                 location__code=district_code
             ).values(
-                'name', 'code'
+                'name', 'code', 'average_spray_quality_score'
             )
 
             directly_observed_spraying_data = get_dos_data(
@@ -466,7 +346,7 @@ class DirectlyObservedSprayingView(ListView):
             spray_operators = SprayOperator.objects.filter(
                 team_leader__code=team_leader_code
             ).values(
-                'name', 'code'
+                'name', 'code', 'average_spray_quality_score'
             )
 
             directly_observed_spraying_data = get_dos_data(

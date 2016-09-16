@@ -214,6 +214,102 @@ def add_spray_data(data):
     return sprayday
 
 
+def get_dos_data(column, where_params=None):
+    cursor = connection.cursor()
+    where_clause = ''
+
+    if where_params:
+        sub_column = where_params.get('column')
+        value = where_params.get('value')
+        where_clause = """
+where
+    main_directlyobservedsprayingform.{sub_column} = '{value}'
+""".format(**{'sub_column': sub_column, 'value': value})
+
+    sql_statement = """
+select
+    {column},
+    sum(case when correct_removal = 'yes' then 1 else 0 end) correct_removal_yes,
+    sum(case when correct_mix = 'yes' then 1 else 0 end) correct_mix_yes,
+    sum(case when rinse = 'yes' then 1 else 0 end) rinse_yes,
+    sum(case when "PPE" = 'yes' then 1 else 0 end) ppe_yes,
+    sum(case when "CFV" = 'yes' then 1 else 0 end) cfv_yes,
+    sum(case when correct_covering = 'yes' then 1 else 0 end) correct_covering_yes,
+    sum(case when leak_free = 'yes' then 1 else 0 end) leak_free_yes,
+    sum(case when correct_distance = 'yes' then 1 else 0 end) correct_distance_yes,
+    sum(case when correct_speed = 'yes' then 1 else 0 end) correct_speed_yes,
+    sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
+from
+    main_directlyobservedsprayingform
+{where_clause}
+group by
+    {column};
+""".format(**{'column': column, 'where_clause': where_clause})  # noqa
+
+    cursor.execute(sql_statement)
+    queryset = cursor.cursor.fetchall()
+
+    return {
+        a[0]: a[1:]
+        for a in queryset
+    }
+
+
+def update_average_dos_score_all_levels(code, score):
+    so = SprayOperator.objects.filter(code=code)[0]
+    if so:
+        # update spray operator's average_spray_quality_score value
+        so.average_spray_quality_score = round(score, 2)
+        so.save()
+
+        tl = so.team_leader
+        spray_operators = tl.sprayoperator_set.values(
+            'average_spray_quality_score'
+        )
+
+        # re-calculate and update average of team leader assistant
+        numerator = sum([
+            a.get('average_spray_quality_score') for a in spray_operators
+        ])
+        denominator = spray_operators.count() or 1
+        average_spray_quality_score = numerator / denominator
+
+        tl.average_spray_quality_score = round(average_spray_quality_score, 2)
+        tl.save()
+
+        # re-calculate and update average of district
+        district = tl.location
+        tl = district.teamleader_set.values(
+            'average_spray_quality_score'
+        )
+        numerator = sum([
+            a.get('average_spray_quality_score') for a in tl
+        ])
+        denominator = tl.count() or 1
+        average_spray_quality_score = numerator / denominator
+
+        district.average_spray_quality_score = round(
+            average_spray_quality_score, 2
+        )
+        district.save()
+
+
+def get_calculate_avg_dos_score(spray_operator_code):
+    directly_observed_spraying_data = get_dos_data(
+        'spray_date',
+        {'column': 'sprayop_code_name', 'value': spray_operator_code}
+    )
+
+    total_yes = 0
+    for spray_date, records in directly_observed_spraying_data.items():
+        if records:
+            total_yes += sum(records)
+
+    return round(
+        total_yes / (len(directly_observed_spraying_data) or 1), 2
+    )
+
+
 def add_directly_observed_spraying_data(data):
     spray_operator_code = data.get('sprayop_code_name')
     submission_id = data.get('_id')
@@ -237,6 +333,9 @@ def add_directly_observed_spraying_data(data):
         data=data,
         spray_date=data.get('today'),
     )
+
+    avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
+    update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
 
 
 def get_hh_submission(spray_form_id):
