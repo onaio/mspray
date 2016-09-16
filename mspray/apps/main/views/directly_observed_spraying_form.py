@@ -167,13 +167,55 @@ class DirectlyObservedSprayingView(ListView):
             'leak_free': 0,
             'correct_distance': 0,
             'correct_speed': 0,
-            'correct_overlap': 0,
-            'avg_dos_score': 0
+            'correct_overlap': 0
         }
         total = {
             'submission_count': 0
         }
+
+        def get_average_spray_quality_score(qs):
+            return {
+                a.get('code'): a.get('average_spray_quality_score')
+                for a in qs
+            }
+
         submissions_count = self.get_submission_count(kwargs)
+        level = kwargs.get('level')
+        asqs_dict = {}
+        if level == "district":
+            locations = Location.objects.filter(
+                parent=None
+            ).values(
+                'code', 'average_spray_quality_score'
+            )
+            asqs_dict = get_average_spray_quality_score(
+                locations
+            )
+        elif level == "spray-operator":
+            filter_args = kwargs.get('filter-args')
+            if filter_args:
+                team_leader_code = filter_args.get('tl_code_name')
+                spray_operators = SprayOperator.objects.filter(
+                    team_leader__code=team_leader_code
+                ).values(
+                    'code', 'average_spray_quality_score'
+                )
+
+                asqs_dict = get_average_spray_quality_score(
+                    spray_operators
+                )
+        elif level == "team-leader":
+            filter_args = kwargs.get('filter-args')
+            if filter_args:
+                district_code = filter_args.get('district')
+                team_leaders = TeamLeader.objects.filter(
+                    location__code=district_code
+                ).values(
+                    'code', 'average_spray_quality_score'
+                )
+                asqs_dict = get_average_spray_quality_score(
+                    team_leaders
+                )
 
         for a in user_list:
             code = str(a.get('code'))
@@ -202,7 +244,6 @@ class DirectlyObservedSprayingView(ListView):
                     records[8], submission_count)
                 correct_overlap = calculate_percentage(
                     records[9], submission_count)
-                avg_dos_score = sum(records) / 10
 
                 data[name] = {
                     'submission_count': submission_count,
@@ -217,7 +258,7 @@ class DirectlyObservedSprayingView(ListView):
                     'correct_speed': correct_speed,
                     'correct_overlap': correct_overlap,
                     'code': code,
-                    'avg_dos_score': avg_dos_score,
+                    'total_yes': asqs_dict.get(code, 0.0)
                 }
 
                 average['correct_removal'] += correct_removal
@@ -230,22 +271,22 @@ class DirectlyObservedSprayingView(ListView):
                 average['correct_distance'] += correct_distance
                 average['correct_speed'] += correct_speed
                 average['correct_overlap'] += correct_overlap
-                average['avg_dos_score'] += avg_dos_score
                 total['submission_count'] += submission_count
             else:
                 data[name] = {
                     'submission_count': 0,
-                    'correct_removal': 0,
-                    'correct_mix': 0,
-                    'rinse': 0,
-                    'ppe': 0,
-                    'cfv': 0,
-                    'correct_covering': 0,
-                    'leak_free': 0,
-                    'correct_distance': 0,
-                    'correct_speed': 0,
-                    'correct_overlap': 0,
-                    'code': code
+                    'correct_removal': 0.0,
+                    'correct_mix': 0.0,
+                    'rinse': 0.0,
+                    'ppe': 0.0,
+                    'cfv': 0.0,
+                    'correct_covering': 0.0,
+                    'leak_free': 0.0,
+                    'correct_distance': 0.0,
+                    'correct_speed': 0.0,
+                    'correct_overlap': 0.0,
+                    'code': code,
+                    'total_yes': 0.0
                 }
 
         for a, b in average.items():
@@ -254,6 +295,110 @@ class DirectlyObservedSprayingView(ListView):
             )
 
         return data, average, total
+
+    def spray_operator_daily_performance_handler(self, context, splitter):
+        spray_operator_code = splitter[4]
+        context['spray_operator_code'] = spray_operator_code
+
+        directly_observed_spraying_data = get_dos_data(
+            'spray_date',
+            {'column': 'sprayop_code_name', 'value': spray_operator_code}
+        )
+
+        data = {}
+        count = 1
+        average = {
+            'correct_removal': 0,
+            'correct_mix': 0,
+            'rinse': 0,
+            'ppe': 0,
+            'cfv': 0,
+            'correct_covering': 0,
+            'leak_free': 0,
+            'correct_distance': 0,
+            'correct_speed': 0,
+            'correct_overlap': 0,
+            'avg_dos_score': 0,
+            'total_yes': 0
+        }
+
+        total = {
+            'submission_count': 0,
+        }
+
+        submissions_count = {
+            a.get('spray_date'): a.get('count')
+            for a in DirectlyObservedSprayingForm.objects.filter(
+                sprayop_code_name=spray_operator_code
+            ).values(
+                'spray_date'
+            ).annotate(
+                count=Count('spray_date')
+            )
+        }
+
+        for spray_date, records in directly_observed_spraying_data.items():
+            if records:
+                submission_count = submissions_count.get(spray_date)
+                correct_removal = calculate_percentage(
+                    records[0], submission_count)
+                correct_mix = calculate_percentage(
+                    records[1], submission_count)
+                rinse = calculate_percentage(records[2], submission_count)
+                ppe = calculate_percentage(records[3], submission_count)
+                cfv = calculate_percentage(records[4], submission_count)
+                correct_covering = calculate_percentage(
+                    records[5], submission_count)
+                leak_free = calculate_percentage(
+                    records[6], submission_count)
+                correct_distance = calculate_percentage(
+                    records[7], submission_count)
+                correct_speed = calculate_percentage(
+                    records[8], submission_count)
+                correct_overlap = calculate_percentage(
+                    records[9], submission_count)
+                total_yes = sum(records)
+
+                data[spray_date] = {
+                    'day': count,
+                    'submission_count': submission_count,
+                    'correct_removal': correct_removal,
+                    'correct_mix': correct_mix,
+                    'rinse': rinse,
+                    'ppe': ppe,
+                    'cfv': cfv,
+                    'correct_covering': correct_covering,
+                    'leak_free': leak_free,
+                    'correct_distance': correct_distance,
+                    'correct_speed': correct_speed,
+                    'correct_overlap': correct_overlap,
+                    'total_yes': total_yes
+                }
+
+                average['correct_removal'] += correct_removal
+                average['correct_mix'] += correct_mix
+                average['rinse'] += rinse
+                average['ppe'] += ppe
+                average['cfv'] += cfv
+                average['correct_covering'] += correct_covering
+                average['leak_free'] += leak_free
+                average['correct_distance'] += correct_distance
+                average['correct_speed'] += correct_speed
+                average['correct_overlap'] += correct_overlap
+                average['total_yes'] += total_yes
+                total['submission_count'] += submission_count
+                count = count + 1
+
+        for a, b in average.items():
+            average[a] = round(
+                b / (len(directly_observed_spraying_data) or 1), 2
+            )
+
+        context['data'] = data
+        context['average'] = average
+        context['total'] = total
+
+        return context
 
     def get_context_data(self, **kwargs):
         context = super(
@@ -343,105 +488,8 @@ class DirectlyObservedSprayingView(ListView):
             context['total'] = total
 
         elif len(splitter) == 5:
-            district_code = splitter[2]
-            spray_operator_code = splitter[4]
-            context['spray_operator_code'] = spray_operator_code
-
-            directly_observed_spraying_data = get_dos_data(
-                'spray_date',
-                {'column': 'sprayop_code_name', 'value': spray_operator_code}
+            context = self.spray_operator_daily_performance_handler(
+                context, splitter
             )
-
-            data = {}
-            count = 1
-            average = {
-                'correct_removal': 0,
-                'correct_mix': 0,
-                'rinse': 0,
-                'ppe': 0,
-                'cfv': 0,
-                'correct_covering': 0,
-                'leak_free': 0,
-                'correct_distance': 0,
-                'correct_speed': 0,
-                'correct_overlap': 0,
-                'avg_dos_score': 0
-            }
-
-            total = {
-                'submission_count': 0
-            }
-
-            submissions_count = {
-                a.get('spray_date'): a.get('count')
-                for a in DirectlyObservedSprayingForm.objects.filter(
-                    sprayop_code_name=spray_operator_code
-                ).values(
-                    'spray_date'
-                ).annotate(
-                    count=Count('spray_date')
-                )
-            }
-
-            for spray_date, records in directly_observed_spraying_data.items():
-                if records:
-                    submission_count = submissions_count.get(spray_date)
-                    correct_removal = calculate_percentage(
-                        records[0], submission_count)
-                    correct_mix = calculate_percentage(
-                        records[1], submission_count)
-                    rinse = calculate_percentage(records[2], submission_count)
-                    ppe = calculate_percentage(records[3], submission_count)
-                    cfv = calculate_percentage(records[4], submission_count)
-                    correct_covering = calculate_percentage(
-                        records[5], submission_count)
-                    leak_free = calculate_percentage(
-                        records[6], submission_count)
-                    correct_distance = calculate_percentage(
-                        records[7], submission_count)
-                    correct_speed = calculate_percentage(
-                        records[8], submission_count)
-                    correct_overlap = calculate_percentage(
-                        records[9], submission_count)
-                    avg_dos_score = sum(records) / 10
-
-                    data[spray_date] = {
-                        'day': count,
-                        'submission_count': submission_count,
-                        'correct_removal': correct_removal,
-                        'correct_mix': correct_mix,
-                        'rinse': rinse,
-                        'ppe': ppe,
-                        'cfv': cfv,
-                        'correct_covering': correct_covering,
-                        'leak_free': leak_free,
-                        'correct_distance': correct_distance,
-                        'correct_speed': correct_speed,
-                        'correct_overlap': correct_overlap,
-                        'avg_dos_score': avg_dos_score,
-                    }
-
-                    average['correct_removal'] += correct_removal
-                    average['correct_mix'] += correct_mix
-                    average['rinse'] += rinse
-                    average['ppe'] += ppe
-                    average['cfv'] += cfv
-                    average['correct_covering'] += correct_covering
-                    average['leak_free'] += leak_free
-                    average['correct_distance'] += correct_distance
-                    average['correct_speed'] += correct_speed
-                    average['correct_overlap'] += correct_overlap
-                    average['avg_dos_score'] += avg_dos_score
-                    total['submission_count'] += submission_count
-                    count = count + 1
-
-            for a, b in average.items():
-                average[a] = round(
-                    b / (len(directly_observed_spraying_data) or 1), 2
-                )
-
-            context['data'] = data
-            context['average'] = average
-            context['total'] = total
 
         return context
