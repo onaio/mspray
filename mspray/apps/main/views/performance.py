@@ -12,7 +12,6 @@ from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayPointView
 from mspray.apps.main.models import SprayOperator
-from mspray.apps.main.models import TeamLeader
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.utils import avg_time
