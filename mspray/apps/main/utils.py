@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
+from django.db.models import Count
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
@@ -28,9 +29,12 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.spray_operator import DirectlyObservedSprayingForm
-from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+from mspray.apps.main.models.spray_operator import SprayOperatorDailySummary
 from mspray.apps.main.models.spray_operator import SprayOperator
+from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+from mspray.apps.main.models.spraypoint import SprayPointView
 from mspray.apps.main.models.team_leader import TeamLeader
+from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -188,6 +192,12 @@ def add_spray_data(data):
     if so:
         sprayday.spray_operator = so
 
+    team_leader_assistant = get_team_leader_assistant(
+        data.get(TEAM_LEADER_CODE)
+    )
+    if team_leader_assistant:
+        sprayday.team_leader_assistant = team_leader_assistant
+
     team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
     if team_leader:
         sprayday.team_leader = team_leader
@@ -206,7 +216,9 @@ def add_spray_data(data):
 
 def add_directly_observed_spraying_data(data):
     spray_operator_code = data.get('sprayop_code_name')
+    submission_id = data.get('_id')
     DirectlyObservedSprayingForm.objects.create(
+        submission_id=submission_id,
         correct_removal=data.get('correct_removal'),
         correct_mix=data.get('correct_mix'),
         rinse=data.get('rinse'),
@@ -227,12 +239,131 @@ def add_directly_observed_spraying_data(data):
     )
 
 
+def get_hh_submission(spray_form_id):
+    hh_submission = SprayPointView.objects.filter(
+        sprayformid=spray_form_id
+    ).values(
+        'sprayformid'
+    ).annotate(
+        sprayformid_count=Count('sprayformid'),
+        sprayed_count=Count('was_sprayed')
+    )
+
+    return hh_submission and hh_submission[0] or {}
+
+
+def get_sop_submission(spray_form_id):
+    sop_submission = SprayOperatorDailySummary.objects.filter(
+        spray_form_id=spray_form_id
+    ).values(
+        'spray_form_id'
+    ).annotate(
+        found_count=Count('found'),
+        sprayed_count=Count('sprayed')
+    )
+
+    return sop_submission and sop_submission[0] or {}
+
+
+def calculate_data_quality_check(spray_form_id, spray_operator_code):
+    # from HH Submission form total submissions
+    hh_submission_agg = get_hh_submission(spray_form_id)
+
+    # from SOP Summary form
+    sop_submission_aggregate = get_sop_submission(spray_form_id)
+
+    sop_found_count = None
+    if hh_submission_agg:
+        hh_sprayformid_count = hh_submission_agg.get('sprayformid_count')
+        hh_sprayed_count = hh_submission_agg.get('sprayed_count')
+
+        sop_submission = sop_submission_aggregate.get(spray_form_id)
+        if sop_submission:
+            sop_found_count = sop_submission.get('found_count')
+            sop_sprayed_count = sop_submission.get('sprayed_count')
+
+    data_quality_check = False
+    if sop_found_count is not None:
+        # check HH Submission Form total submissions count is equal to
+        # SOP Summary Form 'found' count and HH Submission Form
+        # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+        # count and both checks should be based on 'sprayformid'
+        data_quality_check = sop_found_count == hh_sprayformid_count\
+            and sop_sprayed_count == hh_sprayed_count
+
+    so = SprayOperator.objects.filter(code=spray_operator_code)[0]
+    if so:
+        # update spray operator
+        so.data_quality_check = data_quality_check
+        so.save()
+
+        team_leader = so.team_leader
+        if data_quality_check:
+            # if data_quality_check is True, check if all data quality
+            # values for the rest of the spray operators is true before
+            # saving
+            data_quality_check = all(
+                [
+                    a.get('data_quality_check')
+                    for a in team_leader.sprayoperator_set.values(
+                        'data_quality_check'
+                    )
+                ]
+            )
+
+        # update team leader
+        team_leader.data_quality_check = data_quality_check
+        team_leader.save()
+
+        # update district
+        district = team_leader.location
+        if data_quality_check:
+            data_quality_check = all(
+                [
+                    a.get('data_quality_check')
+                    for a in district.teamleader_set.values(
+                        'data_quality_check'
+                    )
+                ]
+            )
+
+        district.data_quality_check = data_quality_check
+        district.save()
+
+
+def add_spray_operator_daily(data):
+    spray_form_id = data.get('sprayformid')
+    submission_id = data.get('_id')
+    sprayed = data.get('sprayed', 0)
+    found = data.get('found', 0)
+    spray_operator_code = data.get('sprayop_code')
+    SprayOperatorDailySummary.objects.create(
+        spray_form_id=spray_form_id,
+        sprayed=sprayed,
+        found=found,
+        submission_id=submission_id,
+        sprayoperator_code=spray_operator_code,
+        data=data,
+    )
+    calculate_data_quality_check(
+        spray_form_id, spray_operator_code
+    )
+
+
 def get_team_leader(code):
     try:
         return TeamLeader.objects.get(code=code)
     except TeamLeader.DoesNotExist:
         pass
 
+    return None
+
+
+def get_team_leader_assistant(code):
+    try:
+        return TeamLeaderAssistant.objects.get(code=code)
+    except TeamLeaderAssistant.DoesNotExist:
+        pass
     return None
 
 
