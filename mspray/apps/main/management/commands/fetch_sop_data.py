@@ -13,17 +13,18 @@ class Command(BaseCommand):
     help = _('Fetch data from ona server.')
 
     def add_arguments(self, parser):
-        parser.add_argument('--formid', dest='formid', default=FORMID,
-                            type=int, help='form id')
+        parser.add_argument('formid', type=int, help='form id')
 
     def handle(self, *args, **options):
-        formid = 141280
+        formid = int(options['formid'])
         latest = SprayOperatorDailySummary.objects.filter().order_by(
-            'submission_id'
+            '-submission_id'
         ).values_list(
             'submission_id', flat=True
         ).first()
         data = fetch_form_data(formid, latest)
+        pre_count = SprayOperatorDailySummary.objects.count()
         for a in data:
             add_spray_operator_daily(a)
-        print("successfully imported data")
+        count = SprayOperatorDailySummary.objects.count()
+        print("successfully imported %d data" % (count - pre_count))

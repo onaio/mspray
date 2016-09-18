@@ -393,7 +393,7 @@ def calculate_data_quality_check(spray_form_id, spray_operator_code):
         data_quality_check = sop_found_count == hh_sprayformid_count\
             and sop_sprayed_count == hh_sprayed_count
 
-    so = SprayOperator.objects.filter(code=spray_operator_code)[0]
+    so = SprayOperator.objects.filter(code=spray_operator_code).first()
     if so:
         # update spray operator
         so.data_quality_check = data_quality_check
@@ -439,17 +439,21 @@ def add_spray_operator_daily(data):
     sprayed = data.get('sprayed', 0)
     found = data.get('found', 0)
     spray_operator_code = data.get('sprayop_code')
-    SprayOperatorDailySummary.objects.create(
-        spray_form_id=spray_form_id,
-        sprayed=sprayed,
-        found=found,
-        submission_id=submission_id,
-        sprayoperator_code=spray_operator_code,
-        data=data,
-    )
-    calculate_data_quality_check(
-        spray_form_id, spray_operator_code
-    )
+    try:
+        SprayOperatorDailySummary.objects.create(
+            spray_form_id=spray_form_id,
+            sprayed=sprayed,
+            found=found,
+            submission_id=submission_id,
+            sprayoperator_code=spray_operator_code,
+            data=data,
+        )
+    except IntegrityError:
+        pass
+    else:
+        calculate_data_quality_check(
+            spray_form_id, spray_operator_code
+        )
 
 
 def get_team_leader(code):
