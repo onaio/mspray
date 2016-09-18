@@ -313,29 +313,32 @@ def get_calculate_avg_dos_score(spray_operator_code):
 def add_directly_observed_spraying_data(data):
     spray_operator_code = data.get('sprayop_code_name')
     submission_id = data.get('_id')
-    DirectlyObservedSprayingForm.objects.create(
-        submission_id=submission_id,
-        correct_removal=data.get('correct_removal'),
-        correct_mix=data.get('correct_mix'),
-        rinse=data.get('rinse'),
-        PPE=data.get('PPE'),
-        CFV=data.get('CFV'),
-        correct_covering=data.get('correct_covering'),
-        leak_free=data.get('leak_free'),
-        correct_distance=data.get('correct_distance'),
-        correct_speed=data.get('correct_speed'),
-        correct_overlap=data.get('correct_overlap'),
-        district=data.get('district'),
-        health_facility=data.get('health_facility'),
-        supervisor_name=data.get('supervisor_name'),
-        sprayop_code_name=spray_operator_code,
-        tl_code_name=data.get('tl_code_name'),
-        data=data,
-        spray_date=data.get('today'),
-    )
-
-    avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
-    update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
+    try:
+        DirectlyObservedSprayingForm.objects.create(
+            submission_id=submission_id,
+            correct_removal=data.get('correct_removal'),
+            correct_mix=data.get('correct_mix'),
+            rinse=data.get('rinse'),
+            PPE=data.get('PPE'),
+            CFV=data.get('CFV'),
+            correct_covering=data.get('correct_covering'),
+            leak_free=data.get('leak_free'),
+            correct_distance=data.get('correct_distance'),
+            correct_speed=data.get('correct_speed'),
+            correct_overlap=data.get('correct_overlap'),
+            district=data.get('district'),
+            health_facility=data.get('health_facility'),
+            supervisor_name=data.get('supervisor_name'),
+            sprayop_code_name=spray_operator_code,
+            tl_code_name=data.get('tl_code_name'),
+            data=data,
+            spray_date=data.get('today'),
+        )
+    except IntegrityError:
+        pass
+    else:
+        avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
+        update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
 
 
 def get_hh_submission(spray_form_id):
