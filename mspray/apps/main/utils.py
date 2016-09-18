@@ -256,7 +256,7 @@ group by
 
 
 def update_average_dos_score_all_levels(code, score):
-    so = SprayOperator.objects.filter(code=code)[0]
+    so = SprayOperator.objects.filter(code=code).first()
     if so:
         # update spray operator's average_spray_quality_score value
         so.average_spray_quality_score = round(score, 2)
