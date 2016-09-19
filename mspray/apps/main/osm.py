@@ -213,6 +213,19 @@ def get_ways(osm_xml):
 
 def get_osm_xml(osm_file):
     with open(osm_file) as osm_file:
-        content = osm_file.read().strip()
+        osm_xml = osm_file.read().strip()
 
-    return content
+        return osm_xml
+
+
+def add_or_update_osm_data(osm_file):
+    osm_xml = get_osm_xml(osm_file)
+
+    ways = get_ways(osm_xml)
+    nodes = get_nodes(osm_xml)
+
+    for way in ways:
+        add_way(way)
+
+    for node in nodes:
+        add_node(node)
