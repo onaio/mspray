@@ -93,6 +93,8 @@ class Command(BaseCommand):
                         code = feature.fid + 1
                     else:
                         code = int(feature.get(code_field))
+                        if code == 0:
+                            continue
                     if bytearray(structures_field.encode('utf8')) in \
                             feature.fields:
                         structures = int(feature.get(structures_field))
