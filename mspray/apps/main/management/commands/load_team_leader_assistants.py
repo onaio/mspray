@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if 'csv_file' not in options:
-            raise CommandError(_('Missing locations csv file path'))
+            raise CommandError(_('Missing team leaders csv file path'))
         else:
             try:
                 path = os.path.abspath(options['csv_file'])
