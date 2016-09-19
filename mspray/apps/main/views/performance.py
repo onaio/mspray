@@ -1,6 +1,6 @@
 from datetime import datetime
 from django.conf import settings
-from django.db.models import Count, F, Sum, FloatField, ExpressionWrapper, Q
+from django.db.models import Count, F, Sum, FloatField, ExpressionWrapper
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -110,17 +110,6 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             ).annotate(k=Count('districts', distinct=True))
         }
 
-        gte_85_tas = Location.objects.filter(parent=1, structures__gt=0)\
-            .values('name', 'structures')\
-            .filter(target_areas__sprayable_structure='yes')\
-            .filter(target_areas__was_sprayed='yes')\
-            .filter(~Q(target_areas__osmstructure=None))\
-            .annotate(k=ExpressionWrapper(
-                Count('target_areas', distinct=True) * 100 / (F('structures')),
-                output_field=FloatField())
-            ).values_list('k', flat=True)\
-            .filter(k__gte=85)\
-            .count()
         totals = {
             'avg_structures_per_user_per_so': 0,
             'found': 0,
@@ -144,9 +133,9 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         results = []
 
         so_per_district = {
-            a.get('team_leader__location__code'): a.get('count')
+            a.get('team_leader_assistant__location__code'): a.get('count')
             for a in SprayOperator.objects.values(
-                'team_leader__location__code'
+                'team_leader_assistant__location__code'
             ).annotate(
                 count=Count('code')
             )
@@ -419,18 +408,18 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             where=['data->>%s = %s'],
             params=['sprayable_structure', 'yes']
         ).values_list(
-            'team_leader__code'
+            'team_leader_assistant__code'
         ).annotate(a=Count('spray_operator'),
                    b=Count(Concat(F('spray_date'),
                                   F('spray_operator__code')), distinct=True)
-                   ).values_list('team_leader__code', 'a', 'b')
+                   ).values_list('team_leader_assistant__code', 'a', 'b')
         sprayable_structures = {}
         team_leaders_code_list = []
 
         so_per_team_leader = {
-            a.get('team_leader__code'): a.get('count')
+            a.get('team_leader_assistant__code'): a.get('count')
             for a in SprayOperator.objects.values(
-                'team_leader__code'
+                'team_leader_assistant__code'
             ).annotate(
                 count=Count('code')
             )
