@@ -16,7 +16,11 @@ class Command(BaseCommand):
                     loc.location_set.aggregate(s=Sum('structures'))['s']
                 if structures:
                     loc.structures = structures
-                    loc.save()
+
+                loc.num_of_spray_areas = Location.objects.filter(
+                    geom__contained=loc.geom, level='ta'
+                ).count()
+                loc.save()
 
         for level in ['RHC', 'district']:
             _update_location_level(level)
