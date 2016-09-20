@@ -16,6 +16,7 @@ FUNCTION_TEMPLATE = '%(function)s(%(expressions)s AS FLOAT)'
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+WAS_SPRAYED_VALUE = settings.MSPRAY_WAS_SPRAYED_VALUE
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
@@ -86,16 +87,16 @@ class TargetAreaMixin(object):
 
             return cached_queryset_count(key, queryset)
 
-    def _get_spray_areas_with_sprayable_structures(self, obj):
+    def _get_spray_areas_with_sprayable_structures(self, obj, **kwargs):
         loc = Location.objects.get(pk=obj.get('pk'))
         return Location.objects.filter(
-            geom__contained=loc.geom, level='ta')\
-            .filter(sprayday__data__sprayable_structure='yes')\
+            geom__contained=loc.geom, level='ta', **kwargs
+        ).filter(sprayday__data__sprayable_structure='yes')\
             .annotate(
-                found=(Count('sprayday')),
+                found=(Count('sprayday', distinct=True)),
                 found_percentage=ExpressionWrapper(
                     (
-                        Count('sprayday') * 100 /
+                        Count('sprayday', distinct=True) * 100 /
                         Func(
                             F('sprayday__location__structures'),
                             function='CAST',
