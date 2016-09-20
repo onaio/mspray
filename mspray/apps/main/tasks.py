@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from django.conf import settings
+from django.contrib.gis.geos import Point
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
@@ -55,18 +56,15 @@ def get_location_from_osm(data):
     is_node = False
     location = None
     osm_xml = fetch_osm_xml(data)
-    osmstructure = data.get('osmstructure')
     if osm_xml is not None:
         geoms = []
-        is_node = osmstructure and osmstructure.startswith('OSMNode')
-        if is_node:
-            geoms = parse_osm_nodes(osm_xml)
-        else:
-            geoms = parse_osm_ways(osm_xml)
+        geoms = parse_osm_ways(osm_xml) or parse_osm_nodes(osm_xml)
+
         if len(geoms):
             geom = geoms[0]['geom']
+            is_node = isinstance(geom, Point)
             locations = Location.objects.filter(
-                geom__covers=geom.centroid if not is_node else geom,
+                geom__covers=geom,
                 level=settings.MSPRAY_TA_LEVEL
             )
             if locations:
