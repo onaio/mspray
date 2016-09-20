@@ -29,6 +29,8 @@ class SprayDay(models.Model):
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
+    was_sprayed = models.BooleanField(default=False)
+
     objects = models.GeoManager()
 
     class Meta:

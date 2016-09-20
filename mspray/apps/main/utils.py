@@ -41,6 +41,7 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
@@ -108,8 +109,8 @@ def set_household_buffer(distance=15, wkt=None):
     cursor = connection.cursor()
     where = ""
     if wkt is not None:
-        where = "WHERE ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" \
-            % wkt
+        where = "WHERE "\
+            "ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" % wkt
 
     cursor.execute(
         "UPDATE main_household SET bgeom = ST_GeomFromText(ST_AsText("
@@ -183,6 +184,10 @@ def add_spray_data(data):
         location=location
     )
     sprayday.data = data
+
+    was_sprayed = data.get(WAS_SPRAYED_FIELD)
+    if was_sprayed == WAS_SPRAYED_VALUE:
+        sprayday.was_sprayed = True
 
     if settings.OSM_SUBMISSIONS and geom is not None:
         sprayday.geom = geom
