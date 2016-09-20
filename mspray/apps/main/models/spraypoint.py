@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from django.db import connection
+from django.db.models.signals import post_save
 
 
 class SprayPoint(models.Model):
@@ -78,6 +79,12 @@ class SprayPointView(models.Model):
         cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
             cls._meta.db_table
         ))
+
+
+def refresh_materialized_view(sender, **kwargs):
+    SprayPointView.refresh_view()
+
+post_save.connect(refresh_materialized_view, sender=SprayPoint)
 
 
 class Hhcsv(models.Model):
