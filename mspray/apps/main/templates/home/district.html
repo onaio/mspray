@@ -14,9 +14,9 @@
                 {% if not district or district.level == 'district' %}
                 <tr>
                     <th rowspan="2">{% if district %} Health Facility {% else %} District {% endif%}</th>
-                    <th rowspan="2">Total Spray Areas</th>
-                    <th colspan="2">Spray Areas Visited</th>
-                    <th colspan="2">Spray Areas Sprayed Effectively</th>
+                    <th rowspan="2">Eligible Spray Areas</th>
+                    <th colspan="2">Spray Areas Visited <sup title="A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them.">(a)</sup></th>
+                    <th colspan="2">Spray Areas Sprayed Effectively<sup title="A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed.">(b)</sup></th>
                 </tr>
                 <tr>
                     <th>Number</th>
