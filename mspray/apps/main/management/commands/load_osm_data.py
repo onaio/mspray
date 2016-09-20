@@ -22,8 +22,9 @@ python manage.py load_osm_data -p "data/zambia/osm_files" --settings=local_setti
         path = options.get('path')
         osm_files = os.listdir(path)
 
-        for a in osm_files:
-            file_path = "%s/%s" % (path, a)
-            add_or_update_osm_data(file_path)
+        if len(osm_files) != 0:
+            for a in osm_files:
+                file_path = "%s/%s" % (path, a)
+                add_or_update_osm_data(file_path)
 
-            print("Done with file %s" % file_path)
+                print("Done with file %s" % file_path)
