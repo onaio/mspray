@@ -79,6 +79,9 @@ class TargetAreaMixin(object):
             key = "%s_visited_total" % pk
             # queryset = self.get_spray_queryset(obj)
             queryset = self._get_spray_areas_with_sprayable_structures(obj)
+            # A spray area is defined as 'Visited' if at least 20% of
+            # the structures on the ground within that area have been
+            # found and have data recorded against them.
             queryset = queryset.filter(found_percentage__gte=20)
 
             return cached_queryset_count(key, queryset)
