@@ -139,6 +139,7 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'mspray.libs.renderers.GeoJSONRenderer',
+        'mspray.libs.renderers.OSMRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
