@@ -405,11 +405,11 @@ i.green {
 .small-legend-label {
     font-size: 1.3em;
 }
-#sprayed-label {
-    font-size: 1.2em;
-    margin-left: 20%;
-    margin-top: -10px;
-}
+/* #sprayed-label { */
+/*     font-size: 1.2em; */
+/*     margin-left: 20%; */
+/*     margin-top: -10px; */
+/* } */
 
 .dl-horizontal dd {
     margin-left: 48px;
@@ -428,8 +428,13 @@ i.green {
     border-radius: 5px;
 }
 
+.circle-text-p {
+    text-align: center;
+    line-height: 18px;
+    font-weight: bold;
+}
 .legend {
-    text-align: left;
+    text-align: center;
     line-height: 18px;
     color: #555;
 }
@@ -512,7 +517,8 @@ a.distrct-links {
     background-color: #f5f5f5;
 }
 
-#sprayed-ratio, #progress-ratio {
+/* #sprayed-ratio, */
+#progress-ratio {
     font-size: 12px;
     padding-left: 32px;
     margin-top: -15px;
