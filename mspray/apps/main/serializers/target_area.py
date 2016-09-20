@@ -294,8 +294,9 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
         fields = ('targetid', 'district_name', 'found',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds', 'spray_dates', 'level')
-        model = TargetArea
+                  'not_visited', 'bounds', 'spray_dates', 'level',
+                  'num_of_spray_areas')
+        model = Location
 
 
 class TargetAreaQuerySerializer(TargetAreaQueryMixin,

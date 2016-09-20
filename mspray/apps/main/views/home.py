@@ -81,7 +81,7 @@ class DistrictView(SiteNameMixin, ListView):
             "ymax": 'ST_yMax("main_location"."geom")'
         }).values(
             'pk', 'code', 'level', 'name', 'parent', 'structures',
-            'xmin', 'ymin', 'xmax', 'ymax'
+            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas'
         )
         serializer_class = TargetAreaQuerySerializer \
             if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
