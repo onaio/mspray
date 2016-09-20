@@ -123,9 +123,16 @@ class TargetAreaMixin(object):
         if obj:
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             key = "%s_visited_sprayed" % pk
-            queryset = self.get_spray_queryset(obj)\
-                .extra(where=['data->>%s = %s'],
-                       params=[WAS_SPRAYED_FIELD, "yes"])
+            # queryset = self.get_spray_queryset(obj)\
+            #     .extra(where=['data->>%s = %s'],
+            #            params=[WAS_SPRAYED_FIELD, WAS_SPRAYED_VALUE])
+            queryset = self._get_spray_areas_with_sprayable_structures(
+                obj, sprayday__was_sprayed=True
+            )
+            # A spray area is defined as 'Sprayed Effectively' if at least 90%
+            # of the structures on the ground within that area have been
+            # sprayed.
+            queryset = queryset.filter(found_percentage__gte=90)
 
             return cached_queryset_count(key, queryset)
 
