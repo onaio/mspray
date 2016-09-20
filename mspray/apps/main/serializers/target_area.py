@@ -1,3 +1,4 @@
+from django.db.models import F, Count, ExpressionWrapper, Func, FloatField
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import serializers
@@ -11,6 +12,8 @@ from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 
+FUNCTION_TEMPLATE = '%(function)s(%(expressions)s AS FLOAT)'
+
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
@@ -23,7 +26,7 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 
 
 def cached_queryset_count(key, queryset, query=None, params=[]):
-    count = cache.get(key)
+    count = cache.get(key) if settings.DEBUG is False else None
 
     if count is not None:
         return count
@@ -74,15 +77,41 @@ class TargetAreaMixin(object):
         if obj:
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             key = "%s_visited_total" % pk
-            queryset = self.get_spray_queryset(obj)
+            # queryset = self.get_spray_queryset(obj)
+            queryset = self._get_spray_areas_with_sprayable_structures(obj)
+            queryset = queryset.filter(found_percentage__gte=20)
 
             return cached_queryset_count(key, queryset)
+
+    def _get_spray_areas_with_sprayable_structures(self, obj):
+        loc = Location.objects.get(pk=obj.get('pk'))
+        return Location.objects.filter(
+            geom__contained=loc.geom, level='ta')\
+            .filter(sprayday__data__sprayable_structure='yes')\
+            .annotate(
+                found=(Count('sprayday')),
+                found_percentage=ExpressionWrapper(
+                    (
+                        Count('sprayday') * 100 /
+                        Func(
+                            F('sprayday__location__structures'),
+                            function='CAST',
+                            template=FUNCTION_TEMPLATE
+                        )
+                    ),
+                    output_field=FloatField()
+                )
+            ).values(
+                'sprayday__location__code', 'found',
+                'sprayday__location__structures', 'found_percentage'
+            )
 
     def get_found(self, obj):
         if obj:
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             key = "%s_found" % pk
-            queryset = self.get_spray_queryset(obj)
+            queryset = self._get_spray_areas_with_sprayable_structures(obj)
+            # queryset = self.get_spray_queryset(obj)
 
             return cached_queryset_count(key, queryset)
 
@@ -343,6 +372,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
                   'not_visited', 'level', 'district_name', 'found')
         model = TargetArea
         geo_field = 'geom'
+
 
 class GeoHealthFacilitySerializer(GeoFeatureModelSerializer):
 
