@@ -96,7 +96,8 @@ class TargetAreaMixin(object):
             return cached_queryset_count(key, queryset)
 
     def _get_spray_areas_with_sprayable_structures(self, obj, **kwargs):
-        loc = Location.objects.get(pk=obj.get('pk'))
+        loc = Location.objects.get(pk=obj.get('pk')) \
+            if isinstance(obj, dict) else obj
         return Location.objects.filter(
             geom__contained=loc.geom, level='ta', **kwargs
         ).filter(sprayday__data__sprayable_structure='yes')\
