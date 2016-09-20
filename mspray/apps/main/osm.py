@@ -115,10 +115,11 @@ def get_nodes(osm_xml):
             tag.get('k'): tag.get('v')
             for tag in node.findall('tag')
         }
+        x, y = float(node.get('lon')), float(node.get('lat'))
+        point = Point(x, y)
         nodes.append({
             'node_id': int(node.get('id')),
-            'longitude': float(node.get('lon')),
-            'latitude': float(node.get('lat')),
+            'point': point,
             'version': int(node.get('version', 0)),
             'changeset': int(node.get('changeset', 0)),
             'timestamp': get_date(node.get('timestamp')),
@@ -134,14 +135,12 @@ def add_node(node):
     changeset = node.get('changeset')
     user = node.get('user')
     timestamp = node.get('timestamp')
-    longitude = node.get('longitude')
-    latitude = node.get('latitude')
+    point = node.get('point')
     tags = node.get('tags')
 
     obj, created = Node.objects.update_or_create(
         node_id=node_id,
-        longitude=longitude,
-        latitude=latitude,
+        geom=point,
         defaults={
             'version': version,
             'changeset': changeset,
@@ -160,7 +159,7 @@ def add_way(way):
     user = way.get('user')
     tags = way.get('tags')
     timestamp = way.get('timestamp')
-    nd_path = ",".join([str(a) for a in way.get('nodes')])
+    geom = way.get('geom')
 
     obj, created = Way.objects.update_or_create(
         way_id=way_id,
@@ -170,11 +169,25 @@ def add_way(way):
             'changeset': changeset,
             'user': user,
             'timestamp': timestamp,
-            'nd_path': nd_path,
+            'geom': geom,
             'tags': tags
         })
 
     return obj
+
+
+def get_way_geom(nd_list, root):
+    if len(nd_list) == 0:
+        return
+
+    points = []
+    for nd in nd_list:
+        points.append(_get_node(nd.get('ref'), root))
+
+    try:
+        return Polygon(points)
+    except:
+        return LineString(points)
 
 
 def get_ways(osm_xml):
@@ -188,9 +201,7 @@ def get_ways(osm_xml):
         timestamp = get_date(way.get('timestamp'))
         user = way.get('user')
         if not id.startswith("-"):
-            nodes = []
-            for nd in way.findall('nd'):
-                nodes.append(nd.get('ref'))
+            geom = get_way_geom(way.findall('nd'), root)
 
             tags = {
                 tag.get('k'): tag.get('v')
@@ -199,7 +210,7 @@ def get_ways(osm_xml):
 
             ways.append({
                 'id': id,
-                'nodes': nodes,
+                'geom': geom,
                 'tags': tags,
                 'action': action,
                 'version': version,
