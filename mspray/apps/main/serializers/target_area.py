@@ -15,6 +15,7 @@ from mspray.apps.main.utils import sprayable_queryset
 FUNCTION_TEMPLATE = '%(function)s(%(expressions)s AS FLOAT)'
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
+TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 WAS_SPRAYED_VALUE = settings.MSPRAY_WAS_SPRAYED_VALUE
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
@@ -80,6 +81,13 @@ class TargetAreaMixin(object):
             key = "%s_visited_total" % pk
             # queryset = self.get_spray_queryset(obj)
             queryset = self._get_spray_areas_with_sprayable_structures(obj)
+
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            if level == TA_LEVEL:
+                first = queryset.first()
+                if first:
+                    return first.get('found')
+
             # A spray area is defined as 'Visited' if at least 20% of
             # the structures on the ground within that area have been
             # found and have data recorded against them.
@@ -115,6 +123,11 @@ class TargetAreaMixin(object):
             pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             key = "%s_found" % pk
             queryset = self._get_spray_areas_with_sprayable_structures(obj)
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            if level == TA_LEVEL:
+                first = queryset.first()
+                if first:
+                    return first.get('found')
             # queryset = self.get_spray_queryset(obj)
 
             return cached_queryset_count(key, queryset)
@@ -129,6 +142,13 @@ class TargetAreaMixin(object):
             queryset = self._get_spray_areas_with_sprayable_structures(
                 obj, sprayday__was_sprayed=True
             )
+
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            if level == TA_LEVEL:
+                first = queryset.first()
+                if first:
+                    return first.get('found')
+
             # A spray area is defined as 'Sprayed Effectively' if at least 90%
             # of the structures on the ground within that area have been
             # sprayed.
