@@ -102,10 +102,10 @@ class TargetAreaMixin(object):
             geom__contained=loc.geom, level='ta', **kwargs
         ).filter(sprayday__data__sprayable_structure='yes')\
             .annotate(
-                found=(Count('sprayday', distinct=True)),
+                found=(Count('sprayday__spraypoint', distinct=True)),
                 found_percentage=ExpressionWrapper(
                     (
-                        Count('sprayday', distinct=True) * 100 /
+                        Count('sprayday__spraypoint', distinct=True) * 100 /
                         Func(
                             F('sprayday__location__structures'),
                             function='CAST',
@@ -115,6 +115,8 @@ class TargetAreaMixin(object):
                     output_field=FloatField()
                 )
             ).values(
+                'id',
+                'sprayday__location',
                 'sprayday__location__code', 'found',
                 'sprayday__location__structures', 'found_percentage'
             )
