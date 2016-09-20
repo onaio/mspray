@@ -242,3 +242,56 @@ def add_or_update_osm_data(osm_file):
 
     for node in nodes:
         add_node(node)
+
+
+def generate_osm_xml(osm_list):
+    xml = u""
+    if (len(osm_list) and isinstance(osm_list, list)):
+        root = etree.Element(
+            "osm", version='0.6', generator='osmconvert 0.8.5'
+        )
+
+        nodes = []
+        for a in osm_list:
+            tags = a.get('tags')
+            geom = a.get('geom')
+            node_ids = []
+            if geom:
+                coordinates = geom.get('coordinates')[0]
+                for coordinate in coordinates:
+                    point = Point(coordinate)
+                    nd = Node.objects.filter(geom=point).first()
+                    if nd:
+                        node_ids.append(nd.node_id)
+                        nodes.append(nd)
+
+            # create a dict with way tag attributes
+            kwargs = {}
+            for k, v in a.items():
+                if k not in ['tags', 'geom', 'id'] and v is not None:
+                    kwargs['id' if k == 'way_id' else k] = str(v)
+
+            # create way tag
+            way_tag = etree.Element("way", **kwargs)
+
+            # add nd tags to way tag if they exist
+            if len(node_ids) != 0:
+                for nd in node_ids:
+                    etree.SubElement(way_tag, "nd", ref=str(nd))
+
+            # add tag tags to way tag if they exist
+            if tags:
+                for k, v in tags.items():
+                    etree.SubElement(way_tag, "tag", k=str(k), v=str(v))
+
+            root.append(way_tag)
+
+        # create node tags
+        if nodes:
+            for node in nodes:
+                node_tag = etree.Element("node", id=str(node.node_id))
+                root.append(node_tag)
+
+        xml = etree.tostring(root, encoding='utf-8', xml_declaration=True)
+
+    return xml
