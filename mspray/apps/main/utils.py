@@ -489,13 +489,9 @@ def get_spray_operator(code):
 
 def add_unique_data(sprayday, unique_field, location):
     sp = None
-    data_id = sprayday.data.get(unique_field)
-    if settings.OSM_SUBMISSIONS and \
-            sprayday.data.get('newstructure/nostructure') == 'OK':
-        gps = sprayday.data.get(STRUCTURE_GPS_FIELD)
-        if gps and isinstance(gps, str):
-            data_id = ' '.join(gps.split()[:2])
-
+    wayid = unique_field + ':way:id'
+    nodeid = unique_field + ':node:id'
+    data_id = sprayday.data.get(wayid) or sprayday.data.get(nodeid)
     if data_id and location:
         try:
             sp, created = SprayPoint.objects.get_or_create(
@@ -510,7 +506,7 @@ def add_unique_data(sprayday, unique_field, location):
             )
             was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
 
-            if was_sprayed != 'yes':
+            if was_sprayed != WAS_SPRAYED_VALUE:
                 sp.sprayday = sprayday
                 sp.save()
 
