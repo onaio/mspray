@@ -1,6 +1,6 @@
 from mspray.apps.main.views import (
     target_area, household, household_buffer, sprayday, indicators, districts,
-    spray_operator_daily, directly_observed_spraying_form
+    spray_operator_daily, directly_observed_spraying_form, osm
 )
 from mspray.apps.main.views import home
 from mspray.apps.main.views import performance
@@ -18,6 +18,7 @@ router.register(r'districts', districts.DistrictViewSet, 'district')
 router.register(r'households', household.HouseholdViewSet)
 router.register(r'spraydays', sprayday.SprayDayViewSet)
 router.register(r'targetareas', target_area.TargetAreaViewSet)
+router.register(r'osm', osm.OsmViewSet)
 
 performance_urls = [
     url(r'^$', performance.DistrictPerfomanceView.as_view(),
