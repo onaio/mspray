@@ -7,6 +7,7 @@ class Location(models.Model):
     level = models.CharField(db_index=1, max_length=50)
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     structures = models.PositiveIntegerField(default=0)
+    # total number of spray areas, will be zero for spray area location
     num_of_spray_areas = models.PositiveIntegerField(default=0)
     geom = models.MultiPolygonField(srid=4326, null=True)
     objects = models.GeoManager()
