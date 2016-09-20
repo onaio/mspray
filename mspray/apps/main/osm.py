@@ -111,20 +111,22 @@ def get_nodes(osm_xml):
 
     nodes = []
     for node in root.findall('node'):
+        id = node.get('id')
         tags = {
             tag.get('k'): tag.get('v')
             for tag in node.findall('tag')
         }
         x, y = float(node.get('lon')), float(node.get('lat'))
         point = Point(x, y)
-        nodes.append({
-            'node_id': int(node.get('id')),
-            'point': point,
-            'version': int(node.get('version', 0)),
-            'changeset': int(node.get('changeset', 0)),
-            'timestamp': get_date(node.get('timestamp')),
-            'user': tags,
-        })
+        if not id.startswith("-"):
+            nodes.append({
+                'node_id': int(id),
+                'point': point,
+                'version': int(node.get('version', 0)),
+                'changeset': int(node.get('changeset', 0)),
+                'timestamp': get_date(node.get('timestamp')),
+                'user': tags,
+            })
 
     return nodes
 
