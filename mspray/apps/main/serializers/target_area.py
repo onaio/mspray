@@ -132,7 +132,7 @@ class TargetAreaMixin(object):
                 '%s__location__code' % key, 'found',
                 '%s__location__structures' % key, 'found_percentage'
             )
-        print(qs)
+        print(list(qs))
 
         return qs
 
