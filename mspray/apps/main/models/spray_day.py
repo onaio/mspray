@@ -56,6 +56,22 @@ def link_health_center_location(sender, instance=None, **kwargs):
 post_save.connect(link_health_center_location, sender=SprayDay,
                   dispatch_uid='link_health_center_location')
 
+
+class SprayDayDistrict(models.Model):
+    location = models.ForeignKey('Location')
+    content_object = models.ForeignKey('SprayDay')
+
+
+def link_district_location(sender, instance=None, **kwargs):
+    if instance and instance.location:
+        SprayDayDistrict.objects.get_or_create(
+            location=instance.location.parent,
+            content_object=instance.content_object
+        )
+
+post_save.connect(link_district_location, sender=SprayDayHealthCenterLocation,
+                  dispatch_uid='link_district_location')
+
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {
     'geom': 'POINT25D',
