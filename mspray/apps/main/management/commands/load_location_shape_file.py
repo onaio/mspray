@@ -12,12 +12,12 @@ from mspray.apps.main.models import Location
 
 def get_parent(geom, parent_level, parent_name):
     parent = Location.objects.filter(
-        geom__contains=geom.wkt, level=parent_level
+        geom__contained=geom.wkt, level=parent_level
     ).first()
 
     if parent is None:
         parent = Location.objects.filter(
-            geom__intersects=geom.wkt, level=parent_level, name=parent_name
+            geom__covers=geom.wkt, level=parent_level, name=parent_name
         ).first()
     else:
         assert parent.name == parent_name
@@ -61,6 +61,16 @@ class Command(BaseCommand):
             default='fid',
             help="code field to use in the shape file"
         )
+        parser.add_argument(
+            '--skip',
+            dest='skip_field',
+            help="skip field to use in the shape file"
+        )
+        parser.add_argument(
+            '--skipif',
+            dest='skip_value',
+            help="skip value to use to skip records in the shape file"
+        )
 
     def handle(self, *args, **options):
         if 'shape_file' not in options:
@@ -77,12 +87,23 @@ class Command(BaseCommand):
                 parent_field = options['parent_field']
                 parent_level = options['parent_level']
                 structures_field = options['structures_field']
+
+                skip_field = options.get('skip_field')
+                skip_value = options.get('skip_value')
+                if skip_field and not skip_value:
+                    raise CommandError(_('Error: please provide skip value'))
+
                 count = exception_raised = failed = skipped = 0
                 srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
                 ds = DataSource(path)
                 layer = ds[0]
 
                 for feature in layer:
+                    # skip
+                    if skip_field and skip_value:
+                        if feature.get(skip_field) == skip_value:
+                            continue
+
                     if isinstance(feature.geom, geometries.Polygon):
                         geom = geometries.MultiPolygon('MULTIPOLYGON', srs=srs)
                         geom.add(feature.geom.transform(srs, True))
