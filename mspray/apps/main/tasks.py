@@ -114,7 +114,7 @@ def add_unique_record(pk, location_pk):
                         sp.save()
                     else:
                         print("Retrying %s" % sp.submission_id)
-                        add_unique_record.appl_async(
+                        add_unique_record.apply_async(
                             args=[sp.pk, location.pk],
                             eta=datetime.now() + timedelta(seconds=60)
                         )
