@@ -102,7 +102,8 @@ def add_unique_record(pk, location_pk):
         unique_field = HAS_UNIQUE_FIELD
         if unique_field:
             def get_osmid(data):
-                return data.get('%s:way:id') or data.get('%s:node:id')
+                return data.get('%s:way:id' % unique_field) \
+                    or data.get('%s:node:id' % unique_field)
 
             osmid = get_osmid(sp.data)
             if not osmid:
