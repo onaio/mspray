@@ -9,7 +9,7 @@
             <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "performance:team-leaders" district.code %}">Team Leader Assistants</a></li>
+              <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
               <li class="active">Spray Operators</li>
             </ol>
             <div class="row">
