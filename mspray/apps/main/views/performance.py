@@ -560,8 +560,8 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         ).values(
             'sprayoperator_code'
         ).annotate(
-            found_count=Count('found'),
-            sprayed_count=Count('sprayed')
+            found_count=Sum('found'),
+            sprayed_count=Sum('sprayed')
         )
 
         return {
@@ -592,17 +592,13 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
         team_leader = self.kwargs.get('team_leader')
-
-        ta_pks = get_ta_in_location(district)
-        spraypoints_qs = unique_spray_points(
-            SprayDay.objects.filter(location__pk__in=ta_pks)
-        )
-        spraypoints_qs = spraypoints_qs.extra(
-            select={'spray_operator_code': 'data->>%s'},
-            select_params=[SPRAY_OPERATOR_CODE],
-            where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
-            params=[SPRAY_OPERATOR_CODE, TEAM_LEADER_CODE, team_leader]
-        )
+        spraypoints_qs = SprayDay.objects.filter(spraypoint__isnull=False)\
+            .extra(
+                select={'spray_operator_code': 'data->>%s'},
+                select_params=[SPRAY_OPERATOR_CODE],
+                where=['(data->%s) IS NOT NULL', "data->>%s =  %s"],
+                params=[SPRAY_OPERATOR_CODE, TEAM_LEADER_CODE, team_leader]
+            )
         spraypoints = spraypoints_qs.values_list('spray_operator_code')
         non_sprayable = get_totals(spraypoints, "non-sprayable")
         spraypoints = sprayable_queryset(spraypoints)
