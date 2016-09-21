@@ -410,7 +410,7 @@ def calculate_data_quality_check(spray_form_id, spray_operator_code):
         so.data_quality_check = data_quality_check
         so.save()
 
-        team_leader = so.team_leader
+        team_leader_assistant = so.team_leader_assistant
         if data_quality_check:
             # if data_quality_check is True, check if all data quality
             # values for the rest of the spray operators is true before
@@ -418,23 +418,23 @@ def calculate_data_quality_check(spray_form_id, spray_operator_code):
             data_quality_check = all(
                 [
                     a.get('data_quality_check')
-                    for a in team_leader.sprayoperator_set.values(
+                    for a in team_leader_assistant.sprayoperator_set.values(
                         'data_quality_check'
                     )
                 ]
             )
 
         # update team leader
-        team_leader.data_quality_check = data_quality_check
-        team_leader.save()
+        team_leader_assistant.data_quality_check = data_quality_check
+        team_leader_assistant.save()
 
         # update district
-        district = team_leader.location
+        district = team_leader_assistant.location
         if data_quality_check:
             data_quality_check = all(
                 [
                     a.get('data_quality_check')
-                    for a in district.teamleader_set.values(
+                    for a in district.teamleaderassistant_set.values(
                         'data_quality_check'
                     )
                 ]
