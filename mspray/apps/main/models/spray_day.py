@@ -39,6 +39,11 @@ class SprayDay(models.Model):
     def __str__(self):
         return self.spray_date.isoformat()
 
+
+class SprayDayHealthCenterLocation(models.Model):
+    location = models.ForeignKey('Location')
+    content_object = models.ForeignKey('SprayDay')
+
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {
     'geom': 'POINT25D',
