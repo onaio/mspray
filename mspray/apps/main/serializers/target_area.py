@@ -100,61 +100,39 @@ class TargetAreaMixin(object):
             if isinstance(obj, dict) else obj
 
         if loc.level == 'ta':
-            qs = Location.objects.filter(
-                geom__contained=loc.geom, level='ta', **kwargs
-            ).filter(sprayday__data__sprayable_structure='yes')\
-                .annotate(
-                    found=(Count('sprayday__spraypoint', distinct=True)),
-                    found_percentage=ExpressionWrapper(
-                        (
-                            Count('sprayday__spraypoint', distinct=True) * 100 /
-                            Func(
-                                F('sprayday__location__structures'),
-                                function='CAST',
-                                template=FUNCTION_TEMPLATE
-                            )
-                        ),
-                        output_field=FloatField()
-                    )
-                ).values(
-                    'id',
-                    'sprayday__location',
-                    'sprayday__location__code', 'found',
-                    'sprayday__location__structures', 'found_percentage'
-                )
+            sp_key = key = 'sprayday'
         else:
-            key = 'spraydayhealthcenterlocation'
+            key = 'spraydayhealthcenterlocation' \
+                if loc.level == 'RHC' else 'spraydaydistrict'
             sp_key = '%s__content_object' % key
-            sp_point = \
-                'spraydayhealthcenterlocation__content_object__spraypoint'
-            sp_structures = \
-                'spraydayhealthcenterlocation__location__structures'
-            sprayable_kwargs = {
-                'spraydayhealthcenterlocation__content_object__data__'
-                'sprayable_structure': 'yes'
-            }
-            qs = Location.objects.filter(
-                geom__contained=loc.geom, level=loc.level, **kwargs
-            ).filter(**sprayable_kwargs)\
-                .annotate(
-                    found=(Count(sp_point, distinct=True)),
-                    found_percentage=ExpressionWrapper(
-                        (
-                            Count(sp_point, distinct=True) * 100 /
-                            Func(
-                                F(sp_structures),
-                                function='CAST',
-                                template=FUNCTION_TEMPLATE
-                            )
-                        ),
-                        output_field=FloatField()
-                    )
-                ).values(
-                    'id',
-                    '%s__location' % key,
-                    '%s__location__code' % key, 'found',
-                    '%s__location__structures' % key, 'found_percentage'
+        sp_point = '%s__spraypoint' % sp_key
+        sp_structures = '%s__location__structures' % key
+        sprayable_kwargs = {
+            '%s__data__sprayable_structure' % sp_key: 'yes'
+        }
+        qs = Location.objects.filter(
+            geom__contained=loc.geom, level=loc.level, **kwargs
+        ).filter(**sprayable_kwargs)\
+            .annotate(
+                found=(Count(sp_point, distinct=True)),
+                found_percentage=ExpressionWrapper(
+                    (
+                        Count(sp_point, distinct=True) * 100 /
+                        Func(
+                            F(sp_structures),
+                            function='CAST',
+                            template=FUNCTION_TEMPLATE
+                        )
+                    ),
+                    output_field=FloatField()
                 )
+            ).values(
+                'id',
+                '%s__location' % key,
+                '%s__location__code' % key, 'found',
+                '%s__location__structures' % key, 'found_percentage'
+            )
+        print(qs)
 
         return qs
 
@@ -184,10 +162,15 @@ class TargetAreaMixin(object):
                 queryset = self._get_spray_areas_with_sprayable_structures(
                     obj, sprayday__was_sprayed=True
                 )
-            else:
+            elif level == 'RHC':
                 queryset = self._get_spray_areas_with_sprayable_structures(
                     obj,
                     spraydayhealthcenterlocation__content_object__was_sprayed=True  # noqa
+                )
+            else:
+                queryset = self._get_spray_areas_with_sprayable_structures(
+                    obj,
+                    spraydaydistrict__content_object__was_sprayed=True
                 )
 
             if level == TA_LEVEL:
