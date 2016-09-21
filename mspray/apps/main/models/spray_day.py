@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.db.models.signals import post_save
 
 DATA_FILTER = getattr(settings, 'MSPRAY_DATA_FILTER',
                       '"sprayable_structure":"yes"')
@@ -43,6 +44,17 @@ class SprayDay(models.Model):
 class SprayDayHealthCenterLocation(models.Model):
     location = models.ForeignKey('Location')
     content_object = models.ForeignKey('SprayDay')
+
+
+def link_health_center_location(sender, instance=None, **kwargs):
+    if instance and instance.location:
+        SprayDayHealthCenterLocation.objects.get_or_create(
+            location=instance.location.parent,
+            content_object=instance
+        )
+
+post_save.connect(link_health_center_location, sender=SprayDay,
+                  dispatch_uid='link_health_center_location')
 
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {
