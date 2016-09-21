@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from datetime import datetime, timedelta
+
 from django.conf import settings
 from django.contrib.gis.geos import Point
 
@@ -77,7 +79,6 @@ def get_location_from_osm(data):
 
 
 def set_spraypoint_location(sp, location, geom, is_node=False):
-    from mspray.apps.main.utils import add_unique_data
     if geom:
         sp.geom = geom.centroid if not is_node else geom
         sp.bgeom = geom if not is_node else sp.geom.buffer(0.00004, 1)
@@ -86,16 +87,37 @@ def set_spraypoint_location(sp, location, geom, is_node=False):
         sp.location = location
         sp.save()
 
+        add_unique_record.delay(sp.pk, location.pk)
+
+
+@app.task
+def add_unique_record(pk, location_pk):
+    try:
+        sp = SprayDay.objects.get(pk=pk)
+        location = Location.objects.get(pk=location_pk)
+    except (SprayDay.DoesNotExist, Location.DoesNotExist):
+        pass
+    else:
+        from mspray.apps.main.utils import add_unique_data
         unique_field = HAS_UNIQUE_FIELD
         if unique_field:
-            osmid = sp.data.get('%s:way:id') or sp.data.get('%s:node:id')
+            def get_osmid(data):
+                return data.get('%s:way:id') or data.get('%s:node:id')
+
+            osmid = get_osmid(sp.data)
             if not osmid:
                 formid = getattr(settings, 'ONA_FORM_PK', 0)
                 if formid:
                     data = fetch_form_data(formid, dataid=sp.submission_id)
-                    if data:
+                    if data and get_osmid(data):
                         sp.data = data
                         sp.save()
+                    else:
+                        print("Retrying %s" % sp.submission_id)
+                        add_unique_record.delay(
+                            sp.pk, location.pk,
+                            eta=datetime.now() + timedelta(seconds=60)
+                        )
             add_unique_data(sp, unique_field, location)
 
 
