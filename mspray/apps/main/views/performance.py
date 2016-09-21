@@ -804,8 +804,8 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         ).values(
             'spray_form_id'
         ).annotate(
-            found_count=Count('found'),
-            sprayed_count=Count('sprayed')
+            found_count=Sum('found'),
+            sprayed_count=Sum('sprayed')
         )
 
         return {
