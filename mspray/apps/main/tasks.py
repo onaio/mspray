@@ -5,6 +5,7 @@ from django.contrib.gis.geos import Point
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
+from mspray.apps.main.ona import fetch_form_data
 from mspray.apps.main.ona import fetch_osm_xml
 from mspray.apps.main.osm import parse_osm_ways
 from mspray.apps.main.osm import parse_osm_nodes
@@ -87,6 +88,14 @@ def set_spraypoint_location(sp, location, geom, is_node=False):
 
         unique_field = HAS_UNIQUE_FIELD
         if unique_field:
+            osmid = sp.data.get('%s:way:id') or sp.data.get('%s:node:id')
+            if not osmid:
+                formid = getattr(settings, 'ONA_FORM_PK', 0)
+                if formid:
+                    data = fetch_form_data(formid, dataid=sp.submission_id)
+                    if data:
+                        sp.data = data
+                        sp.save()
             add_unique_data(sp, unique_field, location)
 
 
