@@ -197,11 +197,7 @@ def add_spray_data(data):
     if so:
         sprayday.spray_operator = so
 
-    team_leader_assistant = get_team_leader_assistant(
-        data.get(TEAM_LEADER_CODE)
-    )
-    if team_leader_assistant:
-        sprayday.team_leader_assistant = team_leader_assistant
+    set_team_leader_assistant(sprayday, save=False)
 
     team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
     if team_leader:
@@ -217,6 +213,16 @@ def add_spray_data(data):
         add_unique_data(sprayday, unique_field, location)
 
     return sprayday
+
+
+def set_team_leader_assistant(sprayday, save=True):
+    team_leader_assistant = get_team_leader_assistant(
+        sprayday.data.get(TEAM_LEADER_CODE)
+    )
+    if team_leader_assistant:
+        sprayday.team_leader_assistant = team_leader_assistant
+        if save:
+            sprayday.save()
 
 
 def get_dos_data(column, where_params=None):
