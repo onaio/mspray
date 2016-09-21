@@ -114,8 +114,8 @@ def add_unique_record(pk, location_pk):
                         sp.save()
                     else:
                         print("Retrying %s" % sp.submission_id)
-                        add_unique_record.delay(
-                            sp.pk, location.pk,
+                        add_unique_record.appl_async(
+                            args=[sp.pk, location.pk],
                             eta=datetime.now() + timedelta(seconds=60)
                         )
             add_unique_data(sp, unique_field, location)
