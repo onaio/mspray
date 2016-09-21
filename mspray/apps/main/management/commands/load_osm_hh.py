@@ -1,41 +1,9 @@
 import os
 
-from django.db.utils import IntegrityError
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
-from mspray.apps.main.osm import parse_osm
 from mspray.apps.main.models import Household
-from mspray.apps.main.models import Location
-
-
-def process_osm_file(path):
-    with open(path) as f:
-        content = f.read()
-        nodes = parse_osm(content.strip())
-        ways = [
-            way for way in nodes
-            if not way.get('osm_id').startswith('-')
-            and way.get('osm_type') == 'way'
-        ]
-        if ways:
-            for way in ways:
-                location = Location.objects.filter(
-                    geom__contains=ways[0].get('geom'),
-                    level='ta'
-                ).first()
-                if location:
-                    try:
-                        Household.objects.create(
-                            hh_id=way.get('osm_id'),
-                            geom=way.get('geom').centroid,
-                            bgeom=way.get('geom'),
-                            data=way.get('tags'),
-                            location=location
-                        )
-                    except Household.DoesNotExist:
-                        pass
-                    except IntegrityError:
-                        pass
+from mspray.apps.main.tasks import process_osm_file
 
 
 class Command(BaseCommand):
@@ -57,14 +25,14 @@ class Command(BaseCommand):
                     if not is_osm_file or (is_osm_file and not is_file):
                         continue
                     count = Household.objects.count()
-                    process_osm_file(entry.path)
+                    process_osm_file.delay(entry.path)
                     after_count = Household.objects.count()
                     self.stdout.write('%d structures added.' %
                                       (after_count - count))
             else:
                 path = os.path.abspath(osmfile)
                 count = Household.objects.count()
-                process_osm_file(path)
+                process_osm_file.delay(path)
                 after_count = Household.objects.count()
                 self.stdout.write('%d structures added.' %
                                   (after_count - count))

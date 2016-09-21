@@ -4,10 +4,13 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.db.utils import IntegrityError
 
+from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.ona import fetch_form_data
+from mspray.apps.main.osm import parse_osm
 from mspray.apps.main.ona import fetch_osm_xml
 from mspray.apps.main.osm import parse_osm_ways
 from mspray.apps.main.osm import parse_osm_nodes
@@ -139,3 +142,34 @@ def link_spraypoint_with_osm(pk):
         set_spraypoint_location(sp, location, geom, is_node)
 
         return sp.pk
+
+
+@app.task
+def process_osm_file(path):
+    with open(path) as f:
+        content = f.read()
+        nodes = parse_osm(content.strip())
+        ways = [
+            way for way in nodes
+            if not way.get('osm_id').startswith('-')
+            and way.get('osm_type') == 'way'
+        ]
+        if ways:
+            for way in ways:
+                location = Location.objects.filter(
+                    geom__contains=ways[0].get('geom'),
+                    level='ta'
+                ).first()
+                if location:
+                    try:
+                        Household.objects.create(
+                            hh_id=way.get('osm_id'),
+                            geom=way.get('geom').centroid,
+                            bgeom=way.get('geom'),
+                            data=way.get('tags'),
+                            location=location
+                        )
+                    except Household.DoesNotExist:
+                        pass
+                    except IntegrityError:
+                        pass
