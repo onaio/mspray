@@ -304,14 +304,14 @@ var App = function(buffer, targetAreaData, hhData) {
     this.drawCircles = function (props) {
         var app = this;
         var sprayed_percentage = app.calculatePercentage(props.visited_sprayed, props.visited_total, false),
-            found_percentage = app.calculatePercentage(props.visited_total, props.structures, false),
-            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.structures, false);
+            found_percentage = app.calculatePercentage(props.visited_total, props.total_structures, false),
+            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.total_structures, false);
         app.drawCircle(sprayed_percentage, "spray-coverage", 40);
         app.drawCircle(found_percentage, "found-coverage", 40);
         app.drawCircle(progress_percentage, "circle-progress", 50);
         $("#sprayed-ratio").text("(" + props.visited_sprayed + "/" + props.visited_total + ")");
-        $("#found-ratio").text("(" + props.visited_total + "/" + props.structures + ")");
-        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.structures + ")");
+        $("#found-ratio").text("(" + props.visited_total + "/" + props.total_structures + ")");
+        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.total_structures + ")");
     };
 
     this.loadTargetArea = function(data) {
@@ -346,7 +346,7 @@ var App = function(buffer, targetAreaData, hhData) {
             style: function(feature) {
                 var props = feature.properties;
                 if(props.visited_total !== undefined && props.visited_total > 0){
-                    var percent = app.calculatePercentage(props.visited_sprayed, props.structures, false);
+                    var percent = app.calculatePercentage(props.visited_sprayed, props.total_structures, false);
                     app.hhOptions.fillColor = app.getFillColor(percent);
                 } else {
                     app.hhOptions.fillColor = '#FFDC00';
@@ -358,7 +358,7 @@ var App = function(buffer, targetAreaData, hhData) {
                 var props = feature.properties;
                 if(props.level !== undefined) {
                     var content = props.district_name + "<br/>" +
-                        "Structures: " + props.structures + "<br/>" +
+                        "Structures: " + props.total_structures + "<br/>" +
                         "Visited Total: " + props.visited_total + "<br/>" +
                         "Not Sprayed: " + props.visited_not_sprayed + "<br/>" +
                         "Sprayed: " + props.visited_sprayed;
