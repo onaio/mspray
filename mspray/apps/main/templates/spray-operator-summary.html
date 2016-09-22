@@ -9,7 +9,8 @@
             <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
+              <!-- <li><a href="{% url "performance:team-leaders" district.pk %}"> Team Leader Assistants</a></li> -->
+              <li> Team Leader Assistants</li>
               <li class="active">Spray Operators</li>
             </ol>
             <div class="row">
@@ -27,7 +28,7 @@
                                 <th rowspan="2">Duration in field</th>
                                 <th rowspan="2">Data Quality Check</th>
                                 <th rowspan="2">Found Difference (Latest Submission)</th>
-                                <th rowspan="2">Sprayed Difference TODAY</th>
+                                <th rowspan="2">Sprayed Difference (Latest Submission)</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Found</th>
