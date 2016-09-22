@@ -68,12 +68,11 @@ class DistrictView(SiteNameMixin, ListView):
         qs = super(DistrictView, self).get_queryset()
         pk = self.kwargs.get(self.slug_field)
         if pk is not None:
-            qs = get_location_qs(qs.filter(parent__pk=pk))
+            qs = qs.filter(parent__pk=pk)
         else:
-            qs = super(DistrictView, self).get_queryset()\
-                .filter(parent=None).order_by('name')
+            qs = qs.filter(parent=None).order_by('name')
 
-        return qs
+        return get_location_qs(qs)
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
