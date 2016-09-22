@@ -110,6 +110,8 @@
         app.visitedNotSprayed = {{ target_data.visited_not_sprayed }};
         app.visitedRefused = {{ target_data.visited_refused }};
         app.visitedOther = {{ target_data.visited_other }};
+        app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
+        app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
 
         {% if target_data.level == 'ta' %}
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";

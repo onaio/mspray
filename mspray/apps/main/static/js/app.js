@@ -163,7 +163,7 @@ var App = function(buffer, targetAreaData, hhData) {
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 app.sprayLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
-                        if(feature.properties.sprayed === "no"){
+                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === null) {
                             app.sprayOptions.fillColor = "#000000";
@@ -173,7 +173,7 @@ var App = function(buffer, targetAreaData, hhData) {
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
                     style: function (feature) {
-                        if(feature.properties.sprayed === "no"){
+                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === null) {
                             app.sprayOptions.fillColor = "#000000";
