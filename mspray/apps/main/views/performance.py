@@ -764,7 +764,6 @@ def get_spray_operator_data(spray_operator, spray_date):
             'found_sprayformid'
         ).first()
 
-    found = sop.get('found')
     sprayed = sop.get('sprayed')
     found_sprayformid = sop.get('found_sprayformid')
 
