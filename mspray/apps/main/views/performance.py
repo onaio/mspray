@@ -1,6 +1,7 @@
 from datetime import datetime
 from django.conf import settings
-from django.db.models import Count, F, Sum, FloatField, ExpressionWrapper
+from django.db.models import Case, Count, F, Func, Sum, ExpressionWrapper, When
+from django.db.models import FloatField, IntegerField
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -770,6 +771,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         return context
 
 
+def get_formid(spray_operator, spray_date):
+        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
+
+
 class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     template_name = 'spray-operator-daily.html'
     model = Location
@@ -812,6 +817,53 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             for a in sop_submission_list
         }
 
+    def get_aggregate_queryset(self, spray_operator, spray_date):
+        formid = get_formid(spray_operator, spray_date)
+        return SprayOperator.objects.filter(
+            code=spray_operator.code, sprayday__spray_date=spray_date
+        )\
+            .values('sprayday__spray_date')\
+            .annotate(
+                found=Count('sprayday'),
+                sprayed=Sum(Case(
+                    When(sprayday__was_sprayed=True, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )),
+                not_sprayed=Sum(Case(
+                    When(sprayday__was_sprayed=False, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )),
+                refused=Sum(Case(When(
+                    sprayday__was_sprayed=False,
+                    sprayday__data__contains={
+                        'osmstructure:notsprayed_reason': 'refused'
+                    }, then=1
+                ), default=0, output_field=IntegerField())
+                ),
+                found_sprayformid=Sum(Case(When(
+                    sprayday__data__contains={'sprayformid': formid},
+                    then=1
+                ), default=0, output_field=IntegerField())
+                )
+            ).annotate(
+                success_rate=ExpressionWrapper(
+                    F('sprayed') * 100 / Func(
+                        F('found'), function='CAST',
+                        template='%(function)s(%(expressions)s AS FLOAT)'
+                    ),
+                    FloatField()
+                ),
+                other=Case(When(not_sprayed__gt=0,
+                                then=F('not_sprayed') - F('refused')),
+                           default=0, output_field=IntegerField())
+            ).values(
+                'pk', 'code', 'found', 'sprayed', 'refused', 'other',
+                'not_sprayed', 'sprayday__spray_date', 'success_rate',
+                'found_sprayformid'
+            ).first()
+
     def get_context_data(self, **kwargs):
         data = []
         totals = {
@@ -830,93 +882,127 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorDailyView, self)\
             .get_context_data(**kwargs)
         district = context['object']
-        ta_pks = get_ta_in_location(district)
-        spraypoints_qs = unique_spray_points(
-            SprayDay.objects.filter(location__pk__in=ta_pks)
-        )
+        # ta_pks = get_ta_in_location(district)
+        # # spraypoints_qs = unique_spray_points(
+        #     SprayDay.objects.filter(location__pk__in=ta_pks)
+        # )
 
         team_leader = self.kwargs.get('team_leader')
-        spray_operator = self.kwargs.get('spray_operator')
-        spraypoints = spraypoints_qs.extra(
-            select={'today': 'data->>%s'}, select_params=['today'],
-            where=["data->>%s =  %s", "data->>%s =  %s"],
-            params=[TEAM_LEADER_CODE, team_leader, SPRAY_OPERATOR_CODE,
-                    spray_operator]
-        ).values_list('today')
+        spray_operator_code = self.kwargs.get('spray_operator')
+        spray_operator = get_object_or_404(SprayOperator,
+                                           code=spray_operator_code)
+        dates = spray_operator.sprayday_set.values_list(
+            'spray_date', flat=True
+        ).distinct()
+        # spraypoints = spraypoints_qs.extra(
+        #     select={'today': 'data->>%s'}, select_params=['today'],
+        #     where=["data->>%s =  %s", "data->>%s =  %s"],
+        #     params=[TEAM_LEADER_CODE, team_leader, SPRAY_OPERATOR_CODE,
+        #             spray_operator]
+        # ).values_list('today')
 
-        non_sprayable = get_totals(spraypoints, "non-sprayable")
-        spraypoints = sprayable_queryset(spraypoints)
+        # non_sprayable = get_totals(spraypoints, "non-sprayable")
+        # spraypoints = sprayable_queryset(spraypoints)
 
-        sprayable = get_totals(spraypoints, "sprayable")
-        sprayed = get_totals(spraypoints, "sprayed")
-        refused = get_totals(spraypoints, "refused")
-        other = get_totals(spraypoints, "other")
-        dates = sorted(spraypoints.values_list('today', flat=True).distinct())
+        # sprayable = get_totals(spraypoints, "sprayable")
+        # sprayed = get_totals(spraypoints, "sprayed")
+        # refused = get_totals(spraypoints, "refused")
+        # other = get_totals(spraypoints, "other")
+        # dates = sorted(spraypoints.values_list('today',
+        # flat=True).distinct())
         start_times = []
         end_times = []
 
         # from HH Submission form total submissions
-        hh_submissions_dict = self.get_hh_submission_dict(spray_operator)
+        # hh_submissions_dict = \
+        # self.get_hh_submission_dict(spray_operator_code)
 
-        # from SOP Summary form
-        sop_submissions_dict = self.get_sop_submission_dict(spray_operator)
+        # # from SOP Summary form
+        # sop_submissions_dict = self.get_sop_submission_dict(
+        #     spray_operator_code
+        # )
 
         for index, _date in enumerate(dates):
-            numerator = sprayed.get(_date, 0)
-            denominator = 1 if sprayable.get(_date) == 0 \
-                else sprayable.get(_date, 1)
-            spray_success_rate = round((numerator / denominator) * 100, 1)
+            formid = get_formid(spray_operator,  _date)
+            summary = SprayOperatorDailySummary.objects.filter(
+                sprayoperator_code=spray_operator.code,
+                data__sprayformid=formid
+            ).aggregate(
+                r_found=Sum('found'),
+                r_sprayed=Sum('sprayed')
+            )
 
-            not_sprayed_total = refused.get(_date, 0) + \
-                other.get(_date, 0)
+            sop = self.get_aggregate_queryset(
+                spray_operator, _date
+            )
+            found = sop.get('found')
+            sprayed = sop.get('sprayed')
+            found_sprayformid = sop.get('found_sprayformid')
 
-            qs = spraypoints.extra(where=["data->>%s = %s"],
-                                   params=["today", _date])
+            r_found = summary.get('r_found')
+            r_sprayed = summary.get('r_sprayed')
+
+            found_difference = r_found - found
+            sprayed_difference = r_sprayed - sprayed
+            data_quality_check = r_found == found_sprayformid \
+                and r_sprayed == sprayed
+            # numerator = sprayed.get(_date, 0)
+            # denominator = 1 if sprayable.get(_date) == 0 \
+            #     else sprayable.get(_date, 1)
+            # spray_success_rate = round((numerator / denominator) * 100, 1)
+
+            # not_sprayed_total = refused.get(_date, 0) + \
+            #     other.get(_date, 0)
+
+            # qs = spraypoints.extra(where=["data->>%s = %s"],
+            #                        params=["today", _date])
+            qs = spray_operator.sprayday_set.filter(spray_date=_date)
             pks = list(qs.values_list('id', flat=True))
             _end_time = avg_time(pks, 'start')
             end_times.append(_end_time)
             _start_time = avg_time(pks, 'end')
             start_times.append(_start_time)
 
-            hh_submission_row_val = hh_submissions_dict.get(_date)
-            sop_found_count = 0
-            hh_sprayformid_count = 0
-            sop_sprayed_count = 0
-            hh_sprayed_count = 0
-            if hh_submission_row_val:
-                spray_form_id = hh_submission_row_val[0]
-                hh_sprayformid_count = hh_submission_row_val[1]
-                hh_sprayed_count = hh_submission_row_val[2]
+            # hh_submission_row_val = hh_submissions_dict.get(_date)
+            # sop_found_count = 0
+            # hh_sprayformid_count = 0
+            # sop_sprayed_count = 0
+            # hh_sprayed_count = 0
+            # if hh_submission_row_val:
+            #     spray_form_id = hh_submission_row_val[0]
+            #     hh_sprayformid_count = hh_submission_row_val[1]
+            #     hh_sprayed_count = hh_submission_row_val[2]
 
-                sop_submission_row = sop_submissions_dict.get(spray_form_id)
-                if sop_submission_row:
-                    sop_found_count = sop_submission_row[0]
-                    sop_sprayed_count = sop_submission_row[1]
-                else:
-                    sop_sprayed_count, sop_found_count = 0, 0
+            #     sop_submission_row = sop_submissions_dict.get(spray_form_id)
+            #     if sop_submission_row:
+            #         sop_found_count = sop_submission_row[0]
+            #         sop_sprayed_count = sop_submission_row[1]
+            #     else:
+            #         sop_sprayed_count, sop_found_count = 0, 0
 
-            found_difference = sop_found_count - hh_sprayformid_count
-            sprayed_difference = sop_sprayed_count - hh_sprayed_count
+            # found_difference = sop_found_count - hh_sprayformid_count
+            # sprayed_difference = sop_sprayed_count - hh_sprayed_count
 
-            data_quality_check = False
-            if sop_found_count is not None:
-                # check HH Submission Form total submissions count is equal to
-                # SOP Summary Form 'found' count and HH Submission Form
-                # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
-                # count and both checks should be based on 'sprayformid'
-                data_quality_check = sop_found_count == hh_sprayformid_count\
-                    and sop_sprayed_count == hh_sprayed_count
+            # data_quality_check = False
+            # if sop_found_count is not None:
+            #     # check HH Submission Form total submissions count is equalto
+            #     # SOP Summary Form 'found' count and HH Submission Form
+            #     # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+            #     # count and both checks should be based on 'sprayformid'
+            #     data_quality_check = sop_found_count == hh_sprayformid_count\
+            #         and sop_sprayed_count == hh_sprayed_count
 
             data.append({
                 'day': index + 1,
-                'date': datetime.strptime(_date, '%Y-%m-%d'),
-                'sprayable': sprayable.get(_date, 0),
-                'not_sprayable': non_sprayable.get(_date, 0),
-                'sprayed': sprayed.get(_date, 0),
-                'refused': refused.get(_date, 0),
-                'other': other.get(_date, 0),
-                'spray_success_rate': spray_success_rate,
-                'not_sprayed_total': not_sprayed_total,
+                'date': _date,  # .strftime('%Y-%m-%d'),
+                'sprayable': found,
+                # 'not_sprayable': non_sprayable.get(_date, 0),
+                'sprayed': sprayed,
+                'refused': sop.get('refused'),
+                'other': sop.get('other'),
+                'spray_success_rate': round(
+                    sop.get('success_rate'), 1),
+                'not_sprayed_total': sop.get('not_sprayed'),
                 'avg_start_time': _start_time,
                 'avg_end_time': _end_time,
                 'data_quality_check': data_quality_check,
@@ -925,12 +1011,12 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             })
 
             # calculate totals
-            totals['sprayed'] += sprayed.get(_date, 0)
-            totals['sprayable'] += sprayable.get(_date, 0)
-            totals['not_sprayable'] += non_sprayable.get(_date, 0)
-            totals['refused'] += refused.get(_date, 0)
-            totals['other'] += other.get(_date, 0)
-            totals['not_sprayed_total'] += not_sprayed_total
+            totals['sprayed'] += sop.get('sprayed')
+            totals['sprayable'] += sop.get('found')
+            # totals['not_sprayable'] += non_sprayable.get(_date, 0)
+            totals['refused'] += sop.get('refused')
+            totals['other'] += sop.get('other')
+            totals['not_sprayed_total'] += sop.get('not_sprayed')
             if not data_quality_check:
                 totals['data_quality_check'] = data_quality_check
             totals['found_difference'] += found_difference
@@ -950,14 +1036,12 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             {
                 'data': data,
                 'totals': totals,
-                'spray_operator': spray_operator,
-                'spray_operator_name':
-                get_object_or_404(SprayOperator, code=spray_operator).name,
+                'spray_operator': spray_operator.code,
+                'spray_operator_name': spray_operator.name,
                 'district': district,
                 'district_name': district.name,
                 'team_leader': team_leader,
-                'team_leader_name':
-                get_object_or_404(TeamLeaderAssistant, code=team_leader).name,
+                'team_leader_name': spray_operator.team_leader_assistant.name
             }
         )
 
