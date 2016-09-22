@@ -19,6 +19,10 @@ def get_parent(geom, parent_level, parent_name):
         parent = Location.objects.filter(
             geom__covers=geom.wkt, level=parent_level, name=parent_name
         ).first()
+        if not parent:
+            parent = Location.objects.filter(
+                level=parent_level, name=parent_name
+            ).first()
     else:
         assert parent.name == parent_name
 
@@ -60,6 +64,12 @@ class Command(BaseCommand):
             help="parent name field to use in the shape file"
         )
         parser.add_argument(
+            '--parent-skip',
+            dest='skip_parent',
+            default='no',
+            help="skip parent if not found"
+        )
+        parser.add_argument(
             '--parent-code',
             dest='parent_code',
             help="parent name field to use in the shape file"
@@ -95,6 +105,7 @@ class Command(BaseCommand):
                 name_field = options['name_field']
                 parent_field = options['parent_field']
                 parent_level = options['parent_level']
+                skip_parent = options.get('skip_parent')
                 parent_code_field = options.get('parent_code')
                 structures_field = options['structures_field']
 
@@ -141,9 +152,13 @@ class Command(BaseCommand):
 
                     if parent_code_field:
                         parent_code = feature.get(parent_code_field)
-                        parent = get_parent_by_code(parent_code, level)
+                        parent = get_parent_by_code(parent_code, parent_level)
                     else:
                         parent = get_parent(geom, parent_level, parent_name)
+
+                    if skip_parent != 'yes' and not parent:
+                        skipped += 1
+                        continue
                     try:
                         Location.objects.create(
                             name=name, code=code, structures=structures,
