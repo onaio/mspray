@@ -25,6 +25,10 @@ def get_parent(geom, parent_level, parent_name):
     return parent
 
 
+def get_parent_by_code(code, level):
+    return Location.objects.filter(code=code, level=level).first()
+
+
 class Command(BaseCommand):
     help = _('Load locations')
 
@@ -53,6 +57,11 @@ class Command(BaseCommand):
             '--parent-level',
             dest='parent_level',
             default='parent_level',
+            help="parent name field to use in the shape file"
+        )
+        parser.add_argument(
+            '--parent-code',
+            dest='parent_code',
             help="parent name field to use in the shape file"
         )
         parser.add_argument(
@@ -86,6 +95,7 @@ class Command(BaseCommand):
                 name_field = options['name_field']
                 parent_field = options['parent_field']
                 parent_level = options['parent_level']
+                parent_code_field = options.get('parent_code')
                 structures_field = options['structures_field']
 
                 skip_field = options.get('skip_field')
@@ -102,6 +112,7 @@ class Command(BaseCommand):
                     # skip
                     if skip_field and skip_value:
                         if feature.get(skip_field) == skip_value:
+                            skipped += 1
                             continue
 
                     if isinstance(feature.geom, geometries.Polygon):
@@ -115,6 +126,7 @@ class Command(BaseCommand):
                     else:
                         code = int(feature.get(code_field))
                         if code == 0:
+                            skipped += 1
                             continue
                     if bytearray(structures_field.encode('utf8')) in \
                             feature.fields:
@@ -127,7 +139,11 @@ class Command(BaseCommand):
                     else:
                         parent_name = name
 
-                    parent = get_parent(geom, parent_level, parent_name)
+                    if parent_code_field:
+                        parent_code = feature.get(parent_code_field)
+                        parent = get_parent_by_code(parent_code, level)
+                    else:
+                        parent = get_parent(geom, parent_level, parent_name)
                     try:
                         Location.objects.create(
                             name=name, code=code, structures=structures,
