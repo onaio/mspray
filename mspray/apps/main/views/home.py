@@ -121,7 +121,13 @@ class TargetAreaView(SiteNameMixin, DetailView):
         context = super(TargetAreaView, self).get_context_data(**kwargs)
         serializer_class = TargetAreaQuerySerializer \
             if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
-        serializer = serializer_class(context['object'],
+        location = context['object']
+        if location.level == 'RHC':
+            location = get_location_qs(
+                Location.objects.filter(pk=location.pk),
+                'RHC'
+            ).first()
+        serializer = serializer_class(location,
                                       context={'request': self.request})
         context['target_data'] = serializer.data
         if settings.MSPRAY_SPATIAL_QUERIES or \
@@ -135,7 +141,9 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
             if self.object.level in ['district', 'RHC']:
                 data = GeoTargetAreaSerializer(
-                    self.object.location_set.all(), many=True
+                    get_location_qs(self.object.location_set.all(),
+                                    self.object.level),
+                    many=True
                 ).data
                 context['hh_geojson'] = json.dumps(data)
             else:

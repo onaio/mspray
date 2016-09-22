@@ -673,18 +673,30 @@ def unique_spray_points(queryset):
     return queryset
 
 
-def get_location_qs(qs):
-    qs = qs.annotate(
-            num_new_structures=Sum(Case(When(
-                sprayday__data__has_key='osmstructure:node:id',
-                then=1
-            ), default=0, output_field=IntegerField()))
-        ).annotate(
-            total_structures=ExpressionWrapper(
-                F('num_new_structures') + F('structures'),
-                output_field=IntegerField()
+def get_location_qs(qs, level=None):
+    if level == 'RHC':
+        qs = qs.annotate(
+                num_new_structures=Sum(Case(When(
+                    spraydayhealthcenterlocation__content_object__data__has_key='osmstructure:node:id',  # noqa
+                    then=1
+                ), default=0, output_field=IntegerField()))
+            ).annotate(
+                total_structures=ExpressionWrapper(
+                    F('num_new_structures') + F('structures'),
+                    output_field=IntegerField()
+                )
             )
-        )
+    else:
+        qs = qs.annotate(
+                num_new_structures=Sum(Case(When(
+                    sprayday__data__has_key='osmstructure:node:id',
+                    then=1
+                ), default=0, output_field=IntegerField()))
+            ).annotate(
+                total_structures=ExpressionWrapper(
+                    F('num_new_structures') + F('structures'),
+                    output_field=IntegerField()
+                )
+            )
 
     return qs
-
