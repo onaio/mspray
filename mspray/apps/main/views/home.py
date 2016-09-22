@@ -2,6 +2,8 @@ import json
 
 from dateutil.parser import parse
 from django.conf import settings
+# from django.db.models import Case, F, Sum, ExpressionWrapper, When
+# from django.db.models import IntegerField
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -14,6 +16,7 @@ from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
+from mspray.apps.main.utils import get_location_qs
 
 
 def get_location_dict(code):
@@ -65,7 +68,7 @@ class DistrictView(SiteNameMixin, ListView):
         qs = super(DistrictView, self).get_queryset()
         pk = self.kwargs.get(self.slug_field)
         if pk is not None:
-            qs = qs.filter(parent__pk=pk)
+            qs = get_location_qs(qs.filter(parent__pk=pk))
         else:
             qs = super(DistrictView, self).get_queryset()\
                 .filter(parent=None).order_by('name')
@@ -81,7 +84,8 @@ class DistrictView(SiteNameMixin, ListView):
             "ymax": 'ST_yMax("main_location"."geom")'
         }).values(
             'pk', 'code', 'level', 'name', 'parent', 'structures',
-            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas'
+            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
+            'num_new_structures', 'total_structures'
         )
         serializer_class = TargetAreaQuerySerializer \
             if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
@@ -107,6 +111,11 @@ class TargetAreaView(SiteNameMixin, DetailView):
     template_name = 'home/map.html'
     model = Location
     slug_field = 'pk'
+
+    def get_queryset(self):
+        qs = super(TargetAreaView, self).get_queryset()
+
+        return get_location_qs(qs)
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)

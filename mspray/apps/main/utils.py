@@ -11,6 +11,8 @@ from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
 from django.db.models import Q
+from django.db.models import Case, F, Sum, ExpressionWrapper, When
+from django.db.models import IntegerField
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
@@ -669,3 +671,20 @@ def unique_spray_points(queryset):
         )
 
     return queryset
+
+
+def get_location_qs(qs):
+    qs = qs.annotate(
+            num_new_structures=Sum(Case(When(
+                sprayday__data__has_key='osmstructure:node:id',
+                then=1
+            ), default=0, output_field=IntegerField()))
+        ).annotate(
+            total_structures=ExpressionWrapper(
+                F('num_new_structures') + F('structures'),
+                output_field=IntegerField()
+            )
+        )
+
+    return qs
+

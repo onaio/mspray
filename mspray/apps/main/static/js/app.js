@@ -321,7 +321,7 @@ var App = function(buffer, targetAreaData, hhData) {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
                 var content = "<h4>Target Area: " + props.district_name + "</h4>" +
-                    "Structures: " + props.structures;
+                    "Structures: " + props.total_structures;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
                 label.setContent("" + props.district_name);
