@@ -86,12 +86,12 @@
                             </td>
                         </td>
 
-                        <td class='numbers'>{{ district.total_structures|intcomma }}</td>
+                        <td class='numbers'>{{ district.structures|intcomma }}</td>
                         <td class='numbers'>{{ district.found|intcomma }}</td>
                         <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
-                        {% calc_percentage district.visited_sprayed district.total_structures as spray_effectiveness_percentage %}
+                        {% calc_percentage district.visited_sprayed district.structures as spray_effectiveness_percentage %}
                         <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
-                        {% calc_percentage district.found district.total_structures as found_coverage_percentage %}
+                        {% calc_percentage district.found district.structures as found_coverage_percentage %}
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>

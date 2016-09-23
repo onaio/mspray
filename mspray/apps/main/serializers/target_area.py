@@ -1,4 +1,5 @@
-from django.db.models import F, Count, ExpressionWrapper, Func, FloatField
+from django.db.models import Case, Count, ExpressionWrapper, F, Func, Sum, When
+from django.db.models import FloatField, IntegerField
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import serializers
@@ -46,6 +47,187 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
     return count
 
 
+def get_spray_data(obj):
+    if type(obj) == dict:
+        loc = Location.objects.get(pk=obj.get('pk'))
+    else:
+        loc = obj
+    if loc.level in ['RHC', 'district']:
+        if loc.level == 'district':
+            pks = loc.spraydaydistrict_set.values('content_object_id')
+        else:
+            pks = loc.spraydayhealthcenterlocation_set\
+                .values('content_object_id')
+        qs = SprayDay.objects.filter(pk__in=pks)
+        return qs.filter(spraypoint__isnull=False).values('location')\
+            .annotate(
+                found=Sum(
+                    Case(
+                        When(
+                            data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                            was_sprayed=False,
+                            then=0
+                        ),
+                        default=1,
+                        output_field=IntegerField()
+                    )
+                ),
+                sprayed=Sum(
+                    Case(
+                        When(was_sprayed=True, then=1),
+                        default=0,
+                        output_field=IntegerField()
+                    )
+                ),
+                not_sprayed=Sum(
+                    Case(
+                        When(
+                            was_sprayed=False,
+                            data__contains={WAS_SPRAYED_FIELD: 'notsprayed'},
+                            then=1
+                        ),
+                        default=0,
+                        output_field=IntegerField()
+                    )
+                ),
+                not_sprayable=Sum(
+                    Case(
+                        When(
+                            data__has_key='osmstructure:way:id',
+                            data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                            was_sprayed=False,
+                            then=1
+                        ),
+                        default=0,
+                        output_field=IntegerField()
+                    )
+                ),
+                new_structures=Sum(
+                    Case(
+                        When(data__has_key='osmstructure:node:id', then=1),
+                        When(data__contains={
+                            WAS_SPRAYED_FIELD: 'notsprayable'
+                        }, then=-1),
+                        default=0,
+                        output_field=IntegerField()
+                    )
+                ),
+                refused=Sum(
+                    Case(
+                        When(
+                            was_sprayed=False,
+                            data__contains={REASON_FIELD: REASON_REFUSED},
+                            then=1
+                        ),
+                        default=0,
+                        output_field=IntegerField()
+                    )
+                ),
+                other=Sum(
+                    Case(
+                        When(
+                            was_sprayed=False,
+                            data__contains={REASON_FIELD: REASON_REFUSED},
+                            then=0
+                        ),
+                        When(
+                            was_sprayed=True,
+                            then=0
+                        ),
+                        default=1,
+                        output_field=IntegerField()
+                    )
+                )
+            )
+    else:
+        qs = loc.sprayday_set
+
+    return qs.filter(spraypoint__isnull=False).aggregate(
+        found=Sum(
+            Case(
+                When(
+                    # data__has_key='osmstructure:way:id',
+                    data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                    was_sprayed=False,
+                    then=0
+                ),
+                default=1,
+                output_field=IntegerField()
+            )
+        ),
+        sprayed=Sum(
+            Case(
+                When(was_sprayed=True, then=1),
+                default=0,
+                output_field=IntegerField()
+            )
+        ),
+        not_sprayed=Sum(
+            Case(
+                When(
+                    was_sprayed=False,
+                    data__contains={WAS_SPRAYED_FIELD: 'notsprayed'},
+                    then=1
+                ),
+                # When(was_sprayed=False,
+                #      data__contains={
+                #     WAS_SPRAYED_FIELD: 'notsprayable'
+                # }, then=-1),
+                default=0,
+                output_field=IntegerField()
+            )
+        ),
+        not_sprayable=Sum(
+            Case(
+                When(
+                    data__has_key='osmstructure:way:id',
+                    data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                    was_sprayed=False,
+                    then=1
+                ),
+                default=0,
+                output_field=IntegerField()
+            )
+        ),
+        new_structures=Sum(
+            Case(
+                When(data__has_key='osmstructure:node:id', then=1),
+                When(data__contains={
+                    WAS_SPRAYED_FIELD: 'notsprayable'
+                }, then=-1),
+                default=0,
+                output_field=IntegerField()
+            )
+        ),
+        refused=Sum(
+            Case(
+                When(
+                    was_sprayed=False,
+                    data__contains={REASON_FIELD: REASON_REFUSED},
+                    then=1
+                ),
+                default=0,
+                output_field=IntegerField()
+            )
+        ),
+        other=Sum(
+            Case(
+                When(
+                    was_sprayed=False,
+                    data__contains={REASON_FIELD: REASON_REFUSED},
+                    then=0
+                ),
+                When(
+                    was_sprayed=True,
+                    then=0
+                ),
+                default=1,
+                output_field=IntegerField()
+            )
+        )
+    )
+
+
 class TargetAreaMixin(object):
     def get_queryset(self, obj):
 
@@ -77,23 +259,43 @@ class TargetAreaMixin(object):
 
     def get_visited_total(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_total" % pk
-            # queryset = self.get_spray_queryset(obj)
-            queryset = self._get_spray_areas_with_sprayable_structures(obj)
-
             level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
             if level == TA_LEVEL:
-                first = queryset.first()
-                if first:
-                    return first.get('found')
+                visited_found = data.get('found') or 0
+            else:
+                visited_found = 0
+                for i in data:
+                    found = i.get('found') or 0
+                    not_sprayable = i.get('not_sprayable') or 0
+                    new_structures = i.get('new_structures') or 0
+                    structures = i.get('structures') or 0
+                    structures -= not_sprayable
+                    structures += new_structures
+                    if structures != 0:
+                        rate = round(found * 100 / structures)
+                        if rate >= 20:
+                            visited_found += 1
 
-            # A spray area is defined as 'Visited' if at least 20% of
-            # the structures on the ground within that area have been
-            # found and have data recorded against them.
-            queryset = queryset.filter(found_percentage__gte=20)
+            return visited_found
 
-            return cached_queryset_count(key, queryset)
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_visited_total" % pk
+            # # queryset = self.get_spray_queryset(obj)
+            # queryset = self._get_spray_areas_with_sprayable_structures(obj)
+
+            # level = obj['level'] if isinstance(obj, dict) else obj.level
+            # if level == TA_LEVEL:
+            #     first = queryset.first()
+            #     if first:
+            #         return first.get('found')
+
+            # # A spray area is defined as 'Visited' if at least 20% of
+            # # the structures on the ground within that area have been
+            # # found and have data recorded against them.
+            # queryset = queryset.filter(found_percentage__gte=20)
+
+            # return cached_queryset_count(key, queryset)
 
     def _get_spray_areas_with_sprayable_structures(self, obj, **kwargs):
         loc = Location.objects.get(pk=obj.get('pk')) \
@@ -111,26 +313,47 @@ class TargetAreaMixin(object):
             '%s__data__sprayable_structure' % sp_key: 'yes'
         }
         qs = Location.objects.filter(
-            geom__contained=loc.geom, level=loc.level, **kwargs
+            pk=loc.pk, level=loc.level, **kwargs
         ).filter(**sprayable_kwargs)\
             .annotate(
+                num_new_structures=Sum(Case(When(
+                    **{'%s__data__has_key' % sp_key: 'osmstructure:node:id'},
+                    then=1
+                ), default=0, output_field=IntegerField())),
+            ).annotate(
+                sprayed=Sum(Case(
+                    When(**{'%s__was_sprayed' % sp_key: True}, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )),
+                not_sprayed=Sum(Case(
+                    When(**{
+                        '%s__was_sprayed' % sp_key: False,
+                        '%s__isnull' % sp_point: False
+                    }, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )),
                 found=(Count(sp_point, distinct=True)),
                 found_percentage=ExpressionWrapper(
                     (
                         Count(sp_point, distinct=True) * 100 /
                         Func(
-                            F(sp_structures),
+                            F(sp_structures) + F('num_new_structures'),
                             function='CAST',
                             template=FUNCTION_TEMPLATE
                         )
                     ),
                     output_field=FloatField()
-                )
+                ),
+                total_structures=F(sp_structures) + F('num_new_structures'),
             ).values(
                 'id',
                 '%s__location' % key,
                 '%s__location__code' % key, 'found',
-                '%s__location__structures' % key, 'found_percentage'
+                '%s__location__structures' % key, 'found_percentage',
+                'num_new_structures', 'total_structures', 'sprayed',
+                'not_sprayed'
             )
         print(list(qs))
 
@@ -138,96 +361,152 @@ class TargetAreaMixin(object):
 
     def get_found(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_found" % pk
-            queryset = self._get_spray_areas_with_sprayable_structures(obj)
             level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
             if level == TA_LEVEL:
-                first = queryset.first()
-                if first:
-                    return first.get('found')
-            # queryset = self.get_spray_queryset(obj)
+                found = data.get('found') or 0
+            else:
+                found = data.count()
 
-            return cached_queryset_count(key, queryset)
+            return found
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_found" % pk
+            # queryset = self._get_spray_areas_with_sprayable_structures(obj)
+            # level = obj['level'] if isinstance(obj, dict) else obj.level
+            # if level == TA_LEVEL:
+            #     first = queryset.first()
+            #     if first:
+            #         return first.get('found')
+            # # queryset = self.get_spray_queryset(obj)
+
+            # return cached_queryset_count(key, queryset)
 
     def get_visited_sprayed(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_sprayed" % pk
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            # queryset = self.get_spray_queryset(obj)\
-            #     .extra(where=['data->>%s = %s'],
-            #            params=[WAS_SPRAYED_FIELD, WAS_SPRAYED_VALUE])
+            data = get_spray_data(obj)
             if level == TA_LEVEL:
-                queryset = self._get_spray_areas_with_sprayable_structures(
-                    obj, sprayday__was_sprayed=True
-                )
-            elif level == 'RHC':
-                queryset = self._get_spray_areas_with_sprayable_structures(
-                    obj,
-                    spraydayhealthcenterlocation__content_object__was_sprayed=True  # noqa
-                )
+                visited_sprayed = data.get('sprayed') or 0
             else:
-                queryset = self._get_spray_areas_with_sprayable_structures(
-                    obj,
-                    spraydaydistrict__content_object__was_sprayed=True
-                )
+                visited_sprayed = 0
+                for i in data:
+                    sprayed = i.get('sprayed') or 0
+                    not_sprayable = i.get('not_sprayable') or 0
+                    new_structures = i.get('new_structures') or 0
+                    structures = i.get('structures') or 0
+                    structures -= not_sprayable
+                    structures += new_structures
+                    if structures != 0:
+                        rate = round(sprayed * 100 / structures)
+                        if rate >= 90:
+                            visited_sprayed += 1
 
-            if level == TA_LEVEL:
-                first = queryset.first()
-                if first:
-                    return first.get('found')
+            return visited_sprayed
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_visited_sprayed" % pk
+            # level = obj['level'] if isinstance(obj, dict) else obj.level
+            # # queryset = self.get_spray_queryset(obj)\
+            # #     .extra(where=['data->>%s = %s'],
+            # #            params=[WAS_SPRAYED_FIELD, WAS_SPRAYED_VALUE])
+            # if level == TA_LEVEL:
+            #     queryset = self._get_spray_areas_with_sprayable_structures(
+            #         obj  # , sprayday__was_sprayed=True
+            #     )
+            # elif level == 'RHC':
+            #     queryset = self._get_spray_areas_with_sprayable_structures(
+            #         obj,
+            #         spraydayhealthcenterlocation__content_object__was_sprayed=True  # noqa
+            #     )
+            # else:
+            #     queryset = self._get_spray_areas_with_sprayable_structures(
+            #         obj,
+            #         spraydaydistrict__content_object__was_sprayed=True
+            #     )
 
-            # A spray area is defined as 'Sprayed Effectively' if at least 90%
-            # of the structures on the ground within that area have been
-            # sprayed.
-            queryset = queryset.filter(found_percentage__gte=90)
+            # if level == TA_LEVEL:
+            #     first = queryset.first()
+            #     if first:
+            #         return first.get('sprayed')
 
-            return cached_queryset_count(key, queryset)
+            # # A spray area is defined as 'Sprayed Effectively' if atleast 90%
+            # # of the structures on the ground within that area have been
+            # # sprayed.
+            # queryset = queryset.filter(found_percentage__gte=90)
+
+            # return cached_queryset_count(key, queryset)
 
     def get_visited_not_sprayed(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_not_sprayed" % pk
-            queryset = self.get_spray_queryset(obj)\
-                .extra(where=['data->>%s = %s'],
-                       params=[WAS_SPRAYED_FIELD, "no"])
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
+            if level == TA_LEVEL:
+                visited_not_sprayed = data.get('not_sprayed') or 0
+            else:
+                visited_not_sprayed = data.aggregate(
+                    r=Sum('not_sprayed')
+                ).get('r') or 0
 
-            return cached_queryset_count(key, queryset)
+            return visited_not_sprayed
 
     def get_visited_refused(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_refused" % pk
-            queryset = self.get_spray_queryset(obj)\
-                .extra(where=['data->>%s = %s'],
-                       params=[REASON_FIELD, REASON_REFUSED])
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
+            if level == TA_LEVEL:
+                refused = data.get('refused') or 0
+            else:
+                refused = data.aggregate(r=Sum('refused')).get('r') or 0
 
-            return cached_queryset_count(key, queryset)
+            return refused
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_visited_refused" % pk
+            # queryset = self.get_spray_queryset(obj)\
+            #     .extra(where=['data->>%s = %s'],
+            #            params=[REASON_FIELD, REASON_REFUSED])
+
+            # return cached_queryset_count(key, queryset)
 
     def get_visited_other(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_visited_other" % pk
-            queryset = self.get_spray_queryset(obj)\
-                .extra(where=[
-                    "data->>%s IN ({})".format(
-                        ",".join(["'{}'".format(i) for i in REASON_OTHER])
-                    )
-                ], params=[REASON_FIELD])
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
+            if level == TA_LEVEL:
+                other = data.get('other') or 0
+            else:
+                other = data.aggregate(r=Sum('other')).get('r') or 0
 
-            return cached_queryset_count(key, queryset)
+            return other
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_visited_other" % pk
+            # queryset = self.get_spray_queryset(obj)\
+            #     .extra(where=[
+            #         "data->>%s IN ({})".format(
+            #             ",".join(["'{}'".format(i) for i in REASON_OTHER])
+            #         )
+            #     ], params=[REASON_FIELD])
+
+            # return cached_queryset_count(key, queryset)
 
     def get_not_visited(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
             structures = obj['structures'] \
                 if isinstance(obj, dict) else obj.structures
-            not_sprayable = self.get_not_sprayable(obj)
-            structures -= not_sprayable
-            key = "%s_not_visited" % pk
-            queryset = self.get_spray_queryset(obj)
-            count = cached_queryset_count(key, queryset)
+            data = get_spray_data(obj)
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            if level == TA_LEVEL:
+                not_sprayable = data.get('not_sprayable') or 0
+                new_structures = data.get('new_structures') or 0
+                structures -= not_sprayable
+                structures += new_structures
+                count = data.get('found') or 0
+            else:
+                not_sprayable = \
+                    data.aggregate(r=Sum('not_sprayable')).get('r') or 0
+                new_structures = \
+                    data.aggregate(r=Sum('new_structures')).get('r') or 0
+                count = data.aggregate(r=Sum('found')).get('r') or 0
+                structures -= not_sprayable
+                structures += new_structures
 
             return structures - count
 
@@ -250,41 +529,68 @@ class TargetAreaMixin(object):
 
     def get_new_structures(self, obj):
         if obj:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            key = "%s_new_structures" % pk
-            queryset = self.get_spray_queryset(obj).extra(
-                where=["(data->>%s) IS NULL"], params=["osmstructure"]
-            )
+            level = obj['level'] if isinstance(obj, dict) else obj.level
+            data = get_spray_data(obj)
+            if level == TA_LEVEL:
+                new_structures = data.get('new_structures') or 0
+            else:
+                new_structures = \
+                    data.aggregate(r=Sum('new_structures')).get('r') or 0
 
-            return cached_queryset_count(key, queryset)
+            return new_structures
+            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+            # key = "%s_new_structures" % pk
+            # queryset = self.get_spray_queryset(obj).extra(
+            #     where=["(data->>%s) IS NULL"], params=["osmstructure"]
+            # )
+
+            # return cached_queryset_count(key, queryset)
 
         return 0
 
     def get_structures(self, obj):
         structures = obj.get('structures') \
             if isinstance(obj, dict) else obj.structures
-
-        count = self.get_not_sprayable(obj)
-        structures -= count
-        new_structures = self.get_new_structures(obj)
-        structures += new_structures
+        data = get_spray_data(obj)
+        level = obj['level'] if isinstance(obj, dict) else obj.level
+        if level == TA_LEVEL:
+            not_sprayable = data.get('not_sprayable') or 0
+            new_structures = data.get('new_structures') or 0
+            structures -= not_sprayable
+            structures += new_structures
+        else:
+            not_sprayable = \
+                data.aggregate(r=Sum('not_sprayable')).get('r') or 0
+            new_structures = \
+                data.aggregate(r=Sum('new_structures')) .get('r') or 0
+            structures -= not_sprayable
+            structures += new_structures
 
         return structures
 
     def get_not_sprayable(self, obj):
-        count = 0
-        queryset = self.get_queryset(obj)
+        data = get_spray_data(obj)
+        level = obj['level'] if isinstance(obj, dict) else obj.level
+        if level == TA_LEVEL:
+            not_sprayable = data.get('not_sprayable') or 0
+        else:
+            not_sprayable = \
+                data.aggregate(r=Sum('not_sprayable')).get('r') or 0
 
-        if HAS_SPRAYABLE_QUESTION:
-            pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            queryset = queryset.extra(
-                where=['data->>%s = %s'],
-                params=['sprayable_structure', 'no']
-            )
-            key = "%s_not_sprayable" % pk
-            count = cached_queryset_count(key, queryset)
+        return not_sprayable
+        # count = 0
+        # queryset = self.get_queryset(obj)
 
-        return count
+        # if HAS_SPRAYABLE_QUESTION:
+        #     pk = obj['pk'] if isinstance(obj, dict) else obj.pk
+        #     queryset = queryset.extra(
+        #         where=['data->>%s = %s'],
+        #         params=['sprayable_structure', 'no']
+        #     )
+        #     key = "%s_not_sprayable" % pk
+        #     count = cached_queryset_count(key, queryset)
+
+        # return count
 
 
 class TargetAreaQueryMixin(TargetAreaMixin):
