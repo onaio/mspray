@@ -173,3 +173,19 @@ def process_osm_file(path):
                         pass
                     except IntegrityError:
                         pass
+
+
+@app.task
+def refresh_data_with_no_osm():
+    data = SprayDay.objects.exclude(data__has_key='osmstructure:way:id')\
+        .exclude(data__has_key='osmstructure:node:id')\
+        .filter(data__has_key='osmstructure')
+    found = data.count()
+    for rec in data:
+        link_spraypoint_with_osm.delay(rec.pk)
+
+    refresh_data_with_no_osm.apply_async(
+        eta=datetime.now() + timedelta(minute=4)
+    )
+
+    return found
