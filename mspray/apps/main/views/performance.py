@@ -15,6 +15,7 @@ from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
+from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 from mspray.apps.main.utils import unique_spray_points
@@ -141,8 +142,9 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         }
 
         for district in districts:
-            target_areas = Location.objects.filter(parent=district)\
-                .order_by('name')
+            target_areas = get_location_qs(
+                Location.objects.filter(parent=district).order_by('name')
+            )
             result = {'location': district}
             target_areas_found_total = 0
             target_areas_sprayed_total = 0
