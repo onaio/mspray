@@ -185,7 +185,7 @@ def refresh_data_with_no_osm():
         link_spraypoint_with_osm.delay(rec.pk)
 
     refresh_data_with_no_osm.apply_async(
-        eta=datetime.now() + timedelta(minute=4)
+        eta=datetime.now() + timedelta(minutes=4)
     )
 
     return found
