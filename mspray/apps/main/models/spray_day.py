@@ -12,6 +12,8 @@ STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_STRUCTURE_GPS_FIELD',
                               'structure_gps')
 NON_STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_NON_STRUCTURE_GPS_FIELD',
                                   'non_structure_gps')
+WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 
 
 class SprayDay(models.Model):
@@ -39,6 +41,15 @@ class SprayDay(models.Model):
 
     def __str__(self):
         return self.spray_date.isoformat()
+
+    def save(self, *args, **kwargs):
+        data = self.data
+
+        was_sprayed = data.get(WAS_SPRAYED_FIELD)
+        if was_sprayed == WAS_SPRAYED_VALUE:
+            self.was_sprayed = True
+
+        return super(SprayDay, self).save(*args, **kwargs)
 
 
 class SprayDayHealthCenterLocation(models.Model):

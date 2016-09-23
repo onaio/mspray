@@ -187,10 +187,6 @@ def add_spray_data(data):
     )
     sprayday.data = data
 
-    was_sprayed = data.get(WAS_SPRAYED_FIELD)
-    if was_sprayed == WAS_SPRAYED_VALUE:
-        sprayday.was_sprayed = True
-
     if settings.OSM_SUBMISSIONS and geom is not None:
         sprayday.geom = geom
         sprayday.bgeom = sprayday.geom.buffer(0.00004, 1)
