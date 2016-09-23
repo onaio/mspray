@@ -10,7 +10,6 @@ from django.views.generic import TemplateView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
-from mspray.apps.main.models import SprayPointView
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
@@ -730,6 +729,15 @@ def get_spray_operator_data(spray_operator, spray_date):
                 default=0,
                 output_field=IntegerField()
             )),
+            sprayed_sprayformid=Sum(Case(
+                When(
+                    sprayday__was_sprayed=True,
+                    sprayday__data__contains={'sprayformid': formid},
+                    then=1
+                ),
+                default=0,
+                output_field=IntegerField()
+            )),
             not_sprayed=Sum(Case(
                 When(sprayday__was_sprayed=False, then=1),
                 default=0,
@@ -761,10 +769,10 @@ def get_spray_operator_data(spray_operator, spray_date):
         ).values(
             'pk', 'code', 'found', 'sprayed', 'refused', 'other',
             'not_sprayed', 'sprayday__spray_date', 'success_rate',
-            'found_sprayformid'
+            'found_sprayformid', 'sprayed_sprayformid'
         ).first()
 
-    sprayed = sop.get('sprayed')
+    sprayed_sprayformid = sop.get('sprayed_sprayformid')
     found_sprayformid = sop.get('found_sprayformid')
 
     formid = get_formid(spray_operator,  spray_date)
@@ -780,9 +788,9 @@ def get_spray_operator_data(spray_operator, spray_date):
     r_sprayed = summary.get('r_sprayed') or 0
 
     found_difference = r_found - found_sprayformid
-    sprayed_difference = r_sprayed - sprayed
+    sprayed_difference = r_sprayed - sprayed_sprayformid
     data_quality_check = r_found == found_sprayformid \
-        and r_sprayed == sprayed
+        and r_sprayed == sprayed_sprayformid
 
     data = dict()
     for k, v in sop.items():
@@ -801,90 +809,6 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     template_name = 'spray-operator-daily.html'
     model = Location
     slug_field = 'id'
-
-    def get_hh_submission_dict(self, spray_operator):
-        hh_submission_list = SprayPointView.objects.filter(
-            sprayoperator_code=spray_operator
-        ).values(
-            'sprayformid', 'spray_date'
-        ).annotate(
-            sprayformid_count=Count('sprayformid'),
-            sprayed_count=Count('was_sprayed')
-        )
-
-        return {
-            a.get('spray_date').strftime('%Y-%m-%d'): [
-                a.get('sprayformid'),
-                a.get('sprayformid_count'),
-                a.get('sprayed_count')
-            ]
-            for a in hh_submission_list
-        }
-
-    def get_sop_submission_dict(self, spray_operator):
-        sop_submission_list = SprayOperatorDailySummary.objects.filter(
-            sprayoperator_code=spray_operator
-        ).values(
-            'spray_form_id'
-        ).annotate(
-            found_count=Sum('found'),
-            sprayed_count=Sum('sprayed')
-        )
-
-        return {
-            a.get('spray_form_id'): [
-                a.get('found_count'),
-                a.get('sprayed_count')
-            ]
-            for a in sop_submission_list
-        }
-
-    def get_aggregate_queryset(self, spray_operator, spray_date):
-        formid = get_formid(spray_operator, spray_date)
-        return SprayOperator.objects.filter(
-            code=spray_operator.code, sprayday__spray_date=spray_date
-        )\
-            .values('sprayday__spray_date')\
-            .annotate(
-                found=Count('sprayday'),
-                sprayed=Sum(Case(
-                    When(sprayday__was_sprayed=True, then=1),
-                    default=0,
-                    output_field=IntegerField()
-                )),
-                not_sprayed=Sum(Case(
-                    When(sprayday__was_sprayed=False, then=1),
-                    default=0,
-                    output_field=IntegerField()
-                )),
-                refused=Sum(Case(When(
-                    sprayday__was_sprayed=False,
-                    sprayday__data__contains={
-                        'osmstructure:notsprayed_reason': 'refused'
-                    }, then=1
-                ), default=0, output_field=IntegerField())
-                ),
-                found_sprayformid=Sum(Case(When(
-                    sprayday__data__contains={'sprayformid': formid},
-                    then=1
-                ), default=0, output_field=IntegerField())
-                )
-            ).annotate(
-                success_rate=Case(When(found__gt=0, then=ExpressionWrapper(
-                    F('sprayed') * 100 / Func(
-                        F('found'), function='CAST',
-                        template='%(function)s(%(expressions)s AS FLOAT)'
-                    ),
-                    FloatField()
-                )), default=0, output_field=FloatField()),
-                other=Case(When(not_sprayed__gt=0,
-                                then=F('not_sprayed') - F('refused')),
-                           default=0, output_field=IntegerField())
-            ).values(
-                'pk', 'code', 'found', 'sprayed', 'refused', 'other',
-                'not_sprayed', 'sprayday__spray_date', 'success_rate',
-                'found_sprayformid'
-            ).first()
 
     def get_context_data(self, **kwargs):
         data = []
