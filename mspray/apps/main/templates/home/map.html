@@ -104,7 +104,7 @@
         var app = new App(undefined, targetAreaData, hhData);
         app.fitBounds(bounds);
 
-        app.housesCount = {{ target_data.total_structures }};
+        app.housesCount = {{ target_data.structures }};
         app.visitedTotal = {{ target_data.found }};
         app.visitedSprayed = {{ target_data.visited_sprayed }};
         app.visitedNotSprayed = {{ target_data.visited_not_sprayed }};

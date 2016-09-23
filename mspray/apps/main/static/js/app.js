@@ -165,7 +165,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === null) {
+                        } else if (feature.properties.sprayed === 'notsprayable') {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
@@ -173,9 +173,10 @@ var App = function(buffer, targetAreaData, hhData) {
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
                     style: function (feature) {
+                        // console.log(feature.properties.sprayed);
                         if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === null) {
+                        } else if (feature.properties.sprayed === 'notsprayable') {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
@@ -183,13 +184,14 @@ var App = function(buffer, targetAreaData, hhData) {
                         return app.sprayOptions;
                     },
                     onEachFeature: function(features){
+                        var was_sprayed = features.properties.sprayed;
                         if (sprayed_status[features.properties.sprayed] === undefined) {
                             sprayed_status[features.properties.sprayed] = 1;
                         } else {
                             sprayed_status[features.properties.sprayed]++;
                         }
 
-                        if (features.properties.reason !== null) {
+                        if (features.properties.reason !== null && was_sprayed == app.WAS_NOT_SPRAYED_VALUE) {
                             if (reason_obj[reasons[features.properties.reason]] === undefined) {
                                 reason_obj[reasons[features.properties.reason]] = 1;
                             } else {
@@ -304,14 +306,14 @@ var App = function(buffer, targetAreaData, hhData) {
     this.drawCircles = function (props) {
         var app = this;
         var sprayed_percentage = app.calculatePercentage(props.visited_sprayed, props.visited_total, false),
-            found_percentage = app.calculatePercentage(props.visited_total, props.total_structures, false),
-            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.total_structures, false);
+            found_percentage = app.calculatePercentage(props.visited_total, props.structures, false),
+            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.structures, false);
         app.drawCircle(sprayed_percentage, "spray-coverage", 40);
         app.drawCircle(found_percentage, "found-coverage", 40);
         app.drawCircle(progress_percentage, "circle-progress", 50);
         $("#sprayed-ratio").text("(" + props.visited_sprayed + "/" + props.visited_total + ")");
-        $("#found-ratio").text("(" + props.visited_total + "/" + props.total_structures + ")");
-        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.total_structures + ")");
+        $("#found-ratio").text("(" + props.visited_total + "/" + props.structures + ")");
+        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.structures + ")");
     };
 
     this.loadTargetArea = function(data) {
@@ -321,7 +323,7 @@ var App = function(buffer, targetAreaData, hhData) {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
                 var content = "<h4>Target Area: " + props.district_name + "</h4>" +
-                    "Structures: " + props.total_structures;
+                    "Structures: " + props.structures;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
                 label.setContent("" + props.district_name);
@@ -346,7 +348,7 @@ var App = function(buffer, targetAreaData, hhData) {
             style: function(feature) {
                 var props = feature.properties;
                 if(props.visited_total !== undefined && props.visited_total > 0){
-                    var percent = app.calculatePercentage(props.visited_sprayed, props.total_structures, false);
+                    var percent = app.calculatePercentage(props.visited_sprayed, props.structures, false);
                     app.hhOptions.fillColor = app.getFillColor(percent);
                 } else {
                     app.hhOptions.fillColor = '#FFDC00';
@@ -358,7 +360,7 @@ var App = function(buffer, targetAreaData, hhData) {
                 var props = feature.properties;
                 if(props.level !== undefined) {
                     var content = props.district_name + "<br/>" +
-                        "Structures: " + props.total_structures + "<br/>" +
+                        "Structures: " + props.structures + "<br/>" +
                         "Visited Total: " + props.visited_total + "<br/>" +
                         "Not Sprayed: " + props.visited_not_sprayed + "<br/>" +
                         "Sprayed: " + props.visited_sprayed;
