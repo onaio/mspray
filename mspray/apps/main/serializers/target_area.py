@@ -12,6 +12,7 @@ from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
+from mspray.apps.main.utils import parse_spray_date
 
 FUNCTION_TEMPLATE = '%(function)s(%(expressions)s AS FLOAT)'
 
@@ -47,7 +48,9 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
     return count
 
 
-def get_spray_data(obj):
+def get_spray_data(obj, context):
+    spray_date = parse_spray_date(context.get('request'))
+
     if type(obj) == dict:
         loc = Location.objects.get(pk=obj.get('pk'))
     else:
@@ -59,6 +62,9 @@ def get_spray_data(obj):
             pks = loc.spraydayhealthcenterlocation_set\
                 .values('content_object_id')
         qs = SprayDay.objects.filter(pk__in=pks)
+        if spray_date:
+            qs = qs.filter(spray_date=spray_date)
+
         return qs.filter(spraypoint__isnull=False).values('location')\
             .annotate(
                 found=Sum(
@@ -139,8 +145,10 @@ def get_spray_data(obj):
                     )
                 )
             )
-    else:
-        qs = loc.sprayday_set
+
+    qs = loc.sprayday_set
+    if spray_date:
+        qs = qs.filter(spray_date=spray_date)
 
     return qs.filter(spraypoint__isnull=False).aggregate(
         found=Sum(
@@ -260,7 +268,7 @@ class TargetAreaMixin(object):
     def get_visited_total(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 visited_found = data.get('found') or 0
             else:
@@ -362,7 +370,7 @@ class TargetAreaMixin(object):
     def get_found(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 found = data.get('found') or 0
             else:
@@ -384,7 +392,7 @@ class TargetAreaMixin(object):
     def get_visited_sprayed(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 visited_sprayed = data.get('sprayed') or 0
             else:
@@ -438,7 +446,7 @@ class TargetAreaMixin(object):
     def get_visited_not_sprayed(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 visited_not_sprayed = data.get('not_sprayed') or 0
             else:
@@ -451,7 +459,7 @@ class TargetAreaMixin(object):
     def get_visited_refused(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 refused = data.get('refused') or 0
             else:
@@ -469,7 +477,7 @@ class TargetAreaMixin(object):
     def get_visited_other(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 other = data.get('other') or 0
             else:
@@ -491,7 +499,7 @@ class TargetAreaMixin(object):
         if obj:
             structures = obj['structures'] \
                 if isinstance(obj, dict) else obj.structures
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             level = obj['level'] if isinstance(obj, dict) else obj.level
             if level == TA_LEVEL:
                 not_sprayable = data.get('not_sprayable') or 0
@@ -530,7 +538,7 @@ class TargetAreaMixin(object):
     def get_new_structures(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
-            data = get_spray_data(obj)
+            data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 new_structures = data.get('new_structures') or 0
             else:
@@ -551,7 +559,7 @@ class TargetAreaMixin(object):
     def get_structures(self, obj):
         structures = obj.get('structures') \
             if isinstance(obj, dict) else obj.structures
-        data = get_spray_data(obj)
+        data = get_spray_data(obj, self.context)
         level = obj['level'] if isinstance(obj, dict) else obj.level
         if level == TA_LEVEL:
             not_sprayable = data.get('not_sprayable') or 0
@@ -569,7 +577,7 @@ class TargetAreaMixin(object):
         return structures
 
     def get_not_sprayable(self, obj):
-        data = get_spray_data(obj)
+        data = get_spray_data(obj, self.context)
         level = obj['level'] if isinstance(obj, dict) else obj.level
         if level == TA_LEVEL:
             not_sprayable = data.get('not_sprayable') or 0
