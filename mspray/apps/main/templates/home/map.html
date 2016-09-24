@@ -47,12 +47,19 @@
                 <hr>
                 <div>
                     <dl class="dl-horizontal" id="target-area-stats">
+                    {% if sprayed_duplicates or not_sprayed_duplicates  %}
+                    <p>Some structures were selected more than once.</p>
+                    {% endif %}
                     {% if sprayed_duplicates %}
                         <dt>{{ sprayed_duplicates }}</dt>
                         <dd>Sprayed Duplicates</dd>
-
+                    {% endif %}
+                    {% if not_sprayed_duplicates %}
                         <dt>{{ not_sprayed_duplicates }}</dt>
                         <dd>Not Sprayed Duplicates</dd>
+                    {% endif %}
+                    {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
+                    <p>No structures were selected more than once.</p>
                     {% endif %}
                     </dl>
                 </div>
