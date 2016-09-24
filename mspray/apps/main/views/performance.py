@@ -386,6 +386,106 @@ def get_tla_data_quality_check(team_leader_assistant, spray_operator=None):
     )
 
 
+def get_district_data(district):
+    data = []
+    totals = {
+        'avg_structures_per_so': 0,
+        'other': 0,
+        'refused': 0,
+        'sprayed': 0,
+        'sprayable': 0,
+        'not_sprayable': 0,
+        'not_sprayed_total': 0,
+        'spray_success_rate': 0,
+        'avg_quality_score': 0,
+        'data_quality_check': True,
+        'found_difference': 0,
+        'sprayed_difference': 0
+    }
+    start_times = []
+    end_times = []
+
+    team_leaders = TeamLeaderAssistant.objects.filter(
+        location=district
+    ).order_by('name')
+
+    for team_leader_assistant in team_leaders:
+        k = get_tla_data(team_leader_assistant)[1]
+        found_difference, sprayed_difference, data_quality_check = \
+            get_tla_data_quality_check(team_leader_assistant)
+
+        tla_code = team_leader_assistant.code
+        tla_name = team_leader_assistant.name
+        tla_not_sprayable = team_leader_assistant.sprayday_set.filter(
+            data__contains={'osmstructure:spray_status': 'notsprayable'}
+        ).count()
+        tla_sprayable = k.get('sprayable')
+        tla_sprayed = k.get('sprayed')
+        tla_refused = k.get('refused')
+        tla_other = k.get('other')
+        tla_not_sprayed = k.get('not_sprayed_total')
+        avg_structures_per_so = k.get('avg_structures_per_so')
+
+        _end_time = k.get('avg_end_time') or (None, None)
+        end_times.append(_end_time)
+        _start_time = k.get('avg_start_time') or (None, None)
+        start_times.append(_start_time)
+
+        data.append({
+            'team_leader': tla_code,
+            'team_leader_name': tla_name,
+            'sprayable': tla_sprayable,
+            'not_sprayable': tla_not_sprayable,
+            'sprayed': tla_sprayed,
+            'refused': tla_refused,
+            'other': tla_other,
+            # 'no_of_days_worked': no_of_days_worked,
+            'spray_success_rate': k.get('spray_success_rate'),
+            'avg_structures_per_so': avg_structures_per_so,
+            'not_sprayed_total': tla_not_sprayed,
+            'avg_start_time': _start_time,
+            'avg_end_time': _end_time,
+            'data_quality_check': data_quality_check,
+            'found_difference': found_difference,
+            'sprayed_difference': sprayed_difference
+        })
+
+        # totals
+        totals['sprayed'] += tla_sprayed
+        totals['sprayable'] += tla_sprayable
+        totals['not_sprayable'] += tla_not_sprayable
+        totals['refused'] += tla_refused
+        totals['other'] += tla_other
+        totals['not_sprayed_total'] += tla_not_sprayed
+        # totals['number_of_days_worked'] += no_of_days_worked
+        totals['avg_structures_per_so'] += avg_structures_per_so
+        if not data_quality_check:
+            totals['data_quality_check'] = data_quality_check
+        totals['found_difference'] += found_difference
+        totals['sprayed_difference'] += sprayed_difference
+
+    # calculate spray_success_rate total
+    numerator = totals['sprayed']
+    denominator = 1 if totals['sprayable'] == 0 \
+        else totals['sprayable']
+    sprayed_success_rate = round((numerator / denominator) * 100, 1)
+    totals['spray_success_rate'] = sprayed_success_rate
+
+    if len(team_leaders):
+        # calculate avg_structures_per_user_per_so total
+        totals['avg_structures_per_so'] = round(
+            totals['avg_structures_per_so'] / len(team_leaders))
+        totals['avg_quality_score'] = round(
+            totals['avg_quality_score'] / len(list(team_leaders)), 2
+        )
+
+    if len(start_times) and len(end_times):
+        totals['avg_start_time'] = avg_time_tuple(start_times)
+        totals['avg_end_time'] = avg_time_tuple(end_times)
+
+    return (data, totals)
+
+
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
     model = Location
     slug_field = 'id'
@@ -396,102 +496,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
 
-        data = []
-        totals = {
-            'avg_structures_per_so': 0,
-            'other': 0,
-            'refused': 0,
-            'sprayed': 0,
-            'sprayable': 0,
-            'not_sprayable': 0,
-            'not_sprayed_total': 0,
-            'spray_success_rate': 0,
-            'avg_quality_score': 0,
-            'data_quality_check': True,
-            'found_difference': 0,
-            'sprayed_difference': 0
-        }
-
-        team_leaders = TeamLeaderAssistant.objects.filter(
-            location=district
-        ).order_by('name')
-
-        start_times = []
-        end_times = []
-
-        for team_leader_assistant in team_leaders:
-            k = get_tla_data(team_leader_assistant)[1]
-            found_difference, sprayed_difference, data_quality_check = \
-                get_tla_data_quality_check(team_leader_assistant)
-
-            tla_code = team_leader_assistant.code
-            tla_name = team_leader_assistant.name
-            tla_not_sprayable = team_leader_assistant.sprayday_set.filter(
-                data__contains={'osmstructure:spray_status': 'notsprayable'}
-            ).count()
-            tla_sprayable = k.get('sprayable')
-            tla_sprayed = k.get('sprayed')
-            tla_refused = k.get('refused')
-            tla_other = k.get('other')
-            tla_not_sprayed = k.get('not_sprayed_total')
-            avg_structures_per_so = k.get('avg_structures_per_so')
-
-            _end_time = k.get('avg_end_time') or (None, None)
-            end_times.append(_end_time)
-            _start_time = k.get('avg_start_time') or (None, None)
-            start_times.append(_start_time)
-
-            data.append({
-                'team_leader': tla_code,
-                'team_leader_name': tla_name,
-                'sprayable': tla_sprayable,
-                'not_sprayable': tla_not_sprayable,
-                'sprayed': tla_sprayed,
-                'refused': tla_refused,
-                'other': tla_other,
-                # 'no_of_days_worked': no_of_days_worked,
-                'spray_success_rate': k.get('spray_success_rate'),
-                'avg_structures_per_so': avg_structures_per_so,
-                'not_sprayed_total': tla_not_sprayed,
-                'avg_start_time': _start_time,
-                'avg_end_time': _end_time,
-                'data_quality_check': data_quality_check,
-                'found_difference': found_difference,
-                'sprayed_difference': sprayed_difference
-            })
-
-            # totals
-            totals['sprayed'] += tla_sprayed
-            totals['sprayable'] += tla_sprayable
-            totals['not_sprayable'] += tla_not_sprayable
-            totals['refused'] += tla_refused
-            totals['other'] += tla_other
-            totals['not_sprayed_total'] += tla_not_sprayed
-            # totals['number_of_days_worked'] += no_of_days_worked
-            totals['avg_structures_per_so'] += avg_structures_per_so
-            if not data_quality_check:
-                totals['data_quality_check'] = data_quality_check
-            totals['found_difference'] += found_difference
-            totals['sprayed_difference'] += sprayed_difference
-
-        # calculate spray_success_rate total
-        numerator = totals['sprayed']
-        denominator = 1 if totals['sprayable'] == 0 \
-            else totals['sprayable']
-        sprayed_success_rate = round((numerator / denominator) * 100, 1)
-        totals['spray_success_rate'] = sprayed_success_rate
-
-        if len(team_leaders):
-            # calculate avg_structures_per_user_per_so total
-            totals['avg_structures_per_so'] = round(
-                totals['avg_structures_per_so'] / len(team_leaders))
-            totals['avg_quality_score'] = round(
-                totals['avg_quality_score'] / len(list(team_leaders)), 2
-            )
-
-        if len(start_times) and len(end_times):
-            totals['avg_start_time'] = avg_time_tuple(start_times)
-            totals['avg_end_time'] = avg_time_tuple(end_times)
+        data, totals = get_district_data(district)
 
         context.update({
             'data': data,
