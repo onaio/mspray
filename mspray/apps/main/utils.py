@@ -3,6 +3,7 @@ import json
 
 from datetime import datetime
 from datetime import timedelta
+from dateutil.parser import parse
 
 from django.conf import settings
 from django.contrib.gis.geos import Polygon
@@ -696,3 +697,12 @@ def get_location_qs(qs, level=None):
             )
 
     return qs
+
+
+def parse_spray_date(request):
+    spray_date = request.GET.get('spray_date')
+    if spray_date:
+        try:
+            return parse(spray_date).date()
+        except ValueError:
+            pass
