@@ -99,10 +99,11 @@ def get_updated_osm_from_ona(sp):
     formid = getattr(settings, 'ONA_FORM_PK', 0)
     if formid:
         data = fetch_form_data(formid, dataid=sp.submission_id)
-        osmid = get_osmid(data)
-        if data and osmid:
-            sp.data = data
-            sp.save()
+        if data:
+            osmid = get_osmid(data)
+            if osmid:
+                sp.data = data
+                sp.save()
 
             return osmid
 
