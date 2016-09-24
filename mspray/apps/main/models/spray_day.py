@@ -71,6 +71,9 @@ class SprayDayHealthCenterLocation(models.Model):
     location = models.ForeignKey('Location')
     content_object = models.ForeignKey('SprayDay')
 
+    class Meta:
+        unique_together = ('location', 'content_object')
+
 
 def link_health_center_location(sender, instance=None, **kwargs):
     if instance and instance.location:
@@ -86,6 +89,9 @@ post_save.connect(link_health_center_location, sender=SprayDay,
 class SprayDayDistrict(models.Model):
     location = models.ForeignKey('Location')
     content_object = models.ForeignKey('SprayDay')
+
+    class Meta:
+        unique_together = ('location', 'content_object')
 
 
 def link_district_location(sender, instance=None, **kwargs):
