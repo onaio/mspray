@@ -18,6 +18,7 @@ WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 
 class SprayDay(models.Model):
     submission_id = models.PositiveIntegerField(unique=True)
+    osmid = models.BigIntegerField(null=True, db_index=True)
     spray_date = models.DateField(db_index=True)
     geom = models.PointField(srid=4326, db_index=True, null=True)
     bgeom = models.GeometryField(srid=4326, db_index=True, null=True)
