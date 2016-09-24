@@ -10,7 +10,7 @@
             <ol class="breadcrumb">
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
               <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
-              <li><a href="{% url "performance:spray-operator-summary" district.code team_leader %}">Spray Operators</a></li>
+              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">Spray Operators</a></li>
               <li class="active">Spray Operator</li>
             </ol>
             <div class="row">
