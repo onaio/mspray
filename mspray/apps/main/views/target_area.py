@@ -44,8 +44,13 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
             households = Household.objects.filter(location__in=tas)
 
             if settings.OSM_SUBMISSIONS:
-                spray_points = SprayDay.objects.exclude(geom=None)\
-                    .filter(location__in=tas).values('geom')
+                spray_points = SprayDay.objects.exclude(geom=None)
+                spray_date = self.kwargs.get('spray_date')
+                if spray_date:
+                    spray_points = spray_points.filter(spray_date=spray_date)
+                spray_points = spray_points.filter(
+                    location__in=tas
+                ).values('geom')
                 exclude = households.filter(geom__in=spray_points)\
                     .values_list('pk', flat=True)
                 households = households.exclude(pk__in=exclude)

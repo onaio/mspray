@@ -1,6 +1,5 @@
 import json
 
-from dateutil.parser import parse
 from django.conf import settings
 # from django.db.models import Case, F, Sum, ExpressionWrapper, When
 # from django.db.models import IntegerField
@@ -17,6 +16,7 @@ from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 from mspray.apps.main.utils import get_location_qs
+from mspray.apps.main.utils import parse_spray_date
 
 
 def get_location_dict(code):
@@ -129,6 +129,9 @@ class TargetAreaView(SiteNameMixin, DetailView):
         serializer = serializer_class(location,
                                       context={'request': self.request})
         context['target_data'] = serializer.data
+        spray_date = parse_spray_date(self.request)
+        if spray_date:
+            context['spray_date'] = spray_date
         if settings.MSPRAY_SPATIAL_QUERIES or \
                 context['object'].geom is not None:
             view = TargetAreaViewSet.as_view({'get': 'retrieve'})
@@ -149,17 +152,15 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 hhview = TargetAreaHouseholdsViewSet.as_view({
                     'get': 'retrieve'
                 })
-                response = hhview(self.request, pk=context['object'].pk,
-                                  bgeom=bgeom, format='geojson')
+                response = hhview(
+                    self.request,
+                    pk=context['object'].pk,
+                    bgeom=bgeom,
+                    spray_date=spray_date,
+                    format='geojson'
+                )
                 response.render()
                 context['hh_geojson'] = response.content
-
-        spray_date = self.request.GET.get('spray_date')
-        if spray_date:
-            try:
-                context['spray_date'] = parse(spray_date).date()
-            except ValueError:
-                pass
 
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('id', 'code', 'name').order_by('name')
