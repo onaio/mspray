@@ -1,8 +1,7 @@
 import json
 
 from django.conf import settings
-# from django.db.models import Case, F, Sum, ExpressionWrapper, When
-# from django.db.models import IntegerField
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -106,6 +105,14 @@ class DistrictView(SiteNameMixin, ListView):
         return context
 
 
+def get_duplicates(location, was_sprayed):
+    return location.sprayday_set.filter(
+        osmid__isnull=False, was_sprayed=was_sprayed
+    ).values('osmid').annotate(
+        dupes=Count('osmid')
+    ).filter(dupes__gt=1)
+
+
 class TargetAreaView(SiteNameMixin, DetailView):
     template_name = 'home/map.html'
     model = Location
@@ -161,6 +168,12 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 )
                 response.render()
                 context['hh_geojson'] = response.content
+                context['sprayed_duplicates'] = len(
+                    get_duplicates(context['object'], True)
+                )
+                context['not_sprayed_duplicates'] = len(
+                    get_duplicates(context['object'], False)
+                )
 
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('id', 'code', 'name').order_by('name')

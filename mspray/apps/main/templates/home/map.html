@@ -45,6 +45,18 @@
                     </dl>
                 </div>
                 <hr>
+                <div>
+                    <dl class="dl-horizontal" id="target-area-stats">
+                    {% if sprayed_duplicates %}
+                        <dt>{{ sprayed_duplicates }}</dt>
+                        <dd>Sprayed Duplicates</dd>
+
+                        <dt>{{ not_sprayed_duplicates }}</dt>
+                        <dd>Not Sprayed Duplicates</dd>
+                    {% endif %}
+                    </dl>
+                </div>
+                <hr>
                 <div id="not-sprayed-reasons">
                     <p>Not Sprayed Reasons</p>
                     <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
@@ -113,6 +125,10 @@
         app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
         app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
 
+        {% if sprayed_duplicates %}
+        app.sprayedDuplicates = {{ sprayed_duplicates }};
+        app.notSprayedDuplicates = {{ not_sprayed_duplicates }};
+        {% endif %}
         {% if target_data.level == 'ta' %}
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
