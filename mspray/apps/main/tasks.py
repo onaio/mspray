@@ -1,7 +1,5 @@
 from __future__ import absolute_import
 
-from datetime import datetime, timedelta
-
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db.utils import IntegrityError
@@ -9,6 +7,7 @@ from django.db.utils import IntegrityError
 from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models.spray_day import get_osmid
 from mspray.apps.main.ona import fetch_form_data
 from mspray.apps.main.osm import parse_osm
 from mspray.apps.main.ona import fetch_osm_xml
@@ -24,12 +23,13 @@ STRUCTURE_GPS_FIELD = getattr(settings,
                               STRUCTURE_GPS_FIELD)
 
 
-def get_new_structure_location(data, geom):
+def get_new_structure_location(data, geom, is_node=False):
     from mspray.apps.main.utils import geojson_from_gps_string
-    gps_field = data.get(STRUCTURE_GPS_FIELD,
-                         data.get(NON_STRUCTURE_GPS_FIELD))
-    geom = geojson_from_gps_string(gps_field, True) \
-        if gps_field is not None else geom
+    if is_node and geom is None:
+        gps_field = data.get(STRUCTURE_GPS_FIELD,
+                             data.get(NON_STRUCTURE_GPS_FIELD))
+        geom = geojson_from_gps_string(gps_field, True) \
+            if gps_field is not None else geom
     location = None
     if geom is not None:
         locations = Location.objects.filter(
@@ -91,6 +91,20 @@ def set_spraypoint_location(sp, location, geom, is_node=False):
         sp.save()
 
         add_unique_record.delay(sp.pk, location.pk)
+    elif geom is not None:
+        sp.save()
+
+
+def get_updated_osm_from_ona(sp):
+    formid = getattr(settings, 'ONA_FORM_PK', 0)
+    if formid:
+        data = fetch_form_data(formid, dataid=sp.submission_id)
+        osmid = get_osmid(data)
+        if data and osmid:
+            sp.data = data
+            sp.save()
+
+            return osmid
 
 
 @app.task
@@ -102,27 +116,9 @@ def add_unique_record(pk, location_pk):
         pass
     else:
         from mspray.apps.main.utils import add_unique_data
-        unique_field = HAS_UNIQUE_FIELD
-        if unique_field:
-            def get_osmid(data):
-                return data.get('%s:way:id' % unique_field) \
-                    or data.get('%s:node:id' % unique_field)
-
-            osmid = get_osmid(sp.data)
-            if not osmid:
-                formid = getattr(settings, 'ONA_FORM_PK', 0)
-                if formid:
-                    data = fetch_form_data(formid, dataid=sp.submission_id)
-                    if data and get_osmid(data):
-                        sp.data = data
-                        sp.save()
-                    else:
-                        print("Retrying %s" % sp.submission_id)
-                        add_unique_record.apply_async(
-                            args=[sp.pk, location.pk],
-                            eta=datetime.now() + timedelta(seconds=60)
-                        )
-            add_unique_data(sp, unique_field, location)
+        osmid = get_osmid(sp.data) or get_updated_osm_from_ona(sp)
+        if osmid:
+            add_unique_data(sp, HAS_UNIQUE_FIELD, location)
 
 
 @app.task
@@ -134,7 +130,7 @@ def link_spraypoint_with_osm(pk):
     else:
         location, geom, is_node = get_location_from_osm(sp.data)
         if location is None:
-            location, geom = get_new_structure_location(sp.data, geom)
+            location, geom = get_new_structure_location(sp.data, geom, is_node)
             if location is None:
                 location = get_location_from_data(sp.data)
             else:
@@ -182,10 +178,8 @@ def refresh_data_with_no_osm():
         .filter(data__has_key='osmstructure')
     found = data.count()
     for rec in data:
-        link_spraypoint_with_osm.delay(rec.pk)
-
-    refresh_data_with_no_osm.apply_async(
-        eta=datetime.now() + timedelta(minutes=4)
-    )
+        osmid = get_updated_osm_from_ona(rec)
+        if osmid:
+            link_spraypoint_with_osm.delay(rec.pk)
 
     return found
