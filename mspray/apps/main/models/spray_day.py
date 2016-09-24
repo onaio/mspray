@@ -14,6 +14,13 @@ NON_STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_NON_STRUCTURE_GPS_FIELD',
                                   'non_structure_gps')
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
+OSM_STRUCTURE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
+
+
+def get_osmid(data):
+    if OSM_STRUCTURE_FIELD:
+        return data.get('%s:way:id' % OSM_STRUCTURE_FIELD) \
+            or data.get('%s:node:id' % OSM_STRUCTURE_FIELD)
 
 
 class SprayDay(models.Model):
@@ -49,6 +56,13 @@ class SprayDay(models.Model):
         was_sprayed = data.get(WAS_SPRAYED_FIELD)
         if was_sprayed == WAS_SPRAYED_VALUE:
             self.was_sprayed = True
+
+        osmid = get_osmid(self.data)
+        try:
+            if osmid and int(osmid) != self.osmid:
+                self.osmid = osmid
+        except:
+            pass
 
         return super(SprayDay, self).save(*args, **kwargs)
 
