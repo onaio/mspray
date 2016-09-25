@@ -152,7 +152,8 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 data = GeoTargetAreaSerializer(
                     get_location_qs(self.object.location_set.all(),
                                     self.object.level),
-                    many=True
+                    many=True,
+                    context={'request': self.request}
                 ).data
                 context['hh_geojson'] = json.dumps(data)
             else:
