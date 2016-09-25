@@ -629,7 +629,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                                            code=spray_operator_code)
         dates = spray_operator.sprayday_set.values_list(
             'spray_date', flat=True
-        ).distinct()
+        ).distinct().order_by('spray_date')
         start_times = []
         end_times = []
 
