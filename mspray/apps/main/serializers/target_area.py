@@ -546,13 +546,6 @@ class TargetAreaMixin(object):
                     data.aggregate(r=Sum('new_structures')).get('r') or 0
 
             return new_structures
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_new_structures" % pk
-            # queryset = self.get_spray_queryset(obj).extra(
-            #     where=["(data->>%s) IS NULL"], params=["osmstructure"]
-            # )
-
-            # return cached_queryset_count(key, queryset)
 
         return 0
 
@@ -586,19 +579,6 @@ class TargetAreaMixin(object):
                 data.aggregate(r=Sum('not_sprayable')).get('r') or 0
 
         return not_sprayable
-        # count = 0
-        # queryset = self.get_queryset(obj)
-
-        # if HAS_SPRAYABLE_QUESTION:
-        #     pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-        #     queryset = queryset.extra(
-        #         where=['data->>%s = %s'],
-        #         params=['sprayable_structure', 'no']
-        #     )
-        #     key = "%s_not_sprayable" % pk
-        #     count = cached_queryset_count(key, queryset)
-
-        # return count
 
 
 class TargetAreaQueryMixin(TargetAreaMixin):
@@ -749,8 +729,9 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
         fields = ('targetid', 'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'level', 'district_name', 'found',
-                  'total_structures', 'num_new_structures')
-        model = TargetArea
+                  'total_structures', 'num_new_structures',
+                  'num_of_spray_areas')
+        model = Location
         geo_field = 'geom'
 
 
