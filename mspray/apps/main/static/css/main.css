@@ -433,6 +433,9 @@ i.green {
     line-height: 18px;
     font-weight: bold;
 }
+.circle-text-p.numbers {
+    margin-top: -15px;
+}
 .legend {
     text-align: center;
     line-height: 18px;
@@ -520,7 +523,6 @@ a.distrct-links {
 /* #sprayed-ratio, */
 #progress-ratio {
     font-size: 12px;
-    padding-left: 32px;
     margin-top: -15px;
 }
 
