@@ -200,7 +200,6 @@ var App = function(buffer, targetAreaData, hhData) {
                     }
                 })
                 .addTo(app.map);
-                app.map.fitBounds(app.sprayLayer.getBounds());
             }
 
             $("#target-area-stats-structures").empty().append(
@@ -335,6 +334,7 @@ var App = function(buffer, targetAreaData, hhData) {
         });
         app.targetLayer.setStyle(app.targetOptions);
         app.targetLayer.addTo(app.map);
+        app.map.fitBounds(app.targetLayer.getBounds());
     };
 
     this.loadHouseholds = function(data) {
