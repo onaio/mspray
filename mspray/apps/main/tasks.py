@@ -17,6 +17,7 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.celery import app
 
+BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 0.00007)
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 STRUCTURE_GPS_FIELD = getattr(settings,
                               'MSPRAY_STRUCTURE_GPS_FIELD',
@@ -84,7 +85,7 @@ def get_location_from_osm(data):
 def set_spraypoint_location(sp, location, geom, is_node=False):
     if geom:
         sp.geom = geom.centroid if not is_node else geom
-        sp.bgeom = geom if not is_node else sp.geom.buffer(0.00004, 1)
+        sp.bgeom = geom if not is_node else sp.geom.buffer(BUFFER_SIZE)
 
     if location:
         sp.location = location
