@@ -304,16 +304,16 @@ var App = function(buffer, targetAreaData, hhData) {
     };
 
     this.drawCircles = function (props) {
-        var app = this;
+        var app = this, structures = props.level == 'ta' ? props.structures : props.num_of_spray_areas;
         var sprayed_percentage = app.calculatePercentage(props.visited_sprayed, props.visited_total, false),
-            found_percentage = app.calculatePercentage(props.visited_total, props.structures, false),
-            progress_percentage = app.calculatePercentage(props.visited_sprayed, props.structures, false);
+            found_percentage = app.calculatePercentage(props.visited_total, structures, false),
+            progress_percentage = app.calculatePercentage(props.visited_sprayed, structures, false);
         app.drawCircle(sprayed_percentage, "spray-coverage", 40);
         app.drawCircle(found_percentage, "found-coverage", 40);
         app.drawCircle(progress_percentage, "circle-progress", 50);
         $("#sprayed-ratio").text("(" + props.visited_sprayed + "/" + props.visited_total + ")");
-        $("#found-ratio").text("(" + props.visited_total + "/" + props.structures + ")");
-        $("#progress-ratio").text("(" + props.visited_sprayed + "/" + props.structures + ")");
+        $("#found-ratio").text("(" + props.visited_total + "/" + structures + ")");
+        $("#progress-ratio").text("(" + props.visited_sprayed + "/" +structures + ")");
     };
 
     this.loadTargetArea = function(data) {
