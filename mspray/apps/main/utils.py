@@ -245,7 +245,7 @@ select
     sum(case when "PPE" = 'yes' then 1 else 0 end) ppe_yes,
     sum(case when "CFV" = 'yes' then 1 else 0 end) cfv_yes,
     sum(case when correct_covering = 'yes' then 1 else 0 end) correct_covering_yes,
-    sum(case when leak_free = 'yes' then 1 else 0 end) leak_free_yes,
+    sum(case when leak_free = 'no' then 1 else 0 end) leak_free_no,
     sum(case when correct_distance = 'yes' then 1 else 0 end) correct_distance_yes,
     sum(case when correct_speed = 'yes' then 1 else 0 end) correct_speed_yes,
     sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
@@ -310,13 +310,13 @@ def get_calculate_avg_dos_score(spray_operator_code):
         {'column': 'sprayop_code_name', 'value': spray_operator_code}
     )
 
-    total_yes = 0
+    total_positive_resp = 0
     for spray_date, records in directly_observed_spraying_data.items():
         if records:
-            total_yes += sum(records)
+            total_positive_resp += sum(records)
 
     return round(
-        total_yes / (len(directly_observed_spraying_data) or 1), 2
+        total_positive_resp / (len(directly_observed_spraying_data) or 1), 2
     )
 
 
