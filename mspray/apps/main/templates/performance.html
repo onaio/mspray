@@ -82,11 +82,7 @@
                 </tr>
             </tfoot>
         </table>
-        <p class="definitions">
-            <a href="{% url "performance:definitions-and-conditions" %}">
-                <span class="glyphicon glyphicon-info-sign"></span> Definitions and Conditions
-            </a>
-        </p>
+        {% include 'definitions-and-conditions.html' %}
     </div>
 </div>
 

@@ -1,12 +1,12 @@
 from django.conf import settings
 from django.db.models import Case, Count, F, Func, Sum, ExpressionWrapper, When
 from django.db.models import Avg, FloatField, IntegerField
-from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 from django.views.generic import TemplateView
 
+from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
@@ -15,15 +15,6 @@ from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.utils import avg_time
 from mspray.apps.main.utils import avg_time_tuple
-from mspray.apps.main.utils import get_location_qs
-from mspray.apps.main.utils import get_ta_in_location
-from mspray.apps.main.utils import sprayable_queryset
-from mspray.apps.main.utils import unique_spray_points
-from mspray.apps.main.utils import not_sprayable_queryset
-from mspray.apps.main.utils import sprayed_queryset
-from mspray.apps.main.utils import refused_queryset
-from mspray.apps.main.utils import other_queryset
-from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
@@ -139,6 +130,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         context.update({
             'data': results, 'totals': totals
         })
+        context.update(DEFINITIONS['performance:district'])
 
         return context
 
@@ -326,6 +318,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             'district': district,
             'district_name': district.name
         })
+        context.update(DEFINITIONS['tla'])
 
         return context
 
@@ -502,6 +495,7 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 'district_name': district.name
             }
         )
+        context.update(DEFINITIONS['sop'])
 
         return context
 
@@ -697,5 +691,6 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 'team_leader_name': spray_operator.team_leader_assistant.name
             }
         )
+        context.update(DEFINITIONS['sop'])
 
         return context

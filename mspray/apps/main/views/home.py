@@ -16,6 +16,7 @@ from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.definitions import DEFINITIONS
 
 
 def get_location_dict(code):
@@ -101,6 +102,12 @@ class DistrictView(SiteNameMixin, ListView):
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
         context['district_totals'] = totals
+        if not district_code:
+            context.update(DEFINITIONS['district'])
+        else:
+            loc = context.get('district')
+            level = 'RHC' if loc.level == 'district' else 'ta'
+            context.update(DEFINITIONS[level])
 
         return context
 
