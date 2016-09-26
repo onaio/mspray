@@ -282,23 +282,29 @@ class TargetAreaQueryMixin(TargetAreaMixin):
         if obj:
             queryset = self.get_spray_queryset(obj)
 
-            return queryset.filter(sprayed_percentage__gte=90)\
+            result = queryset.filter(sprayed_percentage__gte=90)\
                 .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
+            return result or 0
 
     def get_coverage_40_to_89(self, obj):
         if obj:
             queryset = self.get_spray_queryset(obj)
 
-            return queryset.filter(sprayed_percentage__gte=40,
-                                   sprayed_percentage__lt=90)\
+            result = queryset.filter(sprayed_percentage__gte=40,
+                                     sprayed_percentage__lt=90)\
                 .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
+            return result or 0
 
     def get_coverage_0_to_39(self, obj):
         if obj:
             queryset = self.get_spray_queryset(obj)
 
-            return queryset.filter(sprayed_percentage__lt=40)\
+            result = queryset.filter(sprayed_percentage__lt=40)\
                 .aggregate(Sum('num_sprayed'))['num_sprayed__sum']
+
+            return result or 0
 
 
 class NamibiaTargetAreaSerializer(TargetAreaQueryMixin,
