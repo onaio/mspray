@@ -311,9 +311,11 @@ var App = function(buffer, targetAreaData, hhData) {
                 if(app.showDupes) {
                     app.map.removeLayer(app.sprayLayer);
                     app.map.addLayer(app.duplicateLayer);
+                    $("#sprayed-duplicates").html("Show all");
                 } else {
                     app.map.removeLayer(app.duplicateLayer);
                     app.map.addLayer(app.sprayLayer);
+                    $("#sprayed-duplicates").html("Show Duplicates");
                 }
                 return false;
             });
