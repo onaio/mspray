@@ -96,7 +96,7 @@ class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
 
     class Meta:
         model = SprayDay
-        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
                   'spray_operator', 'spray_operator_code', 'irs_sticker_num')
         geo_field = 'bgeom'
 
