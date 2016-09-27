@@ -179,13 +179,17 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 sprayed_duplicates = list(get_duplicates(
                     context['object'], True
                 ))
+                not_sprayed_duplicates = list(get_duplicates(
+                    context['object'], False
+                ))
                 context['sprayed_duplicates_data'] = json.dumps(
                     sprayed_duplicates
                 )
                 context['sprayed_duplicates'] = len(sprayed_duplicates)
-                context['not_sprayed_duplicates'] = len(
-                    get_duplicates(context['object'], False)
+                context['not_sprayed_duplicates_data'] = json.dumps(
+                    not_sprayed_duplicates
                 )
+                context['not_sprayed_duplicates'] = len(not_sprayed_duplicates)
 
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('id', 'code', 'name').order_by('name')

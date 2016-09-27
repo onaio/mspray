@@ -248,6 +248,14 @@ var App = function(buffer, targetAreaData, hhData) {
                             }
                         }
 
+                        duplicates = app.notSprayedDuplicatesData !== undefined ? app.notSprayedDuplicatesData : [];
+
+                        for(i =0; i < duplicates.length; i++){
+                            if(feature.properties.osmid === duplicates[i].osmid) {
+                                return true;
+                            }
+                        }
+
                         return false;
                     }
                 });
@@ -296,6 +304,18 @@ var App = function(buffer, targetAreaData, hhData) {
 
             $("#target-area-stats-item").on("click", function() {
                 $(".info-panel").toggle();
+            });
+            $("#sprayed-duplicates").on("click", function(e) {
+                e.preventDefault();
+                app.showDupes = app.showDupes !== true;
+                if(app.showDupes) {
+                    app.map.removeLayer(app.sprayLayer);
+                    app.map.addLayer(app.duplicateLayer);
+                } else {
+                    app.map.removeLayer(app.duplicateLayer);
+                    app.map.addLayer(app.sprayLayer);
+                }
+                return false;
             });
         });
     };

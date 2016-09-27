@@ -52,7 +52,9 @@
                 <div>
                     <dl class="dl-horizontal" id="target-area-stats">
                     {% if sprayed_duplicates or not_sprayed_duplicates  %}
-                    <p>Some structures were selected more than once.</p>
+                    <p>Some structures were selected more than once.<br />
+                        <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
+                    </p>
                     {% endif %}
                     {% if sprayed_duplicates %}
                         <dt>{{ sprayed_duplicates }}</dt>
@@ -140,6 +142,7 @@
         app.sprayedDuplicates = {{ sprayed_duplicates }};
         app.sprayedDuplicatesData = {{ sprayed_duplicates_data|safe }};
         app.notSprayedDuplicates = {{ not_sprayed_duplicates }};
+        app.notSprayedDuplicatesData = {{ not_sprayed_duplicates_data|safe }};
         {% endif %}
         {% if target_data.level == 'ta' %}
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
