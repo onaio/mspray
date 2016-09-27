@@ -138,6 +138,7 @@
 
         {% if sprayed_duplicates %}
         app.sprayedDuplicates = {{ sprayed_duplicates }};
+        app.sprayedDuplicatesData = {{ sprayed_duplicates_data|safe }};
         app.notSprayedDuplicates = {{ not_sprayed_duplicates }};
         {% endif %}
         {% if target_data.level == 'ta' %}

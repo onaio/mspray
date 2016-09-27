@@ -158,6 +158,7 @@ var App = function(buffer, targetAreaData, hhData) {
             var geojson = sprayed.getGeoJSON();
             app.k = geojson;
             app.sprayCount = 0; // reset counter
+            app.sprayData = geojson;
 
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 app.sprayLayer = L.geoJson(geojson, {
@@ -198,8 +199,58 @@ var App = function(buffer, targetAreaData, hhData) {
                             }
                         }
                     }
-                })
-                .addTo(app.map);
+                }).addTo(app.map);
+
+                app.duplicateLayer = L.geoJson(geojson, {
+                    pointToLayer: function (feature, latlng) {
+                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
+                            app.sprayOptions.fillColor = "#D82118";
+                        } else if (feature.properties.sprayed === 'notsprayable') {
+                            app.sprayOptions.fillColor = "#000000";
+                        } else{
+                            app.sprayOptions.fillColor = "#2ECC40";
+                        }
+                        return L.circleMarker(latlng, app.sprayOptions);
+                    },
+                    style: function (feature) {
+                        // console.log(feature.properties.sprayed);
+                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
+                            app.sprayOptions.fillColor = "#D82118";
+                        } else if (feature.properties.sprayed === 'notsprayable') {
+                            app.sprayOptions.fillColor = "#000000";
+                        } else{
+                            app.sprayOptions.fillColor = "#2ECC40";
+                        }
+                        return app.sprayOptions;
+                    },
+                    onEachFeature: function(features){
+                        var was_sprayed = features.properties.sprayed;
+                        if (sprayed_status[features.properties.sprayed] === undefined) {
+                            sprayed_status[features.properties.sprayed] = 1;
+                        } else {
+                            sprayed_status[features.properties.sprayed]++;
+                        }
+
+                        if (features.properties.reason !== null && was_sprayed == app.WAS_NOT_SPRAYED_VALUE) {
+                            if (reason_obj[reasons[features.properties.reason]] === undefined) {
+                                reason_obj[reasons[features.properties.reason]] = 1;
+                            } else {
+                                reason_obj[reasons[features.properties.reason]]++;
+                            }
+                        }
+                    },
+                    filter: function(feature) {
+                        var i, duplicates = app.sprayedDuplicatesData !== undefined ? app.sprayedDuplicatesData : [];
+
+                        for(i =0; i < duplicates.length; i++){
+                            if(feature.properties.osmid === duplicates[i].osmid) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
+                });
             }
 
             $("#target-area-stats-structures").empty().append(
