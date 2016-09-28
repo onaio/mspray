@@ -234,9 +234,12 @@ def get_totals(spraypoints, condition):
                     c=Count('data')))
         elif condition == "sprayed":
             resultset = dict(spraypoints
-                             .extra(where=['data->>%s = %s'],
-                                    params=[WAS_SPRAYED_FIELD, 'yes'])
-                             .annotate(c=Count('data')))
+                             .extra(
+                                 where=["CAST(data->>%s AS integer ) > %s or "
+                                        "CAST(data->>%s AS integer) > %s"],
+                                 params=["sprayed/sprayed_Deltamethrin", 0,
+                                         "sprayed/sprayed_DDT", 0]
+                             ).annotate(c=Count('data')))
         elif condition == "refused":
             resultset = dict(
                 spraypoints.extra(
@@ -308,8 +311,12 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             sprayed_success_rate = round((numerator/denominator) * 100, 1)
 
             # calcuate Average structures sprayed per day per SO
-            spray_points_sprayed = qs.extra(where=["data->>%s = %s"],
-                                            params=[WAS_SPRAYED_FIELD, "yes"])
+            spray_points_sprayed = qs.extra(
+                where=["CAST(data->>%s AS integer ) > %s or "
+                       "CAST(data->>%s AS integer) > %s"],
+                params=["sprayed/sprayed_Deltamethrin", 0,
+                        "sprayed/sprayed_DDT", 0]
+            )
             sprayed_structures = update_sprayed_structures(
                 spray_points_sprayed, {})
             denominator = 1 if len(sprayed_structures.keys()) == 0 \
@@ -442,8 +449,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
             # calcuate Average structures sprayed per day per SO
             spray_points_sprayed = qs.extra(
-                where=["data->>%s = %s"],
-                params=[WAS_SPRAYED_FIELD, "yes"]
+                where=["CAST(data->>%s AS integer ) > %s or "
+                       "CAST(data->>%s AS integer) > %s"],
+                params=["sprayed/sprayed_Deltamethrin", 0,
+                        "sprayed/sprayed_DDT", 0]
             )
             sprayed_structures = update_sprayed_structures(
                 spray_points_sprayed, {}, per_so=False)
