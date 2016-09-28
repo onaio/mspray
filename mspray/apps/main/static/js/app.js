@@ -220,13 +220,13 @@ var App = function(buffer, targetAreaData, hhData) {
             $("#not-sprayed-reasons").show();
             $(".perc_label").text(app.sprayCount);
 
-            var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.visitedTotal, false),
+            var sprayed_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false),
                 refused_percentage = app.calculatePercentage(app.visitedRefused, app.visitedTotal),
                 other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal);
 
             app.drawCircle(sprayed_percentage, "circle-sprayed");
             if(geojson.features !== undefined && geojson.features.length > 0) {
-                $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.visitedTotal + ")");
+                $("#sprayed-ratio").text("(" + app.visitedSprayed + "/" + app.housesCount + ")");
                 $("#circle-refused").text(refused_percentage);
                 $("#circle-other").text(other_percentage);
             }
