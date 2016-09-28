@@ -121,7 +121,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             result['avg_start_time'] = _start_time
             start_times.append(_start_time)
 
-            for target_area in target_areas:
+            ta_with_data = target_areas.filter(
+                pk__in=qs.values_list('location', flat=True).distinct()
+            )
+            for target_area in ta_with_data:
                 locations = list(get_ta_in_location(target_area))
                 structures = 0 \
                     if target_area.structures < 0 else target_area.structures
@@ -139,8 +142,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
                 # sprayed
                 spray_points_sprayed = spray_day.extra(
-                    where=["data->>%s = %s"],
-                    params=[WAS_SPRAYED_FIELD, "yes"]
+                    where=["CAST(data->>%s AS integer ) > %s or "
+                           "CAST(data->>%s AS integer) > %s"],
+                    params=["sprayed/sprayed_Deltamethrin", 0,
+                            "sprayed/sprayed_DDT", 0]
                 )
 
                 spray_points_sprayed_count = spray_points_sprayed.count()
