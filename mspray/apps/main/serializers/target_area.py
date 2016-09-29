@@ -143,7 +143,8 @@ def get_spray_data(obj, context):
                         default=1,
                         output_field=IntegerField()
                     )
-                )
+                ),
+                structures=F('location__structures')
             )
 
     qs = loc.sprayday_set
@@ -177,10 +178,6 @@ def get_spray_data(obj, context):
                     data__contains={WAS_SPRAYED_FIELD: 'notsprayed'},
                     then=1
                 ),
-                # When(was_sprayed=False,
-                #      data__contains={
-                #     WAS_SPRAYED_FIELD: 'notsprayable'
-                # }, then=-1),
                 default=0,
                 output_field=IntegerField()
             )
@@ -287,24 +284,6 @@ class TargetAreaMixin(object):
 
             return visited_found
 
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_visited_total" % pk
-            # # queryset = self.get_spray_queryset(obj)
-            # queryset = self._get_spray_areas_with_sprayable_structures(obj)
-
-            # level = obj['level'] if isinstance(obj, dict) else obj.level
-            # if level == TA_LEVEL:
-            #     first = queryset.first()
-            #     if first:
-            #         return first.get('found')
-
-            # # A spray area is defined as 'Visited' if at least 20% of
-            # # the structures on the ground within that area have been
-            # # found and have data recorded against them.
-            # queryset = queryset.filter(found_percentage__gte=20)
-
-            # return cached_queryset_count(key, queryset)
-
     def _get_spray_areas_with_sprayable_structures(self, obj, **kwargs):
         loc = Location.objects.get(pk=obj.get('pk')) \
             if isinstance(obj, dict) else obj
@@ -377,21 +356,11 @@ class TargetAreaMixin(object):
                 found = data.count()
 
             return found
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_found" % pk
-            # queryset = self._get_spray_areas_with_sprayable_structures(obj)
-            # level = obj['level'] if isinstance(obj, dict) else obj.level
-            # if level == TA_LEVEL:
-            #     first = queryset.first()
-            #     if first:
-            #         return first.get('found')
-            # # queryset = self.get_spray_queryset(obj)
-
-            # return cached_queryset_count(key, queryset)
 
     def get_visited_sprayed(self, obj):
         if obj:
             level = obj['level'] if isinstance(obj, dict) else obj.level
+
             data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
                 visited_sprayed = data.get('sprayed') or 0
@@ -410,38 +379,6 @@ class TargetAreaMixin(object):
                             visited_sprayed += 1
 
             return visited_sprayed
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_visited_sprayed" % pk
-            # level = obj['level'] if isinstance(obj, dict) else obj.level
-            # # queryset = self.get_spray_queryset(obj)\
-            # #     .extra(where=['data->>%s = %s'],
-            # #            params=[WAS_SPRAYED_FIELD, WAS_SPRAYED_VALUE])
-            # if level == TA_LEVEL:
-            #     queryset = self._get_spray_areas_with_sprayable_structures(
-            #         obj  # , sprayday__was_sprayed=True
-            #     )
-            # elif level == 'RHC':
-            #     queryset = self._get_spray_areas_with_sprayable_structures(
-            #         obj,
-            #         spraydayhealthcenterlocation__content_object__was_sprayed=True  # noqa
-            #     )
-            # else:
-            #     queryset = self._get_spray_areas_with_sprayable_structures(
-            #         obj,
-            #         spraydaydistrict__content_object__was_sprayed=True
-            #     )
-
-            # if level == TA_LEVEL:
-            #     first = queryset.first()
-            #     if first:
-            #         return first.get('sprayed')
-
-            # # A spray area is defined as 'Sprayed Effectively' if atleast 90%
-            # # of the structures on the ground within that area have been
-            # # sprayed.
-            # queryset = queryset.filter(found_percentage__gte=90)
-
-            # return cached_queryset_count(key, queryset)
 
     def get_visited_not_sprayed(self, obj):
         if obj:
@@ -466,13 +403,6 @@ class TargetAreaMixin(object):
                 refused = data.aggregate(r=Sum('refused')).get('r') or 0
 
             return refused
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_visited_refused" % pk
-            # queryset = self.get_spray_queryset(obj)\
-            #     .extra(where=['data->>%s = %s'],
-            #            params=[REASON_FIELD, REASON_REFUSED])
-
-            # return cached_queryset_count(key, queryset)
 
     def get_visited_other(self, obj):
         if obj:
