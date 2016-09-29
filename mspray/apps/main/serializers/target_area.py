@@ -112,9 +112,13 @@ def get_spray_data(obj, context):
                 new_structures=Sum(
                     Case(
                         When(data__has_key='osmstructure:node:id', then=1),
-                        When(data__contains={
-                            WAS_SPRAYED_FIELD: 'notsprayable'
-                        }, then=-1),
+                        When(
+                            data__has_key='osmstructure:node:id',
+                            data__contains={
+                                WAS_SPRAYED_FIELD: 'notsprayable'
+                            },
+                            then=-1
+                        ),
                         default=0,
                         output_field=IntegerField()
                     )
