@@ -242,6 +242,24 @@ def get_spray_data(obj, context):
     )
 
 
+def count_if(data, percentage):
+    """Count as 1 if it matches the percentage or greater"""
+    visited_sprayed = 0
+    for i in data:
+        sprayed = i.get('sprayed') or 0
+        not_sprayable = i.get('not_sprayable') or 0
+        new_structures = i.get('new_structures') or 0
+        structures = i.get('structures') or 0
+        structures -= not_sprayable
+        structures += new_structures
+        if structures != 0:
+            rate = round(sprayed * 100 / structures)
+            if rate >= percentage:
+                visited_sprayed += 1
+
+    return visited_sprayed
+
+
 class TargetAreaMixin(object):
     def get_queryset(self, obj):
 
@@ -278,82 +296,9 @@ class TargetAreaMixin(object):
             if level == TA_LEVEL:
                 visited_found = data.get('found') or 0
             else:
-                visited_found = 0
-                for i in data:
-                    found = i.get('found') or 0
-                    not_sprayable = i.get('not_sprayable') or 0
-                    new_structures = i.get('new_structures') or 0
-                    structures = i.get('structures') or 0
-                    structures -= not_sprayable
-                    structures += new_structures
-                    if structures != 0:
-                        rate = round(found * 100 / structures)
-                        if rate >= 20:
-                            visited_found += 1
+                visited_found = count_if(data, 20)
 
             return visited_found
-
-    def _get_spray_areas_with_sprayable_structures(self, obj, **kwargs):
-        loc = Location.objects.get(pk=obj.get('pk')) \
-            if isinstance(obj, dict) else obj
-
-        if loc.level == 'ta':
-            sp_key = key = 'sprayday'
-        else:
-            key = 'spraydayhealthcenterlocation' \
-                if loc.level == 'RHC' else 'spraydaydistrict'
-            sp_key = '%s__content_object' % key
-        sp_point = '%s__spraypoint' % sp_key
-        sp_structures = '%s__location__structures' % key
-        sprayable_kwargs = {
-            '%s__data__sprayable_structure' % sp_key: 'yes'
-        }
-        qs = Location.objects.filter(
-            pk=loc.pk, level=loc.level, **kwargs
-        ).filter(**sprayable_kwargs)\
-            .annotate(
-                num_new_structures=Sum(Case(When(
-                    **{'%s__data__has_key' % sp_key: 'osmstructure:node:id'},
-                    then=1
-                ), default=0, output_field=IntegerField())),
-            ).annotate(
-                sprayed=Sum(Case(
-                    When(**{'%s__was_sprayed' % sp_key: True}, then=1),
-                    default=0,
-                    output_field=IntegerField()
-                )),
-                not_sprayed=Sum(Case(
-                    When(**{
-                        '%s__was_sprayed' % sp_key: False,
-                        '%s__isnull' % sp_point: False
-                    }, then=1),
-                    default=0,
-                    output_field=IntegerField()
-                )),
-                found=(Count(sp_point, distinct=True)),
-                found_percentage=ExpressionWrapper(
-                    (
-                        Count(sp_point, distinct=True) * 100 /
-                        Func(
-                            F(sp_structures) + F('num_new_structures'),
-                            function='CAST',
-                            template=FUNCTION_TEMPLATE
-                        )
-                    ),
-                    output_field=FloatField()
-                ),
-                total_structures=F(sp_structures) + F('num_new_structures'),
-            ).values(
-                'id',
-                '%s__location' % key,
-                '%s__location__code' % key, 'found',
-                '%s__location__structures' % key, 'found_percentage',
-                'num_new_structures', 'total_structures', 'sprayed',
-                'not_sprayed'
-            )
-        print(list(qs))
-
-        return qs
 
     def get_found(self, obj):
         if obj:
@@ -374,18 +319,7 @@ class TargetAreaMixin(object):
             if level == TA_LEVEL:
                 visited_sprayed = data.get('sprayed') or 0
             else:
-                visited_sprayed = 0
-                for i in data:
-                    sprayed = i.get('sprayed') or 0
-                    not_sprayable = i.get('not_sprayable') or 0
-                    new_structures = i.get('new_structures') or 0
-                    structures = i.get('structures') or 0
-                    structures -= not_sprayable
-                    structures += new_structures
-                    if structures != 0:
-                        rate = round(sprayed * 100 / structures)
-                        if rate >= 90:
-                            visited_sprayed += 1
+                visited_sprayed = count_if(data, 90)
 
             return visited_sprayed
 
@@ -423,16 +357,6 @@ class TargetAreaMixin(object):
                 other = data.aggregate(r=Sum('other')).get('r') or 0
 
             return other
-            # pk = obj['pk'] if isinstance(obj, dict) else obj.pk
-            # key = "%s_visited_other" % pk
-            # queryset = self.get_spray_queryset(obj)\
-            #     .extra(where=[
-            #         "data->>%s IN ({})".format(
-            #             ",".join(["'{}'".format(i) for i in REASON_OTHER])
-            #         )
-            #     ], params=[REASON_FIELD])
-
-            # return cached_queryset_count(key, queryset)
 
     def get_not_visited(self, obj):
         if obj:
