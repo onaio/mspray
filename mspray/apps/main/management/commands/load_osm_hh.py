@@ -32,7 +32,7 @@ class Command(BaseCommand):
             else:
                 path = os.path.abspath(osmfile)
                 count = Household.objects.count()
-                process_osm_file.delay(path)
+                process_osm_file(path)
                 after_count = Household.objects.count()
                 self.stdout.write('%d structures added.' %
                                   (after_count - count))
