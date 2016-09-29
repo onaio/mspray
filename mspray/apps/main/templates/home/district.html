@@ -62,7 +62,7 @@
                         <td class='numbers'>{{ district.visited_total|intcomma }}</td>
                         <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district.visited_total district.num_of_spray_areas %} {% endif %}</td>
                         <td class='numbers'>{{ district.visited_sprayed|intcomma }}</td>
-                        {% calc_percentage district.visited_sprayed district.num_of_spray_areas as calculated_percentage %}
+                        {% calc_percentage district.visited_sprayed district.visited_total as calculated_percentage %}
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                     </tr>
                 {% endfor %}
@@ -107,7 +107,7 @@
                         <td class='numbers'>{{ district_totals.visited_total|intcomma  }}</td>
                         <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district_totals.visited_total district_totals.num_of_spray_areas %} {% endif %}</td>
                         <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }}</td>
-                        {% calc_percentage district_totals.visited_sprayed district_totals.num_of_spray_areas as total_calculated_percentage %}
+                        {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as total_calculated_percentage %}
                         <td class='numbers {{ total_calculated_percentage|sprayed_effectively_color }}'>{{ total_calculated_percentage }}</td>
                     {% else %}
                         <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
