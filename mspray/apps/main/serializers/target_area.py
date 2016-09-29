@@ -49,7 +49,8 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
 
 
 def get_spray_data(obj, context):
-    spray_date = parse_spray_date(context.get('request'))
+    request = context.get('request')
+    spray_date = parse_spray_date(request) if request else None
 
     if type(obj) == dict:
         loc = Location.objects.get(pk=obj.get('pk'))
