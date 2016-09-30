@@ -114,7 +114,7 @@ class Command(BaseCommand):
                 if skip_field and not skip_value:
                     raise CommandError(_('Error: please provide skip value'))
 
-                count = exception_raised = failed = skipped = 0
+                count = exception_raised = failed = skipped = updated = 0
                 srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
                 ds = DataSource(path)
                 layer = ds[0]
@@ -162,19 +162,29 @@ class Command(BaseCommand):
                         skipped += 1
                         continue
                     try:
-                        Location.objects.create(
-                            name=name, code=code, structures=structures,
-                            level=level, parent=parent, geom=geom.wkt
+                        location = Location.objects.get(
+                            name=name, level=level, parent=parent
                         )
-                    except IntegrityError:
-                        failed += 1
-                    except Exception as e:
-                        exception_raised += 1
+                    except Location.DoesNotExist:
+                        try:
+                            Location.objects.create(
+                                name=name, code=code, structures=structures,
+                                level=level, parent=parent, geom=geom.wkt
+                            )
+                        except IntegrityError:
+                            failed += 1
+                        except Exception as e:
+                            exception_raised += 1
+                        else:
+                            count += 1
                     else:
-                        count += 1
+                        location.geom = geom.wkt
+                        location.save()
+                        updated += 1
 
                 self.stdout.write(
-                    "Created %s locations, failed %s, skipped %s, error %s" % (
-                        count, failed, skipped, exception_raised
+                    "Created %s locations, %s updated, failed %s, skipped %s, "
+                    "error %s" % (
+                        count, updated, failed, skipped, exception_raised
                     )
                 )
