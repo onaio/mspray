@@ -149,6 +149,8 @@ class Command(BaseCommand):
                         parent_name = feature.get(parent_field)
                     else:
                         parent_name = name
+                    name = name.strip()
+                    parent_name = parent_name.strip()
 
                     if parent_code_field:
                         parent_code = feature.get(parent_code_field)
