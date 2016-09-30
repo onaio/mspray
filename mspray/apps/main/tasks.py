@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
+import gc
 import os
+
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db.utils import IntegrityError
@@ -180,6 +182,7 @@ def process_osm_file(path):
 
                 if location:
                     _create_household(way, location)
+    gc.collect()
 
 
 @app.task
