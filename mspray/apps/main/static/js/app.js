@@ -390,6 +390,7 @@ var App = function(buffer, targetAreaData, hhData) {
     this.loadTargetArea = function(data) {
         var app = this,
             geojson = data;
+        app.targetAreaData = data;
         app.targetLayer = L.geoJson(geojson, {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
@@ -431,22 +432,39 @@ var App = function(buffer, targetAreaData, hhData) {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
                 if(props.level !== undefined) {
-                    var content = props.district_name + "<br/>" +
-                        "Structures: " + props.structures + "<br/>" +
-                        "Visited Total: " + props.visited_total + "<br/>" +
-                        "Not Sprayed: " + props.visited_not_sprayed + "<br/>" +
-                        "Sprayed: " + props.visited_sprayed;
+                    var content;
+                    if (props.level === 'RHC') {
+                        content = props.district_name + "<br/>" +
+                            "Number of spray areas: " + props.num_of_spray_areas + "<br/>" +
+                            "Spray areas Visited: " + props.visited_total + "<br/>" +
+                            "Spray areas Sprayed: " + props.visited_sprayed+ "<br/>" +
+                            "Spray areas NOT Sprayed: " + props.visited_not_sprayed;
+                    } else {
+                        content = props.district_name + "<br/>" +
+                            "Structures: " + props.structures + "<br/>" +
+                            "Visited Total: " + props.visited_total + "<br/>" +
+                            "Sprayed: " + props.visited_sprayed + "<br/>" +
+                            "Not Sprayed: " + props.visited_not_sprayed;
+                    }
+
                     layer.bindPopup(content, {closeButton: true});
-                    var label = new L.Label();
+                    // var label = new L.Label();
+                    var label = new L.Label({className: "hh-label"});
                     label.setContent(props.district_name);
                     label.setLatLng(layer.getBounds().getCenter());
                     app.map.showLabel(label);
                     layer.on({
+                        dblclick: function(e) {
+                            var uri = window.location.origin +
+                                "/" + app.targetAreaData.properties.targetid +
+                                "/" + feature.properties.targetid;
+                            window.location.href = uri;
+                        },
                         mouseover: function(e){
-                            e.layer.openPopup();
+                            // e.layer.openPopup();
                         },
                         mouseout: function(e){
-                            e.layer.closePopup();
+                            // e.layer.closePopup();
                         }
                     });
                 }

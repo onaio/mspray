@@ -593,6 +593,11 @@ a.distrct-links {
     border: none;
     font-size: 20px;
 }
+.hh-label {
+    color: white;
+    background-color: transparent;
+    border: none
+}
 .ta-label:before {
     border: none;
 }
