@@ -1,3 +1,5 @@
+import gc
+
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db.utils import IntegrityError
@@ -26,6 +28,7 @@ class Command(BaseCommand):
             raw_data = fetch_form_data(formid, dataids_only=True)
             if isinstance(raw_data, list):
                 all_data = [rec['_id'] for rec in raw_data]
+                all_data.sort()
                 if all_data is not None and isinstance(all_data, list):
                     new_data = list(set(all_data) - set(old_data))
                     count = len(new_data)
@@ -44,6 +47,8 @@ class Command(BaseCommand):
                                 add_spray_data(rec)
                             except IntegrityError:
                                 continue
+                        if counter % 100 == 0:
+                            gc.collect()
             else:
                 self.stdout.write("DATA not fetched: {}".format(raw_data))
         else:
