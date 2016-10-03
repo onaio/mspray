@@ -454,7 +454,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     label.setLatLng(layer.getBounds().getCenter());
                     app.map.showLabel(label);
                     layer.on({
-                        dblclick: function(e) {
+                        click: function(e) {
                             var uri = window.location.origin +
                                 "/" + app.targetAreaData.properties.targetid +
                                 "/" + feature.properties.targetid;
