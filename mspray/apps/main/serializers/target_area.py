@@ -319,7 +319,7 @@ class TargetAreaMixin(object):
             if level == TA_LEVEL:
                 visited_sprayed = data.get('sprayed') or 0
             else:
-                visited_sprayed = count_if(data, 90)
+                visited_sprayed = count_if(data, 85)
 
             return visited_sprayed
 

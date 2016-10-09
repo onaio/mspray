@@ -2,13 +2,13 @@ DEFINITIONS = {
     "district": {
         "definitions": [
             "a - A spray area is defined as 'Visited' if at least 20% of"" the structures on the ground within that area have been found and have data recorded against them.",  # noqa
-            "b - A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed."  # noqa
+            "b - A spray area is defined as 'Sprayed Effectively' if at least 85% of the structures on the ground within that area have been sprayed."  # noqa
         ],
         "colors": {
             "title": "1. Health Facility shapefiles will appear colored based on Spray Effectiveness as below:",  # noqa
             "colors": [
-                ("Green", ">=", "90%"),
-                ("Orange", "90%", "75%"),
+                ("Green", ">=", "85%"),
+                ("Orange", "85%", "75%"),
                 ("Red", "75%", "20%"),
                 ("Yellow", "<", "20%")
             ]
@@ -17,13 +17,13 @@ DEFINITIONS = {
     "RHC": {
         "definitions": [
             "a - A spray area is defined as 'Visited' if at least 20% of the structures within that area have been found and have data recorded against them.",  # noqa
-            "b - A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures within that area have been sprayed.",  # noqa
+            "b - A spray area is defined as 'Sprayed Effectively' if at least 85% of the structures within that area have been sprayed.",  # noqa
         ],
         "colors": {
             "title": "1. Spray Area shapefiles will appear colored based on Spray Effectiveness as below:",  # noqa
             "colors": [
-                ("Green", ">=", "90%"),
-                ("Orange", "90%", "75%"),
+                ("Green", ">=", "85%"),
+                ("Orange", "85%", "75%"),
                 ("Red", "75%", "20%"),
                 ("Yellow", "<", "20%")
             ]
@@ -38,8 +38,8 @@ DEFINITIONS = {
         "colors": {
             "title": "Spray Effectiveness colors:",
             "colors": [
-                ("Green", ">=", "90%"),
-                ("Orange", "90%", "75%"),
+                ("Green", ">=", "85%"),
+                ("Orange", "85%", "75%"),
                 ("Red", "75%", "20%"),
                 ("Yellow", "<", "20%")
             ]

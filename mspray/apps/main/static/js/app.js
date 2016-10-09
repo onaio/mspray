@@ -97,19 +97,19 @@ var App = function(buffer, targetAreaData, hhData) {
 
     this.getFillColor = function (percent) {
         var fillColor;
-        if(percent < 30){
+        if(percent < 20){
             fillColor = "#FFA500";
         }
-        else if(percent >= 30 && percent < 40){
+        else if(percent >= 20 && percent < 40){
             fillColor = "#FFFFCC";
         }
-        else if(percent >= 40 && percent < 80){
+        else if(percent >= 40 && percent < 75){
             fillColor = "#C2E699";
         }
-        else if(percent >= 80 && percent < 90){
+        else if(percent >= 75 && percent < 85){
             fillColor = "#78C679";
         }
-        else if(percent >= 90 && percent <= 100){
+        else if(percent >= 85 && percent <= 100){
             fillColor = "#31A354";
         }
         return fillColor;
