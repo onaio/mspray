@@ -25,6 +25,14 @@ class Command(BaseCommand):
             if data is not None and isinstance(data, list):
                 for rec in data:
                     try:
-                        add_spray_data(rec)
-                    except IntegrityError:
-                        continue
+                        sprayday = SprayDay.objects.get(
+                            submission_id=rec.get('_id')
+                        )
+                    except SprayDay.DoesNotExist:
+                        pass
+                    else:
+                        sprayday.delete()
+                        try:
+                            add_spray_data(rec)
+                        except IntegrityError:
+                            continue
