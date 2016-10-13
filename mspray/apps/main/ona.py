@@ -25,7 +25,8 @@ def fetch_osm_xml(data):
     return xml
 
 
-def fetch_form_data(formid, latest=None, dataid=None, dataids_only=False):
+def fetch_form_data(formid, latest=None, dataid=None, dataids_only=False,
+                    edited_only=False):
     query = None
     if latest:
         query = {
@@ -34,6 +35,10 @@ def fetch_form_data(formid, latest=None, dataid=None, dataids_only=False):
     if dataids_only:
         query = {} if query is None else query
         query['fields'] = '["_id"]'
+    if edited_only:
+        query = {
+            'query': '{"_edited":"true"}'
+        }
 
     if dataid is not None:
         url = urljoin(ONA_URI,
