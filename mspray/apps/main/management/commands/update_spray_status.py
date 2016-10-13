@@ -15,9 +15,10 @@ class Command(BaseCommand):
                     where=['(data->>%s) != %s'],
                     params=[settings.MSPRAY_WAS_SPRAYED_FIELD, status]
                 )
+            count = int(mismatched.count())
             mismatched.update(was_sprayed=was_sprayed is not True)
 
-            return mismatched.count()
+            return count
 
         print(settings.MSPRAY_WAS_SPRAYED_FIELD)
         true_mismatch = int(update_mismatched(True, 'yes'))
