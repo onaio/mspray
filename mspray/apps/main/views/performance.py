@@ -225,7 +225,7 @@ def get_district_data(district):
 
     for team_leader_assistant in team_leaders:
         k = get_tla_data(team_leader_assistant)[1]
-        found_difference, sprayed_difference, data_quality_check = \
+        sprayed_difference, found_difference, data_quality_check = \
             get_tla_data_quality_check(team_leader_assistant)
 
         tla_code = team_leader_assistant.code
@@ -397,7 +397,7 @@ def get_tla_data(team_leader_assistant):
         # spray_operator = SprayOperator.objects.get(pk=sop.get('pk'))
         sop = get_sop_data(team_leader_assistant, spray_operator)
         found_difference = sprayed_difference = 0
-        found_difference, sprayed_difference, data_quality_check = \
+        sprayed_difference, found_difference, data_quality_check = \
             get_tla_data_quality_check(team_leader_assistant,
                                        spray_operator)
 
