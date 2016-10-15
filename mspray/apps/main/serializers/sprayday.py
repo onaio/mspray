@@ -23,14 +23,15 @@ class SprayBase(object):
 
     def get_sprayed(self, obj):
         if obj:
+            print(WAS_SPRAYED_FIELD)
             return obj.data.get(WAS_SPRAYED_FIELD)
 
     def get_reason(self, obj):
         if obj:
             reason = obj.data.get(REASON_FIELD)
-            reason = REASONS.get(reason)
-            if isinstance(reason, str):
-                reason = reason.lower()
+            # reason = REASONS.get(reason)
+            # if isinstance(reason, str):
+            #     reason = reason.lower()
 
             return reason
 

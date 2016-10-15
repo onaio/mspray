@@ -147,20 +147,34 @@ var App = function(buffer, targetAreaData, hhData) {
         var sprayed = L.mapbox.featureLayer().loadURL(url),
             sprayed_status = {}, reason_obj = {},
             reasons = {
-            "sick": "sick",
-            "locked": "locked",
-            "funeral": "funeral",
-            "refused": "refused",
-            "no one home/missed": "no one home/missed",
-            "other": "other"
+            "S": "sick",
+            "L": "locked",
+            "F": "funeral",
+            "R": "refused",
+            "M": "no one home/missed",
+            "O": "other"
         },
+        reasons_keys = ["S", "L", "F", "R", "M", "O"],
         target_area_stats = "";
+        app.kk = [];
         sprayed.on("ready", function(){
             var geojson = sprayed.getGeoJSON();
             app.k = geojson;
             app.sprayCount = 0; // reset counter
             app.sprayData = geojson;
+            var reasonCounter = function(key, data) {
+                return data.filter(function(k, v) {
+                    return k.properties.reason !== null && k.properties.sprayed == app.WAS_NOT_SPRAYED_VALUE;
+                }) .reduce(function(k, v){
+                    return v.properties.reason === key ? k + 1: k;
+                }, 0);
+            }, key, i;
+            for(i = 0; i < reasons_keys.length; ++i) {
+                key = reasons_keys[i];
+                reason_obj[reasons[key]] = reasonCounter(key, geojson.features);
+            }
 
+            // geojson.features.filter(function(k, v){ return k.properties.reason !== null}) .reduce(function(k, v){return v.properties.reason === 'R' ? k + 1: k + 0}, 0)
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 app.sprayLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
@@ -174,7 +188,6 @@ var App = function(buffer, targetAreaData, hhData) {
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
                     style: function (feature) {
-                        console.log(feature.properties.sprayed, feature.properties.osm_sprayed);
                         if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
@@ -192,13 +205,6 @@ var App = function(buffer, targetAreaData, hhData) {
                             sprayed_status[features.properties.sprayed]++;
                         }
 
-                        if (features.properties.reason !== null && was_sprayed == app.WAS_NOT_SPRAYED_VALUE) {
-                            if (reason_obj[reasons[features.properties.reason]] === undefined) {
-                                reason_obj[reasons[features.properties.reason]] = 1;
-                            } else {
-                                reason_obj[reasons[features.properties.reason]]++;
-                            }
-                        }
                     }
                 }).addTo(app.map);
 
@@ -223,22 +229,6 @@ var App = function(buffer, targetAreaData, hhData) {
                             app.sprayOptions.fillColor = "#2ECC40";
                         }
                         return app.sprayOptions;
-                    },
-                    onEachFeature: function(features){
-                        var was_sprayed = features.properties.sprayed;
-                        if (sprayed_status[features.properties.sprayed] === undefined) {
-                            sprayed_status[features.properties.sprayed] = 1;
-                        } else {
-                            sprayed_status[features.properties.sprayed]++;
-                        }
-
-                        if (features.properties.reason !== null && was_sprayed == app.WAS_NOT_SPRAYED_VALUE) {
-                            if (reason_obj[reasons[features.properties.reason]] === undefined) {
-                                reason_obj[reasons[features.properties.reason]] = 1;
-                            } else {
-                                reason_obj[reasons[features.properties.reason]]++;
-                            }
-                        }
                     },
                     filter: function(feature) {
                         var i, duplicates = app.sprayedDuplicatesData !== undefined ? app.sprayedDuplicatesData : [];
