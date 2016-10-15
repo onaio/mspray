@@ -30,6 +30,7 @@ var App = function(buffer, targetAreaData, hhData) {
         opacity: 1,
         fillOpacity: 1
     };
+    this.WAS_NOT_SPRAYABLE = null;
 
     L.mapbox.accessToken = "pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ";
     this.map = L.mapbox.map("map");
@@ -165,7 +166,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === 'notsprayable') {
+                        } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
@@ -173,10 +174,10 @@ var App = function(buffer, targetAreaData, hhData) {
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
                     style: function (feature) {
-                        // console.log(feature.properties.sprayed);
+                        console.log(feature.properties.sprayed, feature.properties.osm_sprayed);
                         if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === 'notsprayable') {
+                        } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
@@ -205,7 +206,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === 'notsprayable') {
+                        } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";
@@ -216,7 +217,7 @@ var App = function(buffer, targetAreaData, hhData) {
                         // console.log(feature.properties.sprayed);
                         if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
-                        } else if (feature.properties.sprayed === 'notsprayable') {
+                        } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
                         } else{
                             app.sprayOptions.fillColor = "#2ECC40";

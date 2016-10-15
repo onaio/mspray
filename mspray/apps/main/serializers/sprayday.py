@@ -17,6 +17,10 @@ REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER
 
 
 class SprayBase(object):
+    def get_osm_sprayed(self, obj):
+        if obj:
+            return obj.data.get('osmstructure:spray_status')
+
     def get_sprayed(self, obj):
         if obj:
             return obj.data.get(WAS_SPRAYED_FIELD)
@@ -88,6 +92,7 @@ class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
 
 class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
+    osm_sprayed = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     spray_operator = serializers.SerializerMethodField()
     spray_operator_code = serializers.SerializerMethodField()
@@ -97,7 +102,9 @@ class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
     class Meta:
         model = SprayDay
         fields = ('submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
-                  'spray_operator', 'spray_operator_code', 'irs_sticker_num')
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num',
+                  'osm_sprayed'
+                  )
         geo_field = 'bgeom'
 
 
