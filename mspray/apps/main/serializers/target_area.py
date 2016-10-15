@@ -1,5 +1,5 @@
-from django.db.models import Case, Count, ExpressionWrapper, F, Func, Sum, When
-from django.db.models import FloatField, IntegerField
+from django.db.models import Case, F, Sum, When
+from django.db.models import IntegerField
 from django.conf import settings
 from django.core.cache import cache
 from rest_framework import serializers
@@ -20,6 +20,7 @@ SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 WAS_SPRAYED_VALUE = settings.MSPRAY_WAS_SPRAYED_VALUE
+WAS_NOT_SPRAYED_VALUE = settings.MSPRAY_WAS_NOT_SPRAYED_VALUE
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
@@ -71,11 +72,12 @@ def get_spray_data(obj, context):
                 found=Sum(
                     Case(
                         When(
-                            data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                            was_sprayed=False,
-                            then=0
+                            # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
+                            data__has_key=WAS_SPRAYED_FIELD,
+                            # was_sprayed=False,
+                            then=1
                         ),
-                        default=1,
+                        default=0,
                         output_field=IntegerField()
                     )
                 ),
@@ -90,7 +92,8 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=False,
-                            data__contains={WAS_SPRAYED_FIELD: 'notsprayed'},
+                            data__contains={WAS_SPRAYED_FIELD:
+                                            WAS_NOT_SPRAYED_VALUE},
                             then=1
                         ),
                         default=0,
@@ -100,26 +103,28 @@ def get_spray_data(obj, context):
                 not_sprayable=Sum(
                     Case(
                         When(
-                            data__has_key='osmstructure:way:id',
-                            data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                            was_sprayed=False,
-                            then=1
+                            # data__has_key='osmstructure:way:id',
+                            # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
+                            data__has_key=WAS_SPRAYED_FIELD,
+                            # was_sprayed=False,
+                            then=0
                         ),
-                        default=0,
+                        default=1,
                         output_field=IntegerField()
                     )
                 ),
                 new_structures=Sum(
                     Case(
-                        When(data__has_key='osmstructure:node:id', then=1),
+                        When(data__has_key='osmstructure:way:id', then=0),
                         When(
                             data__has_key='osmstructure:node:id',
                             data__contains={
-                                WAS_SPRAYED_FIELD: 'notsprayable'
+                                # WAS_SPRAYED_FIELD: 'notsprayable'
+                                'osmstructure:spray_status': 'notsprayable'
                             },
                             then=-1
                         ),
-                        default=0,
+                        default=1,
                         output_field=IntegerField()
                     )
                 ),
@@ -161,11 +166,12 @@ def get_spray_data(obj, context):
             Case(
                 When(
                     # data__has_key='osmstructure:way:id',
-                    data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                    was_sprayed=False,
-                    then=0
+                    # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                    data__has_key=WAS_SPRAYED_FIELD,
+                    # was_sprayed=False,
+                    then=1
                 ),
-                default=1,
+                default=0,
                 output_field=IntegerField()
             )
         ),
@@ -180,7 +186,7 @@ def get_spray_data(obj, context):
             Case(
                 When(
                     was_sprayed=False,
-                    data__contains={WAS_SPRAYED_FIELD: 'notsprayed'},
+                    data__contains={WAS_SPRAYED_FIELD: WAS_NOT_SPRAYED_VALUE},
                     then=1
                 ),
                 default=0,
@@ -190,26 +196,28 @@ def get_spray_data(obj, context):
         not_sprayable=Sum(
             Case(
                 When(
-                    data__has_key='osmstructure:way:id',
-                    data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                    was_sprayed=False,
-                    then=1
+                    data__has_key=WAS_SPRAYED_FIELD,
+                    # data__has_key='osmstructure:way:id',
+                    # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                    # was_sprayed=False,
+                    then=0
                 ),
-                default=0,
+                default=1,
                 output_field=IntegerField()
             )
         ),
         new_structures=Sum(
             Case(
-                When(data__has_key='osmstructure:node:id', then=1),
+                When(data__has_key='osmstructure:way:id', then=0),
                 When(
                     data__has_key='osmstructure:node:id',
                     data__contains={
-                        WAS_SPRAYED_FIELD: 'notsprayable'
+                        # WAS_SPRAYED_FIELD: 'notsprayable'
+                        'osmstructure:spray_status': 'notsprayable'
                     },
                     then=-1
                 ),
-                default=0,
+                default=1,
                 output_field=IntegerField()
             )
         ),
