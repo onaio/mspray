@@ -14,18 +14,15 @@
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
-                    <th rowspan="2">District</th>
-                    <th rowspan="2">Health Centre</th>
-                    <th rowspan="2">Spray Area</th>
-                    <th rowspan="2">Eligible Spray Areas</th>
-                    <th colspan="2">Spray Areas Visited <sup title="A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them.">(a)</sup></th>
-                    <th colspan="2">Spray Areas Sprayed Effectively<sup title="A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed.">(b)</sup></th>
-                </tr>
-                <tr>
-                    <th>Number</th>
-                    <th>%</th>
-                    <th>Number</th>
-                    <th>%</th>
+                    <th>District</th>
+                    <th>Health Centre</th>
+                    <th>Target Area</th>
+                    <th>Structures on ground</th>
+                    <th>Found</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found coverage</th>
+                    <th>Spray coverage</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,19 +35,25 @@
                                 <i class="fa fa-map"></i>
                                 {{ district.district_name }}
                             </a>
+                            </td>
                         </td>
+
                         <td class='numbers'>{{ district.structures|intcomma }}</td>
-                        <td class='numbers'>{{ district.visited_total|intcomma }}</td>
-                        <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district.visited_total district.num_of_spray_areas %} {% endif %}</td>
-                        <td class='numbers'>{{ district.visited_sprayed|intcomma }}</td>
-                        {% calc_percentage district.visited_sprayed district.visited_total as calculated_percentage %}
-                        <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
+                        <td class='numbers'>{{ district.found|intcomma }}</td>
+                        <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district.visited_sprayed district.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district.found district.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
                     <td>Total</td>
+                        <td>&nbsp;</td>
                         <td>&nbsp;</td>
                         <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>

@@ -1,7 +1,9 @@
+import csv
 import json
 
 from django.conf import settings
 from django.db.models import Count
+from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -224,11 +226,13 @@ class SprayAreaView(SiteNameMixin, ListView):
             'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
             'num_new_structures', 'total_structures', 'parent__name',
             'parent__parent__name', 'parent__parent__pk', 'parent__pk'
-        )[:10]
-        serializer_class = TargetAreaSerializer
-        serializer = serializer_class(qs, many=True,
-                                      context={'request': self.request})
-        context['district_list'] = serializer.data
+        ).order_by('parent__parent__name', 'parent__name', 'name')
+        if self.request.GET.get('format') != 'csv':
+            serializer_class = TargetAreaSerializer
+            serializer = serializer_class(qs, many=True,
+                                          context={'request': self.request})
+            context['district_list'] = serializer.data
+        context['qs'] = qs
         # fields = ['structures', 'visited_total', 'visited_sprayed',
         #           'visited_not_sprayed', 'visited_refused', 'visited_other',
         #           'not_visited', 'found', 'num_of_spray_areas']
@@ -244,6 +248,66 @@ class SprayAreaView(SiteNameMixin, ListView):
         return context
 
     def render_to_response(self, context, **response_kwargs):
+        if self.request.GET.get('format') == 'csv':
+            def calc_percentage(numerator, denominator):
+                try:
+                    denominator = float(denominator)
+                    numerator = float(numerator)
+                except ValueError:
+                    return ''
+
+                if denominator == 0:
+                    return ''
+
+                return round((numerator * 100) / denominator)
+
+            class SprayArea(object):
+                def write(self, value):
+                    return value
+
+            def _data():
+                yield [
+                    "District",
+                    "Health Centre",
+                    "Spray Area",
+                    "Structures on Ground",
+                    "Found",
+                    "Visited Sprayed",
+                    "Spray Effectiveness",
+                    "Found Coverage",
+                    "Sprayed Coverage"
+                ]
+                for value in context.get('qs'):
+                    district = TargetAreaSerializer(
+                        value, context=context
+                    ).data
+
+                    yield [
+                        district.get('district'),
+                        district.get('rhc'),
+                        district.get('district_name'),
+                        district.get('structures'),
+                        district.get('found'),
+                        district.get('visited_sprayed'),
+                        calc_percentage(district.get('visited_sprayed'),
+                                        district.get('structures')),
+                        calc_percentage(district.get('found'),
+                                        district.get('structures')),
+                        calc_percentage(district.get('visited_sprayed'),
+                                        district.get('found'))
+                    ]
+
+            sprayarea_buffer = SprayArea()
+            writer = csv.writer(sprayarea_buffer)
+            response = StreamingHttpResponse(
+                (writer.writerow(row) for row in _data()),
+                content_type='text/csv'
+            )
+            response['Content-Disposition'] = \
+                'attachment; filename="sprayareas.csv"'
+
+            return response
+
         return super(SprayAreaView, self).render_to_response(
             context, **response_kwargs
         )

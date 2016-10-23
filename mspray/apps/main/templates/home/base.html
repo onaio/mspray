@@ -46,13 +46,17 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'index' %}">Spray Effectiveness</a></li>
+                                <li><a href="{% url 'index' %}">Spray Effectiveness</a>
+                                    <a href="{% url 'sprayareas' %}"> All Spray Areas</a>
+                                    <a href="{% url 'sprayareas' %}?format=csv"> CSV: All Spray Areas</a>
+                                </li>
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
                                 <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
                             </ul>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
+                        <a href="{% url 'sprayareas' %}"> All Spray Areas</a>
                         {% include 'home/district_list.html' %}
                         {% include 'home/target_areas_list.html' %}
                         {% block spray_dates  %}

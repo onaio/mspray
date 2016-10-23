@@ -44,7 +44,7 @@ urlpatterns = [
     url(r'^(?P<district_pk>\d+)/(?P<slug>\d+)$',
         home.TargetAreaView.as_view(),
         name='target_area'),
-    url(r'^sprayareas$', home.SprayAreaView.as_view()),
+    url(r'^sprayareas$', home.SprayAreaView.as_view(), name='sprayareas'),
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),
