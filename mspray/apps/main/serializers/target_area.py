@@ -532,6 +532,10 @@ class TargetAreaQueryMixin(TargetAreaMixin):
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    district_pk = serializers.SerializerMethodField()
+    rhc = serializers.SerializerMethodField()
+    rhc_pk = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
     total_structures = serializers.IntegerField()
@@ -551,9 +555,42 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level',
-                  'num_of_spray_areas', 'total_structures',
+                  'num_of_spray_areas', 'total_structures', 'district', 'rhc',
+                  'district_pk', 'rhc_pk',
                   'num_new_structures')
         model = Location
+
+    def get_district(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__parent__name') \
+                    if isinstance(obj, dict) else obj.parent.parent.name
+            except:
+                pass
+
+    def get_district_pk(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__parent__pk') \
+                    if isinstance(obj, dict) else obj.parent.parent.pk
+            except:
+                pass
+
+    def get_rhc(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__name') \
+                    if isinstance(obj, dict) else obj.parent.name
+            except:
+                pass
+
+    def get_rhc_pk(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__pk') \
+                    if isinstance(obj, dict) else obj.parent.pk
+            except:
+                pass
 
 
 class TargetAreaQuerySerializer(TargetAreaQueryMixin,

@@ -202,7 +202,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
 
 class SprayAreaView(SiteNameMixin, ListView):
-    template_name = 'home/district.html'
+    template_name = 'home/sprayareas.html'
     model = Location
     slug_field = 'pk'
 
@@ -222,23 +222,28 @@ class SprayAreaView(SiteNameMixin, ListView):
         }).values(
             'pk', 'code', 'level', 'name', 'parent', 'structures',
             'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
-            'num_new_structures', 'total_structures'
-        )
+            'num_new_structures', 'total_structures', 'parent__name',
+            'parent__parent__name', 'parent__parent__pk', 'parent__pk'
+        )[:10]
         serializer_class = TargetAreaSerializer
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
-        fields = ['structures', 'visited_total', 'visited_sprayed',
-                  'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'found', 'num_of_spray_areas']
-        totals = {}
-        for rec in serializer.data:
-            for field in fields:
-                totals[field] = rec[field] + (totals[field]
-                                              if field in totals else 0)
-        district_code = self.kwargs.get(self.slug_field)
-        context.update(get_location_dict(district_code))
-        context['district_totals'] = totals
+        # fields = ['structures', 'visited_total', 'visited_sprayed',
+        #           'visited_not_sprayed', 'visited_refused', 'visited_other',
+        #           'not_visited', 'found', 'num_of_spray_areas']
+        # totals = {}
+        # for rec in serializer.data:
+        #     for field in fields:
+        #         totals[field] = rec[field] + (totals[field]
+        #                                       if field in totals else 0)
+        context.update(get_location_dict(None))
+        # context['district_totals'] = totals
         context.update(DEFINITIONS['ta'])
 
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        return super(SprayAreaView, self).render_to_response(
+            context, **response_kwargs
+        )

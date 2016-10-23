@@ -142,7 +142,6 @@ def create_households_buffer(distance=15, recreate=False, target=None):
         buffer_qs.delete()
 
     for ta in queryset_iterator(ta_qs, 10):
-        print(ta.name)
         hh_buffers = Household.objects.filter(location=ta)\
             .values_list('bgeom', flat=True)
         if len(hh_buffers) == 0:
