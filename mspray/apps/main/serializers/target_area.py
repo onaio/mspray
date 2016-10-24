@@ -67,7 +67,8 @@ def get_spray_data(obj, context):
         if spray_date:
             qs = qs.filter(spray_date=spray_date)
 
-        return qs.filter(spraypoint__isnull=False).values('location')\
+        # return qs.filter(spraypoint__isnull=False).values('location')\
+        return qs.values('location')\
             .annotate(
                 found=Sum(
                     Case(
@@ -92,6 +93,13 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=False,
+                            data__contains={
+                                'sprayable_structure': 'no'
+                            },
+                            then=0
+                        ),
+                        When(
+                            was_sprayed=False,
                             data__contains={WAS_SPRAYED_FIELD:
                                             WAS_NOT_SPRAYED_VALUE},
                             then=1
@@ -103,10 +111,11 @@ def get_spray_data(obj, context):
                 not_sprayable=Sum(
                     Case(
                         When(
-                            # data__has_key='osmstructure:way:id',
-                            # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
+                            data__has_key='osmstructure:node:id',
+                            then=0
+                        ),
+                        When(
                             data__has_key=WAS_SPRAYED_FIELD,
-                            # was_sprayed=False,
                             then=0
                         ),
                         default=1,
@@ -119,8 +128,7 @@ def get_spray_data(obj, context):
                         When(
                             data__has_key='osmstructure:node:id',
                             data__contains={
-                                # WAS_SPRAYED_FIELD: 'notsprayable'
-                                'osmstructure:spray_status': 'notsprayable'
+                                'sprayable_structure': 'no'
                             },
                             then=-1
                         ),
@@ -161,7 +169,8 @@ def get_spray_data(obj, context):
     if spray_date:
         qs = qs.filter(spray_date=spray_date)
 
-    return qs.filter(spraypoint__isnull=False).aggregate(
+    # return qs.filter(spraypoint__isnull=False).aggregate(
+    return qs.aggregate(
         found=Sum(
             Case(
                 When(
@@ -186,6 +195,13 @@ def get_spray_data(obj, context):
             Case(
                 When(
                     was_sprayed=False,
+                    data__contains={
+                        'sprayable_structure': 'no'
+                    },
+                    then=0
+                ),
+                When(
+                    was_sprayed=False,
                     data__contains={WAS_SPRAYED_FIELD: WAS_NOT_SPRAYED_VALUE},
                     then=1
                 ),
@@ -197,9 +213,10 @@ def get_spray_data(obj, context):
             Case(
                 When(
                     data__has_key=WAS_SPRAYED_FIELD,
-                    # data__has_key='osmstructure:way:id',
-                    # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                    # was_sprayed=False,
+                    then=0
+                ),
+                When(
+                    data__has_key='osmstructure:node:id',
                     then=0
                 ),
                 default=1,
@@ -212,8 +229,7 @@ def get_spray_data(obj, context):
                 When(
                     data__has_key='osmstructure:node:id',
                     data__contains={
-                        # WAS_SPRAYED_FIELD: 'notsprayable'
-                        'osmstructure:spray_status': 'notsprayable'
+                        'sprayable_structure': 'no'
                     },
                     then=-1
                 ),

@@ -62,7 +62,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if getattr(settings, 'MSPRAY_UNIQUE_FIELD', None):
             queryset = queryset.filter(
-                pk__in=SprayPoint.objects.values('sprayday')
+                # pk__in=SprayPoint.objects.values('sprayday')
             )
 
         return super(SprayDayViewSet, self).filter_queryset(queryset)

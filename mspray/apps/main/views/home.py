@@ -118,6 +118,8 @@ class DistrictView(SiteNameMixin, ListView):
 def get_duplicates(location, was_sprayed):
     return location.sprayday_set.filter(
         osmid__isnull=False, was_sprayed=was_sprayed
+    ).exclude(
+        data__contains={'osmstructure:spray_status': 'notsprayable'}
     ).values('osmid').annotate(
         dupes=Count('osmid')
     ).filter(dupes__gt=1)
