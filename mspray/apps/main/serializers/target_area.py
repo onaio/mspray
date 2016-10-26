@@ -293,17 +293,21 @@ def count_duplicates(obj, was_sprayed):
     return sum([i.get('dupes') - 1 for i in dupes])
 
 
-def count_if(data, percentage):
+def count_if(data, percentage, debug=False):
     """Count as 1 if it matches the percentage or greater"""
     visited_sprayed = 0
     for i in data:
+        pk = i.get('location')
         sprayed = i.get('sprayed') or 0
         not_sprayable = i.get('not_sprayable') or 0
         new_structures = i.get('new_structures') or 0
         structures = i.get('structures') or 0
+        if debug:
+            print(pk, "Sprayed:", sprayed, "S:", structures,
+                  'NW:', new_structures, 'NS:', not_sprayable,
+                  'D:', count_duplicates(i, True) if pk else '')
         structures -= not_sprayable
         structures += new_structures
-        pk = i.get('location')
         if pk is not None:
             structures += count_duplicates(i, True)
         if structures != 0:
@@ -312,6 +316,34 @@ def count_if(data, percentage):
                 visited_sprayed += 1
 
     return visited_sprayed
+
+
+def count_key_if_percent(obj, key, percentage, context=dict()):
+    def count_for(location):
+        counter = 0
+        for i in location.location_set.all():
+            data = get_spray_data(i, context)
+            ratio = round(
+                (data.get('sprayed') * 100) /
+                (
+                    i.structures +
+                    (data.get('new_structures') or 0) +
+                    count_duplicates(i, True) -
+                    (data.get('not_sprayable') or 0)
+                )
+            ) if data.get('sprayed') else 0
+
+            counter += 1 if ratio >= percentage else 0
+
+        return counter
+
+    loc = Location.objects.get(pk=obj.get('pk')) if type(obj) == dict else obj
+
+    if loc.level == 'RHC':
+        return count_for(loc)
+
+    return sum([count_key_if_percent(i, key, percentage, context)
+                for i in loc.location_set.all()])
 
 
 class TargetAreaMixin(object):
@@ -351,7 +383,9 @@ class TargetAreaMixin(object):
                 visited_found = (data.get('found') or 0) + \
                     count_duplicates(obj, True)
             else:
-                visited_found = count_if(data, 20)
+                visited_found = count_key_if_percent(
+                    obj, 'sprayed', 20, self.context
+                )
 
             return visited_found
 
@@ -375,7 +409,9 @@ class TargetAreaMixin(object):
             if level == TA_LEVEL:
                 visited_sprayed = data.get('sprayed') or 0
             else:
-                visited_sprayed = count_if(data, 85)
+                visited_sprayed = count_key_if_percent(
+                    obj, 'sprayed', 85, self.context
+                )
 
             return visited_sprayed
 
