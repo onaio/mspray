@@ -503,6 +503,8 @@ def add_unique_data(sprayday, unique_field, location):
         sprayday.data.get(nodeid) or \
         sprayday.data.get('newstructure/gps')
     if data_id and location:
+        if isinstance(data_id, str) and len(data_id) > 50:
+            data_id = data_id[:50]
         try:
             sp, created = SprayPoint.objects.get_or_create(
                 sprayday=sprayday,
