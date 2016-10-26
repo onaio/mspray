@@ -499,7 +499,9 @@ def add_unique_data(sprayday, unique_field, location):
     sp = None
     wayid = unique_field + ':way:id'
     nodeid = unique_field + ':node:id'
-    data_id = sprayday.data.get(wayid) or sprayday.data.get(nodeid)
+    data_id = sprayday.data.get(wayid) or \
+        sprayday.data.get(nodeid) or \
+        sprayday.data.get('newstructure/gps')
     if data_id and location:
         try:
             sp, created = SprayPoint.objects.get_or_create(

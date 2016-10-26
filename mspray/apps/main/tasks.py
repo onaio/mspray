@@ -124,7 +124,9 @@ def add_unique_record(pk, location_pk):
         pass
     else:
         from mspray.apps.main.utils import add_unique_data
-        osmid = get_osmid(sp.data) or get_updated_osm_from_ona(sp)
+        osmid = get_osmid(sp.data) or \
+            get_updated_osm_from_ona(sp) or \
+            sp.data.get('newstructure/gps')
         if osmid:
             add_unique_data(sp, HAS_UNIQUE_FIELD, location)
 
