@@ -2,7 +2,6 @@ import csv
 import json
 
 from django.conf import settings
-from django.db.models import Count
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
@@ -11,7 +10,7 @@ from django.views.generic import ListView
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.target_area import \
-    GeoTargetAreaSerializer
+    GeoTargetAreaSerializer, get_duplicates, count_duplicates
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
@@ -114,14 +113,6 @@ class DistrictView(SiteNameMixin, ListView):
         return context
 
 
-def get_duplicates(location, was_sprayed):
-    return location.sprayday_set.filter(
-        osmid__isnull=False, was_sprayed=was_sprayed
-    ).values('osmid').annotate(
-        dupes=Count('osmid')
-    ).filter(dupes__gt=1)
-
-
 class TargetAreaView(SiteNameMixin, DetailView):
     template_name = 'home/map.html'
     model = Location
@@ -166,32 +157,30 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 ).data
                 context['hh_geojson'] = json.dumps(data)
             else:
+                loc = context['object']
                 hhview = TargetAreaHouseholdsViewSet.as_view({
                     'get': 'retrieve'
                 })
                 response = hhview(
                     self.request,
-                    pk=context['object'].pk,
+                    pk=loc.pk,
                     bgeom=bgeom,
                     spray_date=spray_date,
                     format='geojson'
                 )
                 response.render()
                 context['hh_geojson'] = response.content
-                sprayed_duplicates = list(get_duplicates(
-                    context['object'], True
-                ))
-                not_sprayed_duplicates = list(get_duplicates(
-                    context['object'], False
-                ))
+                sprayed_duplicates = list(get_duplicates(loc, True))
+                not_sprayed_duplicates = list(get_duplicates(loc, False))
                 context['sprayed_duplicates_data'] = json.dumps(
                     sprayed_duplicates
                 )
-                context['sprayed_duplicates'] = len(sprayed_duplicates)
+                context['sprayed_duplicates'] = count_duplicates(loc, True)
                 context['not_sprayed_duplicates_data'] = json.dumps(
                     not_sprayed_duplicates
                 )
-                context['not_sprayed_duplicates'] = len(not_sprayed_duplicates)
+                context['not_sprayed_duplicates'] = \
+                    count_duplicates(loc, False)
 
         context['districts'] = Location.objects.filter(parent=None)\
             .values_list('id', 'code', 'name').order_by('name')

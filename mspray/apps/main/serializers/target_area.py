@@ -1,4 +1,4 @@
-from django.db.models import Case, F, Sum, When
+from django.db.models import Case, Count, F, Sum, When
 from django.db.models import IntegerField
 from django.conf import settings
 from django.core.cache import cache
@@ -67,13 +67,14 @@ def get_spray_data(obj, context):
         if spray_date:
             qs = qs.filter(spray_date=spray_date)
 
-        return qs.filter(spraypoint__isnull=False).values('location')\
+        return qs.values('location')\
             .annotate(
                 found=Sum(
                     Case(
                         When(
                             # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
                             data__has_key=WAS_SPRAYED_FIELD,
+                            spraypoint__isnull=False,
                             # was_sprayed=False,
                             then=1
                         ),
@@ -83,7 +84,11 @@ def get_spray_data(obj, context):
                 ),
                 sprayed=Sum(
                     Case(
-                        When(was_sprayed=True, then=1),
+                        When(
+                            was_sprayed=True,
+                            spraypoint__isnull=False,
+                            then=1
+                        ),
                         default=0,
                         output_field=IntegerField()
                     )
@@ -92,6 +97,7 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=False,
+                            spraypoint__isnull=False,
                             data__contains={WAS_SPRAYED_FIELD:
                                             WAS_NOT_SPRAYED_VALUE},
                             then=1
@@ -103,13 +109,12 @@ def get_spray_data(obj, context):
                 not_sprayable=Sum(
                     Case(
                         When(
-                            # data__has_key='osmstructure:way:id',
-                            # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
-                            data__has_key=WAS_SPRAYED_FIELD,
-                            # was_sprayed=False,
-                            then=0
+                            data__has_key='osmstructure:way:id',
+                            data__contains={'sprayable_structure': 'no'},
+                            spraypoint__isnull=False,
+                            then=1
                         ),
-                        default=1,
+                        default=0,
                         output_field=IntegerField()
                     )
                 ),
@@ -118,6 +123,7 @@ def get_spray_data(obj, context):
                         When(data__has_key='osmstructure:way:id', then=0),
                         When(
                             data__has_key='osmstructure:node:id',
+                            spraypoint__isnull=False,
                             data__contains={
                                 # WAS_SPRAYED_FIELD: 'notsprayable'
                                 'osmstructure:spray_status': 'notsprayable'
@@ -132,6 +138,7 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=False,
+                            spraypoint__isnull=False,
                             data__contains={REASON_FIELD: REASON_REFUSED},
                             then=1
                         ),
@@ -143,6 +150,7 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=False,
+                            spraypoint__isnull=False,
                             data__contains={REASON_FIELD: REASON_REFUSED},
                             then=0
                         ),
@@ -161,12 +169,13 @@ def get_spray_data(obj, context):
     if spray_date:
         qs = qs.filter(spray_date=spray_date)
 
-    return qs.filter(spraypoint__isnull=False).aggregate(
+    return qs.aggregate(
         found=Sum(
             Case(
                 When(
                     # data__has_key='osmstructure:way:id',
                     # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
+                    spraypoint__isnull=False,
                     data__has_key=WAS_SPRAYED_FIELD,
                     # was_sprayed=False,
                     then=1
@@ -177,7 +186,11 @@ def get_spray_data(obj, context):
         ),
         sprayed=Sum(
             Case(
-                When(was_sprayed=True, then=1),
+                When(
+                    # spraypoint__isnull=False,
+                    was_sprayed=True,
+                    then=1
+                ),
                 default=0,
                 output_field=IntegerField()
             )
@@ -185,6 +198,7 @@ def get_spray_data(obj, context):
         not_sprayed=Sum(
             Case(
                 When(
+                    spraypoint__isnull=False,
                     was_sprayed=False,
                     data__contains={WAS_SPRAYED_FIELD: WAS_NOT_SPRAYED_VALUE},
                     then=1
@@ -196,13 +210,12 @@ def get_spray_data(obj, context):
         not_sprayable=Sum(
             Case(
                 When(
-                    data__has_key=WAS_SPRAYED_FIELD,
-                    # data__has_key='osmstructure:way:id',
-                    # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
-                    # was_sprayed=False,
-                    then=0
+                    data__has_key='osmstructure:way:id',
+                    data__contains={'sprayable_structure': 'no'},
+                    spraypoint__isnull=False,
+                    then=1
                 ),
-                default=1,
+                default=0,
                 output_field=IntegerField()
             )
         ),
@@ -210,6 +223,7 @@ def get_spray_data(obj, context):
             Case(
                 When(data__has_key='osmstructure:way:id', then=0),
                 When(
+                    spraypoint__isnull=False,
                     data__has_key='osmstructure:node:id',
                     data__contains={
                         # WAS_SPRAYED_FIELD: 'notsprayable'
@@ -224,6 +238,7 @@ def get_spray_data(obj, context):
         refused=Sum(
             Case(
                 When(
+                    spraypoint__isnull=False,
                     was_sprayed=False,
                     data__contains={REASON_FIELD: REASON_REFUSED},
                     then=1
@@ -235,11 +250,13 @@ def get_spray_data(obj, context):
         other=Sum(
             Case(
                 When(
+                    spraypoint__isnull=False,
                     was_sprayed=False,
                     data__contains={REASON_FIELD: REASON_REFUSED},
                     then=0
                 ),
                 When(
+                    spraypoint__isnull=False,
                     was_sprayed=True,
                     then=0
                 ),
@@ -248,6 +265,32 @@ def get_spray_data(obj, context):
             )
         )
     )
+
+
+def get_duplicates(obj, was_sprayed):
+    def duplicates(spray_status):
+        return loc.sprayday_set.filter(
+            osmid__isnull=False, was_sprayed=spray_status
+        ).values('osmid').annotate(
+            dupes=Count('osmid')
+        ).filter(dupes__gt=1)
+
+    loc = Location.objects.get(pk=obj.get('pk') or obj.get('location')) \
+        if type(obj) == dict else obj
+    dupes = duplicates(was_sprayed)
+
+    if not was_sprayed:
+        sprayed = duplicates(True).values_list('osmid', flat=True)
+        dupes = dupes.exclude(spraypoint__isnull=False)\
+            .exclude(osmid__in=sprayed)
+
+    return dupes
+
+
+def count_duplicates(obj, was_sprayed):
+    dupes = get_duplicates(obj, was_sprayed)
+
+    return sum([i.get('dupes') - 1 for i in dupes])
 
 
 def count_if(data, percentage):
@@ -260,6 +303,9 @@ def count_if(data, percentage):
         structures = i.get('structures') or 0
         structures -= not_sprayable
         structures += new_structures
+        pk = i.get('location')
+        if pk is not None:
+            structures += count_duplicates(i, True)
         if structures != 0:
             rate = round(sprayed * 100 / structures)
             if rate >= percentage:
@@ -302,7 +348,8 @@ class TargetAreaMixin(object):
             level = obj['level'] if isinstance(obj, dict) else obj.level
             data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
-                visited_found = data.get('found') or 0
+                visited_found = (data.get('found') or 0) + \
+                    count_duplicates(obj, True)
             else:
                 visited_found = count_if(data, 20)
 
@@ -313,7 +360,8 @@ class TargetAreaMixin(object):
             level = obj['level'] if isinstance(obj, dict) else obj.level
             data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
-                found = data.get('found') or 0
+                found = (data.get('found') or 0) + \
+                    count_duplicates(obj, True)
             else:
                 found = data.count()
 
@@ -376,7 +424,7 @@ class TargetAreaMixin(object):
                 not_sprayable = data.get('not_sprayable') or 0
                 new_structures = data.get('new_structures') or 0
                 structures -= not_sprayable
-                structures += new_structures
+                structures += new_structures + count_duplicates(obj, True)
                 count = data.get('found') or 0
             else:
                 not_sprayable = \
@@ -429,7 +477,8 @@ class TargetAreaMixin(object):
             not_sprayable = data.get('not_sprayable') or 0
             new_structures = data.get('new_structures') or 0
             structures -= not_sprayable
-            structures += new_structures
+            structures += new_structures + count_duplicates(obj,
+                                                            was_sprayed=True)
         else:
             not_sprayable = \
                 data.aggregate(r=Sum('not_sprayable')).get('r') or 0
