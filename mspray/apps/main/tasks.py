@@ -55,9 +55,12 @@ def get_location_from_data(data):
         location = Location.objects.get(name=target_area,
                                         parent__parent__code=district)
     except Location.DoesNotExist:
-        if target_area == 'NM':
-            code = 'NM{}'.format(district)
-            location = Location.objects.get(code=code, parent__code=district)
+        pass
+        # if target_area == 'NM':
+        #     code = 'NM{}'.format(district)
+        #     location = Location.objects.get(code=code, parent__code=district)
+    except ValueError:
+        pass
 
     return location
 
