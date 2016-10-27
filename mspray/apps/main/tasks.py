@@ -49,11 +49,11 @@ def get_new_structure_location(data, geom, is_node=False):
 
 def get_location_from_data(data):
     district = data.get('district')
-    target_area = data.get('target_area')
+    target_area = data.get('spray_area')
     location = None
     try:
         location = Location.objects.get(name=target_area,
-                                        parent__code=district)
+                                        parent__parent__code=district)
     except Location.DoesNotExist:
         if target_area == 'NM':
             code = 'NM{}'.format(district)
