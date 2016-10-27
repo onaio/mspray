@@ -75,16 +75,17 @@ class SprayPointView(models.Model):
 
     @classmethod
     def refresh_view(cls):
-        cursor = connection.cursor()
-        cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
-            cls._meta.db_table
-        ))
+        # cursor = connection.cursor()
+        # cursor.execute('REFRESH MATERIALIZED VIEW {} WITH DATA'.format(
+        #     cls._meta.db_table
+        # ))
+        pass
 
 
 def refresh_materialized_view(sender, **kwargs):
     SprayPointView.refresh_view()
 
-post_save.connect(refresh_materialized_view, sender=SprayPoint)
+# post_save.connect(refresh_materialized_view, sender=SprayPoint)
 
 
 class Hhcsv(models.Model):
