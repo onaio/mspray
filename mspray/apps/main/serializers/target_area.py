@@ -72,10 +72,13 @@ def get_spray_data(obj, context):
                 found=Sum(
                     Case(
                         When(
-                            # data__contains={WAS_SPRAYED_FIELD:'notsprayable'},
                             data__has_key=WAS_SPRAYED_FIELD,
                             spraypoint__isnull=False,
-                            # was_sprayed=False,
+                            then=1
+                        ),
+                        When(
+                            spraypoint__isnull=True,
+                            data__has_key='newstructure/gps',
                             then=1
                         ),
                         default=0,
@@ -179,11 +182,13 @@ def get_spray_data(obj, context):
         found=Sum(
             Case(
                 When(
-                    # data__has_key='osmstructure:way:id',
-                    # data__contains={WAS_SPRAYED_FIELD: 'notsprayable'},
                     spraypoint__isnull=False,
                     data__has_key=WAS_SPRAYED_FIELD,
-                    # was_sprayed=False,
+                    then=1
+                ),
+                When(
+                    spraypoint__isnull=True,
+                    data__has_key='newstructure/gps',
                     then=1
                 ),
                 default=0,
