@@ -233,7 +233,7 @@ def get_spray_data(obj, context):
         new_structures=Sum(
             Case(
                 When(
-                    spraypoint__isnull=False,
+                    # spraypoint__isnull=False,
                     data__has_key='newstructure/gps',
                     data__contains={
                         'sprayable_structure': 'yes'

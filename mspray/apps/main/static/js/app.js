@@ -208,6 +208,7 @@ var App = function(buffer, targetAreaData, hhData) {
                     }
                 }).addTo(app.map);
 
+                app.map.fitBounds(app.sprayLayer.getBounds());
                 app.duplicateLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
