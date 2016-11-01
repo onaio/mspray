@@ -120,17 +120,23 @@ def get_spray_data(obj, context):
                 ),
                 new_structures=Sum(
                     Case(
-                        When(data__has_key='osmstructure:way:id', then=0),
                         When(
-                            data__has_key='osmstructure:node:id',
                             spraypoint__isnull=False,
+                            data__has_key='newstructure/gps',
                             data__contains={
-                                # WAS_SPRAYED_FIELD: 'notsprayable'
-                                'osmstructure:spray_status': 'notsprayable'
+                                'sprayable_structure': 'yes'
                             },
-                            then=-1
+                            then=1
                         ),
-                        default=1,
+                        When(
+                            spraypoint__isnull=False,
+                            data__has_key='osmstructure:node:id',
+                            data__contains={
+                                'sprayable_structure': 'yes'
+                            },
+                            then=1
+                        ),
+                        default=0,
                         output_field=IntegerField()
                     )
                 ),
@@ -221,17 +227,23 @@ def get_spray_data(obj, context):
         ),
         new_structures=Sum(
             Case(
-                When(data__has_key='osmstructure:way:id', then=0),
+                When(
+                    spraypoint__isnull=False,
+                    data__has_key='newstructure/gps',
+                    data__contains={
+                        'sprayable_structure': 'yes'
+                    },
+                    then=1
+                ),
                 When(
                     spraypoint__isnull=False,
                     data__has_key='osmstructure:node:id',
                     data__contains={
-                        # WAS_SPRAYED_FIELD: 'notsprayable'
-                        'osmstructure:spray_status': 'notsprayable'
+                        'sprayable_structure': 'yes'
                     },
-                    then=-1
+                    then=1
                 ),
-                default=1,
+                default=0,
                 output_field=IntegerField()
             )
         ),
