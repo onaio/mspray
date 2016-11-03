@@ -105,15 +105,16 @@ class SubmissionSerializer(SprayBase, serializers.ModelSerializer):
         )
 
     def get_spray_area(self, obj):
-        if obj:
+        if obj and obj.location:
             return obj.location.name
 
     def get_health_facility(self, obj):
-        if obj:
+        if obj and obj.location and obj.location.parent:
             return obj.location.parent.name
 
     def get_district(self, obj):
-        if obj:
+        if obj and obj.location and obj.location.parent \
+                and obj.location.parent.parent:
             return obj.location.parent.parent.name
 
     def get_data(self, obj):
