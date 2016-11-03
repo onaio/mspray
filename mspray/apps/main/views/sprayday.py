@@ -1,3 +1,5 @@
+import csv
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
@@ -10,6 +12,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework_csv import renderers as csv_r
+from rest_framework_csv.misc import Echo
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayPoint
@@ -22,6 +25,107 @@ from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
+
+
+headers = [
+    'district',
+    'health_facility',
+    'osmid',
+    'spray_area',
+    'submission_id',
+    'was_sprayed',
+    'data._duration',
+    'data._edited',
+    'data._id',
+    'data._submission_time',
+    'data._submitted_by',
+    'data._uuid',
+    'data._version',
+    'data._xform_id_string',
+    'data.deviceid',
+    'data.district',
+    'data.end',
+    'data.formhub/uuid',
+    'data.health_facility',
+    'data.imei',
+    'data.meta/instanceID',
+    'data.meta/instanceName',
+    'data.newstructure/gps',
+    'data.newstructure/nostructure',
+    'data.osmstructure',
+    'data.osmstructure:building',
+    'data.osmstructure:ctr:lat',
+    'data.osmstructure:ctr:lon',
+    'data.osmstructure:node:id',
+    'data.osmstructure:source',
+    'data.osmstructure:spray_status',
+    'data.osmstructure:structure_type',
+    'data.osmstructure:useraccuracy',
+    'data.osmstructure:userlatlng',
+    'data.osmstructure:way:id',
+    'data.spray_area',
+    'data.sprayable/irs_card_confirm',
+    'data.sprayable/irs_card_num',
+    'data.sprayable/sprayed/sprayed_childrenU5',
+    'data.sprayable/sprayed/sprayed_females',
+    'data.sprayable/sprayed/sprayed_males',
+    'data.sprayable/sprayed/sprayed_nets',
+    'data.sprayable/sprayed/sprayed_pregwomen',
+    'data.sprayable/sprayed/sprayed_pregwomen_uNet',
+    'data.sprayable/sprayed/sprayed_rooms',
+    'data.sprayable/sprayed/sprayed_roomsfound',
+    'data.sprayable/sprayed/sprayed_total_uNet',
+    'data.sprayable/sprayed/sprayed_totalpop',
+    'data.sprayable/sprayed/sprayed_u5_uNet',
+    'data.sprayable/sprayop_code',
+    'data.sprayable/sprayop_name',
+    'data.sprayable/structure_head_name',
+    'data.sprayable/unsprayed/population/unsprayed_children_u5',
+    'data.sprayable/unsprayed/population/unsprayed_nets',
+    'data.sprayable/unsprayed/population/unsprayed_pregnant_women',
+    'data.sprayable/unsprayed/population/unsprayed_roomsfound',
+    'data.sprayable/unsprayed/population/unsprayed_total_uNet',
+    'data.sprayable/unsprayed/population/unsprayed_u5_uNet',
+    'data.sprayable/unsprayed/reason',
+    'data.sprayable/unsprayed/unsprayed_females',
+    'data.sprayable/unsprayed/unsprayed_males',
+    'data.sprayable/unsprayed/unsprayed_totalpop',
+    'data.sprayable/was_sprayed',
+    'data.sprayable_structure',
+    'data.sprayformid',
+    'data.start',
+    'data.subscriberid',
+    'data.supervisor_name',
+    'data.tla_code',
+    'data.tla_leader',
+    'data.today',
+]
+
+
+class CustomCSVRenderer(csv_r.CSVStreamingRenderer):
+
+    def render(self, data, media_type=None, renderer_context={},
+               writer_opts=None):
+
+        csv_buffer = Echo()
+        csv_writer = csv.writer(csv_buffer)
+
+        yield csv_writer.writerow([elem for elem in headers])
+
+        for i in data.iterator():
+            data = SubmissionSerializer(i).data
+            row = []
+
+            for h in headers:
+                if h.startswith('data.'):
+                    k, v = h.split('.')
+                    val = data.get('data').get(v)
+                else:
+                    val = data.get(h)
+
+                row.append(val)
+
+            yield csv_writer.writerow([elem for elem in row])
 
 
 class SprayDayViewSet(viewsets.ModelViewSet):
@@ -41,7 +145,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     ordering_fields = ('spray_date',)
     ordering = ('spray_date',)
     renderer_classes = \
-        [csv_r.CSVStreamingRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
+        [CustomCSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
 
     def get_serializer_class(self):
         fmt = self.request.accepted_renderer.format
@@ -113,5 +217,8 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                 .values_list('spray_date', flat=True).distinct()
 
             return Response(data)
+
+        if request.accepted_renderer.format == 'csv':
+            return Response(self.filter_queryset(self.get_queryset()))
 
         return super(SprayDayViewSet, self).list(request, *args, **kwargs)
