@@ -1,3 +1,4 @@
+import gc
 import csv
 
 from django.conf import settings
@@ -24,6 +25,7 @@ from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
+from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.main.utils import Echo
 from mspray.libs.renderers import CSVRenderer
 
@@ -107,7 +109,7 @@ def _data(qs):
 
         yield [elem for elem in headers]
 
-        for i in qs.iterator():
+        for i in queryset_iterator(qs):
             data = SubmissionSerializer(i).data
             row = []
 

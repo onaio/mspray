@@ -17,6 +17,7 @@ from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.main.utils import Echo
 from mspray.apps.main.definitions import DEFINITIONS
 
@@ -253,7 +254,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Found Coverage",
                     "Sprayed Coverage"
                 ]
-                for value in context.get('qs'):
+                for value in queryset_iterator(context.get('qs')):
                     district = TargetAreaSerializer(
                         value, context=context
                     ).data
