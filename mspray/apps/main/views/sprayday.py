@@ -41,7 +41,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     ordering_fields = ('spray_date',)
     ordering = ('spray_date',)
     renderer_classes = \
-        [csv_r.CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
+        [csv_r.CSVStreamingRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
 
     def get_serializer_class(self):
         fmt = self.request.accepted_renderer.format
