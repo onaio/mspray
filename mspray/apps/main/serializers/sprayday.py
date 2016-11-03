@@ -91,6 +91,43 @@ class SprayDayGeoSerializer(SprayBase, GeoFeatureModelSerializer):
         geo_field = 'geom'
 
 
+class SubmissionSerializer(SprayBase, serializers.ModelSerializer):
+    spray_area = serializers.SerializerMethodField()
+    health_facility = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SprayDay
+        fields = (
+            'district', 'health_facility', 'spray_area',
+            'osmid', 'was_sprayed', 'submission_id',  'data'
+        )
+
+    def get_spray_area(self, obj):
+        if obj:
+            return obj.location.name
+
+    def get_health_facility(self, obj):
+        if obj:
+            return obj.location.parent.name
+
+    def get_district(self, obj):
+        if obj:
+            return obj.location.parent.parent.name
+
+    def get_data(self, obj):
+        if obj:
+            data = obj.data
+            del data['_attachments']
+            del data['_bamboo_dataset_id']
+            del data['_status']
+            del data['_tags']
+            del data['_geolocation']
+
+            return data
+
+
 class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()

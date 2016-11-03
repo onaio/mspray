@@ -16,7 +16,7 @@ from mspray.apps.main.models import SprayPoint
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
-from mspray.apps.main.serializers.sprayday import SprayDaySerializer
+from mspray.apps.main.serializers.sprayday import SubmissionSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayGeoSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
@@ -46,7 +46,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         fmt = self.request.accepted_renderer.format
         if fmt == 'csv':
-            return SprayDaySerializer
+            return SubmissionSerializer
 
         if settings.OSM_SUBMISSIONS:
             return SprayDayShapeSerializer
