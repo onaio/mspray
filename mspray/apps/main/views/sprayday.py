@@ -74,6 +74,8 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                 pk__in=SprayPoint.objects.values('sprayday')
             )
 
+        queryset = queryset.select_related('location__parent__parent')
+
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
     def create(self, request, *args, **kwargs):
