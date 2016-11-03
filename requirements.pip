@@ -1,6 +1,7 @@
 django
 psycopg2
 django_nose
+djangorestframework-csv
 djangorestframework-gis
 django-cors-headers
 django-filter

@@ -221,16 +221,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                                           context={'request': self.request})
             context['district_list'] = serializer.data
         context['qs'] = qs
-        # fields = ['structures', 'visited_total', 'visited_sprayed',
-        #           'visited_not_sprayed', 'visited_refused', 'visited_other',
-        #           'not_visited', 'found', 'num_of_spray_areas']
-        # totals = {}
-        # for rec in serializer.data:
-        #     for field in fields:
-        #         totals[field] = rec[field] + (totals[field]
-        #                                       if field in totals else 0)
         context.update(get_location_dict(None))
-        # context['district_totals'] = totals
         context.update(DEFINITIONS['ta'])
 
         return context

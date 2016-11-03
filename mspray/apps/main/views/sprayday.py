@@ -8,6 +8,8 @@ from rest_framework import filters
 from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
+from rest_framework_csv import renderers as csv_r
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayPoint
@@ -15,6 +17,7 @@ from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.serializers.sprayday import SprayDaySerializer
+from mspray.apps.main.serializers.sprayday import SprayDayGeoSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
@@ -32,13 +35,19 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     `ordering=-day`
     """
     queryset = SprayDay.objects.filter()
-    serializer_class = SprayDaySerializer
+    serializer_class = SprayDayGeoSerializer
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
     filter_fields = ('spray_date',)
     ordering_fields = ('spray_date',)
     ordering = ('spray_date',)
+    renderer_classes = \
+        [csv_r.CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
 
     def get_serializer_class(self):
+        fmt = self.request.accepted_renderer.format
+        if fmt == 'csv':
+            return SprayDaySerializer
+
         if settings.OSM_SUBMISSIONS:
             return SprayDayShapeSerializer
 

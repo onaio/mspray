@@ -60,7 +60,23 @@ class SprayBaseNamibia(SprayBase):
             return sprayed
 
 
-class SprayDaySerializer(SprayBase, GeoFeatureModelSerializer):
+class SprayDaySerializer(SprayBase, serializers.ModelSerializer):
+    sprayed = serializers.SerializerMethodField()
+    osm_sprayed = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    spray_operator = serializers.SerializerMethodField()
+    spray_operator_code = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SprayDay
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
+                  'spray_operator', 'spray_operator_code', 'irs_sticker_num',
+                  'osm_sprayed'
+                  )
+
+
+class SprayDayGeoSerializer(SprayBase, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     spray_operator = serializers.SerializerMethodField()
