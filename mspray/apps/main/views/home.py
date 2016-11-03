@@ -17,6 +17,7 @@ from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.utils import Echo
 from mspray.apps.main.definitions import DEFINITIONS
 
 
@@ -240,10 +241,6 @@ class SprayAreaView(SiteNameMixin, ListView):
 
                 return round((numerator * 100) / denominator)
 
-            class SprayArea(object):
-                def write(self, value):
-                    return value
-
             def _data():
                 yield [
                     "District",
@@ -276,8 +273,8 @@ class SprayAreaView(SiteNameMixin, ListView):
                                         district.get('found'))
                     ]
 
-            sprayarea_buffer = SprayArea()
-            writer = csv.writer(sprayarea_buffer)
+            csv_buffer = Echo()
+            writer = csv.writer(csv_buffer)
             response = StreamingHttpResponse(
                 (writer.writerow(row) for row in _data()),
                 content_type='text/csv'

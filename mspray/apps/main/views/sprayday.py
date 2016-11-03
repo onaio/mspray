@@ -3,6 +3,7 @@ import csv
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
+from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 
@@ -11,8 +12,6 @@ from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework_csv import renderers as csv_r
-from rest_framework_csv.misc import Echo
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayPoint
@@ -25,6 +24,8 @@ from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
 from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import delete_cached_target_area_keys
+from mspray.apps.main.utils import Echo
+from mspray.libs.renderers import CSVRenderer
 
 
 headers = [
@@ -102,17 +103,11 @@ headers = [
 ]
 
 
-class CustomCSVRenderer(csv_r.CSVStreamingRenderer):
+def _data(qs):
 
-    def render(self, data, media_type=None, renderer_context={},
-               writer_opts=None):
+        yield [elem for elem in headers]
 
-        csv_buffer = Echo()
-        csv_writer = csv.writer(csv_buffer)
-
-        yield csv_writer.writerow([elem for elem in headers])
-
-        for i in data.iterator():
+        for i in qs.iterator():
             data = SubmissionSerializer(i).data
             row = []
 
@@ -125,7 +120,7 @@ class CustomCSVRenderer(csv_r.CSVStreamingRenderer):
 
                 row.append(val)
 
-            yield csv_writer.writerow([elem for elem in row])
+            yield row
 
 
 class SprayDayViewSet(viewsets.ModelViewSet):
@@ -144,8 +139,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     filter_fields = ('spray_date',)
     ordering_fields = ('spray_date',)
     ordering = ('spray_date',)
-    renderer_classes = \
-        [CustomCSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
+    renderer_classes = [CSVRenderer] + api_settings.DEFAULT_RENDERER_CLASSES
 
     def get_serializer_class(self):
         fmt = self.request.accepted_renderer.format
@@ -219,6 +213,16 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             return Response(data)
 
         if request.accepted_renderer.format == 'csv':
-            return Response(self.filter_queryset(self.get_queryset()))
+            self.object_list = self.filter_queryset(self.get_queryset())
+            csv_buffer = Echo()
+            writer = csv.writer(csv_buffer)
+            response = StreamingHttpResponse(
+                (writer.writerow(row) for row in _data(self.object_list)),
+                content_type='text/csv'
+            )
+            response['Content-Disposition'] = \
+                'attachment; filename="data_all.csv"'
+
+            return response
 
         return super(SprayDayViewSet, self).list(request, *args, **kwargs)

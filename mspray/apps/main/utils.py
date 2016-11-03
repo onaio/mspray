@@ -713,3 +713,8 @@ def parse_spray_date(request):
             return parse(spray_date).date()
         except ValueError:
             pass
+
+
+class Echo(object):
+    def write(self, value):
+        return value
