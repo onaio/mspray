@@ -193,6 +193,52 @@ class TargetAreaView(SiteNameMixin, DetailView):
         return context
 
 
+def calc_percentage(numerator, denominator):
+    try:
+        denominator = float(denominator)
+        numerator = float(numerator)
+    except ValueError:
+        return ''
+
+    if denominator == 0:
+        return ''
+
+    return round((numerator * 100) / denominator)
+
+
+def _data(qs, context=None):
+    yield [
+        "District",
+        "Health Centre",
+        "Spray Area",
+        "Structures on Ground",
+        "Found",
+        "Visited Sprayed",
+        "Spray Effectiveness",
+        "Found Coverage",
+        "Sprayed Coverage"
+    ]
+    for value in queryset_iterator(qs):
+        district = TargetAreaSerializer(
+            value, context=context
+        ).data
+
+        yield [
+            district.get('district'),
+            district.get('rhc'),
+            district.get('district_name'),
+            district.get('structures'),
+            district.get('found'),
+            district.get('visited_sprayed'),
+            calc_percentage(district.get('visited_sprayed'),
+                            district.get('structures')),
+            calc_percentage(district.get('found'),
+                            district.get('structures')),
+            calc_percentage(district.get('visited_sprayed'),
+                            district.get('found'))
+        ]
+
+
 class SprayAreaView(SiteNameMixin, ListView):
     template_name = 'home/sprayareas.html'
     model = Location
@@ -230,54 +276,12 @@ class SprayAreaView(SiteNameMixin, ListView):
 
     def render_to_response(self, context, **response_kwargs):
         if self.request.GET.get('format') == 'csv':
-            def calc_percentage(numerator, denominator):
-                try:
-                    denominator = float(denominator)
-                    numerator = float(numerator)
-                except ValueError:
-                    return ''
-
-                if denominator == 0:
-                    return ''
-
-                return round((numerator * 100) / denominator)
-
-            def _data():
-                yield [
-                    "District",
-                    "Health Centre",
-                    "Spray Area",
-                    "Structures on Ground",
-                    "Found",
-                    "Visited Sprayed",
-                    "Spray Effectiveness",
-                    "Found Coverage",
-                    "Sprayed Coverage"
-                ]
-                for value in queryset_iterator(context.get('qs')):
-                    district = TargetAreaSerializer(
-                        value, context=context
-                    ).data
-
-                    yield [
-                        district.get('district'),
-                        district.get('rhc'),
-                        district.get('district_name'),
-                        district.get('structures'),
-                        district.get('found'),
-                        district.get('visited_sprayed'),
-                        calc_percentage(district.get('visited_sprayed'),
-                                        district.get('structures')),
-                        calc_percentage(district.get('found'),
-                                        district.get('structures')),
-                        calc_percentage(district.get('visited_sprayed'),
-                                        district.get('found'))
-                    ]
-
             csv_buffer = Echo()
             writer = csv.writer(csv_buffer)
-            response = StreamingHttpResponse(
-                (writer.writerow(row) for row in _data()),
+            response = StreamingHttpResponse((
+                writer.writerow(row) for row in _data(
+                    context.get('qs'), context
+                )),
                 content_type='text/csv'
             )
             response['Content-Disposition'] = \
