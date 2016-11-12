@@ -31,6 +31,10 @@ class SprayDay(models.Model):
     bgeom = models.GeometryField(srid=4326, db_index=True, null=True)
     data = JSONField(default={})
     location = models.ForeignKey('Location', db_index=True, null=True)
+    rhc = models.ForeignKey('Location', db_index=True, null=True,
+                            related_name='visited_rhc')
+    district = models.ForeignKey('Location', db_index=True, null=True,
+                                 related_name='visited_district')
     team_leader = models.ForeignKey('TeamLeader', db_index=True, null=True)
     team_leader_assistant = models.ForeignKey(
         'TeamLeaderAssistant', db_index=True, null=True

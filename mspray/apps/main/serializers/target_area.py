@@ -59,11 +59,10 @@ def get_spray_data(obj, context):
         loc = obj
     if loc.level in ['RHC', 'district']:
         if loc.level == 'district':
-            pks = loc.spraydaydistrict_set.values('content_object_id')
+            kwargs = {'district': loc}
         else:
-            pks = loc.spraydayhealthcenterlocation_set\
-                .values('content_object_id')
-        qs = SprayDay.objects.filter(pk__in=pks)
+            kwargs = {'rhc': loc}
+        qs = SprayDay.objects.filter(**kwargs)
         if spray_date:
             qs = qs.filter(spray_date=spray_date)
 
