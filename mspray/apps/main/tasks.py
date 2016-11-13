@@ -21,8 +21,6 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.celery import app
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.main.serializers.target_area import get_spray_area_count
-from mspray.apps.main.serializers.target_area import count_key_if_percent
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
@@ -212,6 +210,9 @@ def refresh_data_with_no_osm():
 
 @app.task
 def set_district_sprayed_visited():
+    from mspray.apps.main.serializers.target_area import get_spray_area_count
+    from mspray.apps.main.serializers.target_area import count_key_if_percent
+
     qs = Location.objects.filter(level='ta')
     for location in qs.iterator():
         sprayed = 0
