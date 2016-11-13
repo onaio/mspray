@@ -11,6 +11,7 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.target_area import \
     GeoTargetAreaSerializer, get_duplicates, count_duplicates
+from mspray.apps.main.serializers.target_area import DistrictSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
@@ -85,10 +86,14 @@ class DistrictView(SiteNameMixin, ListView):
         }).values(
             'pk', 'code', 'level', 'name', 'parent', 'structures',
             'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
-            'num_new_structures', 'total_structures'
+            'num_new_structures', 'total_structures', 'visited', 'sprayed'
         )
-        serializer_class = TargetAreaQuerySerializer \
-            if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
+        pk = self.kwargs.get(self.slug_field)
+        if pk is None:
+            serializer_class = DistrictSerializer
+        else:
+            serializer_class = TargetAreaQuerySerializer \
+                if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
