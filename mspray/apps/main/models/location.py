@@ -15,6 +15,8 @@ class Location(models.Model):
     average_spray_quality_score = models.FloatField(default=0.0)
     # visited - 20% of the structures have been sprayed in the spray area
     visited = models.PositiveIntegerField(default=0)
+    # sprayed - 20% of the structures have been sprayed in the spray area
+    sprayed = models.PositiveIntegerField(default=0)
 
     class Meta:
         app_label = 'main'
