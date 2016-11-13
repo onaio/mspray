@@ -5,6 +5,7 @@ import os
 
 from django.conf import settings
 from django.contrib.gis.geos import Point
+from django.db.models import Sum
 from django.db.utils import IntegrityError
 
 from mspray.apps.main.models import Household
@@ -20,6 +21,8 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.celery import app
 from mspray.libs.utils.geom_buffer import with_metric_buffer
+from mspray.apps.main.serializers.target_area import get_spray_area_count
+from mspray.apps.main.serializers.target_area import count_key_if_percent
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
@@ -205,3 +208,65 @@ def refresh_data_with_no_osm():
             link_spraypoint_with_osm.delay(rec.pk)
 
     return found
+
+
+@app.task
+def set_district_sprayed_visited():
+    qs = Location.objects.filter(level='ta')
+    for location in qs.iterator():
+        sprayed = 0
+        visited = 0
+        visited_sprayed, found = get_spray_area_count(location)
+        if visited_sprayed:
+            ratio = round((visited_sprayed * 100) / found)
+            if ratio >= 20:
+                visited = 1
+            if ratio >= 85:
+                sprayed = 1
+
+        location.visited = visited
+        location.sprayed = sprayed
+        location.save()
+
+    gc.collect()
+    qs = Location.objects.filter(level='RHC').annotate(
+        visited_sum=Sum('location__visited'),
+        sprayed_sum=Sum('location__sprayed')
+    )
+    d = {}
+    e = {}
+    for location in qs:
+        location.visited = location.visited_sum or 0
+        location.sprayed = location.sprayed_sum or 0
+        location.save()
+        k = count_key_if_percent(location, 'sprayed', 20)
+        if k != location.visited:
+            print(location, location.visited, k)
+        k = count_key_if_percent(location, 'sprayed', 85)
+        if k != location.sprayed:
+            print(location, location.spprayed, k)
+        if location.parent_id not in d:
+            d[location.parent_id] = 0
+        d[location.parent_id] += location.visited
+        if location.parent_id not in e:
+            e[location.parent_id] = 0
+        e[location.parent_id] += location.visited
+
+    gc.collect()
+    qs = Location.objects.filter(level='district').annotate(
+        visited_sum=Sum('location__visited'),
+        sprayed_sum=Sum('location__sprayed')
+    )
+    for location in qs:
+        location.visited = location.visited_sum or 0
+        location.sprayed = location.sprayed_sum or 0
+        location.save()
+        k = count_key_if_percent(location, 'sprayed', 20)
+        if k != location.visited:
+            print(location.pk, location, location.visited, k,
+                  location.visited - k, d.get(location.pk))
+        k = count_key_if_percent(location, 'sprayed', 85)
+        if k != location.sprayed:
+            print(location.pk, location, location.sprayed, k,
+                  location.sprayedt - k, e.get(location.pk))
+    gc.collect()
