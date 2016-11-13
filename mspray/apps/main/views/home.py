@@ -92,8 +92,13 @@ class DistrictView(SiteNameMixin, ListView):
         if pk is None:
             serializer_class = DistrictSerializer
         else:
-            serializer_class = TargetAreaQuerySerializer \
-                if settings.SITE_NAME == 'namibia' else TargetAreaSerializer
+            level = self.object_list.first().level
+            if level == 'RHC':
+                serializer_class = DistrictSerializer
+            else:
+                serializer_class = TargetAreaQuerySerializer \
+                    if settings.SITE_NAME == 'namibia' \
+                    else TargetAreaSerializer
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
