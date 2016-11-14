@@ -241,7 +241,16 @@ def get_spray_data(obj, context):
                     then=1
                 ),
                 When(
-                    # spraypoint__isnull=False,
+                    spraypoint__isnull=False,
+                    data__has_key='osmstructure:node:id',
+                    data__contains={
+                        'sprayable_structure': 'yes'
+                    },
+                    then=1
+                ),
+                When(
+                    spraypoint__isnull=True,
+                    was_sprayed=True,
                     data__has_key='osmstructure:node:id',
                     data__contains={
                         'sprayable_structure': 'yes'
