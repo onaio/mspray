@@ -187,7 +187,8 @@ def get_spray_data(obj, context):
                 ),
                 When(
                     spraypoint__isnull=True,
-                    data__has_key='newstructure/gps',
+                    # data__has_key='newstructure/gps',
+                    was_sprayed=True,
                     then=1
                 ),
                 default=0,
@@ -462,8 +463,7 @@ class TargetAreaMixin(object):
             level = obj['level'] if isinstance(obj, dict) else obj.level
             if level == TA_LEVEL:
                 data = get_spray_data(obj, self.context)
-                visited_found = (data.get('found') or 0) + \
-                    count_duplicates(obj, True)
+                visited_found = (data.get('found') or 0)
             else:
                 visited_found = count_key_if_percent(
                     obj, 'sprayed', 20, self.context
@@ -476,8 +476,7 @@ class TargetAreaMixin(object):
             level = obj['level'] if isinstance(obj, dict) else obj.level
             data = get_spray_data(obj, self.context)
             if level == TA_LEVEL:
-                found = (data.get('found') or 0) + \
-                    count_duplicates(obj, True)
+                found = (data.get('found') or 0)
             else:
                 found = data.count()
 
