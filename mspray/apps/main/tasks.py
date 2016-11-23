@@ -230,15 +230,16 @@ def set_district_sprayed_visited():
         location.save()
 
     gc.collect()
-    qs = Location.objects.filter(level='RHC').annotate(
-        visited_sum=Sum('location__visited'),
-        sprayed_sum=Sum('location__sprayed')
+    qs = Location.objects.filter(level='RHC').values('id').annotate(
+        visited_sum=Sum('location__visited', distinct=True),
+        sprayed_sum=Sum('location__sprayed', distinct=True)
     )
     d = {}
     e = {}
-    for location in qs:
-        location.visited = location.visited_sum or 0
-        location.sprayed = location.sprayed_sum or 0
+    for l in qs:
+        location = Location.objects.get(pk=l.get('id'))
+        location.visited = l.get('visited_sum') or 0
+        location.sprayed = l.get('sprayed_sum') or 0
         location.save()
         k = count_key_if_percent(location, 'sprayed', 20)
         if k != location.visited:
@@ -254,13 +255,14 @@ def set_district_sprayed_visited():
         e[location.parent_id] += location.visited
 
     gc.collect()
-    qs = Location.objects.filter(level='district').annotate(
-        visited_sum=Sum('location__visited'),
-        sprayed_sum=Sum('location__sprayed')
+    qs = Location.objects.filter(level='district').values('id').annotate(
+        visited_sum=Sum('location__visited', distinct=True),
+        sprayed_sum=Sum('location__sprayed', distinct=True)
     )
-    for location in qs:
-        location.visited = location.visited_sum or 0
-        location.sprayed = location.sprayed_sum or 0
+    for l in qs:
+        location = Location.objects.get(pk=l.get('id'))
+        location.visited = l.get('visited_sum') or 0
+        location.sprayed = l.get('sprayed_sum') or 0
         location.save()
         k = count_key_if_percent(location, 'sprayed', 20)
         if k != location.visited:
