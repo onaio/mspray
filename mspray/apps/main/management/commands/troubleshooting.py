@@ -173,7 +173,7 @@ class Command(BaseCommand):
         except:
             pass
         for rhc in Location.objects.filter(level='RHC'):
-            qs = location.location_set.all().order_by('name')
+            qs = rhc.location_set.all().order_by('name')
             fn = os.path.join(dir_path,
                               '%s_%s.csv' % (rhc.parent.name, rhc.name))
             with codecs.open(fn, 'w', encoding='utf-8') as f:
