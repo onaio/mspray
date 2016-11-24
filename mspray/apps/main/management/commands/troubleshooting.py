@@ -178,6 +178,6 @@ class Command(BaseCommand):
                               '%s_%s.csv' % (rhc.parent.name, rhc.name))
             with codecs.open(fn, 'w', encoding='utf-8') as f:
                 writer = csv.writer(f)
-                for i in do_calculations():
+                for i in do_calculations(qs):
                     writer.writerow(i)
             gc.collect()
