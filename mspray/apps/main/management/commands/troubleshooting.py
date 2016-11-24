@@ -152,7 +152,7 @@ class Command(BaseCommand):
         # qs = location.location_set.all().order_by('name')
 
         def do_calculations(qs):
-            yield ("spray_date", "total_submissions", "unsprayable", "sprayed",
+            yield ("spray_area", "total_submissions", "unsprayable", "sprayed",
                    "not_sprayed", "not_sprayed_wo_duplicates",
                    "distinct_structures", "new_structures",
                    "not_sprayed_before", "not_sprayable_before",
