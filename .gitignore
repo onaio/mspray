@@ -9,3 +9,4 @@ ui/bower_components
 .DS_Store
 ui/*.xlsx
 node_modules
+celerybeat-schedule
