@@ -17,6 +17,7 @@ class Location(models.Model):
     visited = models.PositiveIntegerField(default=0)
     # sprayed - 20% of the structures have been sprayed in the spray area
     sprayed = models.PositiveIntegerField(default=0)
+    new_structures = models.PositiveIntegerField(default=0)
 
     class Meta:
         app_label = 'main'

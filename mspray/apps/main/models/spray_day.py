@@ -45,6 +45,7 @@ class SprayDay(models.Model):
     end_time = models.DateTimeField(null=True)
 
     was_sprayed = models.BooleanField(default=False)
+    is_new_structure = models.BooleanField(default=False)
 
     objects = models.GeoManager()
 

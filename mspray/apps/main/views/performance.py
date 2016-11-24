@@ -554,10 +554,6 @@ def get_spray_operator_data(spray_operator, spray_date):
             other=Case(When(not_sprayed__gt=0,
                             then=F('not_sprayed') - F('refused')),
                        default=0, output_field=IntegerField())
-        ).values(
-            'pk', 'code', 'found', 'sprayed', 'refused', 'other',
-            'not_sprayed', 'sprayday__spray_date', 'success_rate',
-            'found_sprayformid', 'sprayed_sprayformid'
         ).first()
 
     sprayed_sprayformid = sop.get('sprayed_sprayformid')

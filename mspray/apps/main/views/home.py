@@ -74,7 +74,7 @@ class DistrictView(SiteNameMixin, ListView):
         else:
             qs = qs.filter(parent=None).order_by('name')
 
-        return get_location_qs(qs)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
@@ -83,11 +83,7 @@ class DistrictView(SiteNameMixin, ListView):
             "ymin": 'ST_yMin("main_location"."geom")',
             "xmax": 'ST_xMax("main_location"."geom")',
             "ymax": 'ST_yMax("main_location"."geom")'
-        }).values(
-            'pk', 'code', 'level', 'name', 'parent', 'structures',
-            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
-            'num_new_structures', 'total_structures', 'visited', 'sprayed'
-        )
+        })
         pk = self.kwargs.get(self.slug_field)
         if pk is None:
             serializer_class = DistrictSerializer
@@ -128,10 +124,10 @@ class TargetAreaView(SiteNameMixin, DetailView):
     model = Location
     slug_field = 'pk'
 
-    def get_queryset(self):
-        qs = super(TargetAreaView, self).get_queryset()
+    # def get_queryset(self):
+    #     qs = super(TargetAreaView, self).get_queryset()
 
-        return get_location_qs(qs)
+    #     return get_location_qs(qs)
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)

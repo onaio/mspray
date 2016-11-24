@@ -10,12 +10,11 @@ from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
 from mspray.apps.main.serializers.household import HouseholdBSerializer
-from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import get_ta_in_location
 
 
 class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    queryset = get_location_qs(Location.objects.filter())
+    queryset = Location.objects.filter()
     serializer_class = TargetAreaSerializer
 
     def get_serializer_class(self):
@@ -27,7 +26,7 @@ class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
                                   viewsets.GenericViewSet):
-    queryset = get_location_qs(Location.objects.filter())
+    queryset = Location.objects.filter()
     serializer_class = HouseholdSerializer
 
     def get_serializer_class(self):

@@ -73,3 +73,9 @@ urlpatterns = [
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
         name="dos-spray-operator"),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

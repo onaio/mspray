@@ -377,6 +377,14 @@ def count_key_if_percent(obj, key, percentage, context=dict()):
 
 
 class DistrictMixin(object):
+    def get_total_structures(self, obj):
+        if obj:
+            return obj.structures + obj.new_structures
+
+    def get_num_new_structures(self, obj):
+        if obj:
+            return obj.new_structures
+
     def get_targetid(self, obj):
         return obj.get('pk') if isinstance(obj, dict) else obj.pk
 
@@ -439,6 +447,14 @@ class DistrictMixin(object):
 
 
 class TargetAreaMixin(object):
+    def get_total_structures(self, obj):
+        if obj:
+            return obj.structures + obj.new_structures
+
+    def get_num_new_structures(self, obj):
+        if obj:
+            return obj.new_structures
+
     def get_queryset(self, obj):
 
         qs = SprayDay.objects.filter(
@@ -713,8 +729,8 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     rhc_pk = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
-    total_structures = serializers.IntegerField()
-    num_new_structures = serializers.IntegerField()
+    total_structures = serializers.SerializerMethodField()
+    num_new_structures = serializers.SerializerMethodField()
     found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -777,8 +793,8 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
     rhc_pk = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
-    total_structures = serializers.IntegerField()
-    num_new_structures = serializers.IntegerField()
+    total_structures = serializers.SerializerMethodField()
+    num_new_structures = serializers.SerializerMethodField()
     found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -861,8 +877,8 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
     structures = serializers.SerializerMethodField()
-    total_structures = serializers.IntegerField()
-    num_new_structures = serializers.IntegerField()
+    total_structures = serializers.SerializerMethodField()
+    num_new_structures = serializers.SerializerMethodField()
     found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()

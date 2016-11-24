@@ -683,7 +683,7 @@ def get_location_qs(qs, level=None):
                 num_new_structures=Sum(Case(When(
                     spraydayhealthcenterlocation__content_object__data__has_key='osmstructure:node:id',  # noqa
                     then=1
-                ), default=0, output_field=IntegerField()))
+                ), default=0, output_field=IntegerField()), distinct=True)
             ).annotate(
                 total_structures=ExpressionWrapper(
                     F('num_new_structures') + F('structures'),
@@ -695,7 +695,7 @@ def get_location_qs(qs, level=None):
                 num_new_structures=Sum(Case(When(
                     sprayday__data__has_key='osmstructure:node:id',
                     then=1
-                ), default=0, output_field=IntegerField()))
+                ), default=0, output_field=IntegerField()), distinct=True)
             ).annotate(
                 total_structures=ExpressionWrapper(
                     F('num_new_structures') + F('structures'),
