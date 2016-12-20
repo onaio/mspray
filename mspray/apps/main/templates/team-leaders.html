@@ -18,7 +18,7 @@
                     <tr>
                         <th rowspan="3">Team Leader Assistants (TLA)</th>
                         <th colspan="6">Number of Structures</th>
-                        <th rowspan="3">Spray Coverage</th>
+                        <!-- <th rowspan="3">Spray Coverage</th> -->
                         <th rowspan="3">Average structures <br />found per SOP per day</th>
                         <th rowspan="3">Average data collection start time</th>
                         <th rowspan="3">Average data collection end time</th>
@@ -48,7 +48,7 @@
                             <td class='numbers'>{{ row.refused|intcomma  }}</td>
                             <td class='numbers'>{{ row.other|intcomma  }}</td>
                             <td class='numbers'>{{ row.not_sprayed_total }}</td>
-                            <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                            <!-- <td class='numbers'>{{ row.spray_success_rate }}%</td> -->
                             <td class='numbers {{ row.avg_structures_per_so|sprayed_color }}'>
                                 {{ row.avg_structures_per_so }}
                             </td>
@@ -74,7 +74,7 @@
                         <td class='numbers'>{{ totals.refused|intcomma  }}</td>
                         <td class='numbers'>{{ totals.other|intcomma  }}</td>
                         <td class='numbers'>{{ totals.not_sprayed_total }}</td>
-                        <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                        <!-- <td class='numbers'>{{ totals.spray_success_rate }}%</td> -->
                         <td class='numbers {{ totals.avg_structures_per_so|sprayed_color }}'>
                             {{ totals.avg_structures_per_so }}
                         </td>
