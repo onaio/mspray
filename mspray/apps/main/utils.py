@@ -11,20 +11,20 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
-from django.db.models import Q
-from django.db.models import Case, F, Sum, ExpressionWrapper, When
-from django.db.models import IntegerField
+from django.db.models import Q, F, ExpressionWrapper, OuterRef, Subquery, Value
+from django.db.models import IntegerField, PositiveIntegerField, Count
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
-from django.db.models import Count
+from django.db.models.functions import Coalesce
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
-from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_day import SprayDay,\
+    SprayDayHealthCenterLocation
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -679,29 +679,36 @@ def unique_spray_points(queryset):
 
 def get_location_qs(qs, level=None):
     if level == 'RHC':
+        sprays = SprayDayHealthCenterLocation.objects.filter(
+            location=OuterRef('pk'),
+            content_object__data__has_key='osmstructure:node:id'
+        ).order_by().values('location')
+        new_structure_count = sprays.annotate(c=Count('location')).values('c')
         qs = qs.annotate(
-                num_new_structures=Sum(Case(When(
-                    spraydayhealthcenterlocation__content_object__data__has_key='osmstructure:node:id',  # noqa
-                    then=1
-                ), default=0, output_field=IntegerField()))
-            ).annotate(
-                total_structures=ExpressionWrapper(
-                    F('num_new_structures') + F('structures'),
-                    output_field=IntegerField()
-                )
+            num_new_structures=Coalesce(Subquery(
+                queryset=new_structure_count,
+                output_field=IntegerField()), Value(0))
+        ).annotate(
+            total_structures=ExpressionWrapper(
+                F('num_new_structures') + F('structures'),
+                output_field=IntegerField()
             )
+        )
     else:
+        sprays = SprayDay.objects.filter(
+            location=OuterRef('pk'),
+            data__has_key='osmstructure:node:id').order_by().values('location')
+        new_structure_count = sprays.annotate(c=Count('location')).values('c')
         qs = qs.annotate(
-                num_new_structures=Sum(Case(When(
-                    sprayday__data__has_key='osmstructure:node:id',
-                    then=1
-                ), default=0, output_field=IntegerField()))
-            ).annotate(
-                total_structures=ExpressionWrapper(
-                    F('num_new_structures') + F('structures'),
-                    output_field=IntegerField()
-                )
+            num_new_structures=Coalesce(Subquery(
+                queryset=new_structure_count,
+                output_field=PositiveIntegerField()), Value(0))
+        ).annotate(
+            total_structures=ExpressionWrapper(
+                F('num_new_structures') + F('structures'),
+                output_field=PositiveIntegerField()
             )
+        )
 
     return qs
 
