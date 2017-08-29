@@ -1,3 +1,5 @@
+import sys
+
 from mspray.apps.main.views import (
     target_area, household, household_buffer, sprayday, indicators, districts,
     spray_operator_daily, directly_observed_spraying_form
@@ -9,6 +11,9 @@ from django.conf import settings
 from django.conf.urls import include, url, static
 from rest_framework import routers
 from django.contrib import admin
+
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+
 admin.autodiscover()
 
 router = routers.DefaultRouter(trailing_slash=False)
@@ -73,3 +78,14 @@ urlpatterns = [
         directly_observed_spraying_form.DirectlyObservedSprayingView.as_view(),
         name="dos-spray-operator"),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
+if (settings.DEBUG or TESTING) and 'debug_toolbar' in settings.INSTALLED_APPS:
+    try:
+        import debug_toolbar
+    except ImportError:
+        pass
+    else:
+        urlpatterns += [
+            url(r'^__debug__/', include(debug_toolbar.urls)),
+        ]
