@@ -1,6 +1,8 @@
 from django.conf import settings
-from django.db.models import Case, Count, F, Func, Sum, ExpressionWrapper, When
-from django.db.models import Avg, FloatField, IntegerField
+from django.db.models import Case, Count, F, Func, Sum, ExpressionWrapper,\
+    When, Avg, FloatField, PositiveIntegerField, IntegerField, OuterRef,\
+    Subquery, Value
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -506,64 +508,92 @@ def get_formid(spray_operator, spray_date):
 
 def get_spray_operator_data(spray_operator, spray_date):
     formid = get_formid(spray_operator, spray_date)
+
+    was_sprayed_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk'),
+        was_sprayed=True).order_by().values('spray_operator')
+    was_sprayed_count = was_sprayed_sprays.annotate(
+        a=Count('spray_operator')).values('a')
+
+    sprayed_sprayformid_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk'), was_sprayed=True,
+        data__contains={
+            'sprayformid': formid}).order_by().values('spray_operator')
+    sprayed_sprayformid_count = sprayed_sprayformid_sprays.annotate(
+        b=Count('spray_operator')).values('b')
+
+    not_sprayed_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk'),
+        was_sprayed=False).order_by().values('spray_operator')
+    not_sprayed_count = not_sprayed_sprays.annotate(
+        c=Count('spray_operator')).values('c')
+
+    refused_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk'), was_sprayed=False,
+        data__contains={
+            'osmstructure:notsprayed_reason': 'refused'
+        }).order_by().values('spray_operator')
+    refused_count = refused_sprays.annotate(
+        d=Count('spray_operator')).values('d')
+
+    found_sprayformid_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk'), data__contains={'sprayformid': formid}
+    ).order_by().values('spray_operator')
+    found_sprayformid_count = found_sprayformid_sprays.annotate(
+        e=Count('spray_operator')).values('e')
+
+    found_sprays = SprayDay.objects.filter(
+        spray_operator=OuterRef('pk')).order_by().values('spray_operator')
+    found_count = found_sprays.annotate(
+        f=Count('spray_operator')).values('f')
+
     sop = SprayOperator.objects.filter(
         code=spray_operator.code, sprayday__spray_date=spray_date
-    )\
-        .values('sprayday__spray_date')\
-        .annotate(
-            found=Count('sprayday'),
-            sprayed=Sum(Case(
-                When(sprayday__was_sprayed=True, then=1),
-                default=0,
-                output_field=IntegerField()
-            )),
-            sprayed_sprayformid=Sum(Case(
-                When(
-                    sprayday__was_sprayed=True,
-                    sprayday__data__contains={'sprayformid': formid},
-                    then=1
-                ),
-                default=0,
-                output_field=IntegerField()
-            )),
-            not_sprayed=Sum(Case(
-                When(sprayday__was_sprayed=False, then=1),
-                default=0,
-                output_field=IntegerField()
-            )),
-            refused=Sum(Case(When(
-                sprayday__was_sprayed=False,
-                sprayday__data__contains={
-                    'osmstructure:notsprayed_reason': 'refused'
-                }, then=1
-            ), default=0, output_field=IntegerField())
+    ).annotate(
+        found=Coalesce(Subquery(
+            queryset=found_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        sprayed=Coalesce(Subquery(
+            queryset=was_sprayed_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        sprayed_sprayformid=Coalesce(Subquery(
+            queryset=sprayed_sprayformid_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        not_sprayed=Coalesce(Subquery(
+            queryset=not_sprayed_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        refused=Coalesce(Subquery(
+            queryset=refused_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        found_sprayformid=Coalesce(Subquery(
+            queryset=found_sprayformid_count,
+            output_field=PositiveIntegerField()), Value(0))
+    ).annotate(
+        success_rate=Case(When(found__gt=0, then=ExpressionWrapper(
+            F('sprayed') * 100 / Func(
+                F('found'), function='CAST',
+                template='%(function)s(%(expressions)s AS FLOAT)'
             ),
-            found_sprayformid=Sum(Case(When(
-                sprayday__data__contains={'sprayformid': formid},
-                then=1
-            ), default=0, output_field=IntegerField())
-            )
-        ).annotate(
-            success_rate=Case(When(found__gt=0, then=ExpressionWrapper(
-                F('sprayed') * 100 / Func(
-                    F('found'), function='CAST',
-                    template='%(function)s(%(expressions)s AS FLOAT)'
-                ),
-                FloatField()
-            )), default=0, output_field=FloatField()),
-            other=Case(When(not_sprayed__gt=0,
-                            then=F('not_sprayed') - F('refused')),
-                       default=0, output_field=IntegerField())
-        ).values(
-            'pk', 'code', 'found', 'sprayed', 'refused', 'other',
-            'not_sprayed', 'sprayday__spray_date', 'success_rate',
-            'found_sprayformid', 'sprayed_sprayformid'
-        ).first()
+            FloatField()
+        )), default=0, output_field=FloatField())
+    ).annotate(
+        other=Case(When(not_sprayed__gt=0,
+                        then=F('not_sprayed') - F('refused')),
+                   default=0, output_field=IntegerField())
+    ).values(
+        'pk', 'code', 'found', 'sprayed', 'refused', 'other',
+        'not_sprayed', 'sprayday__spray_date', 'success_rate',
+        'found_sprayformid', 'sprayed_sprayformid'
+    ).distinct('id').first()
 
     sprayed_sprayformid = sop.get('sprayed_sprayformid')
     found_sprayformid = sop.get('found_sprayformid')
 
-    formid = get_formid(spray_operator,  spray_date)
     summary = SprayOperatorDailySummary.objects.filter(
         sprayoperator_code=spray_operator.code,
         data__sprayformid=formid
