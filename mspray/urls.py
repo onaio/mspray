@@ -6,6 +6,7 @@ from mspray.apps.main.views import (
 )
 from mspray.apps.main.views import home
 from mspray.apps.main.views import performance
+from mspray.apps.warehouse import urls as warehouse_urls
 
 from django.conf import settings
 from django.conf.urls import include, url, static
@@ -44,6 +45,7 @@ performance_urls = [
 urlpatterns = [
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
+    url(r'^warehouse/', include(warehouse_urls, namespace='warehouse')),
     url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
         name='district'),
     url(r'^(?P<district_pk>\d+)/(?P<slug>\d+)$',

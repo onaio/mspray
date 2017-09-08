@@ -19,27 +19,33 @@ def spray_area_calculations(loc, stdout_write=print):
     unsprayable = qs.filter(
         was_sprayed=False, data__contains={'sprayable_structure': 'no'}
     ).count()
+
     sprayable = qs.filter(
         data__contains={'sprayable_structure': 'yes'}
     )
     stdout_write(unsprayable, "Total Unsprayable")
+
     sprayed = qs.filter(was_sprayed=True).count()
     stdout_write(sprayed, "Total Sprayed")
+
     not_sprayed = qs.filter(
         was_sprayed=False, data__contains={'sprayable_structure': 'yes'}
     ).count()
     stdout_write(not_sprayed, "Total Not Sprayed")
+
     not_sprayed_wo = qs.filter(
         was_sprayed=False, data__contains={'sprayable_structure': 'yes'},
         spraypoint__isnull=False
     ).count()
     stdout_write(not_sprayed_wo, "Not Sprayed (without duplicates)")
+
     new_structures = sprayable.filter(
         Q(data__has_key='osmstructure:node:id') |
         Q(data__has_key='newstructure/gps')
     ).count()
     stdout_write(new_structures,
                  "Total New structures(not sprayable not included)")
+
     osmids = qs.filter(
         was_sprayed=True, data__contains={'sprayable_structure': 'yes'}
     ).values('osmid').distinct()
@@ -48,6 +54,7 @@ def spray_area_calculations(loc, stdout_write=print):
         osmids_count,
         "Total distinct structures sprayed on %s (no duplicates)" % loc
     )
+
     not_sprayable_before = SprayDay.objects.filter(
         location=loc,
         data__contains={'sprayable_structure': 'no'},
@@ -56,6 +63,7 @@ def spray_area_calculations(loc, stdout_write=print):
     stdout_write(
         not_sprayable_before,
         "structures that had 'not sprayable' status on %s" % loc)
+
     not_sprayed_before = SprayDay.objects.filter(
         location=loc, was_sprayed=False,
         osmid__in=osmids
@@ -63,6 +71,7 @@ def spray_area_calculations(loc, stdout_write=print):
     stdout_write(
         not_sprayed_before,
         "structures that had 'not sprayed' on %s" % loc)
+
     structures = loc.structures
     stdout_write(structures, "enumerated structures")
 

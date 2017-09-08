@@ -245,8 +245,9 @@ MSPRAY_IRS_NUM_FIELD = 'irs_sticker_num'
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
 ONA_URI = 'https://ona.io'
+DRUID_BROKER_URI = 'http://10.20.25.56:8082'
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
 OSM_SUBMISSIONS = False
 HAS_SPRAYABLE_QUESTION = False
-SITE_NAME = 'mspray'
+SITE_NAME = 'mSpray'

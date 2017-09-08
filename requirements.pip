@@ -4,12 +4,15 @@ django_nose
 djangorestframework-gis
 django-cors-headers
 django-filter
+django-mptt
 python-dateutil
 python3-memcached
+pydruid
 
 # dev
 coverage
 flake8
+django-extensions
 
 # deployment
 uwsgi

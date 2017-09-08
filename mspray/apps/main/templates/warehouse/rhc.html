@@ -1,0 +1,60 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">{% trans "District" %}: {{object.name}} <i class="fa fa-map"></i></a></h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>{% trans "Target Area" %}</th>
+                    <th>{% trans "Structures on ground" %}</th>
+                    <th>{% trans "Found" %}</th>
+                    <th>{% trans "Sprayed" %}</th>
+                    <th>{% trans "Spray Effectiveness" %}</th>
+                    <th>{% trans "Found coverage" %}</th>
+                    <th>{% trans "Spray coverage" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td><a href="">{{item.target_area_name}} <i class="fa fa-map"></i></a></td>
+                    <td class='numbers'>{{item.target_area_structures}}</td>
+                    <td class='numbers'>{{item.found}}</td>
+                    <td class='numbers'>{{item.num_sprayed}}</td>
+                    <td class='numbers {{ item.spray_efectiveness|sprayed_effectively_color }}'>{{item.spray_efectiveness|floatformat:0}}%</td>
+                    <td class='numbers'>{{item.found_coverage|floatformat:0}}%</td>
+                    <td class='numbers'>{{item.spray_coverage|floatformat:0}}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                </tr>
+            </tfoot>
+        </table>
+        <p>{% trans "* To sort a column, click on the column name" %}</p>
+
+        {% include 'definitions-and-conditions.html' with colors=True %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
