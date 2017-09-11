@@ -9,10 +9,12 @@
 {% block content %}
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
-        <h1 id="district-name">{% trans "District" %}: {{object.name}} <i class="fa fa-map"></i></a></h1>
+        <h1 id="district-name">{% trans "All Spray Areas" %}</h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
+                    <th>{% trans "District" %}</th>
+                    <th>{% trans "Health Centre" %}</th>
                     <th>{% trans "Target Area" %}</th>
                     <th>{% trans "Structures on ground" %}</th>
                     <th>{% trans "Found" %}</th>
@@ -25,6 +27,8 @@
             <tbody>
                 {% for item in data %}
                 <tr>
+                    <td>{{item.district_name}}</td>
+                    <td>{{item.rhc_name}}</td>
                     <td><a href=""><i class="fa fa-map"></i> {{item.target_area_name}}</a></td>
                     <td class='numbers'>{{item.total_structures|intcomma}}</td>
                     <td class='numbers'>{{item.num_found|floatformat:0|intcomma}}</td>
@@ -36,6 +40,8 @@
                 {% endfor %}
                 {% for missing_item in missing_target_areas %}
                 <tr>
+                    <td>{{missing_item.parent__parent__name}}</td>
+                    <td>{{missing_item.parent__name}}</td>
                     <td><a href=""><i class="fa fa-map"></i> {{missing_item.name}}</a></td>
                     <td class='numbers'>{{missing_item.structures|intcomma}}</td>
                     <td class='numbers'>0</td>
@@ -48,7 +54,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td>{% trans "Total" %}</td>
+                    <td colspan="3">{% trans "Total" %}</td>
                     <td class='numbers'>{{ totals.structures|intcomma }}</td>
                     <td class='numbers'>{{ totals.found|intcomma }}</td>
                     <td class='numbers'>{{ totals.sprayed|intcomma }} </td>
