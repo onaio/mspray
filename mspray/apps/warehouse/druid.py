@@ -6,9 +6,66 @@ from pydruid.utils import filters
 from pydruid.utils.postaggregator import Field
 
 from django.conf import settings
+from django.db.models import Sum
+
+from mspray.apps.main.models import Location
 
 
-def calculate_rhc_totals(totals):
+def get_target_area_totals(data):
+    """
+    Loops through data and caulcates totals
+    """
+    total_structures, total_found, total_sprayed = Decimal(0), Decimal(0),\
+        Decimal(0)
+    for d in data:
+        d['total_structures'] = int(d['target_area_structures']) +\
+            d['num_new_no_duplicates'] + d['num_sprayed_duplicates'] -\
+            d['num_not_sprayable_no_duplicates']
+        try:
+            found_coverage = (Decimal(d['num_found']) /
+                              Decimal(d['total_structures'])) * 100
+        except ZeroDivisionError:
+            found_coverage = 0
+        except InvalidOperation:
+            found_coverage = 0
+        try:
+            spray_efectiveness = (Decimal(d['num_sprayed']) /
+                                  Decimal(d['total_structures'])) *\
+                Decimal(100)
+        except ZeroDivisionError:
+            spray_efectiveness = 0
+        except InvalidOperation:
+            found_coverage = 0
+        try:
+            spray_coverage = (Decimal(d['num_sprayed']) /
+                              Decimal(d['num_found'])) *\
+                Decimal(100)
+        except ZeroDivisionError:
+            spray_coverage = 0
+        except InvalidOperation:
+            found_coverage = 0
+        d['spray_efectiveness'] = spray_efectiveness
+        d['found_coverage'] = found_coverage
+        d['spray_coverage'] = spray_coverage
+        total_found += Decimal(d['num_found'])
+        total_sprayed += Decimal(d['num_sprayed'])
+        total_structures += Decimal(d['total_structures'])
+    totals = {
+        'found': total_found,
+        'sprayed': total_sprayed,
+        'structures': total_structures,
+        'found_coverage': Decimal(0),
+        'spray_efectiveness': Decimal(0),
+        'spray_coverage': Decimal(0),
+    }
+    return totals
+
+
+def calculate_target_area_totals(totals):
+    """
+    Takes a 'totals' dict and calculates the found, structures and sprayed
+    indicatos
+    """
     total_found = totals['found']
     total_structures = totals['structures']
     total_sprayed = totals['sprayed']
@@ -36,10 +93,57 @@ def calculate_rhc_totals(totals):
     return totals
 
 
-def get_rhc_data(pk=None, dimensions=None):
+def process_location_data(location_dict, district_data):
+    """
+    Takes a group of target areas in a location and calculates location-wide
+    indicators
+    """
+    result = {}
+    if location_dict['level'] == 'district':
+        target_areas = Location.objects.filter(
+            parent__parent__id=location_dict['id']).filter(level='ta')
+    elif location_dict['level'] == 'RHC':
+        target_areas = Location.objects.filter(
+            parent__id=location_dict['id']).filter(level='ta')
+    else:
+        target_areas = Location.objects.filter(
+            id=location_dict['id']).filter(level='ta')
+    target_area_count = target_areas.count()
+    visited, sprayed = 0, 0
+    for x in district_data:
+        if x['found_coverage'] >= Decimal(20):
+            visited += 1
+        if x['spray_efectiveness'] >= Decimal(85):
+            sprayed += 1
+    result['target_area_count'] = target_area_count
+    result['visited'] = visited
+    result['sprayed'] = sprayed
+
+    try:
+        visited_percentage = (Decimal(visited) / Decimal(target_area_count)) *\
+            Decimal(100)
+    except ZeroDivisionError:
+        visited_percentage = 0
+    except InvalidOperation:
+        visited_percentage = 0
+
+    try:
+        sprayed_percentage = (Decimal(sprayed) / Decimal(visited)) *\
+            Decimal(100)
+    except ZeroDivisionError:
+        sprayed_percentage = 0
+    except InvalidOperation:
+        sprayed_percentage = 0
+
+    result['visited_percentage'] = visited_percentage
+    result['sprayed_percentage'] = sprayed_percentage
+    return result
+
+
+def get_druid_data(rhc_pk=None, district_pk=None, dimensions=None):
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource='mspraytest',
+        datasource='mspraytest2',
         granularity='all',
         intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
         aggregations={
@@ -124,8 +228,10 @@ def get_rhc_data(pk=None, dimensions=None):
             "columns": ["target_area_name"]
         }
     )
-    if pk:
-        params['filter'] = (filters.Dimension('rhc_id') == pk)
+    if rhc_pk:
+        params['filter'] = (filters.Dimension('rhc_id') == rhc_pk)
+    if district_pk:
+        params['filter'] = (filters.Dimension('district_id') == district_pk)
     if dimensions is None:
         params['dimensions'] = ['target_area_id', 'target_area_name',
                                 'target_area_structures']
@@ -140,48 +246,6 @@ def get_rhc_data(pk=None, dimensions=None):
         result = request.result
         data = [x['event'] for x in result if x['event']['target_area_id']
                 is not None]
-        total_structures, total_found, total_sprayed = Decimal(0), Decimal(0),\
-            Decimal(0)
-        for d in data:
-            d['total_structures'] = int(d['target_area_structures']) +\
-                d['num_new_no_duplicates'] + d['num_sprayed_duplicates'] -\
-                d['num_not_sprayable_no_duplicates']
-            try:
-                found_coverage = (Decimal(d['num_found']) /
-                                  Decimal(d['total_structures'])) * 100
-            except ZeroDivisionError:
-                found_coverage = 0
-            except InvalidOperation:
-                found_coverage = 0
-            try:
-                spray_efectiveness = (Decimal(d['num_sprayed']) /
-                                      Decimal(d['total_structures'])) *\
-                    Decimal(100)
-            except ZeroDivisionError:
-                spray_efectiveness = 0
-            except InvalidOperation:
-                found_coverage = 0
-            try:
-                spray_coverage = (Decimal(d['num_sprayed']) /
-                                  Decimal(d['num_found'])) *\
-                    Decimal(100)
-            except ZeroDivisionError:
-                spray_coverage = 0
-            except InvalidOperation:
-                found_coverage = 0
-            d['spray_efectiveness'] = spray_efectiveness
-            d['found_coverage'] = found_coverage
-            d['spray_coverage'] = spray_coverage
-            total_found += Decimal(d['num_found'])
-            total_sprayed += Decimal(d['num_sprayed'])
-            total_structures += Decimal(d['total_structures'])
-        totals = {
-            'found': total_found,
-            'sprayed': total_sprayed,
-            'structures': total_structures,
-            'found_coverage': Decimal(0),
-            'spray_efectiveness': Decimal(0),
-            'spray_coverage': Decimal(0),
-        }
+        totals = get_target_area_totals(data)
         return data, totals
     return [], {}

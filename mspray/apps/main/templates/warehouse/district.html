@@ -1,0 +1,58 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">{% trans "District: " %} {{object.name}} <a href="{% url 'warehouse:district' object.pk %}"><i class="fa fa-map"></i></a></h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th rowspan="2">{% trans "Health Facility" %}</th>
+                    <th rowspan="2">{% trans "Eligible Spray Areas" %}</th>
+                    <th colspan="2">{% trans "Spray Areas Visited" %} <sup title="{% trans "A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them." %}">(a)</sup></th>
+                    <th colspan="2">{% trans "Spray Areas Sprayed Effectively" %}<sup title="{% trans "A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed." %}">(b)</sup></th>
+                </tr>
+                <tr>
+                    <th>{% trans "Number" %}</th>
+                    <th>{% trans "%" %}</th>
+                    <th>{% trans "Number" %}</th>
+                    <th>{% trans "%" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for object in object_list %}
+                    <tr>
+                        <td><a href="{% url 'warehouse:rhc' object.id %}"><i class="fa fa-map"></i> {{object.name}}</a></td>
+                        <td class='numbers'>{{object.target_area_count}}</td>
+                        <td class='numbers'>{{object.visited}}</td>
+                        <td class='numbers'>{{object.visited_percentage|floatformat:0}}%</td>
+                        <td class='numbers'>{{object.sprayed}}</td>
+                        <td class='numbers {{object.sprayed_percentage|sprayed_effectively_color}}'>{{object.sprayed_percentage|floatformat:0}}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>{% trans "* To sort a column, click on the column name" %}</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
