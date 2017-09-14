@@ -1,11 +1,14 @@
 from django.views.generic.detail import DetailView
 from django.views.generic import TemplateView
 
+from rest_framework.renderers import JSONRenderer
+
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals
 from mspray.apps.main.definitions import DEFINITIONS
+from mspray.apps.warehouse.serializers import TargetAreaSerializer
 
 
 class Home(SiteNameMixin, TemplateView):
@@ -90,12 +93,31 @@ class RHCView(SiteNameMixin, DetailView):
         return context
 
 
-class TargetAreas(SiteNameMixin, TemplateView):
+class TargetAreaView(SiteNameMixin, DetailView):
+    template_name = 'warehouse/map.html'
+    slug_field = 'pk'
+    model = Location
+
+    def get_queryset(self):
+        return Location.objects.filter(level='ta')
+
+    def get_context_data(self, **kwargs):
+        context = super(TargetAreaView, self).get_context_data(**kwargs)
+        data, totals = get_druid_data(ta_pk=self.object.pk, dimensions=[
+            'target_area_id', 'target_area_name', 'target_area_structures',
+            'district_name', 'district_id', 'rhc_name', 'rhc_id']
+        )
+        ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
+        context['target_data'] = JSONRenderer().render(ta_data)
+        return context
+
+
+class AllTargetAreas(SiteNameMixin, TemplateView):
     template_name = 'warehouse/spray-areas.html'
 
     def get_context_data(self, **kwargs):
-        context = super(TargetAreas, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(pk=None, dimensions=[
+        context = super(AllTargetAreas, self).get_context_data(**kwargs)
+        data, totals = get_druid_data(dimensions=[
             'target_area_id', 'target_area_name', 'target_area_structures',
             'rhc_name', 'district_name']
         )

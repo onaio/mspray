@@ -25,7 +25,7 @@
             <tbody>
                 {% for item in data %}
                 <tr>
-                    <td><a href=""><i class="fa fa-map"></i> {{item.target_area_name}}</a></td>
+                    <td><a href="{% url 'warehouse:ta' item.target_area_id %}"><i class="fa fa-map"></i> {{item.target_area_name}}</a></td>
                     <td class='numbers'>{{item.total_structures|intcomma}}</td>
                     <td class='numbers'>{{item.num_found|floatformat:0|intcomma}}</td>
                     <td class='numbers'>{{item.num_sprayed|intcomma}}</td>

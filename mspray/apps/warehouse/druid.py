@@ -6,7 +6,6 @@ from pydruid.utils import filters
 from pydruid.utils.postaggregator import Field
 
 from django.conf import settings
-from django.db.models import Sum
 
 from mspray.apps.main.models import Location
 
@@ -21,6 +20,9 @@ def get_target_area_totals(data):
         d['total_structures'] = int(d['target_area_structures']) +\
             d['num_new_no_duplicates'] + d['num_sprayed_duplicates'] -\
             d['num_not_sprayable_no_duplicates']
+
+        d['num_not_visited'] = d['total_structures'] - d['num_found']
+
         try:
             found_coverage = (Decimal(d['num_found']) /
                               Decimal(d['total_structures'])) * 100
@@ -28,6 +30,7 @@ def get_target_area_totals(data):
             found_coverage = 0
         except InvalidOperation:
             found_coverage = 0
+
         try:
             spray_efectiveness = (Decimal(d['num_sprayed']) /
                                   Decimal(d['total_structures'])) *\
@@ -36,6 +39,7 @@ def get_target_area_totals(data):
             spray_efectiveness = 0
         except InvalidOperation:
             found_coverage = 0
+
         try:
             spray_coverage = (Decimal(d['num_sprayed']) /
                               Decimal(d['num_found'])) *\
@@ -44,6 +48,7 @@ def get_target_area_totals(data):
             spray_coverage = 0
         except InvalidOperation:
             found_coverage = 0
+
         d['spray_efectiveness'] = spray_efectiveness
         d['found_coverage'] = found_coverage
         d['spray_coverage'] = spray_coverage
@@ -140,10 +145,10 @@ def process_location_data(location_dict, district_data):
     return result
 
 
-def get_druid_data(rhc_pk=None, district_pk=None, dimensions=None):
+def get_druid_data(ta_pk=None, rhc_pk=None, district_pk=None, dimensions=None):
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource='mspraytest2',
+        datasource='mspraytest',
         granularity='all',
         intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
         aggregations={
@@ -216,6 +221,15 @@ def get_druid_data(rhc_pk=None, district_pk=None, dimensions=None):
                 ),
                 aggregators.longsum('count')
             ),
+            'num_refused': aggregators.filtered(
+                filters.Filter(
+                    type='and',
+                    fields=[filters.Dimension('is_duplicate') == 'false',
+                            filters.Dimension('is_refused') == 'true',
+                            filters.Dimension('sprayed') == 'no']
+                ),
+                aggregators.longsum('count')
+            ),
         },
         post_aggregations={
             'num_found': Field('num_sprayed_no_duplicates') +
@@ -228,6 +242,8 @@ def get_druid_data(rhc_pk=None, district_pk=None, dimensions=None):
             "columns": ["target_area_name"]
         }
     )
+    if ta_pk:
+        params['filter'] = (filters.Dimension('target_area_id') == ta_pk)
     if rhc_pk:
         params['filter'] = (filters.Dimension('rhc_id') == rhc_pk)
     if district_pk:
