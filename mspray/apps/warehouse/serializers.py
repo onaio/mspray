@@ -331,35 +331,6 @@ class DruidBase(object):
         if self.druid_data:
             return self.druid_data.get('osmid')
 
-    def get_bgeom(self, obj):
-        if self.druid_data:
-            bgeom_srid = self.druid_data.get('bgeom_srid')
-            bgeom_type = self.druid_data.get('bgeom_type')
-            bgeom_coordinates = self.druid_data.get('bgeom_coordinates')
-            return {'srid': bgeom_srid,
-                    'type': bgeom_type,
-                    'coordinates': bgeom_coordinates}
-
-
-class SprayDaySerializer(DruidBase):
-    sprayed = serializers.SerializerMethodField()
-    osm_sprayed = serializers.SerializerMethodField()
-    reason = serializers.SerializerMethodField()
-    sprayoperator_name = serializers.SerializerMethodField()
-    sprayoperator_code = serializers.SerializerMethodField()
-    irs_sticker_num = serializers.SerializerMethodField()
-    bgeom = serializers.SerializerMethodField()
-
-    class Meta:
-        fields = ['submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
-                  'sprayoperator_name', 'sprayoperator_code', 'osm_sprayed',
-                  'irs_sticker_num', 'bgeom'
-                  ]
-
-    def get_osm_sprayed(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayed')
-
 
 class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
     targetid = serializers.SerializerMethodField()

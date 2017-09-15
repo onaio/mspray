@@ -148,7 +148,7 @@ def process_location_data(location_dict, district_data):
 def get_druid_data(ta_pk=None, rhc_pk=None, district_pk=None, dimensions=None):
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource='mspraytest',
+        datasource='mspraytest2',
         granularity='all',
         intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
         aggregations={
@@ -265,3 +265,37 @@ def get_druid_data(ta_pk=None, rhc_pk=None, district_pk=None, dimensions=None):
         totals = get_target_area_totals(data)
         return data, totals
     return [], {}
+
+
+def druid_select_query(dimensions, filter_dict=[]):
+    """
+    params filters is a dicts like so:
+    {'target_area_id': 12}
+    """
+    query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
+    params = dict(
+        datasource='mspraytest',
+        granularity='all',
+        intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
+        limit_spec={
+            "type": "default",
+            "limit": 50000,
+        }
+    )
+    params['dimensions'] = dimensions
+    if filter_dict:
+        fields = []
+        for k, v in filter_dict.items():
+            fields.append(filters.Dimension(k) == v)
+        params['filter'] = filters.Filter(
+            type="and",
+            fields=fields
+        )
+
+    try:
+        request = query.groupby(**params)
+    except OSError:
+        pass
+    else:
+        return request.result
+    return []

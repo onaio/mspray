@@ -139,15 +139,15 @@
         app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
         app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
 
-        // {% if sprayed_duplicates %}
-        // app.sprayedDuplicates = {{ sprayed_duplicates }};
-        // app.sprayedDuplicatesData = {{ sprayed_duplicates_data|safe }};
-        // app.notSprayedDuplicates = {{ not_sprayed_duplicates }};
-        // app.notSprayedDuplicatesData = {{ not_sprayed_duplicates_data|safe }};
-        // {% endif %}
-        // {% if target_data.level == 'ta' %}
-        // var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
-        // app.loadSprayPoints(spraypoints_url);
-        // {% endif %}
+        {% if sprayed_duplicates %}
+        app.sprayedDuplicates = {{ sprayed_duplicates }};
+        app.sprayedDuplicatesData = {{ sprayed_duplicates_data|safe }};
+        app.notSprayedDuplicates = {{ not_sprayed_duplicates }};
+        app.notSprayedDuplicatesData = {{ not_sprayed_duplicates_data|safe }};
+        {% endif %}
+
+        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
+        app.loadSprayPoints(spraypoints_url);
+
     </script>
 {% endblock %}

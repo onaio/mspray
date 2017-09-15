@@ -9,6 +9,7 @@ from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.warehouse.serializers import TargetAreaSerializer
+from mspray.apps.warehouse.utils import get_duplicates
 
 
 class Home(SiteNameMixin, TemplateView):
@@ -108,6 +109,13 @@ class TargetAreaView(SiteNameMixin, DetailView):
             'district_name', 'district_id', 'rhc_name', 'rhc_id']
         )
         ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
+        sprayed_duplicates = get_duplicates(ta_pk=self.object.id, sprayed=True)
+        not_sprayed_duplicates = get_duplicates(ta_pk=self.object.id,
+                                                sprayed=False)
+        context['sprayed_duplicates'] = len(sprayed_duplicates)
+        context['sprayed_duplicates_data'] = sprayed_duplicates
+        context['not_sprayed_duplicates'] = len(not_sprayed_duplicates)
+        context['not_sprayed_duplicates_data'] = not_sprayed_duplicates
         context['target_data'] = JSONRenderer().render(ta_data)
         return context
 
