@@ -8,6 +8,7 @@ django-mptt
 python-dateutil
 python3-memcached
 pydruid
+rapidpro-python
 
 # dev
 coverage

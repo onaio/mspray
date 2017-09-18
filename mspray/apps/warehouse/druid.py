@@ -145,7 +145,7 @@ def process_location_data(location_dict, district_data):
     return result
 
 
-def get_druid_data(ta_pk=None, rhc_pk=None, district_pk=None, dimensions=None):
+def get_druid_data(dimensions=None, filter_dict=[]):
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
         datasource='mspraytest2',
@@ -242,12 +242,15 @@ def get_druid_data(ta_pk=None, rhc_pk=None, district_pk=None, dimensions=None):
             "columns": ["target_area_name"]
         }
     )
-    if ta_pk:
-        params['filter'] = (filters.Dimension('target_area_id') == ta_pk)
-    if rhc_pk:
-        params['filter'] = (filters.Dimension('rhc_id') == rhc_pk)
-    if district_pk:
-        params['filter'] = (filters.Dimension('district_id') == district_pk)
+    if filter_dict:
+        fields = []
+        for k, v in filter_dict.items():
+            fields.append(filters.Dimension(k) == v)
+        params['filter'] = filters.Filter(
+            type="and",
+            fields=fields
+        )
+
     if dimensions is None:
         params['dimensions'] = ['target_area_id', 'target_area_name',
                                 'target_area_structures']

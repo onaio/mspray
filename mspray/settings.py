@@ -73,6 +73,7 @@ INSTALLED_APPS = (
     'rest_framework_gis',
     'mspray.apps.main',
     'mspray.apps.warehouse',
+    'mspray.apps.alerts',
 )
 
 MIDDLEWARE = (
