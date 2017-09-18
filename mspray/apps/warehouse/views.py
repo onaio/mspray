@@ -74,7 +74,7 @@ class RHCView(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(RHCView, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(rhc_pk=self.object.pk)
+        data, totals = get_druid_data(filter_dict={'rhc_id': self.object.pk})
         context['data'] = data
         context.update(DEFINITIONS['ta'])
         # update data with numbers of any missing target areas
@@ -104,9 +104,11 @@ class TargetAreaMap(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaMap, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(ta_pk=self.object.pk, dimensions=[
-            'target_area_id', 'target_area_name', 'target_area_structures',
-            'district_name', 'district_id', 'rhc_name', 'rhc_id']
+        data, totals = get_druid_data(
+            filter_dict={'target_area_id': self.object.pk},
+            dimensions=['target_area_id', 'target_area_name',
+                        'target_area_structures', 'district_name',
+                        'district_id', 'rhc_name', 'rhc_id']
         )
         ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
         sprayed_duplicates = get_duplicates(ta_pk=self.object.id, sprayed=True)
@@ -130,7 +132,7 @@ class RHCMap(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(RHCMap, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(rhc_pk=self.object.pk)
+        data, totals = get_druid_data(filter_dict={'rhc_id': self.object.pk})
         ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
         context['target_data'] = JSONRenderer().render(ta_data)
         return context

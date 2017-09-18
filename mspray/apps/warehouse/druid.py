@@ -145,7 +145,7 @@ def process_location_data(location_dict, district_data):
     return result
 
 
-def get_druid_data(dimensions=None, filter_dict=[]):
+def get_druid_data(dimensions=None, filter_dict={}):
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
         datasource='mspraytest2',
@@ -270,7 +270,7 @@ def get_druid_data(dimensions=None, filter_dict=[]):
     return [], {}
 
 
-def druid_select_query(dimensions, filter_dict=[]):
+def druid_select_query(dimensions, filter_dict={}):
     """
     params filters is a dicts like so:
     {'target_area_id': 12}
