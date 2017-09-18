@@ -94,7 +94,7 @@ class RHCView(SiteNameMixin, DetailView):
         return context
 
 
-class TargetAreaView(SiteNameMixin, DetailView):
+class TargetAreaMap(SiteNameMixin, DetailView):
     template_name = 'warehouse/map.html'
     slug_field = 'pk'
     model = Location
@@ -103,7 +103,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
         return Location.objects.filter(level='ta')
 
     def get_context_data(self, **kwargs):
-        context = super(TargetAreaView, self).get_context_data(**kwargs)
+        context = super(TargetAreaMap, self).get_context_data(**kwargs)
         data, totals = get_druid_data(ta_pk=self.object.pk, dimensions=[
             'target_area_id', 'target_area_name', 'target_area_structures',
             'district_name', 'district_id', 'rhc_name', 'rhc_id']
@@ -116,6 +116,22 @@ class TargetAreaView(SiteNameMixin, DetailView):
         context['sprayed_duplicates_data'] = sprayed_duplicates
         context['not_sprayed_duplicates'] = len(not_sprayed_duplicates)
         context['not_sprayed_duplicates_data'] = not_sprayed_duplicates
+        context['target_data'] = JSONRenderer().render(ta_data)
+        return context
+
+
+class RHCMap(SiteNameMixin, DetailView):
+    template_name = 'warehouse/rhc_map.html'
+    slug_field = 'pk'
+    model = Location
+
+    def get_queryset(self):
+        return Location.objects.filter(level='RHC')
+
+    def get_context_data(self, **kwargs):
+        context = super(RHCMap, self).get_context_data(**kwargs)
+        data, totals = get_druid_data(rhc_pk=self.object.pk)
+        ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
         context['target_data'] = JSONRenderer().render(ta_data)
         return context
 
