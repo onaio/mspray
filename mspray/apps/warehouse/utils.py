@@ -1,3 +1,5 @@
+import operator
+
 from django.core.paginator import Paginator
 
 from rest_framework.renderers import JSONRenderer
@@ -29,12 +31,12 @@ def create_json_file(filename, queryset=None):
 
 def get_duplicates(ta_pk=None, sprayed=True):
     dimensions = ["osmid"]
-    filters = {'is_duplicate': "true"}
+    filters = [['is_duplicate', operator.eq, "true"]]
     if sprayed is True:
-        filters['sprayed'] = "yes"
+        filters.append(['sprayed', operator.eq, "yes"])
     else:
-        filters['sprayed'] = "no"
+        filters.append(['sprayed', operator.eq, "no"])
     if ta_pk:
-        filters['target_area_id'] = ta_pk
+        filters.append(['target_area_id', operator.eq, ta_pk])
     data = druid_select_query(dimensions, filters)
     return [x['event'] for x in data if x['event']['osmid'] is not None]

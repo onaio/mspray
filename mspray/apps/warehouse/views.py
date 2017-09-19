@@ -1,3 +1,5 @@
+import operator
+
 from django.views.generic.detail import DetailView
 from django.views.generic import TemplateView
 
@@ -74,7 +76,9 @@ class RHCView(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(RHCView, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(filter_dict={'rhc_id': self.object.pk})
+        data, totals = get_druid_data(filter_list=[['rhc_id',
+                                                    operator.eq,
+                                                    self.object.pk]])
         context['data'] = data
         context.update(DEFINITIONS['ta'])
         # update data with numbers of any missing target areas
@@ -105,7 +109,7 @@ class TargetAreaMap(SiteNameMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super(TargetAreaMap, self).get_context_data(**kwargs)
         data, totals = get_druid_data(
-            filter_dict={'target_area_id': self.object.pk},
+            filter_list=[['target_area_id', operator.eq, self.object.pk]],
             dimensions=['target_area_id', 'target_area_name',
                         'target_area_structures', 'district_name',
                         'district_id', 'rhc_name', 'rhc_id']
@@ -132,7 +136,8 @@ class RHCMap(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(RHCMap, self).get_context_data(**kwargs)
-        data, totals = get_druid_data(filter_dict={'rhc_id': self.object.pk})
+        data, totals = get_druid_data(filter_list=[['rhc_id', operator.eq,
+                                      self.object.pk]])
         ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
         context['target_data'] = JSONRenderer().render(ta_data)
         return context

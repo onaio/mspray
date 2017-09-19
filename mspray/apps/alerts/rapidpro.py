@@ -4,7 +4,7 @@ from temba_client.v2 import TembaClient
 
 
 client = TembaClient(settings.RAPIDPRO_API_URL, settings.RAPIDPRO_API_TOKEN)
-default_contact_uuid = settings.RAPIDPRO_DEFAULT_CONTACT_UUID
+default_contact_uuid = settings.RAPIDPRO_DEFAULT_CONTACT_ID
 
 
 def start_flow(flow_uuid, payload):

@@ -38,7 +38,7 @@ def get_target_area_totals(data):
         except ZeroDivisionError:
             spray_efectiveness = 0
         except InvalidOperation:
-            found_coverage = 0
+            spray_efectiveness = 0
 
         try:
             spray_coverage = (Decimal(d['num_sprayed']) /
@@ -47,7 +47,7 @@ def get_target_area_totals(data):
         except ZeroDivisionError:
             spray_coverage = 0
         except InvalidOperation:
-            found_coverage = 0
+            spray_coverage = 0
 
         d['spray_efectiveness'] = spray_efectiveness
         d['found_coverage'] = found_coverage
@@ -145,7 +145,18 @@ def process_location_data(location_dict, district_data):
     return result
 
 
-def get_druid_data(dimensions=None, filter_dict={}):
+def get_druid_data(dimensions=None, filter_list=[], filter_type="and"):
+    """
+    Runs a query against Druid, returns data with metrics, and a totals dict
+    of the data
+    Inputs:
+        dimensions => list of dimensions to group by
+        filter_list => list of list of things to filter with e.g.
+                        filter_list=[['target_area_id', operator.ne, 1],
+                                     ['sprayed', operator.eq, "yes"],
+                                     ['dimension', operator, "value"]])
+        filter_type => type of Druid filter to perform
+    """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
         datasource='mspraytest2',
@@ -242,12 +253,15 @@ def get_druid_data(dimensions=None, filter_dict={}):
             "columns": ["target_area_name"]
         }
     )
-    if filter_dict:
+    if filter_list:
         fields = []
-        for k, v in filter_dict.items():
-            fields.append(filters.Dimension(k) == v)
+        for this_filter in filter_list:
+            compare_dim = filters.Dimension(this_filter[0])
+            comparison_operator = this_filter[1]  # e.g. operator.eq
+            compare_dim_value = this_filter[2]
+            fields.append(comparison_operator(compare_dim, compare_dim_value))
         params['filter'] = filters.Filter(
-            type="and",
+            type=filter_type,
             fields=fields
         )
 
@@ -270,10 +284,15 @@ def get_druid_data(dimensions=None, filter_dict={}):
     return [], {}
 
 
-def druid_select_query(dimensions, filter_dict={}):
+def druid_select_query(dimensions, filter_list=[], filter_type="and"):
     """
-    params filters is a dicts like so:
-    {'target_area_id': 12}
+    Inputs:
+        dimensions => list of dimensions to group by
+        filter_list => list of list of things to filter with e.g.
+                        filter_list=[['target_area_id', operator.ne, 1],
+                                     ['sprayed', operator.eq, "yes"],
+                                     ['dimension', operator, "value"]])
+        filter_type => type of Druid filter to perform
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
@@ -286,12 +305,15 @@ def druid_select_query(dimensions, filter_dict={}):
         }
     )
     params['dimensions'] = dimensions
-    if filter_dict:
+    if filter_list:
         fields = []
-        for k, v in filter_dict.items():
-            fields.append(filters.Dimension(k) == v)
+        for this_filter in filter_list:
+            compare_dim = filters.Dimension(this_filter[0])
+            comparison_operator = this_filter[1]  # e.g. operator.eq
+            compare_dim_value = this_filter[2]
+            fields.append(comparison_operator(compare_dim, compare_dim_value))
         params['filter'] = filters.Filter(
-            type="and",
+            type=filter_type,
             fields=fields
         )
 
