@@ -32,13 +32,13 @@ def get_target_area_totals(data):
             found_coverage = 0
 
         try:
-            spray_efectiveness = (Decimal(d['num_sprayed']) /
-                                  Decimal(d['total_structures'])) *\
+            spray_effectiveness = (Decimal(d['num_sprayed']) /
+                                   Decimal(d['total_structures'])) *\
                 Decimal(100)
         except ZeroDivisionError:
-            spray_efectiveness = 0
+            spray_effectiveness = 0
         except InvalidOperation:
-            spray_efectiveness = 0
+            spray_effectiveness = 0
 
         try:
             spray_coverage = (Decimal(d['num_sprayed']) /
@@ -49,7 +49,7 @@ def get_target_area_totals(data):
         except InvalidOperation:
             spray_coverage = 0
 
-        d['spray_efectiveness'] = spray_efectiveness
+        d['spray_effectiveness'] = spray_effectiveness
         d['found_coverage'] = found_coverage
         d['spray_coverage'] = spray_coverage
         total_found += Decimal(d['num_found'])
@@ -60,7 +60,7 @@ def get_target_area_totals(data):
         'sprayed': total_sprayed,
         'structures': total_structures,
         'found_coverage': Decimal(0),
-        'spray_efectiveness': Decimal(0),
+        'spray_effectiveness': Decimal(0),
         'spray_coverage': Decimal(0),
     }
     return totals
@@ -82,8 +82,8 @@ def calculate_target_area_totals(totals):
     except InvalidOperation:
         pass
     try:
-        totals['spray_efectiveness'] = (total_sprayed /
-                                        total_structures) * 100
+        totals['spray_effectiveness'] = (total_sprayed /
+                                         total_structures) * 100
     except ZeroDivisionError:
         pass
     except InvalidOperation:
@@ -118,7 +118,7 @@ def process_location_data(location_dict, district_data):
     for x in district_data:
         if x['found_coverage'] >= Decimal(20):
             visited += 1
-        if x['spray_efectiveness'] >= Decimal(85):
+        if x['spray_effectiveness'] >= Decimal(85):
             sprayed += 1
     result['target_area_count'] = target_area_count
     result['visited'] = visited

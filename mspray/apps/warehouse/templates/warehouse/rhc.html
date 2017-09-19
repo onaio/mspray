@@ -29,7 +29,7 @@
                     <td class='numbers'>{{item.total_structures|intcomma}}</td>
                     <td class='numbers'>{{item.num_found|floatformat:0|intcomma}}</td>
                     <td class='numbers'>{{item.num_sprayed|intcomma}}</td>
-                    <td class='numbers {{ item.spray_efectiveness|sprayed_effectively_color }}'>{{item.spray_efectiveness|floatformat:0}}%</td>
+                    <td class='numbers {{ item.spray_effectiveness|sprayed_effectively_color }}'>{{item.spray_effectiveness|floatformat:0}}%</td>
                     <td class='numbers'>{{item.found_coverage|floatformat:0}}%</td>
                     <td class='numbers'>{{item.spray_coverage|floatformat:0}}%</td>
                 </tr>
@@ -52,7 +52,7 @@
                     <td class='numbers'>{{ totals.structures|intcomma }}</td>
                     <td class='numbers'>{{ totals.found|intcomma }}</td>
                     <td class='numbers'>{{ totals.sprayed|intcomma }} </td>
-                    <td class='numbers {{ totals.spray_efectiveness|sprayed_effectively_color }}'>{{ totals.spray_efectiveness|floatformat:0}}%</td>
+                    <td class='numbers {{ totals.spray_effectiveness|sprayed_effectively_color }}'>{{ totals.spray_effectiveness|floatformat:0}}%</td>
                     <td class='numbers'>{{ totals.found_coverage|floatformat:0}}%</td>
                     <td class='numbers'>{{ totals.spray_coverage|floatformat:0}}%</td>
                 </tr>

@@ -5,6 +5,8 @@ from django.conf import settings
 from mspray.apps.warehouse.druid import get_druid_data
 from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
+from mspray.apps.alerts.serializers import RapidProBaseSerializer
+from mspray.apps.alerts.serializers import FoundCoverageSerializer
 
 from mspray.apps.main.models import Location, SprayDay
 
@@ -26,21 +28,7 @@ def daily_spray_success_by_spray_area(district_id, spray_date):
     if data:
         flow_uuid = settings.RAPIDPRO_DAILY_SPRAY_SUCCESS_FLOW_ID
         for item in data:
-            payload = dict(
-                target_area_id=item['target_area_id'],
-                target_area_name=item['target_area_name'],
-                rhc_id=item['rhc_id'],
-                rhc_name=item['rhc_name'],
-                district_id=item['district_id'],
-                district_name=item['district_name'],
-                num_found=item['num_found'],
-                num_sprayed=item['num_sprayed_no_duplicates'],
-                spray_coverage=int(item['spray_coverage']),
-                found_coverage=int(item['found_coverage']),
-                spray_effectiveness=int(item['spray_effectiveness']),
-                total_structures=item['total_structures'],
-                date=spray_date
-            )
+            payload = RapidProBaseSerializer(item, date=spray_date)
             start_flow(flow_uuid, payload)
 
 
@@ -80,51 +68,25 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
                 filter_list=[['target_area_id', operator.eq, target_area.id],
                              ['spray_date', operator.ne, spray_date]])
             # prepare payload
-            payload = {}
+            payload_source_data = {}
+            if all_data:
+                payload_source_data = all_data[0]
+
             if today_data:
-                payload['has_submissions_today'] = 1
+                payload_source_data['has_submissions_today'] = 1
             else:
-                payload['has_submissions_today'] = 0
+                payload_source_data['has_submissions_today'] = 0
 
             if other_data:
-                payload['today_is_working_day'] = 1
+                payload_source_data['today_is_working_day'] = 1
             else:
-                payload['today_is_working_day'] = 0
+                payload_source_data['today_is_working_day'] = 0
 
-            if all_data:
-                area_data_dict = all_data[0]
-                payload['num_found'] = area_data_dict['num_found']
-                payload['total_structures'] = \
-                    area_data_dict['total_structures']
-                payload['found_coverage'] = \
-                    int(area_data_dict['found_coverage'])
-                payload['spray_coverage'] = \
-                    int(area_data_dict['spray_coverage'])
-                payload['spray_effectiveness'] = \
-                    int(area_data_dict['spray_efectiveness'])
-                payload['target_area_id'] = area_data_dict['target_area_id']
-                payload['target_area_name'] = \
-                    area_data_dict['target_area_name']
-                payload['rhc_id'] = area_data_dict['rhc_id']
-                payload['rhc_name'] = area_data_dict['rhc_name']
-                payload['district_id'] = area_data_dict['district_id']
-                payload['district_name'] = area_data_dict['district_name']
-                payload['date'] = spray_date
-            else:
-                payload['num_found'] = 0
-                payload['total_structures'] = target_area.parent.structures
-                payload['found_coverage'] = 0
-                payload['spray_coverage'] = 0
-                payload['spray_effectiveness'] = 0
-                payload['target_area_id'] = target_area.id
-                payload['target_area_name'] = target_area.name
-                payload['rhc_id'] = target_area.parent.id
-                payload['rhc_name'] = target_area.parent.name
-                payload['district_id'] = district_id
-                payload['district_name'] = this_district.name
-                payload['date'] = spray_date
+            payload = FoundCoverageSerializer(payload_source_data,
+                                              date=spray_date,
+                                              target_area=target_area)
 
-            start_flow(flow_uuid, payload)
+            start_flow(flow_uuid, payload.data)
 
 
 def user_distance(spray_day_obj_id):
