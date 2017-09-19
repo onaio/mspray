@@ -102,7 +102,3 @@ def user_distance(spray_day_obj_id):
         payload = UserDistanceSerializer(spray_day_obj).data
         flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
         start_flow(flow_uuid, payload)
-
-
-
-

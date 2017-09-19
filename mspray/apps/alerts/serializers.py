@@ -8,7 +8,7 @@ from mspray.apps.warehouse.serializers import mSpraySerializer
 
 class RapidProBaseSerializer(serializers.Serializer):
     """
-    Prepares
+    Prepares druid data to send to RapidPro
     """
     target_area_id = serializers.IntegerField()
     target_area_name = serializers.CharField()
@@ -34,6 +34,9 @@ class RapidProBaseSerializer(serializers.Serializer):
 
 
 class FoundCoverageSerializer(RapidProBaseSerializer):
+    """
+    Prepares druid data to send to RapidPro
+    """
     target_area_id = serializers.SerializerMethodField()
     target_area_name = serializers.SerializerMethodField()
     rhc_id = serializers.SerializerMethodField()
