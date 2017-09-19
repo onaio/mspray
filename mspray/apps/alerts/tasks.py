@@ -8,7 +8,7 @@ from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
 
-from mspray.apps.main.models import Location, SprayDay
+from mspray.apps.main.models import Location, SprayDay, TeamLeader
 
 
 def daily_spray_success_by_spray_area(district_id, spray_date):
@@ -102,3 +102,25 @@ def user_distance(spray_day_obj_id):
         payload = UserDistanceSerializer(spray_day_obj).data
         flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
         start_flow(flow_uuid, payload)
+
+
+def so_daily_form_completion(district_code, so_code, confrimdecisionform):
+    """
+    Gets district name and surveillance officer name and packages them into
+    payload for RapidPro
+    """
+    try:
+        district = Location.objects.get(code=district_code)
+    except Location.DoesNotExist:
+        pass
+    else:
+        try:
+            team_leader = TeamLeader.objects.get(code=so_code)
+        except TeamLeader.DoesNotExist:
+            pass
+        else:
+            payload = dict(so_name=team_leader.name,
+                           district_name=district.name,
+                           confrimdecisionform=confrimdecisionform)
+            flow_uuid = settings.RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID
+            start_flow(flow_uuid, payload)
