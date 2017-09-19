@@ -4,8 +4,9 @@ from django.conf import settings
 
 from mspray.apps.warehouse.druid import get_druid_data
 from mspray.apps.alerts.rapidpro import start_flow
+from mspray.apps.alerts.serializers import UserDistanceSerializer
 
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Location, SprayDay
 
 
 def daily_spray_success_by_spray_area(district_id, spray_date):
@@ -126,9 +127,19 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
             start_flow(flow_uuid, payload)
 
 
-
-
-
+def user_distance(spray_day_obj_id):
+    """
+    calculates the distance between a user and the structure and sends
+    payload to RapidPro
+    """
+    try:
+        spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
+    except SprayDay.DoesNotExist:
+        pass
+    else:
+        payload = UserDistanceSerializer(spray_day_obj).data
+        flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
+        start_flow(flow_uuid, payload)
 
 
 
