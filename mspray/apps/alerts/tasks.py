@@ -110,7 +110,7 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
     payload for RapidPro
     """
     try:
-        district = Location.objects.get(code=district_code)
+        district = Location.objects.get(code=district_code, level='district')
     except Location.DoesNotExist:
         pass
     else:
@@ -132,7 +132,7 @@ def no_revisit(target_area_code, no_revisit_reason):
     then package for sending to RapidPro
     """
     try:
-        target_area = Location.objects.get(code=target_area_code)
+        target_area = Location.objects.get(code=target_area_code, level='ta')
     except Location.DoesNotExist:
         pass
     else:
@@ -143,9 +143,10 @@ def no_revisit(target_area_code, no_revisit_reason):
         # get today's data for this spray area
         data, _ = get_druid_data(dimensions, filters)
         if data:
-            payload = FoundCoverageSerializer(data, target_area=target_area)
+            payload = FoundCoverageSerializer(data[0], target_area=target_area)
         else:
             payload = FoundCoverageSerializer({}, target_area=target_area)
+        payload = payload.data
         payload['no_revisit_reason'] = no_revisit_reason
         flow_uuid = settings.RAPIDPRO_NO_REVISIT_FLOW_ID
         start_flow(flow_uuid, payload)
