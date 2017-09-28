@@ -18,9 +18,6 @@ class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = get_location_qs(Location.objects.filter())
     serializer_class = TargetAreaSerializer
 
-    def retrieve(self, request, pk=None):
-        return None
-
     def get_serializer_class(self):
         if self.format_kwarg == 'geojson':
             return GeoTargetAreaSerializer

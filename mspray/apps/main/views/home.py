@@ -92,7 +92,8 @@ class DistrictView(SiteNameMixin, ListView):
         if pk is None:
             serializer_class = DistrictSerializer
         else:
-            level = self.object_list.first().level
+            level = self.object_list.first().level \
+                if self.object_list.first() else ''
             if level == 'RHC':
                 serializer_class = DistrictSerializer
             else:
