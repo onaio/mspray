@@ -95,8 +95,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
         for district in districts:
             district_data, district_totals = get_district_data(district)
-            district_totals.update({'location': district,
-                                    'structures': district.structures})
+            district_totals.update(
+                {'location': district,
+                 'structures': district.structures,
+                 'pre_season_target': district.pre_season_target})
             results.append(district_totals)
 
         district_count = districts.count()
@@ -109,22 +111,40 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
         def _sum_key(a, b): return sum([i.get(a, 0) for i in b])
 
+        try:
+            avg_structures_per_so = round(
+                _sum_key('avg_structures_per_so', results) / district_count
+            )
+        except ZeroDivisionError:
+            avg_structures_per_so = 0
+
+        try:
+            spray_success_rate = round(
+                _sum_key('spray_success_rate', results) / district_count, 1
+            )
+        except ZeroDivisionError:
+            spray_success_rate = 0
+
+        try:
+            spray_progress = round(_sum_key('spray_progress', results) /
+                                   _sum_key('pre_season_target', results), 1)
+        except ZeroDivisionError:
+            spray_progress = 0
+
         totals = {
             'avg_start_time': avg_start_time,
             'avg_end_time': avg_end_time,
-            'avg_structures_per_so': round(
-                _sum_key('avg_structures_per_so', results) / district_count
-            ),
+            'avg_structures_per_so': avg_structures_per_so,
             'sprayed': _sum_key('sprayed', results),
             'houses': _sum_key('structures', results),
+            'pre_season_target': _sum_key('pre_season_target', results),
             'sprayable': _sum_key('sprayable', results),
             'not_sprayable': _sum_key('not_sprayable', results),
             'refused': _sum_key('refused', results),
             'other': _sum_key('other', results),
             'not_sprayed_total': _sum_key('not_sprayed_total', results),
-            'spray_success_rate': round(
-                _sum_key('spray_success_rate', results) / district_count, 1
-            ),
+            'spray_success_rate': spray_success_rate,
+            'spray_progress': spray_progress,
             'data_quality_check': any([i.get('data_quality_check')
                                        for i in results])
         }
@@ -216,7 +236,8 @@ def get_district_data(district):
         'avg_quality_score': 0,
         'data_quality_check': True,
         'found_difference': 0,
-        'sprayed_difference': 0
+        'sprayed_difference': 0,
+        'spray_progress': 0
     }
     start_times = []
     end_times = []
