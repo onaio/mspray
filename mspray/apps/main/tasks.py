@@ -177,8 +177,7 @@ def process_osm_file(path):
         nodes = parse_osm(content.strip())
         ways = [
             way for way in nodes
-            if not way.get('osm_id').startswith('-')
-            and way.get('osm_type') == 'way'
+            if way.get('osm_type') == 'way'
         ]
         if ways:
             for way in ways:
