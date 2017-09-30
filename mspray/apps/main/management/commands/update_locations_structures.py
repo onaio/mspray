@@ -22,7 +22,7 @@ class Command(BaseCommand):
         def _update_spray_areas_structures():
             for loc in Location.objects.filter(level='ta')\
                     .annotate(num_structures=Count('household'))\
-                    .iterator():
+                    .filter(num_structures__gt=0).iterator():
                 loc.structures = loc.num_structures
                 loc.save()
 
