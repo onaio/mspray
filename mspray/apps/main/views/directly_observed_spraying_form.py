@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from django.db.models import Count
 from django.views.generic import ListView
 
@@ -69,7 +71,7 @@ class DirectlyObservedSprayingView(ListView):
         return {a.get(column): a.get('count') for a in qs}
 
     def get_data(self, user_list, directly_observed_spraying_data, kwargs):
-        data = {}
+        data = OrderedDict()
         average = {
             'correct_removal': 0,
             'correct_mix': 0,
@@ -185,7 +187,7 @@ class DirectlyObservedSprayingView(ListView):
             {'column': 'sprayop_code_name', 'value': spray_operator_code}
         )
 
-        data = {}
+        data = OrderedDict()
         count = 1
         average = {
             'correct_removal': 0,
@@ -296,7 +298,7 @@ class DirectlyObservedSprayingView(ListView):
                 parent=None
             ).values(
                 'name', 'code', 'average_spray_quality_score'
-            )
+            ).order_by('name')
             directly_observed_spraying_data = get_dos_data('district')
 
             kwargs = {
@@ -305,7 +307,6 @@ class DirectlyObservedSprayingView(ListView):
             data, average, total = self.get_data(
                 districts, directly_observed_spraying_data, kwargs
             )
-
             context['data'] = data
             context['average'] = average
             context['total'] = total
