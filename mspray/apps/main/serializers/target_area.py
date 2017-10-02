@@ -1,4 +1,4 @@
-from django.db.models import Case, Count, F, Sum, When
+from django.db.models import Case, Count, F, Sum, When, Q
 from django.db.models import IntegerField
 from django.conf import settings
 from django.core.cache import cache
@@ -28,6 +28,8 @@ REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
+SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
+NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
 
 def cached_queryset_count(key, queryset, query=None, params=[]):
@@ -112,7 +114,8 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             data__has_key='osmstructure:way:id',
-                            data__contains={'sprayable_structure': 'no'},
+                            data__contains={SPRAYABLE_FIELD:
+                                            NOT_SPRAYABLE_VALUE},
                             spraypoint__isnull=False,
                             then=1
                         ),
@@ -123,19 +126,17 @@ def get_spray_data(obj, context):
                 new_structures=Sum(
                     Case(
                         When(
+                            ~Q(data__contains={SPRAYABLE_FIELD:
+                                               NOT_SPRAYABLE_VALUE}),
                             spraypoint__isnull=False,
                             data__has_key='newstructure/gps',
-                            data__contains={
-                                'sprayable_structure': 'yes'
-                            },
                             then=1
                         ),
                         When(
+                            ~Q(data__contains={SPRAYABLE_FIELD:
+                                               NOT_SPRAYABLE_VALUE}),
                             spraypoint__isnull=False,
                             data__has_key='osmstructure:node:id',
-                            data__contains={
-                                'sprayable_structure': 'yes'
-                            },
                             then=1
                         ),
                         default=0,
@@ -222,7 +223,8 @@ def get_spray_data(obj, context):
             Case(
                 When(
                     data__has_key='osmstructure:way:id',
-                    data__contains={'sprayable_structure': 'no'},
+                    data__contains={SPRAYABLE_FIELD:
+                                    NOT_SPRAYABLE_VALUE},
                     spraypoint__isnull=False,
                     then=1
                 ),
@@ -233,28 +235,22 @@ def get_spray_data(obj, context):
         new_structures=Sum(
             Case(
                 When(
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
                     # spraypoint__isnull=False,
                     data__has_key='newstructure/gps',
-                    data__contains={
-                        'sprayable_structure': 'yes'
-                    },
                     then=1
                 ),
                 When(
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
                     spraypoint__isnull=False,
                     data__has_key='osmstructure:node:id',
-                    data__contains={
-                        'sprayable_structure': 'yes'
-                    },
                     then=1
                 ),
                 When(
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
                     spraypoint__isnull=True,
                     was_sprayed=True,
                     data__has_key='osmstructure:node:id',
-                    data__contains={
-                        'sprayable_structure': 'yes'
-                    },
                     then=1
                 ),
                 default=0,

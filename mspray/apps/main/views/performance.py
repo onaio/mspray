@@ -33,6 +33,8 @@ TEAM_LEADER_ASSISTANT_CODE = getattr(
     settings, 'MSPRAY_TEAM_LEADER_ASSISTANT_CODE', 'tla_code'
 )
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
+SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
+NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
 
 def calculate(numerator, denominator, percentage):
@@ -163,7 +165,7 @@ def get_totals(spraypoints, condition):
     elif condition == "non-sprayable":
         resultset = dict(spraypoints.extra(
             where=['data->>%s = %s'],
-            params=['sprayable_structure', 'no']).annotate(
+            params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]).annotate(
                 c=Count('data')))
     elif condition == "sprayed":
         resultset = dict(spraypoints
