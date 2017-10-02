@@ -20,6 +20,8 @@ from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.main.definitions import DEFINITIONS
 
+NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
+
 
 def get_location_dict(code):
     data = {}
@@ -156,6 +158,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
             response = view(self.request, pk=context['object'].pk,
                             format='geojson')
             response.render()
+            context['not_sprayable_value'] = NOT_SPRAYABLE_VALUE
             context['ta_geojson'] = response.content
             bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
