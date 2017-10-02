@@ -127,16 +127,16 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             ~Q(data__contains={SPRAYABLE_FIELD:
-                                               NOT_SPRAYABLE_VALUE}),
-                            spraypoint__isnull=False,
-                            data__has_key='newstructure/gps',
+                                               NOT_SPRAYABLE_VALUE}) &
+                            Q(spraypoint__isnull=False) &
+                            Q(data__has_key='newstructure/gps'),
                             then=1
                         ),
                         When(
                             ~Q(data__contains={SPRAYABLE_FIELD:
-                                               NOT_SPRAYABLE_VALUE}),
-                            spraypoint__isnull=False,
-                            data__has_key='osmstructure:node:id',
+                                               NOT_SPRAYABLE_VALUE}) &
+                            Q(spraypoint__isnull=False) &
+                            Q(data__has_key='osmstructure:node:id'),
                             then=1
                         ),
                         default=0,
@@ -235,22 +235,22 @@ def get_spray_data(obj, context):
         new_structures=Sum(
             Case(
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
                     # spraypoint__isnull=False,
-                    data__has_key='newstructure/gps',
+                    Q(data__has_key='newstructure/gps'),
                     then=1
                 ),
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
-                    spraypoint__isnull=False,
-                    data__has_key='osmstructure:node:id',
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
+                    Q(spraypoint__isnull=False) &
+                    Q(data__has_key='osmstructure:node:id'),
                     then=1
                 ),
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}),
-                    spraypoint__isnull=True,
-                    was_sprayed=True,
-                    data__has_key='osmstructure:node:id',
+                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
+                    Q(spraypoint__isnull=True) &
+                    Q(was_sprayed=True) &
+                    Q(data__has_key='osmstructure:node:id'),
                     then=1
                 ),
                 default=0,
