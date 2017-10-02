@@ -140,8 +140,17 @@ def process_location_data(location_dict, district_data):
     except InvalidOperation:
         sprayed_percentage = 0
 
+    try:
+        sprayed_coverage = (Decimal(sprayed) / Decimal(target_area_count)) *\
+            Decimal(100)
+    except ZeroDivisionError:
+        sprayed_coverage = 0
+    except InvalidOperation:
+        sprayed_coverage = 0
+
     result['visited_percentage'] = visited_percentage
     result['sprayed_percentage'] = sprayed_percentage
+    result['sprayed_coverage'] = sprayed_coverage
     return result
 
 

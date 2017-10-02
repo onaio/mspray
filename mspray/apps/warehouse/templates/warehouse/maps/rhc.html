@@ -123,7 +123,7 @@
     <script src="{% static "js/app.js" %}"></script>
 
     <script type="text/javascript">
-        var targetAreaData = {% if target_data %} {{ target_data|safe }} {% else %} undefined {% endif %};
+        var targetAreaData = {% if rhc_data %} {{ rhc_data|safe }} {% else %} undefined {% endif %};
         var bounds = targetAreaData.properties.bounds;
 
         var hhData = {% if hh_geojson %} {{ hh_geojson|safe }} {% else %} undefined {% endif %};

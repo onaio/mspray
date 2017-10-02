@@ -199,137 +199,149 @@ class DruidBase(object):
         self.druid_data = kwargs.pop('druid_data', None)
         super(DruidBase, self).__init__(*args, **kwargs)
 
-    def get_district_name(self, obj):
+    def get_druid_data(self, obj):
         if self.druid_data:
-            return self.druid_data.get('district_name')
+            if isinstance(self.druid_data, list):
+                data = [x for x in self.druid_data if x['target_area_id'] ==
+                        str(obj.id)]
+                if len(data) > 0:
+                    return data[0]
+            else:
+                return self.druid_data
+        return None
+
+    def get_district_name(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('district_name')
 
     def get_district_pk(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('district_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('district_id')
 
     def get_rhc_name(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('rhc_name')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('rhc_name')
 
     def get_rhc_pk(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('rhc_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('rhc_id')
 
     def get_sprayoperator_id(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayoperator_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayoperator_id')
 
     def get_sprayoperator_name(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayoperator_name')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayoperator_name')
 
     def get_sprayoperator_code(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayoperator_code')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayoperator_code')
 
     def get_team_leader_assistant_id(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('team_leader_assistant_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('team_leader_assistant_id')
 
     def get_team_leader_assistant_name(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('team_leader_assistant_name')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('team_leader_assistant_name')
 
     def get_team_leader_id(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('team_leader_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('team_leader_id')
 
     def get_team_leader_name(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('team_leader_name')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('team_leader_name')
 
     def get_geom_lat(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('geom_lat')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('geom_lat')
 
     def get_geom_lng(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('geom_lng')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('geom_lng')
 
     def get_submission_time(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('submission_time')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('submission_time')
 
     def get_sprayed(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayed')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayed')
 
     def get_sprayable(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('sprayable')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayable')
 
     def get_is_new(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('is_new')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('is_new')
 
     def get_is_refused(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('is_refused')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('is_refused')
 
     def get_is_duplicate(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('is_duplicate')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('is_duplicate')
 
     def get_total_structures(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('total_structures')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('total_structures')
 
     def get_num_new_structures(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_new_no_duplicates', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_new_no_duplicates', 0)
 
     def get_found(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_found', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_found', 0)
 
     def get_visited_total(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_found', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_found', 0)
 
     def get_visited_sprayed(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_sprayed', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_sprayed', 0)
 
     def get_visited_not_sprayed(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_not_sprayed', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(
+                obj).get('num_not_sprayed_no_duplicates', 0)
 
     def get_visited_refused(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_refused', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_refused', 0)
 
     def get_visited_other(self, obj):
-        if self.druid_data:
+        if self.get_druid_data(obj):
             return 0
 
     def get_not_visited(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('num_not_visited', 0)
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('num_not_visited', 0)
 
     def get_irs_sticker_num(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('irs_sticker_num')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('irs_sticker_num')
 
     def get_spray_date(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('spray_date')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('spray_date')
 
     def get_submission_id(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('submission_id')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('submission_id')
 
     def get_reason(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('reason')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('reason')
 
     def get_osmid(self, obj):
-        if self.druid_data:
-            return self.druid_data.get('osmid')
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('osmid')
 
 
 class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
@@ -371,6 +383,94 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
     def get_target_area_name(self, obj):
         if obj:
             return obj.name
+
+    def get_label(self, obj):
+        if obj:
+            return obj.name
+
+    def get_bounds(self, obj):
+        if obj and obj.geom:
+            return list(obj.geom.boundary.extent)
+
+    def get_spray_dates(self, obj):
+        return None
+
+
+class RHCDruidBase(object):
+
+    def __init__(self, *args, **kwargs):
+        self.druid_data = kwargs.pop('druid_data', None)
+        super(RHCDruidBase, self).__init__(*args, **kwargs)
+
+    def get_druid_data(self, obj):
+        if self.druid_data:
+            if isinstance(self.druid_data, list):
+                data = [x for x in self.druid_data if x['target_area_id'] ==
+                        str(obj.id)]
+                if len(data) > 0:
+                    return data[0]
+            else:
+                return self.druid_data
+        return None
+
+    def get_total_structures(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('target_area_count')
+
+    def get_found(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('visited', 0)
+
+    def get_visited_total(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('visited', 0)
+
+    def get_visited_sprayed(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('sprayed', 0)
+
+    def get_visited_not_sprayed(self, obj):
+        return 0
+
+    def get_visited_refused(self, obj):
+        return 0
+
+    def get_visited_other(self, obj):
+        return 0
+
+    def get_not_visited(self, obj):
+        return 0
+
+
+class RHCSerializer(RHCDruidBase, GeoFeatureModelSerializer):
+    targetid = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
+    level = serializers.ReadOnlyField()
+    structures = serializers.IntegerField()
+    total_structures = serializers.SerializerMethodField()
+    found = serializers.SerializerMethodField()
+    visited_total = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
+    visited_refused = serializers.SerializerMethodField()
+    visited_other = serializers.SerializerMethodField()
+    not_visited = serializers.SerializerMethodField()
+    bounds = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
+    geom = GeometryField()
+
+    class Meta:
+        fields = ['targetid', 'found',
+                  'structures', 'visited_total', 'visited_sprayed',
+                  'visited_not_sprayed', 'visited_refused', 'visited_other',
+                  'not_visited', 'bounds', 'spray_dates', 'level',
+                  'total_structures', 'label']
+        model = Location
+        geo_field = 'geom'
+
+    def get_targetid(self, obj):
+        if obj:
+            return obj.id
 
     def get_label(self, obj):
         if obj:

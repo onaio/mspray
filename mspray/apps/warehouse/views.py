@@ -11,6 +11,7 @@ from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.warehouse.serializers import TargetAreaSerializer
+from mspray.apps.warehouse.serializers import RHCSerializer
 from mspray.apps.warehouse.utils import get_duplicates
 
 
@@ -115,6 +116,7 @@ class TargetAreaMap(SiteNameMixin, DetailView):
                         'district_id', 'rhc_name', 'rhc_id']
         )
         ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
+
         sprayed_duplicates = get_duplicates(ta_pk=self.object.id, sprayed=True)
         not_sprayed_duplicates = get_duplicates(ta_pk=self.object.id,
                                                 sprayed=False)
@@ -138,8 +140,18 @@ class RHCMap(SiteNameMixin, DetailView):
         context = super(RHCMap, self).get_context_data(**kwargs)
         data, totals = get_druid_data(filter_list=[['rhc_id', operator.eq,
                                       self.object.pk]])
-        ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
+        rhc_druid_data = process_location_data(self.object.__dict__, data)
+
+        rhc_data = RHCSerializer(self.object, druid_data=rhc_druid_data).data
+
+        ta_data = TargetAreaSerializer(
+            self.object.get_children().filter(level='ta'),
+            druid_data=data,
+            many=True).data
+
+        context['rhc_data'] = JSONRenderer().render(rhc_data)
         context['target_data'] = JSONRenderer().render(ta_data)
+        context['hh_geojson'] = JSONRenderer().render(ta_data)
         return context
 
 

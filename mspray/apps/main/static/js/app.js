@@ -284,7 +284,6 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                 other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal),
                 found_percentage = app.calculatePercentage(app.visitedTotal, app.housesCount, false),
                 progress_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false);
-
             app.drawCircle(sprayed_percentage, "spray-coverage", 40);
             app.drawCircle(found_percentage, "found-coverage", 40);
             app.drawCircle(progress_percentage, "circle-progress", 50);
@@ -367,7 +366,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
     };
 
     this.drawCircles = function (props) {
-        var app = this, structures = props.level == 'ta' ? props.structures : props.num_of_spray_areas;
+        var app = this, structures = props.level == 'ta' ? props.structures : props.total_structures;
         var sprayed_percentage = app.calculatePercentage(props.visited_sprayed, props.visited_total, false),
             found_percentage = app.calculatePercentage(props.visited_total, structures, false),
             progress_percentage = app.calculatePercentage(props.visited_sprayed, structures, false);
@@ -386,15 +385,16 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
         app.targetLayer = L.geoJson(geojson, {
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
-                var content = "<h4>Target Area: " + props.district_name + "</h4>" +
+                if (props.label) {
+                    var this_label = props.label;
+                } else {
+                    var this_label = props.district_name;
+                }
+                var content = "<h4>Target Area: " + this_label + "</h4>" +
                     "Structures: " + props.structures;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
-                if (props.label) {
-                    label.setContent("" + props.label);
-                } else {
-                    label.setContent("" + props.district_name);
-                }
+                label.setContent(this_label);
                 label.setLatLng(layer.getBounds().getCenter());
                 app.map.showLabel(label);
                 if (props.level != 'ta') {
@@ -429,14 +429,19 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                 var props = feature.properties;
                 if(props.level !== undefined) {
                     var content;
+                    if (props.label) {
+                        var this_label = props.label;
+                    } else {
+                        var this_label = props.district_name;
+                    }
                     if (props.level === 'RHC') {
-                        content = props.district_name + "<br/>" +
+                        content = this_label + "<br/>" +
                             "Number of spray areas: " + props.num_of_spray_areas + "<br/>" +
                             "Spray areas Visited: " + props.visited_total + "<br/>" +
                             "Spray areas Sprayed: " + props.visited_sprayed+ "<br/>" +
                             "Spray areas NOT Sprayed: " + props.visited_not_sprayed;
                     } else {
-                        content = props.district_name + "<br/>" +
+                        content = this_label + "<br/>" +
                             "Structures: " + props.structures + "<br/>" +
                             "Visited Total: " + props.visited_total + "<br/>" +
                             "Sprayed: " + props.visited_sprayed + "<br/>" +
@@ -446,7 +451,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                     layer.bindPopup(content, {closeButton: true});
                     // var label = new L.Label();
                     var label = new L.Label({className: "hh-label"});
-                    label.setContent(props.district_name);
+                    label.setContent(this_label);
                     label.setLatLng(layer.getBounds().getCenter());
                     app.map.showLabel(label);
                     layer.on({
