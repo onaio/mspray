@@ -3,20 +3,25 @@
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
                                 <span class="dist_label">
-                                {% if district.level == top_level.0.level %}
-                                    {{ district.level|title }} : {{ district.name }}
-                                {% elif district %}
-                                    {{ district.parent.level|title }} : {{ district.parent.name }}
-                                {% else %}
-                                    {{ top_level.0.level|title }} All
-                                {% endif%}
+                                    {% with sub1=locations|first top1=top_level|first %}
+                                    {{ top1.level|title }}:
+                                        {% for loc in top_level %}
+                                            {% if loc.id == sub1.parent or loc.id == district.id %}
+                                                {{ loc.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
                                 </span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
                             {% for loc in top_level %}
                                 <li>
+                                    {% if map_menu %}
+                                    <a href="{% url 'target_area' loc.id loc.id %}">{{ loc.name }}</a>
+                                    {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                             </ul>
@@ -26,13 +31,26 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
-                                <span class="dist_label">{% if district %} {{ district.level|title }} : {{ district.name }}{% else %} {{ locations.0.level|title }} All{% endif%}</span>
+                                <span class="dist_label">
+                                    {% with sub1=locations|first top1=locations|first %}
+                                    {{ top1.level|title }}:
+                                        {% for loc in locations %}
+                                            {% if loc.id == district.parent.id or loc.id == district.id %}
+                                                {{ loc.name }}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endwith %}
+                                </span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
                             {% for loc in locations %}
                                 <li>
+                                    {% if map_menu %}
+                                    <a href="{% url 'target_area' loc.parent loc.id %}">{{ loc.name }}</a>
+                                    {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                             </ul>
@@ -57,8 +75,8 @@
                             <ul class="dropdown-menu" id="sub_locations_list">
                             {% for loc in sub_locations %}
                                 <li>
-                                    {% if loc.level == ta_level%}
-                                    <a href="{% url 'target_area' district.id loc.id %}">{{ loc.name }}</a>
+                                    {% if loc.level == ta_level or map_menu %}
+                                    <a href="{% url 'target_area' loc.parent loc.id %}">{{ loc.name }}</a>
                                     {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                     {% endif %}

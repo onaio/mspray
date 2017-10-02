@@ -3,70 +3,141 @@
 {% load humanize %}
 {% load staticfiles %}
 {% load performance_extras %}
+{% load progress_extras %}
 
 {% block content %}
-        <div class="container" id="district_table">
-            <div "col-sm-12" id="table-container">
-                <h1 id="district-name">District:{% if district_name %} {{ district_name }}{% else %} All{% endif%}</h1>
-                <table id="target_areas" class="tablesaw tablesaw-swipe" data-mode="swipe" data-minimap data-sortable data-sortable-switch>
-                    <thead>
-                        <tr>
-                            <th data-priority="persist" data-sortable-col data-sortable-default-col>Target Area</th>
-                            <th data-sortable-col>Targeted</th>
-                            <th data-sortable-col>Found</th>
-                            <th data-sortable-col>Spray Progress</th>
-                            <th data-sortable-col>Spray Coverage</th>
-                            <th data-sortable-col>Not Sprayed</th>
-                            <th data-sortable-col>Not Sprayed - Refused</th>
-                            <th data-sortable-col>Not Found</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for district in district_list %}
-                        <tr>
-                            <td>
-                                {% if higher_level_map and not district_name %}
-                                <a href="{% url 'target_area' district.targetid district.targetid %}">
-                                    <i class="fa fa-map"></i>
-                                </a>
-                                {% endif %}
-                                {% if district_name and district.level == ta_level %}
-                                <a href="{% url 'target_area' district_code district.targetid %}">
-                                    <i class="fa fa-map"></i>
-                                    {{ district.district_name }}
-                                </a>
-                                {% else %}
-                                <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
-                                {% endif %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">District:{% if district_name %} {{ district_name }} {% if district.level == 'district' %}<a href="{% url 'target_area' district_code district.pk %}">{% else %}<a href="{% url 'target_area' district.parent.pk district.pk %}">{% endif %}<i class="fa fa-map"></i></a>{% else %} All{% endif%}</h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                {% if not district or district.level == 'district' %}
+                <tr>
+                    <th rowspan="2">{% if district %} Health Facility {% else %} District {% endif%}</th>
+                    <th rowspan="2">Eligible Spray Areas</th>
+                    <th colspan="2">Spray Areas Visited <sup title="A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them.">(a)</sup></th>
+                    <th colspan="2">Spray Areas Sprayed Effectively<sup title="A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed.">(b)</sup></th>
+                </tr>
+                <tr>
+                    <th>Number</th>
+                    <th>%</th>
+                    <th>Number</th>
+                    <th>%</th>
+                </tr>
+                {% else %}
+                <tr>
+                    <th>Target Area</th>
+                    <th>Structures on ground</th>
+                    <th>Found</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found coverage</th>
+                    <th>Spray coverage</th>
+                </tr>
+                {% endif%}
+            </thead>
+            <tbody>
+            {% if not district or district.level == 'district' %}
+                {% for district in district_list %}
+                    <tr>
+                        <td>
+                            {% if higher_level_map and not district_name %}
+                            <a href="{% url 'target_area' district.targetid district.targetid %}">
+                                <i class="fa fa-map"></i>
+                            </a>
+                            <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                            {% elif district_name and district.level == ta_level %}
+                            <a href="{% url 'target_area' district_code district.targetid %}">
+                                <i class="fa fa-map"></i>
+                                {{ district.district_name }}
+                            </a>
+                            {% else %}
+                            <a href="{% url 'target_area' district_code district.targetid %}">
+                                <i class="fa fa-map"></i>
+                            </a>
+                            <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                            {% endif %}
+                        </td>
+                        <td class='numbers'>{% if district.level != 'ta' %} {{district.num_of_spray_areas }} {% else %}{{ district.structures|intcomma }} {% endif %}</td>
+                        <td class='numbers'>{{ district.visited_total|intcomma }}</td>
+                        <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district.visited_total district.num_of_spray_areas %} {% endif %}</td>
+                        <td class='numbers'>{{ district.visited_sprayed|intcomma }}</td>
+                        {% calc_percentage district.visited_sprayed district.visited_total as calculated_percentage %}
+                        <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                {% for district in district_list %}
+                    <tr>
+                        <td>
+                            {% if higher_level_map and not district_name %}
+                            <a href="{% url 'target_area' district.targetid district.targetid %}">
+                                <i class="fa fa-map"></i>
+                            </a>
+                            {% endif %}
+                            {% if district_name and district.level == ta_level %}
+                            <a href="{% url 'target_area' district_code district.targetid %}">
+                                <i class="fa fa-map"></i>
+                                {{ district.district_name }}
+                            </a>
+                            {% else %}
+                            <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                            {% endif %}
                             </td>
-                            <td class='numbers'>{{ district.structures|intcomma }}</td>
-                            <td class='numbers'>{{ district.found|intcomma }} {% if site_name != 'namibia' %}({% percentage district.found district.structures %}){% endif %}</td>
-                            <td class='numbers'>{{ district.visited_total|intcomma }} ({% percentage district.visited_total district.structures %})</td>
-                            <td class='numbers'>{{ district.visited_sprayed|intcomma }} ({% percentage district.visited_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_not_sprayed|intcomma }} ({% percentage district.visited_not_sprayed district.found %})</td>
-                            <td class='numbers'>{{ district.visited_refused|intcomma }} ({% percentage district.visited_refused district.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district.not_visited|intcomma }} ({% percentage district.not_visited district.structures %})</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td>Totals</a></td>
-                            <td class='numbers'>{{ district_totals.structures|intcomma  }}</td>
-                            <td class='numbers'>{{ district_totals.found|intcomma  }}  {% if site_name != 'namibia' %}({% percentage district_totals.found district_totals.structures %}){% endif %}</td>
-                            <td class='numbers'>{{ district_totals.visited_total|intcomma  }} ({% percentage district_totals.visited_total district_totals.structures %})</td>
-                            <td class='numbers'>{{ district_totals.visited_sprayed|intcomma  }} ({% percentage district_totals.visited_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_not_sprayed|intcomma  }} ({% percentage district_totals.visited_not_sprayed district_totals.found %})</td>
-                            <td class='numbers'>{{ district_totals.visited_refused|intcomma  }} ({% percentage district_totals.visited_refused district_totals.visited_not_sprayed %})</td>
-                            <td class='numbers'>{{ district_totals.not_visited|intcomma  }} ({% percentage district_totals.not_visited district_totals.structures %})</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
+                        </td>
+
+                        <td class='numbers'>{{ district.structures|intcomma }}</td>
+                        <td class='numbers'>{{ district.found|intcomma }}</td>
+                        <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district.visited_sprayed district.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district.found district.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    </tr>
+                {% endfor %}
+            {% endif%}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    {% if not district or district.level == 'district' %}
+                        <td class='numbers'>{{ district_totals.num_of_spray_areas|intcomma  }}</td>
+                        <td class='numbers'>{{ district_totals.visited_total|intcomma  }}</td>
+                        <td class='numbers'>{% if site_name != 'namibia' %} {% percentage district_totals.visited_total district_totals.num_of_spray_areas %} {% endif %}</td>
+                        <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }}</td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as total_calculated_percentage %}
+                        <td class='numbers {{ total_calculated_percentage|sprayed_effectively_color }}'>{{ total_calculated_percentage }}</td>
+                    {% else %}
+                        <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district_totals.visited_total district_totals.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    {% endif%}
+                </tr>
+            </tfoot>
+        </table>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
     {{ block.super }}
     <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
-    <script src="{% static "js/tablesaw.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
 {% endblock %}

@@ -5,6 +5,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
 
+from mspray.apps.main.models import Location
 from mspray.apps.main.models import TeamLeader
 
 
@@ -12,12 +13,15 @@ class Command(BaseCommand):
     args = '<path to team leaders csv with columns code|name>'
     help = _('Load team leaders')
 
+    def add_arguments(self, parser):
+        parser.add_argument('csv_file', metavar="FILE")
+
     def handle(self, *args, **options):
-        if len(args) == 0:
-            raise CommandError(_('Missing locations csv file path'))
-        for path in args:
+        if 'csv_file' not in options:
+            raise CommandError(_('Missing team leaders csv file path'))
+        else:
             try:
-                path = os.path.abspath(path)
+                path = os.path.abspath(options['csv_file'])
             except Exception as e:
                 raise CommandError(_('Error: %(msg)s' % {"msg": e}))
             else:
@@ -31,3 +35,9 @@ class Command(BaseCommand):
                             )
                         if created:
                             print(row)
+                        district = row['district'].strip()
+                        if district:
+                            location = Location.objects.get(code=district,
+                                                            level='district')
+                            team_leader.location = location
+                            team_leader.save()

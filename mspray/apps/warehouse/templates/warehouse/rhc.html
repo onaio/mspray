@@ -1,0 +1,78 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">{% trans "District" %}: {{object.name}} <a href="{% url 'warehouse:rhc' object.pk %}"><i class="fa fa-map"></i></a></h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>{% trans "Target Area" %}</th>
+                    <th>{% trans "Structures on ground" %}</th>
+                    <th>{% trans "Found" %}</th>
+                    <th>{% trans "Sprayed" %}</th>
+                    <th>{% trans "Spray Effectiveness" %}</th>
+                    <th>{% trans "Found coverage" %}</th>
+                    <th>{% trans "Spray coverage" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td><a href="{% url 'warehouse:ta' item.target_area_id %}"><i class="fa fa-map"></i> {{item.target_area_name}}</a></td>
+                    <td class='numbers'>{{item.total_structures|intcomma}}</td>
+                    <td class='numbers'>{{item.num_found|floatformat:0|intcomma}}</td>
+                    <td class='numbers'>{{item.num_sprayed|intcomma}}</td>
+                    <td class='numbers {{ item.spray_effectiveness|sprayed_effectively_color }}'>{{item.spray_effectiveness|floatformat:0}}%</td>
+                    <td class='numbers'>{{item.found_coverage|floatformat:0}}%</td>
+                    <td class='numbers'>{{item.spray_coverage|floatformat:0}}%</td>
+                </tr>
+                {% endfor %}
+                {% for missing_item in missing_target_areas %}
+                <tr>
+                    <td><a href=""><i class="fa fa-map"></i> {{missing_item.name}}</a></td>
+                    <td class='numbers'>{{missing_item.structures|intcomma}}</td>
+                    <td class='numbers'>0</td>
+                    <td class='numbers'>0</td>
+                    <td class='numbers {{ 0|sprayed_effectively_color }}'>0%</td>
+                    <td class='numbers'>0%</td>
+                    <td class='numbers'>0%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>{% trans "Total" %}</td>
+                    <td class='numbers'>{{ totals.structures|intcomma }}</td>
+                    <td class='numbers'>{{ totals.found|intcomma }}</td>
+                    <td class='numbers'>{{ totals.sprayed|intcomma }} </td>
+                    <td class='numbers {{ totals.spray_effectiveness|sprayed_effectively_color }}'>{{ totals.spray_effectiveness|floatformat:0}}%</td>
+                    <td class='numbers'>{{ totals.found_coverage|floatformat:0}}%</td>
+                    <td class='numbers'>{{ totals.spray_coverage|floatformat:0}}%</td>
+                </tr>
+            </tfoot>
+        </table>
+        <p>{% trans "* To sort a column, click on the column name" %}</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}

@@ -8,9 +8,9 @@
         <div class="container">
             <h1>Data for: {{ spray_operator_name }}</h1>
             <ol class="breadcrumb">
-              <li><a href="{% url "performance:districts" %}">Province</a></li>
-              <li><a href="{% url "performance:team-leaders" district.code %}">District</a></li>
-              <li><a href="{% url "performance:spray-operator-summary" district.code team_leader %}">Team Leader</a></li>
+              <li><a href="{% url "performance:districts" %}">Districts</a></li>
+              <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
+              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">Spray Operators</a></li>
               <li class="active">Spray Operator</li>
             </ol>
             <div class="row">
@@ -19,11 +19,15 @@
                         <thead>
                             <tr>
                                 <th rowspan="3">Day</th>
+                                <th rowspan="3">Date</th>
                                 <th colspan="5">Number of Structures</th>
-                                <th rowspan="3">Spray success rate</th>
-                                <th rowspan="3">Start time</th>
-                                <th rowspan="3">End time</th>
+                                <!-- <th rowspan="3">Spray Coverage</th> -->
+                                <th rowspan="3">Data collection start time</th>
+                                <th rowspan="3">Data collection end time</th>
                                 <th rowspan="3">Duration in field</th>
+                                <th rowspan="3">Data Quality Check</th>
+                                <th rowspan="3">Found Difference</th>
+                                <th rowspan="3">Sprayed Difference</th>
                             </tr>
                             <tr>
                                 <th rowspan="2">Found</th>
@@ -40,34 +44,54 @@
                             {% for row in data %}
                                 <tr>
                                     <td>{{ row.day }}</a></td>
+                                    <td>{{ row.date|date:'d-M' }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
                                     <td class='numbers'>{{ row.refused|intcomma  }}</td>
                                     <td class='numbers'>{{ row.other|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayed_total }}</td>
-                                    <td class='numbers'>{{ row.spray_success_rate }}%</td>
+                                    <!-- <td class='numbers'>{{ row.spray_success_rate }}%</td> -->
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
                                     <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
+                                    <td>
+                                        {% if row.data_quality_check %}
+                                            <i class="fa fa-check green" aria-hidden="true"></i>
+                                        {% else %}
+                                            <i class="fa fa-times red" aria-hidden="true"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ row.found_difference }}</td>
+                                    <td>{{ row.sprayed_difference }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td>Totals</td>
+                                <td colspan="2">Totals</td>
                                 <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.refused|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.other|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.not_sprayed_total }}</td>
-                                <td class='numbers'>{{ totals.spray_success_rate }}%</td>
+                                <!-- <td class='numbers'>{{ totals.spray_success_rate }}%</td> -->
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
                                 <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
+                                <td>
+                                    {% if totals.data_quality_check %}
+                                        <i class="fa fa-check green" aria-hidden="true"></i>
+                                    {% else %}
+                                        <i class="fa fa-times red" aria-hidden="true"></i>
+                                    {% endif %}
+                                </td>
+                                <td>{{ totals.found_difference }}</td>
+                                <td>{{ totals.sprayed_difference }}</td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             </div>
+        {% include 'definitions-and-conditions.html' %}
         </div>
 {% endblock %}

@@ -10,11 +10,12 @@ from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
 from mspray.apps.main.serializers.household import HouseholdBSerializer
+from mspray.apps.main.utils import get_location_qs
 from mspray.apps.main.utils import get_ta_in_location
 
 
 class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    queryset = Location.objects.filter()
+    queryset = get_location_qs(Location.objects.filter())
     serializer_class = TargetAreaSerializer
 
     def get_serializer_class(self):
@@ -26,7 +27,7 @@ class TargetAreaViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
 
 class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
                                   viewsets.GenericViewSet):
-    queryset = Location.objects.filter()
+    queryset = get_location_qs(Location.objects.filter())
     serializer_class = HouseholdSerializer
 
     def get_serializer_class(self):
@@ -43,8 +44,13 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
             households = Household.objects.filter(location__in=tas)
 
             if settings.OSM_SUBMISSIONS:
-                spray_points = SprayDay.objects.exclude(geom=None)\
-                    .filter(location__in=tas).values('geom')
+                spray_points = SprayDay.objects.exclude(geom=None)
+                spray_date = self.kwargs.get('spray_date')
+                if spray_date:
+                    spray_points = spray_points.filter(spray_date=spray_date)
+                spray_points = spray_points.filter(
+                    location__in=tas
+                ).values('geom')
                 exclude = households.filter(geom__in=spray_points)\
                     .values_list('pk', flat=True)
                 households = households.exclude(pk__in=exclude)

@@ -3,6 +3,7 @@ import json
 
 from datetime import datetime
 from datetime import timedelta
+from dateutil.parser import parse
 
 from django.conf import settings
 from django.contrib.gis.geos import Polygon
@@ -10,38 +11,63 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
-from django.db.models import Q
+from django.db.models import Q, F, ExpressionWrapper, OuterRef, Subquery, Value
+from django.db.models import IntegerField, PositiveIntegerField, Count
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
+from django.contrib.gis.geos import Point
+from django.db.models.functions import Coalesce
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
-from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_day import SprayDay,\
+    SprayDayHealthCenterLocation
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
 from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spraypoint import SprayPoint
+from mspray.apps.main.models.spray_operator import DirectlyObservedSprayingForm
+from mspray.apps.main.models.spray_operator import SprayOperatorDailySummary
+from mspray.apps.main.models.spray_operator import SprayOperator
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
+from mspray.apps.main.models.spraypoint import SprayPointView
+from mspray.apps.main.models.team_leader import TeamLeader
+from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
+from mspray.libs.utils.geom_buffer import with_metric_buffer
 
+BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
+NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
+WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
+SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
+TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
+IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
+REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
+REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
+REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
+REASONS.pop(REASON_REFUSED)
+REASON_OTHER = REASONS.keys()
 
 
-def geojson_from_gps_string(geolocation):
+def geojson_from_gps_string(geolocation, geom=False):
     if not isinstance(geolocation, str):
         raise ValidationError('Expecting a a string for gps')
 
     geolocation = [float(p) for p in geolocation.split()[:2]]
     geolocation.reverse()
+    if geom:
+        return Point(geolocation[0], geolocation[1])
 
     return json.dumps(
         {'type': 'point', 'coordinates': geolocation})
@@ -90,8 +116,8 @@ def set_household_buffer(distance=15, wkt=None):
     cursor = connection.cursor()
     where = ""
     if wkt is not None:
-        where = "WHERE ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" \
-            % wkt
+        where = "WHERE "\
+            "ST_CoveredBy(geom, ST_GeomFromText('%s', 4326)) is true" % wkt
 
     cursor.execute(
         "UPDATE main_household SET bgeom = ST_GeomFromText(ST_AsText("
@@ -118,7 +144,6 @@ def create_households_buffer(distance=15, recreate=False, target=None):
         buffer_qs.delete()
 
     for ta in queryset_iterator(ta_qs, 10):
-        print(ta.name)
         hh_buffers = Household.objects.filter(location=ta)\
             .values_list('bgeom', flat=True)
         if len(hh_buffers) == 0:
@@ -168,7 +193,19 @@ def add_spray_data(data):
 
     if settings.OSM_SUBMISSIONS and geom is not None:
         sprayday.geom = geom
-        sprayday.bgeom = sprayday.geom.buffer(0.00004, 1)
+        sprayday.bgeom = with_metric_buffer(
+            sprayday.geom, BUFFER_SIZE
+        )
+
+    so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
+    if so:
+        sprayday.spray_operator = so
+
+    set_team_leader_assistant(sprayday, save=False)
+
+    team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
+    if team_leader:
+        sprayday.team_leader = team_leader
 
     sprayday.save()
 
@@ -176,32 +213,314 @@ def add_spray_data(data):
         link_spraypoint_with_osm.delay(sprayday.pk)
 
     unique_field = HAS_UNIQUE_FIELD
-    if unique_field:
-        add_unique_data(sprayday, unique_field)
+    if unique_field and location:
+        add_unique_data(sprayday, unique_field, location)
 
     return sprayday
 
 
-def add_unique_data(sprayday, unique_field):
-    sp = None
-    data_id = sprayday.data.get(unique_field)
-    if settings.OSM_SUBMISSIONS and \
-            sprayday.data.get('newstructure/nostructure') == 'OK':
-        gps = sprayday.data.get(STRUCTURE_GPS_FIELD)
-        if gps and isinstance(gps, str):
-            data_id = ' '.join(gps.split()[:2])
+def set_team_leader_assistant(sprayday, save=True):
+    team_leader_assistant = get_team_leader_assistant(
+        sprayday.data.get(TEAM_LEADER_CODE)
+    )
+    if team_leader_assistant:
+        sprayday.team_leader_assistant = team_leader_assistant
+        if save:
+            sprayday.save()
 
-    if data_id:
+
+def get_dos_data(column, where_params=None):
+    cursor = connection.cursor()
+    where_clause = ''
+
+    if where_params:
+        sub_column = where_params.get('column')
+        value = where_params.get('value')
+        where_clause = """
+where
+    main_directlyobservedsprayingform.{sub_column} = '{value}'
+""".format(**{'sub_column': sub_column, 'value': value})
+
+    sql_statement = """
+select
+    {column},
+    sum(case when correct_removal = 'yes' then 1 else 0 end) correct_removal_yes,
+    sum(case when correct_mix = 'yes' then 1 else 0 end) correct_mix_yes,
+    sum(case when rinse = 'yes' then 1 else 0 end) rinse_yes,
+    sum(case when "PPE" = 'yes' then 1 else 0 end) ppe_yes,
+    sum(case when "CFV" = 'yes' then 1 else 0 end) cfv_yes,
+    sum(case when correct_covering = 'yes' then 1 else 0 end) correct_covering_yes,
+    sum(case when leak_free = 'no' then 1 else 0 end) leak_free_no,
+    sum(case when correct_distance = 'yes' then 1 else 0 end) correct_distance_yes,
+    sum(case when correct_speed = 'yes' then 1 else 0 end) correct_speed_yes,
+    sum(case when correct_overlap = 'yes' then 1 else 0 end) correct_overlap_yes
+from
+    main_directlyobservedsprayingform
+{where_clause}
+group by
+    {column};
+""".format(**{'column': column, 'where_clause': where_clause})  # noqa
+
+    cursor.execute(sql_statement)
+    queryset = cursor.cursor.fetchall()
+
+    return {
+        a[0]: a[1:]
+        for a in queryset
+    }
+
+
+def update_average_dos_score_all_levels(code, score):
+    so = SprayOperator.objects.filter(code=code).first()
+    if so:
+        # update spray operator's average_spray_quality_score value
+        so.average_spray_quality_score = round(score, 2)
+        so.save()
+
+        tl = so.team_leader
+        spray_operators = tl.sprayoperator_set.values(
+            'average_spray_quality_score'
+        )
+
+        # re-calculate and update average of team leader assistant
+        numerator = sum([
+            a.get('average_spray_quality_score') for a in spray_operators
+        ])
+        denominator = spray_operators.count() or 1
+        average_spray_quality_score = numerator / denominator
+
+        tl.average_spray_quality_score = round(average_spray_quality_score, 2)
+        tl.save()
+
+        # re-calculate and update average of district
+        district = tl.location
+        tl = district.teamleader_set.values(
+            'average_spray_quality_score'
+        )
+        numerator = sum([
+            a.get('average_spray_quality_score') for a in tl
+        ])
+        denominator = tl.count() or 1
+        average_spray_quality_score = numerator / denominator
+
+        district.average_spray_quality_score = round(
+            average_spray_quality_score, 2
+        )
+        district.save()
+
+
+def get_calculate_avg_dos_score(spray_operator_code):
+    directly_observed_spraying_data = get_dos_data(
+        'spray_date',
+        {'column': 'sprayop_code_name', 'value': spray_operator_code}
+    )
+
+    total_positive_resp = 0
+    for spray_date, records in directly_observed_spraying_data.items():
+        if records:
+            total_positive_resp += sum(records)
+
+    return round(
+        total_positive_resp / (len(directly_observed_spraying_data) or 1), 2
+    )
+
+
+def add_directly_observed_spraying_data(data):
+    spray_operator_code = data.get('sprayop_code_name')
+    submission_id = data.get('_id')
+    try:
+        DirectlyObservedSprayingForm.objects.create(
+            submission_id=submission_id,
+            correct_removal=data.get('correct_removal'),
+            correct_mix=data.get('correct_mix'),
+            rinse=data.get('rinse'),
+            PPE=data.get('PPE'),
+            CFV=data.get('CFV'),
+            correct_covering=data.get('correct_covering'),
+            leak_free=data.get('leak_free'),
+            correct_distance=data.get('correct_distance'),
+            correct_speed=data.get('correct_speed'),
+            correct_overlap=data.get('correct_overlap'),
+            district=data.get('district'),
+            health_facility=data.get('health_facility'),
+            supervisor_name=data.get('supervisor_name'),
+            sprayop_code_name=spray_operator_code,
+            tl_code_name=data.get('tl_code_name'),
+            data=data,
+            spray_date=data.get('today'),
+        )
+    except IntegrityError:
+        pass
+    else:
+        avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
+        update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
+
+
+def get_hh_submission(spray_form_id):
+    hh_submission = SprayPointView.objects.filter(
+        sprayformid=spray_form_id
+    ).values(
+        'sprayformid'
+    ).annotate(
+        sprayformid_count=Count('sprayformid'),
+        sprayed_count=Count('was_sprayed')
+    )
+
+    return hh_submission and hh_submission[0] or {}
+
+
+def get_sop_submission(spray_form_id):
+    sop_submission = SprayOperatorDailySummary.objects.filter(
+        spray_form_id=spray_form_id
+    ).values(
+        'spray_form_id'
+    ).annotate(
+        found_count=Count('found'),
+        sprayed_count=Count('sprayed')
+    )
+
+    return sop_submission and sop_submission[0] or {}
+
+
+def calculate_data_quality_check(spray_form_id, spray_operator_code):
+    # from HH Submission form total submissions
+    hh_submission_agg = get_hh_submission(spray_form_id)
+
+    # from SOP Summary form
+    sop_submission_aggregate = get_sop_submission(spray_form_id)
+
+    sop_found_count = None
+    if hh_submission_agg:
+        hh_sprayformid_count = hh_submission_agg.get('sprayformid_count')
+        hh_sprayed_count = hh_submission_agg.get('sprayed_count')
+
+        sop_submission = sop_submission_aggregate.get(spray_form_id)
+        if sop_submission:
+            sop_found_count = sop_submission.get('found_count')
+            sop_sprayed_count = sop_submission.get('sprayed_count')
+
+    data_quality_check = False
+    if sop_found_count is not None:
+        # check HH Submission Form total submissions count is equal to
+        # SOP Summary Form 'found' count and HH Submission Form
+        # 'was_sprayed' count is equal to SOP Summary Form 'sprayed'
+        # count and both checks should be based on 'sprayformid'
+        data_quality_check = sop_found_count == hh_sprayformid_count\
+            and sop_sprayed_count == hh_sprayed_count
+
+    so = SprayOperator.objects.filter(code=spray_operator_code).first()
+    if so:
+        # update spray operator
+        so.data_quality_check = data_quality_check
+        so.save()
+
+        team_leader_assistant = so.team_leader_assistant
+        if data_quality_check:
+            # if data_quality_check is True, check if all data quality
+            # values for the rest of the spray operators is true before
+            # saving
+            data_quality_check = all(
+                [
+                    a.get('data_quality_check')
+                    for a in team_leader_assistant.sprayoperator_set.values(
+                        'data_quality_check'
+                    )
+                ]
+            )
+
+        # update team leader
+        team_leader_assistant.data_quality_check = data_quality_check
+        team_leader_assistant.save()
+
+        # update district
+        district = team_leader_assistant.location
+        if data_quality_check:
+            data_quality_check = all(
+                [
+                    a.get('data_quality_check')
+                    for a in district.teamleaderassistant_set.values(
+                        'data_quality_check'
+                    )
+                ]
+            )
+
+        district.data_quality_check = data_quality_check
+        district.save()
+
+
+def add_spray_operator_daily(data):
+    spray_form_id = data.get('sprayformid')
+    submission_id = data.get('_id')
+    sprayed = data.get('sprayed', 0)
+    found = data.get('found', 0)
+    spray_operator_code = data.get('sprayop_code')
+    try:
+        SprayOperatorDailySummary.objects.create(
+            spray_form_id=spray_form_id,
+            sprayed=sprayed,
+            found=found,
+            submission_id=submission_id,
+            sprayoperator_code=spray_operator_code,
+            data=data,
+        )
+    except IntegrityError:
+        pass
+    else:
+        calculate_data_quality_check(
+            spray_form_id, spray_operator_code
+        )
+
+
+def get_team_leader(code):
+    try:
+        return TeamLeader.objects.get(code=code)
+    except TeamLeader.DoesNotExist:
+        pass
+
+    return None
+
+
+def get_team_leader_assistant(code):
+    try:
+        return TeamLeaderAssistant.objects.get(code=code)
+    except TeamLeaderAssistant.DoesNotExist:
+        pass
+    return None
+
+
+def get_spray_operator(code):
+    try:
+        return SprayOperator.objects.get(code=code)
+    except SprayOperator.DoesNotExist:
+        pass
+
+    return None
+
+
+def add_unique_data(sprayday, unique_field, location):
+    sp = None
+    wayid = unique_field + ':way:id'
+    nodeid = unique_field + ':node:id'
+    data_id = sprayday.data.get(wayid) or \
+        sprayday.data.get(nodeid) or \
+        sprayday.data.get('newstructure/gps')
+    if data_id and location:
+        if isinstance(data_id, str) and len(data_id) > 50:
+            data_id = data_id[:50]
         try:
             sp, created = SprayPoint.objects.get_or_create(
                 sprayday=sprayday,
-                data_id=data_id
+                data_id=data_id,
+                location=location
             )
         except IntegrityError:
-            sp = SprayPoint.objects.select_related().get(data_id=data_id)
+            sp = SprayPoint.objects.select_related().get(
+                data_id=data_id,
+                location=location,
+            )
             was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
 
-            if was_sprayed != 'yes':
+            if was_sprayed != WAS_SPRAYED_VALUE:
                 sp.sprayday = sprayday
                 sp.save()
 
@@ -240,8 +559,8 @@ def avg_time_per_group(results):
         return avg_time_tuple(times) if len(times) else (None, None)
 
 
-def avg_time(qs, field):
-    pks = list(qs.values_list('pk', flat=True))
+def avg_time(pks, field):
+    # pks = list(qs.values_list('pk', flat=True))
     if len(pks) == 0:
         return (None, None)
 
@@ -308,14 +627,53 @@ def get_ta_in_location(location):
     return locations
 
 
-def sprayable_queryset(queryset):
+def get_sprayable_or_nonsprayable_queryset(queryset, yes_or_no):
     if HAS_SPRAYABLE_QUESTION:
-        queryset = queryset.extra(
-            where=['data->>%s = %s'],
-            params=['sprayable_structure', 'yes']
-        )
+        if yes_or_no == 'yes':
+            queryset = queryset.extra(
+                where=['data->>%s != %s'],
+                params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]
+            )
+        else:
+            queryset = queryset.extra(
+                where=['data->>%s = %s'],
+                params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]
+            )
 
     return queryset
+
+
+def sprayable_queryset(queryset):
+    return get_sprayable_or_nonsprayable_queryset(queryset, 'yes')
+
+
+def not_sprayable_queryset(queryset):
+    return get_sprayable_or_nonsprayable_queryset(queryset, 'no')
+
+
+def sprayed_queryset(queryset):
+    return queryset.extra(
+        where=['data->>%s = %s'],
+        params=[WAS_SPRAYED_FIELD, 'yes']
+    )
+
+
+def refused_queryset(queryset):
+    return queryset.extra(
+        where=['data->>%s = %s'],
+        params=[REASON_FIELD, REASON_REFUSED]
+    )
+
+
+def other_queryset(queryset):
+    return queryset.extra(
+        where=[
+            "data->>%s IN ({})".format(
+                ",".join(["'{}'".format(i) for i in REASON_OTHER])
+            )
+        ],
+        params=[REASON_FIELD]
+    )
 
 
 def unique_spray_points(queryset):
@@ -325,3 +683,48 @@ def unique_spray_points(queryset):
         )
 
     return queryset
+
+
+def get_location_qs(qs, level=None):
+    if level == 'RHC':
+        sprays = SprayDayHealthCenterLocation.objects.filter(
+            location=OuterRef('pk'),
+            content_object__data__has_key='osmstructure:node:id'
+        ).order_by().values('location')
+        new_structure_count = sprays.annotate(c=Count('location')).values('c')
+        qs = qs.annotate(
+            num_new_structures=Coalesce(Subquery(
+                queryset=new_structure_count,
+                output_field=IntegerField()), Value(0))
+        ).annotate(
+            total_structures=ExpressionWrapper(
+                F('num_new_structures') + F('structures'),
+                output_field=IntegerField()
+            )
+        )
+    else:
+        sprays = SprayDay.objects.filter(
+            location=OuterRef('pk'),
+            data__has_key='osmstructure:node:id').order_by().values('location')
+        new_structure_count = sprays.annotate(c=Count('location')).values('c')
+        qs = qs.annotate(
+            num_new_structures=Coalesce(Subquery(
+                queryset=new_structure_count,
+                output_field=PositiveIntegerField()), Value(0))
+        ).annotate(
+            total_structures=ExpressionWrapper(
+                F('num_new_structures') + F('structures'),
+                output_field=PositiveIntegerField()
+            )
+        )
+
+    return qs
+
+
+def parse_spray_date(request):
+    spray_date = request.GET.get('spray_date')
+    if spray_date:
+        try:
+            return parse(spray_date).date()
+        except ValueError:
+            pass

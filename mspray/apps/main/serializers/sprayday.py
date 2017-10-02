@@ -4,6 +4,9 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models import (
+    SprayOperatorDailySummary, DirectlyObservedSprayingForm
+)
 
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
@@ -14,6 +17,10 @@ REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER
 
 
 class SprayBase(object):
+    def get_osm_sprayed(self, obj):
+        if obj:
+            return obj.data.get('osmstructure:spray_status')
+
     def get_sprayed(self, obj):
         if obj:
             return obj.data.get(WAS_SPRAYED_FIELD)
@@ -21,9 +28,9 @@ class SprayBase(object):
     def get_reason(self, obj):
         if obj:
             reason = obj.data.get(REASON_FIELD)
-            reason = REASONS.get(reason)
-            if isinstance(reason, str):
-                reason = reason.lower()
+            # reason = REASONS.get(reason)
+            # if isinstance(reason, str):
+            #     reason = reason.lower()
 
             return reason
 
@@ -87,6 +94,7 @@ class SprayDayNamibiaSerializer(SprayBaseNamibia, GeoFeatureModelSerializer):
 
 class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
     sprayed = serializers.SerializerMethodField()
+    osm_sprayed = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     spray_operator = serializers.SerializerMethodField()
     spray_operator_code = serializers.SerializerMethodField()
@@ -95,7 +103,48 @@ class SprayDayShapeSerializer(SprayBase, GeoFeatureModelSerializer):
 
     class Meta:
         model = SprayDay
-        fields = ('submission_id', 'spray_date', 'sprayed', 'reason',
+        fields = ('submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
                   'spray_operator', 'spray_operator_code', 'irs_sticker_num',
-                  'id')
+                  'osm_sprayed'
+                  )
         geo_field = 'bgeom'
+
+
+class SprayOperatorDailySerializer(serializers.Serializer):
+    spray_form_id = serializers.CharField(max_length=10, required=False)
+    sprayed = serializers.IntegerField(required=False)
+    found = serializers.IntegerField(required=False)
+    sprayoperator_code = serializers.CharField(max_length=10, required=False)
+
+    class Meta:
+        model = SprayOperatorDailySummary
+        fields = ('spray_form_id', 'sprayed', 'found', 'sprayoperator_code')
+
+
+class DirectlyObservedSprayingFormSerializer(serializers.Serializer):
+    correct_removal = serializers.CharField(max_length=5, required=False)
+    correct_mix = serializers.CharField(max_length=5, required=False)
+    rinse = serializers.CharField(max_length=5, required=False)
+    PPE = serializers.CharField(max_length=5, required=False)
+    CFV = serializers.CharField(max_length=5, required=False)
+    correct_covering = serializers.CharField(max_length=5, required=False)
+    leak_free = serializers.CharField(max_length=5, required=False)
+    correct_distance = serializers.CharField(max_length=5, required=False)
+    correct_speed = serializers.CharField(max_length=5, required=False)
+    correct_overlap = serializers.CharField(max_length=5, required=False)
+    district = serializers.CharField(max_length=10, required=False)
+    health_facility = serializers.CharField(max_length=50, required=False)
+    supervisor_name = serializers.CharField(max_length=10, required=False)
+    sprayop_code_name = serializers.CharField(max_length=10, required=False)
+    tl_code_name = serializers.CharField(max_length=10, required=False)
+    spray_date = serializers.CharField(max_length=10, required=False)
+
+    class Meta:
+        model = DirectlyObservedSprayingForm
+        fields = (
+            'correct_removal', 'correct_mix', 'rinse', 'PPE', 'CFV',
+            'correct_covering', 'leak_free', 'correct_distance',
+            'correct_speed', 'correct_overlap', 'district', 'health_facility',
+            'supervisor_name', 'sprayop_code_name', 'tl_code_name',
+            'spray_date'
+        )

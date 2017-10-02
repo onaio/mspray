@@ -19,6 +19,7 @@ class HouseholdSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Household
         geo_field = 'geom'
+        fields = '__all__'
 
 
 class HouseholdBSerializer(GeoFeatureModelSerializer):
@@ -27,6 +28,7 @@ class HouseholdBSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Household
         geo_field = 'bgeom'
+        fields = '__all__'
 
 
 class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
@@ -37,6 +39,7 @@ class HouseholdsBufferSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = HouseholdsBuffer
         geo_field = 'geom'
+        fields = '__all__'
 
     def get_spray_points(self, obj):
         if obj:

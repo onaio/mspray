@@ -16,10 +16,27 @@ class Command(BaseCommand):
 
         for spraypoint in SprayDay.objects.iterator():
             code = spraypoint.data.get(location_code)
+            district = spraypoint.data.get('district')
             if code:
-                location = Location.objects.get(code=code)
-                spraypoint.location = location
-                spraypoint.save()
-                count += 1
+                try:
+                    location = Location.objects.get(
+                        name=code.replace('_', ' / '),
+                        parent__code=district
+                    )
+                except Location.DoesNotExist:
+                    pass
+                else:
+                    if spraypoint.location is None or \
+                            (location != spraypoint.location and
+                             location.parent != spraypoint.location.parent):
+                        if spraypoint.location is not None:
+                            self.stdout.write('{}:{} {} to {} {}'.format(
+                                spraypoint.pk, spraypoint.location.name,
+                                spraypoint.location.parent.name, location.name,
+                                location.parent.name
+                            ))
+                        spraypoint.location = location
+                        spraypoint.save()
+                        count += 1
 
-        print("Updated {} spraypoints".format(count))
+        self.stdout.write("Updated {} spraypoints".format(count))

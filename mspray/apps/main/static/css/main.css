@@ -19,6 +19,15 @@ h2{
     font-size:2em;
 }
 
+i.red {
+    color: red;
+}
+
+i.green {
+    color: green;
+}
+
+
 /* Tables */
 .table{
     border-top:1px solid #ccc;
@@ -59,8 +68,10 @@ h2{
 /* Table color-coding */
 .table > tbody > tr > td.red,
 .table > tbody > tr > td.green,
+.table > tbody > tr > td.orange,
 .table > tfoot > tr > td.red,
-.table > tfoot > tr > td.green{
+.table > tfoot > tr > td.green,
+.table > tfoot > tr > td.orange{
     color:#fff;
     opacity:0.8;
 }
@@ -75,6 +86,10 @@ h2{
 .table > tbody > tr > td.green,
 .table > tfoot > tr > td.green{
     background:#090;
+}
+.table > tbody > tr > td.orange,
+.table > tfoot > tr > td.orange{
+    background:#f60;
 }
 
 /* Containers */
@@ -390,11 +405,11 @@ h2{
 .small-legend-label {
     font-size: 1.3em;
 }
-#sprayed-label {
-    font-size: 1.2em;
-    margin-left: 20%;
-    margin-top: -10px;
-}
+/* #sprayed-label { */
+/*     font-size: 1.2em; */
+/*     margin-left: 20%; */
+/*     margin-top: -10px; */
+/* } */
 
 .dl-horizontal dd {
     margin-left: 48px;
@@ -413,8 +428,16 @@ h2{
     border-radius: 5px;
 }
 
+.circle-text-p {
+    text-align: center;
+    line-height: 18px;
+    font-weight: bold;
+}
+.circle-text-p.numbers {
+    margin-top: -15px;
+}
 .legend {
-    text-align: left;
+    text-align: center;
     line-height: 18px;
     color: #555;
 }
@@ -497,9 +520,9 @@ a.distrct-links {
     background-color: #f5f5f5;
 }
 
-#sprayed-ratio {
+/* #sprayed-ratio, */
+#progress-ratio {
     font-size: 12px;
-    padding-left: 32px;
     margin-top: -15px;
 }
 
@@ -570,11 +593,16 @@ a.distrct-links {
     border: none;
     font-size: 20px;
 }
+.hh-label {
+    color: white;
+    background-color: transparent;
+    border: none
+}
 .ta-label:before {
     border: none;
 }
 td.numbers {
-    text-align: right;
+    text-align: center;
 }
 .tablesaw tfoot > tr > td {
     font-weight: bold;

@@ -1,0 +1,87 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">
+            All Spray Areas
+        </h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Health Centre</th>
+                    <th>Target Area</th>
+                    <th>Structures on ground</th>
+                    <th>Found</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found coverage</th>
+                    <th>Spray coverage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for district in district_list %}
+                    <tr>
+                        <td class='numbers'>{{ district.district }}</td>
+                        <td class='numbers'>{{ district.rhc }}</td>
+                        <td>
+                            <a href="{% url 'target_area' district.rhc_pk district.targetid %}">
+                                <i class="fa fa-map"></i>
+                                {{ district.district_name }}
+                            </a>
+                            </td>
+                        </td>
+
+                        <td class='numbers'>{{ district.structures|intcomma }}</td>
+                        <td class='numbers'>{{ district.found|intcomma }}</td>
+                        <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district.visited_sprayed district.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district.found district.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district_totals.visited_total district_totals.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
