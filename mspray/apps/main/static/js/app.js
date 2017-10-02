@@ -390,7 +390,11 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                     "Structures: " + props.structures;
                 layer.bindPopup(content, {closeButton: true});
                 var label = new L.Label({className: "ta-label"});
-                label.setContent("" + props.district_name);
+                if (props.label) {
+                    label.setContent("" + props.label);
+                } else {
+                    label.setContent("" + props.district_name);
+                }
                 label.setLatLng(layer.getBounds().getCenter());
                 app.map.showLabel(label);
                 if (props.level != 'ta') {

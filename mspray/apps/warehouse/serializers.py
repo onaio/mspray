@@ -335,6 +335,8 @@ class DruidBase(object):
 class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
+    target_area_name = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
     district_pk = serializers.SerializerMethodField()
     rhc_pk = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
@@ -357,14 +359,22 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level',
-                  'total_structures', 'district_pk', 'rhc_pk',
-                  'num_new_structures']
+                  'total_structures', 'district_pk', 'rhc_pk', 'label',
+                  'num_new_structures', 'target_area_name']
         model = Location
         geo_field = 'geom'
 
     def get_targetid(self, obj):
         if obj:
             return obj.id
+
+    def get_target_area_name(self, obj):
+        if obj:
+            return obj.name
+
+    def get_label(self, obj):
+        if obj:
+            return obj.name
 
     def get_bounds(self, obj):
         if obj and obj.geom:

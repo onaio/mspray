@@ -99,7 +99,7 @@ class RHCView(SiteNameMixin, DetailView):
 
 
 class TargetAreaMap(SiteNameMixin, DetailView):
-    template_name = 'warehouse/map.html'
+    template_name = 'warehouse/maps/target_area.html'
     slug_field = 'pk'
     model = Location
 
@@ -127,7 +127,7 @@ class TargetAreaMap(SiteNameMixin, DetailView):
 
 
 class RHCMap(SiteNameMixin, DetailView):
-    template_name = 'warehouse/rhc_map.html'
+    template_name = 'warehouse/maps/rhc.html'
     slug_field = 'pk'
     model = Location
 
