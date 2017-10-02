@@ -1,5 +1,5 @@
 /* global L, $, Circles */
-var App = function(buffer, targetAreaData, hhData) {
+var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
     "use strict";
     this.targetOptions = {
         fillColor: "#999999",
@@ -30,7 +30,7 @@ var App = function(buffer, targetAreaData, hhData) {
         opacity: 1,
         fillOpacity: 1
     };
-    this.WAS_NOT_SPRAYABLE = null;
+    this.WAS_NOT_SPRAYABLE = notSpraybleValue;
 
     L.mapbox.accessToken = "pk.eyJ1Ijoib25hIiwiYSI6IlVYbkdyclkifQ.0Bz-QOOXZZK01dq4MuMImQ";
     this.map = L.mapbox.map("map");
