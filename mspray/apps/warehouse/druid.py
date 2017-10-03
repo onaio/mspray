@@ -12,7 +12,7 @@ from mspray.apps.main.models import Location
 
 def get_target_area_totals(data):
     """
-    Loops through data and caulcates totals
+    Loops through data and calculates totals
     """
     total_structures, total_found, total_sprayed = Decimal(0), Decimal(0),\
         Decimal(0)
@@ -154,17 +154,31 @@ def process_location_data(location_dict, district_data):
     return result
 
 
-def get_druid_data(dimensions=None, filter_list=[], filter_type="and"):
+def process_druid_data(druid_data, extractor='target_area_id'):
     """
-    Runs a query against Druid, returns data with metrics, and a totals dict
-    of the data
+    Mainly computes 'target_area' totals of given druid data
+    Inputs:
+        extractor => field to use to get data from druid result
+    """
+    data, totals = [], {}
+    data = [x['event'] for x in druid_data if x['event'][extractor]
+            is not None]
+    totals = get_target_area_totals(data)
+    return data, totals
+
+
+def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
+                   order_by=["target_area_name"]):
+    """
+    Runs a query against Druid, returns data with metrics
     Inputs:
         dimensions => list of dimensions to group by
         filter_list => list of list of things to filter with e.g.
                         filter_list=[['target_area_id', operator.ne, 1],
                                      ['sprayed', operator.eq, "yes"],
                                      ['dimension', operator, "value"]])
-        filter_type => type of Druid filter to perform
+        filter_type => type of Druid filter to perform,
+        order_by => field(s) to order the data by
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
@@ -259,7 +273,7 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and"):
         limit_spec={
             "type": "default",
             "limit": 50000,
-            "columns": ["target_area_name"]
+            "columns": order_by
         }
     )
     if filter_list:
@@ -283,14 +297,9 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and"):
     try:
         request = query.groupby(**params)
     except OSError:
-        pass
+        return []
     else:
-        result = request.result
-        data = [x['event'] for x in result if x['event']['target_area_id']
-                is not None]
-        totals = get_target_area_totals(data)
-        return data, totals
-    return [], {}
+        return request.result
 
 
 def druid_select_query(dimensions, filter_list=[], filter_type="and"):

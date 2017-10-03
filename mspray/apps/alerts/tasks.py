@@ -2,7 +2,7 @@ import operator
 
 from django.conf import settings
 
-from mspray.apps.warehouse.druid import get_druid_data
+from mspray.apps.warehouse.druid import get_druid_data, process_druid_data
 from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
@@ -24,7 +24,8 @@ def daily_spray_success_by_spray_area(district_id, spray_date):
                   'district_id', 'district_name']
     filters = [['district_id', operator.eq, district_id],
                ['spray_date', operator.eq, spray_date]]
-    data, _ = get_druid_data(dimensions, filters)
+    druid_result = get_druid_data(dimensions, filters)
+    data, _ = process_druid_data(druid_result)
     if data:
         flow_uuid = settings.RAPIDPRO_DAILY_SPRAY_SUCCESS_FLOW_ID
         for item in data:
@@ -56,17 +57,20 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
             filters = [['target_area_id', operator.eq, target_area.id],
                        ['spray_date', operator.eq, spray_date]]
             # get today's data for this spray area
-            today_data, _ = get_druid_data(dimensions, filters)
+            druid_result1 = get_druid_data(dimensions, filters)
+            today_data, _ = process_druid_data(druid_result1)
             # get today's data for all other spray areas
-            other_data, _ = get_druid_data(
+            druid_result2 = get_druid_data(
                 dimensions=dimensions,
                 filter_list=[['target_area_id', operator.ne, target_area.id],
                              ['spray_date', operator.eq, spray_date]])
+            other_data, _ = process_druid_data(druid_result2)
             # get all data for this area for other dates
-            all_data, _ = get_druid_data(
+            druid_result3 = get_druid_data(
                 dimensions=dimensions,
                 filter_list=[['target_area_id', operator.eq, target_area.id],
                              ['spray_date', operator.ne, spray_date]])
+            all_data, _ = process_druid_data(druid_result3)
             # prepare payload
             payload_source_data = {}
             if all_data:
@@ -141,7 +145,8 @@ def no_revisit(target_area_code, no_revisit_reason):
                       'district_id', 'district_name']
         filters = [['target_area_id', operator.eq, target_area.id]]
         # get today's data for this spray area
-        data, _ = get_druid_data(dimensions, filters)
+        druid_result = get_druid_data(dimensions, filters)
+        data, _ = process_druid_data(druid_result)
         if data:
             payload = FoundCoverageSerializer(data[0], target_area=target_area)
         else:

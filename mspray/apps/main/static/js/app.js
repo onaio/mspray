@@ -436,7 +436,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                     }
                     if (props.level === 'RHC') {
                         content = this_label + "<br/>" +
-                            "Number of spray areas: " + props.num_of_spray_areas + "<br/>" +
+                            "Number of spray areas: " + props.total_structures + "<br/>" +
                             "Spray areas Visited: " + props.visited_total + "<br/>" +
                             "Spray areas Sprayed: " + props.visited_sprayed+ "<br/>" +
                             "Spray areas NOT Sprayed: " + props.visited_not_sprayed;

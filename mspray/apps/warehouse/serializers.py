@@ -1,3 +1,4 @@
+import operator
 from django.conf import settings
 
 from rest_framework import serializers
@@ -7,6 +8,7 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.sprayday import SprayBase
+from mspray.apps.warehouse.druid import get_druid_data
 
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 
@@ -405,8 +407,7 @@ class RHCDruidBase(object):
     def get_druid_data(self, obj):
         if self.druid_data:
             if isinstance(self.druid_data, list):
-                data = [x for x in self.druid_data if x['target_area_id'] ==
-                        str(obj.id)]
+                data = [x for x in self.druid_data if x['rhc_id'] == obj.id]
                 if len(data) > 0:
                     return data[0]
             else:
@@ -482,3 +483,19 @@ class RHCSerializer(RHCDruidBase, GeoFeatureModelSerializer):
 
     def get_spray_dates(self, obj):
         return None
+
+    def get_visited_not_sprayed(self, obj):
+        data = self.get_extra_data(obj)
+        return data.get('num_not_sprayed_no_duplicates', 0)
+
+    def get_visited_refused(self, obj):
+        data = self.get_extra_data(obj)
+        return data.get('num_refused', 0)
+
+    def get_extra_data(self, obj):
+        data = get_druid_data(dimensions=["rhc_id"],
+                              filter_list=[['rhc_id', operator.eq, 14]],
+                              order_by=["rhc_id"])
+        if len(data) > 0:
+            return data[0]['event']
+        return {}
