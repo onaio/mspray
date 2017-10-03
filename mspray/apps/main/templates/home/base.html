@@ -56,8 +56,10 @@
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
+                        {% block main_menu %}
                         {% include 'home/district_list.html' %}
                         {% include 'home/target_areas_list.html' %}
+                        {% endblock %}
                         {% block spray_dates  %}
                         {% endblock %}
                         {% block target_area_stats  %}

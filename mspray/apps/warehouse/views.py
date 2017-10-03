@@ -7,7 +7,7 @@ from rest_framework.renderers import JSONRenderer
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
-from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.utils import parse_spray_date, get_location_dict
 from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals, process_druid_data
 from mspray.apps.main.definitions import DEFINITIONS
@@ -137,6 +137,11 @@ class TargetAreaMap(SiteNameMixin, DetailView):
         context['spray_dates'] = ta_data['properties']['spray_dates']
         context['spray_date'] = spray_date
         context['target_data'] = JSONRenderer().render(ta_data)
+        context['districts'] = Location.objects.filter(parent=None)\
+            .values_list('id', 'code', 'name').order_by('name')
+
+        context.update({'map_menu': True})
+        context.update(get_location_dict(self.object.pk))
         return context
 
 

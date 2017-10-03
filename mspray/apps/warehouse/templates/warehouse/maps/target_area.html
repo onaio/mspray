@@ -7,6 +7,10 @@
         <link href='{% static "css/L.Control.Locate.min.css" %}' rel='stylesheet' />
 {% endblock %}
 
+{% block main_menu %}
+    {% include 'warehouse/snippets/district_list.html' %}
+    {% include 'warehouse/snippets/target_areas_list.html' %}
+{% endblock %}
 
 {% block spray_dates  %}
     <li class="dropdown" id="spray_date_picker">

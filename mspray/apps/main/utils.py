@@ -17,6 +17,7 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
@@ -738,3 +739,43 @@ def parse_spray_date(request):
         except ValueError:
             pass
     return None
+
+
+def get_location_dict(code):
+    data = {}
+    if code:
+        district = get_object_or_404(Location, pk=code)
+        data['district'] = district
+        data['district_code'] = district.pk
+        data['district_name'] = district.name
+        if district.level == settings.MSPRAY_TA_LEVEL:
+            data['sub_locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+        else:
+            data['sub_locations'] = district.location_set.all()\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+        data['top_level'] = Location.objects.filter(parent=None)\
+            .values('id', 'level', 'name', 'parent')\
+            .order_by('name')
+    if 'top_level' not in data:
+        data['locations'] = Location.objects.filter(parent=None)\
+            .values('id', 'level', 'name', 'parent')\
+            .order_by('name')
+    data['ta_level'] = settings.MSPRAY_TA_LEVEL
+    data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
+
+    return data
