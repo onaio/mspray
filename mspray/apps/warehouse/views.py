@@ -179,7 +179,7 @@ class DistrictMap(SiteNameMixin, DetailView):
         district_druid_data = process_location_data(self.object.__dict__, data)
 
         district_data = AreaSerializer(self.object,
-                                      druid_data=district_druid_data).data
+                                       druid_data=district_druid_data).data
 
         rhc_druid_data_list = []
         rhc_list = Location.objects.filter(level='RHC', parent=self.object)
@@ -190,8 +190,8 @@ class DistrictMap(SiteNameMixin, DetailView):
             rhc_druid_data_list.append(rhc_data)
 
         rhc_geojson_data = AreaSerializer(rhc_list,
-                                         druid_data=rhc_druid_data_list,
-                                         many=True).data
+                                          druid_data=rhc_druid_data_list,
+                                          many=True).data
         context['district_data'] = JSONRenderer().render(district_data)
         context['hh_geojson'] = JSONRenderer().render(rhc_geojson_data)
         return context
