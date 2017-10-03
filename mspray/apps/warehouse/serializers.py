@@ -1,5 +1,7 @@
 import operator
+
 from django.conf import settings
+from django.urls import reverse
 
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
@@ -371,11 +373,12 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
     spray_dates = serializers.SerializerMethodField()
     geom = GeometryField()
 
     class Meta:
-        fields = ['targetid', 'district_name', 'found',
+        fields = ['targetid', 'district_name', 'found', 'url',
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level',
@@ -395,6 +398,9 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
     def get_label(self, obj):
         if obj:
             return obj.name
+
+    def get_url(self, obj):
+        return reverse("warehouse:ta", args=[obj.id])
 
     def get_bounds(self, obj):
         if obj and obj.geom:
@@ -470,14 +476,14 @@ class AreaSerializer(AreaDruidBase, GeoFeatureModelSerializer):
     not_visited = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
     spray_dates = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
     geom = GeometryField()
 
     class Meta:
-        fields = ['targetid', 'found',
-                  'structures', 'visited_total', 'visited_sprayed',
-                  'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds', 'spray_dates', 'level',
-                  'total_structures', 'label']
+        fields = ['targetid', 'found', 'structures', 'visited_total', 'url',
+                  'visited_sprayed', 'visited_not_sprayed', 'visited_refused',
+                  'visited_other', 'not_visited', 'bounds', 'spray_dates',
+                  'level', 'total_structures', 'label']
         model = Location
         geo_field = 'geom'
 
@@ -488,6 +494,11 @@ class AreaSerializer(AreaDruidBase, GeoFeatureModelSerializer):
     def get_label(self, obj):
         if obj:
             return obj.name
+
+    def get_url(self, obj):
+        if obj.level == "RHC":
+            return reverse("warehouse:rhc_map", args=[obj.id])
+        return reverse("warehouse:district_map", args=[obj.id])
 
     def get_bounds(self, obj):
         if obj and obj.geom:

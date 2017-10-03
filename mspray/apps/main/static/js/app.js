@@ -456,9 +456,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                     app.map.showLabel(label);
                     layer.on({
                         click: function(e) {
-                            var uri = window.location.origin +
-                                "/" + app.targetAreaData.properties.targetid +
-                                "/" + feature.properties.targetid;
+                            var uri = props.url;
                             window.location.href = uri;
                         },
                         mouseover: function(e){

@@ -11,7 +11,7 @@ from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals, process_druid_data
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.warehouse.serializers import TargetAreaSerializer
-from mspray.apps.warehouse.serializers import RHCSerializer
+from mspray.apps.warehouse.serializers import AreaSerializer
 from mspray.apps.warehouse.utils import get_duplicates
 
 
@@ -147,7 +147,7 @@ class RHCMap(SiteNameMixin, DetailView):
         data, totals = process_druid_data(druid_result)
         rhc_druid_data = process_location_data(self.object.__dict__, data)
 
-        rhc_data = RHCSerializer(self.object, druid_data=rhc_druid_data).data
+        rhc_data = AreaSerializer(self.object, druid_data=rhc_druid_data).data
 
         ta_data = TargetAreaSerializer(
             self.object.get_children().filter(level='ta'),
@@ -178,7 +178,7 @@ class DistrictMap(SiteNameMixin, DetailView):
 
         district_druid_data = process_location_data(self.object.__dict__, data)
 
-        district_data = RHCSerializer(self.object,
+        district_data = AreaSerializer(self.object,
                                       druid_data=district_druid_data).data
 
         rhc_druid_data_list = []
@@ -189,7 +189,7 @@ class DistrictMap(SiteNameMixin, DetailView):
             rhc_data['rhc_id'] = rhc.id
             rhc_druid_data_list.append(rhc_data)
 
-        rhc_geojson_data = RHCSerializer(rhc_list,
+        rhc_geojson_data = AreaSerializer(rhc_list,
                                          druid_data=rhc_druid_data_list,
                                          many=True).data
         context['district_data'] = JSONRenderer().render(district_data)
