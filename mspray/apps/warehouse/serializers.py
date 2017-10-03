@@ -196,6 +196,9 @@ class mSpraySerializer(SprayBase, serializers.ModelSerializer):
 
 
 class DruidBase(object):
+    """
+    Adds Druid data to Target Area Serializer
+    """
 
     def __init__(self, *args, **kwargs):
         self.druid_data = kwargs.pop('druid_data', None)
@@ -347,6 +350,9 @@ class DruidBase(object):
 
 
 class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
+    """
+    Target Area serializer that uses Druid Data
+    """
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     target_area_name = serializers.SerializerMethodField()
@@ -398,11 +404,14 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
         return None
 
 
-class RHCDruidBase(object):
+class AreaDruidBase(object):
+    """
+    Adds Druid data extraction to RHC & district serializers
+    """
 
     def __init__(self, *args, **kwargs):
         self.druid_data = kwargs.pop('druid_data', None)
-        super(RHCDruidBase, self).__init__(*args, **kwargs)
+        super(AreaDruidBase, self).__init__(*args, **kwargs)
 
     def get_druid_data(self, obj):
         if self.druid_data:
@@ -443,7 +452,10 @@ class RHCDruidBase(object):
         return 0
 
 
-class RHCSerializer(RHCDruidBase, GeoFeatureModelSerializer):
+class AreaSerializer(AreaDruidBase, GeoFeatureModelSerializer):
+    """
+    Used for District & RHC
+    """
     targetid = serializers.SerializerMethodField()
     label = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
