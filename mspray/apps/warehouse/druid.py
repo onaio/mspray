@@ -182,7 +182,7 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource='mspraytest2',
+        datasource=settings.DRUID_DATASOURCE,
         granularity='all',
         intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
         aggregations={
@@ -314,7 +314,7 @@ def druid_select_query(dimensions, filter_list=[], filter_type="and"):
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource='mspraytest',
+        datasource=settings.DRUID_DATASOURCE,
         granularity='all',
         intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
         limit_spec={

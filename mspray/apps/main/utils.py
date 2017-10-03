@@ -737,3 +737,4 @@ def parse_spray_date(request):
             return parse(spray_date).date()
         except ValueError:
             pass
+    return None

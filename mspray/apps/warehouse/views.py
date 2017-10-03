@@ -7,6 +7,7 @@ from rest_framework.renderers import JSONRenderer
 
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
+from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.warehouse.druid import get_druid_data, process_location_data,\
     calculate_target_area_totals, process_druid_data
 from mspray.apps.main.definitions import DEFINITIONS
@@ -112,8 +113,13 @@ class TargetAreaMap(SiteNameMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaMap, self).get_context_data(**kwargs)
+        spray_date = parse_spray_date(self.request)
+        filter_list = [['target_area_id', operator.eq, self.object.pk]]
+        if spray_date:
+            filter_list.append(['spray_date', operator.eq,
+                               self.request.GET.get('spray_date')])
         druid_result = get_druid_data(
-            filter_list=[['target_area_id', operator.eq, self.object.pk]],
+            filter_list=filter_list,
             dimensions=['target_area_id', 'target_area_name',
                         'target_area_structures', 'district_name',
                         'district_id', 'rhc_name', 'rhc_id']
@@ -128,6 +134,8 @@ class TargetAreaMap(SiteNameMixin, DetailView):
         context['sprayed_duplicates_data'] = sprayed_duplicates
         context['not_sprayed_duplicates'] = len(not_sprayed_duplicates)
         context['not_sprayed_duplicates_data'] = not_sprayed_duplicates
+        context['spray_dates'] = ta_data['properties']['spray_dates']
+        context['spray_date'] = spray_date
         context['target_data'] = JSONRenderer().render(ta_data)
         return context
 

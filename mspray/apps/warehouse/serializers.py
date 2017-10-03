@@ -1,4 +1,5 @@
 import operator
+from dateutil import parser
 
 from django.conf import settings
 from django.urls import reverse
@@ -10,7 +11,7 @@ from rest_framework_gis.fields import GeometryField
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.sprayday import SprayBase
-from mspray.apps.warehouse.druid import get_druid_data
+from mspray.apps.warehouse.druid import get_druid_data, druid_select_query
 
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 
@@ -407,7 +408,12 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
             return list(obj.geom.boundary.extent)
 
     def get_spray_dates(self, obj):
-        return None
+        druid_result = druid_select_query(dimensions=['spray_date'],
+                                          filter_list=[['target_area_id',
+                                                        operator.eq, obj.id]])
+        data = [x['event'] for x in druid_result if x['event']['spray_date']
+                is not None]
+        return [parser.parse(x['spray_date']).date() for x in data]
 
 
 class AreaDruidBase(object):

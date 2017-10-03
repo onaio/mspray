@@ -12,17 +12,13 @@
     <li class="dropdown" id="spray_date_picker">
         <a href="#" class="dropdown-toggle"
            data-toggle="dropdown">
-            <span class="sprayday_label">Date: {{ spray_date }}</span>
+            <span class="sprayday_label">Date: {{ spray_date|default:"" }}</span>
             <b class="caret"></b>
         </a>
         <ul class="dropdown-menu" id="spraydays_list">
-        {% for day in target_data.spray_dates %}
+        {% for day in spray_dates %}
             <li>
-                {% if object.parent %}
-                <a href="{% url 'target_area' object.parent.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
-                {% else %}
-                <a href="{% url 'target_area' object.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
-                {% endif %}
+                <a href="{% url 'warehouse:ta' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
             </li>
         {% endfor %}
         </ul>
