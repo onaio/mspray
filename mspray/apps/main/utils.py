@@ -455,11 +455,15 @@ def calculate_data_quality_check(spray_form_id, spray_operator_code):
 
 
 def add_spray_operator_daily(data):
-    spray_form_id = data.get('sprayformid')
-    submission_id = data.get('_id')
+    submission_id = data.get(DATA_ID_FIELD)
+    spray_date = data.get(DATE_FIELD)
     sprayed = data.get('sprayed', 0)
     found = data.get('found', 0)
     spray_operator_code = data.get('sprayop_code')
+    so = get_spray_operator(spray_operator_code)
+    spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
+    spray_form_id = data.get('sprayformid', get_formid(so, spray_date))
+    data['sprayformid'] = spray_form_id
     try:
         SprayOperatorDailySummary.objects.create(
             spray_form_id=spray_form_id,
