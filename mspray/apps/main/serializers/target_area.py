@@ -874,7 +874,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'level', 'district_name', 'found',
                   'total_structures', 'num_new_structures',
-                  'num_of_spray_areas')
+                  'num_of_spray_areas', 'id')
         model = Location
         geo_field = 'geom'
 

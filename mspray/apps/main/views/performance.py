@@ -533,26 +533,27 @@ def get_spray_operator_data(spray_operator, spray_date):
     formid = get_formid(spray_operator, spray_date)
 
     was_sprayed_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'),
+        spray_operator=OuterRef('pk'), spray_date=spray_date,
         was_sprayed=True).order_by().values('spray_operator')
     was_sprayed_count = was_sprayed_sprays.annotate(
         a=Count('spray_operator')).values('a')
 
     sprayed_sprayformid_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), was_sprayed=True,
+        spray_operator=OuterRef('pk'), was_sprayed=True, spray_date=spray_date,
         data__contains={
             'sprayformid': formid}).order_by().values('spray_operator')
     sprayed_sprayformid_count = sprayed_sprayformid_sprays.annotate(
         b=Count('spray_operator')).values('b')
 
     not_sprayed_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'),
+        spray_operator=OuterRef('pk'), spray_date=spray_date,
         was_sprayed=False).order_by().values('spray_operator')
     not_sprayed_count = not_sprayed_sprays.annotate(
         c=Count('spray_operator')).values('c')
 
     refused_sprays = SprayDay.objects.filter(
         spray_operator=OuterRef('pk'), was_sprayed=False,
+        spray_date=spray_date,
         data__contains={
             'osmstructure:notsprayed_reason': 'refused'
         }).order_by().values('spray_operator')
@@ -560,18 +561,20 @@ def get_spray_operator_data(spray_operator, spray_date):
         d=Count('spray_operator')).values('d')
 
     found_sprayformid_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), data__contains={'sprayformid': formid}
+        spray_operator=OuterRef('pk'), data__contains={'sprayformid': formid},
+        spray_date=spray_date
     ).order_by().values('spray_operator')
     found_sprayformid_count = found_sprayformid_sprays.annotate(
         e=Count('spray_operator')).values('e')
 
     found_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk')).order_by().values('spray_operator')
+        spray_operator=OuterRef('pk'),
+        spray_date=spray_date).order_by().values('spray_operator')
     found_count = found_sprays.annotate(
         f=Count('spray_operator')).values('f')
 
     sop = SprayOperator.objects.filter(
-        code=spray_operator.code, sprayday__spray_date=spray_date
+        code=spray_operator.code
     ).annotate(
         found=Coalesce(Subquery(
             queryset=found_count,
