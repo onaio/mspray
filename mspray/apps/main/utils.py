@@ -41,6 +41,7 @@ from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
 
+
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
@@ -164,6 +165,7 @@ def add_spray_data(data):
     """"
     Add spray data submission from aggregate submission to the dashboard
     """
+    from mspray.apps.main.views.performance import get_formid  # noqa
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
@@ -200,6 +202,7 @@ def add_spray_data(data):
     so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
     if so:
         sprayday.spray_operator = so
+        sprayday.data['sprayformid'] = get_formid(so, spray_date)
 
     set_team_leader_assistant(sprayday, save=False)
 
