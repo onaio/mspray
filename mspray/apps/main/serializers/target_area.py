@@ -73,13 +73,20 @@ def get_spray_data(obj, context):
                 found=Sum(
                     Case(
                         When(
-                            data__has_key=WAS_SPRAYED_FIELD,
+                            data__has_key='osmstructure:way:id',
+                            data__contains={SPRAYABLE_FIELD:
+                                            NOT_SPRAYABLE_VALUE},
                             spraypoint__isnull=False,
+                            then=0
+                        ),
+                        When(
+                            spraypoint__isnull=False,
+                            data__has_key=WAS_SPRAYED_FIELD,
                             then=1
                         ),
                         When(
                             spraypoint__isnull=True,
-                            data__has_key='newstructure/gps',
+                            was_sprayed=True,
                             then=1
                         ),
                         default=0,
@@ -182,13 +189,19 @@ def get_spray_data(obj, context):
         found=Sum(
             Case(
                 When(
+                    data__has_key='osmstructure:way:id',
+                    data__contains={SPRAYABLE_FIELD:
+                                    NOT_SPRAYABLE_VALUE},
+                    spraypoint__isnull=False,
+                    then=0
+                ),
+                When(
                     spraypoint__isnull=False,
                     data__has_key=WAS_SPRAYED_FIELD,
                     then=1
                 ),
                 When(
                     spraypoint__isnull=True,
-                    # data__has_key='newstructure/gps',
                     was_sprayed=True,
                     then=1
                 ),
@@ -199,7 +212,6 @@ def get_spray_data(obj, context):
         sprayed=Sum(
             Case(
                 When(
-                    # spraypoint__isnull=False,
                     was_sprayed=True,
                     then=1
                 ),
@@ -874,7 +886,7 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'level', 'district_name', 'found',
                   'total_structures', 'num_new_structures',
-                  'num_of_spray_areas')
+                  'num_of_spray_areas', 'id')
         model = Location
         geo_field = 'geom'
 
