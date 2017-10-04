@@ -40,7 +40,6 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.main.views.performance import get_formid
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -162,11 +161,14 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             obj.save()
 
 
+def get_formid(spray_operator, spray_date):
+        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
+
+
 def add_spray_data(data):
     """"
     Add spray data submission from aggregate submission to the dashboard
     """
-    from mspray.apps.main.views.performance import get_formid  # noqa
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')

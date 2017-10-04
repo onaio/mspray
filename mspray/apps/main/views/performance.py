@@ -15,7 +15,7 @@ from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
-from mspray.apps.main.utils import avg_time
+from mspray.apps.main.utils import avg_time, get_formid
 from mspray.apps.main.utils import avg_time_tuple
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -523,10 +523,6 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         context.update(DEFINITIONS['sop'])
 
         return context
-
-
-def get_formid(spray_operator, spray_date):
-        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
 
 
 def get_spray_operator_data(spray_operator, spray_date):
