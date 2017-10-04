@@ -125,7 +125,11 @@ class TargetAreaMap(SiteNameMixin, DetailView):
                         'district_id', 'rhc_name', 'rhc_id']
         )
         data, totals = process_druid_data(druid_result)
-        ta_data = TargetAreaSerializer(self.object, druid_data=data[0]).data
+        if data:
+            ta_data = TargetAreaSerializer(self.object,
+                                           druid_data=data[0]).data
+        else:
+            ta_data = TargetAreaSerializer(self.object).data
 
         sprayed_duplicates = get_duplicates(ta_pk=self.object.id, sprayed=True)
         not_sprayed_duplicates = get_duplicates(ta_pk=self.object.id,
