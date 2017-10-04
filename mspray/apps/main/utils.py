@@ -162,11 +162,14 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             obj.save()
 
 
+def get_formid(spray_operator, spray_date):
+        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
+
+
 def add_spray_data(data):
     """"
     Add spray data submission from aggregate submission to the dashboard
     """
-    from mspray.apps.main.views.performance import get_formid  # noqa
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
