@@ -40,6 +40,7 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
+from mspray.apps.main.views.performance import get_formid
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -200,6 +201,7 @@ def add_spray_data(data):
     so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
     if so:
         sprayday.spray_operator = so
+        sprayday.data['sprayformid'] = get_formid(so, spray_date)
 
     set_team_leader_assistant(sprayday, save=False)
 
