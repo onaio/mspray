@@ -25,7 +25,7 @@ from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
 from mspray.apps.main.models.spray_day import SprayDay,\
-    SprayDayHealthCenterLocation, get_formid
+    SprayDayHealthCenterLocation
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -63,6 +63,10 @@ try:
 except KeyError:
     pass
 REASON_OTHER = REASONS.keys()
+
+
+def get_formid(spray_operator, spray_date):
+    return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
 
 
 def geojson_from_gps_string(geolocation, geom=False):
