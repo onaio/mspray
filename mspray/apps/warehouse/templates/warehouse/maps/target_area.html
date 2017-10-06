@@ -33,50 +33,50 @@
 {% endblock %}
 
 {% block content %}
-        <section class="info-panel">
-            <div class="info-holder">
-                <h4><span class="dist_label" id="target-area-label"> </span></h4>
+    <section class="info-panel">
+        <div class="info-holder">
+            <h4><span class="dist_label" id="target-area-label"> </span></h4>
 
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats-structures">
-                    </dl>
-                </div>
-                <hr>
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats">
-                    </dl>
-                </div>
-                <hr>
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats">
-                    {% if sprayed_duplicates or not_sprayed_duplicates  %}
-                    <p>Some structures were selected more than once.<br />
-                        <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
-                    </p>
-                    {% endif %}
-                    {% if sprayed_duplicates %}
-                        <dt>{{ sprayed_duplicates }}</dt>
-                        <dd>Sprayed Duplicates</dd>
-                    {% endif %}
-                    {% if not_sprayed_duplicates %}
-                        <dt>{{ not_sprayed_duplicates }}</dt>
-                        <dd>Not Sprayed Duplicates</dd>
-                    {% endif %}
-                    {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
-                    <p>No structures were selected more than once.</p>
-                    {% endif %}
-                    </dl>
-                </div>
-                <hr>
-                <div id="not-sprayed-reasons">
-                    <p>Not Sprayed Reasons</p>
-                    <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
-                    </dl>
-                </div>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats-structures">
+                </dl>
             </div>
-        </section>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                </dl>
+            </div>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                {% if sprayed_duplicates or not_sprayed_duplicates  %}
+                <p>Some structures were selected more than once.<br />
+                    <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
+                </p>
+                {% endif %}
+                {% if sprayed_duplicates %}
+                    <dt>{{ sprayed_duplicates }}</dt>
+                    <dd>Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not_sprayed_duplicates %}
+                    <dt>{{ not_sprayed_duplicates }}</dt>
+                    <dd>Not Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
+                <p>No structures were selected more than once.</p>
+                {% endif %}
+                </dl>
+            </div>
+            <hr>
+            <div id="not-sprayed-reasons">
+                <p>Not Sprayed Reasons</p>
+                <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
+                </dl>
+            </div>
+        </div>
+    </section>
 
-        <div id="map"></div>
+    <div id="map"></div>
 
     <div id="map-legend">
 
@@ -118,7 +118,7 @@
     <script src="{% static "js/Google.js" %}"></script>
     <script src="{% static "js/Bing.js" %}"></script>
     <script src="{% static "js/circles.min.js" %}"></script>
-    <script src="{% static "js/app.js" %}"></script>
+    <script src="{% static "js/app-warehouse.js" %}"></script>
 
     <script type="text/javascript">
         var targetAreaData = {% if target_data %} {{ target_data|safe }} {% else %} undefined {% endif %};
