@@ -24,7 +24,7 @@ from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
 from mspray.apps.main.models.spray_day import SprayDay,\
-    SprayDayHealthCenterLocation
+    SprayDayHealthCenterLocation, get_formid
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -159,10 +159,6 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             obj.num_households = \
                 Household.objects.filter(geom__coveredby=b).count()
             obj.save()
-
-
-def get_formid(spray_operator, spray_date):
-        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
 
 
 def add_spray_data(data):

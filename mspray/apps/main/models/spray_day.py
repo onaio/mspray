@@ -17,6 +17,11 @@ WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 OSM_STRUCTURE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 
 
+
+def get_formid(spray_operator, spray_date):
+        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
+
+
 def get_osmid(data):
     if OSM_STRUCTURE_FIELD:
         return data.get('%s:way:id' % OSM_STRUCTURE_FIELD) \
@@ -61,6 +66,9 @@ class SprayDay(models.Model):
         if was_sprayed == WAS_SPRAYED_VALUE:
             self.was_sprayed = True
 
+        if 'sprayformid' and self.spray_operator:
+            self.data['sprayformid'] = get_formid(self.spray_operator,
+                                                  self.spray_date)
         osmid = get_osmid(self.data)
         try:
             if osmid and int(osmid) != self.osmid:
