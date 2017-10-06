@@ -8,64 +8,15 @@ from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
 
-from mspray.apps.main.models import SprayDay
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import SprayDay, Location, Household
 from mspray.apps.main.serializers.sprayday import SprayBase
 from mspray.apps.warehouse.druid import get_druid_data, druid_select_query
+from mspray.apps.warehouse.utils import flatten
 
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 
 
-class mSpraySerializer(SprayBase, serializers.ModelSerializer):
-    """
-    Creates a de-normalised record that will be fed into Druid
-    """
-    location_id = serializers.SerializerMethodField()
-    location_name = serializers.SerializerMethodField()
-    target_area_id = serializers.SerializerMethodField()
-    target_area_name = serializers.SerializerMethodField()
-    target_area_structures = serializers.SerializerMethodField()
-    rhc_id = serializers.SerializerMethodField()
-    rhc_name = serializers.SerializerMethodField()
-    rhc_structures = serializers.SerializerMethodField()
-    district_id = serializers.SerializerMethodField()
-    district_name = serializers.SerializerMethodField()
-    district_structures = serializers.SerializerMethodField()
-    sprayoperator_id = serializers.SerializerMethodField()
-    sprayoperator_name = serializers.SerializerMethodField()
-    sprayoperator_code = serializers.SerializerMethodField()
-    team_leader_assistant_id = serializers.SerializerMethodField()
-    team_leader_assistant_name = serializers.SerializerMethodField()
-    team_leader_id = serializers.SerializerMethodField()
-    team_leader_name = serializers.SerializerMethodField()
-    geom_lat = serializers.SerializerMethodField()
-    geom_lng = serializers.SerializerMethodField()
-    sprayed = serializers.SerializerMethodField()
-    sprayable = serializers.SerializerMethodField()
-    reason = serializers.SerializerMethodField()
-    submission_time = serializers.SerializerMethodField()
-    irs_sticker_num = serializers.SerializerMethodField()
-    is_new = serializers.SerializerMethodField()
-    is_duplicate = serializers.SerializerMethodField()
-    is_refused = serializers.SerializerMethodField()
-    bgeom_type = serializers.SerializerMethodField()
-    bgeom_srid = serializers.SerializerMethodField()
-    bgeom_coordinates = serializers.SerializerMethodField()
-
-    class Meta:
-        model = SprayDay
-        fields = ['submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
-                  'location_id', 'location_name', 'target_area_id',
-                  'target_area_name', 'rhc_id', 'rhc_name', 'district_id',
-                  'district_name', 'sprayoperator_name', 'sprayoperator_id',
-                  'team_leader_assistant_id', 'team_leader_assistant_name',
-                  'team_leader_id', 'team_leader_name', 'geom_lat', 'geom_lng',
-                  'submission_time', 'is_new', 'target_area_structures',
-                  'rhc_structures', 'district_structures', 'sprayable',
-                  'is_duplicate', 'is_refused', 'sprayoperator_code',
-                  'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
-                  'bgeom_srid'
-                  ]
+class LocationMixin(object):
 
     def get_location_id(self, obj):
         if obj and obj.location:
@@ -125,6 +76,87 @@ class mSpraySerializer(SprayBase, serializers.ModelSerializer):
                 level='district').first()
             if this_district:
                 return this_district.structures
+
+
+class HouseHoldDruidSerializer(LocationMixin, serializers.ModelSerializer):
+    """
+    Used to store Household objects in Druid
+    """
+    target_area_id = serializers.SerializerMethodField()
+    target_area_name = serializers.SerializerMethodField()
+    rhc_id = serializers.SerializerMethodField()
+    rhc_name = serializers.SerializerMethodField()
+    district_id = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
+    building = serializers.SerializerMethodField()
+    source = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Household
+        fields = ['id', 'target_area_id', 'target_area_name', 'rhc_id',
+                  'rhc_name', 'district_id', 'district_name', 'building',
+                  'source']
+
+    def get_building(self, obj):
+        if obj and obj.data:
+            return flatten(obj.data).get('building')
+
+    def get_source(self, obj):
+        if obj and obj.data:
+            return flatten(obj.data).get('source')
+
+
+class SprayDayDruidSerializer(SprayBase, LocationMixin,
+                              serializers.ModelSerializer):
+    """
+    used when storing SprayDay objects in Druid
+    """
+    location_id = serializers.SerializerMethodField()
+    location_name = serializers.SerializerMethodField()
+    target_area_id = serializers.SerializerMethodField()
+    target_area_name = serializers.SerializerMethodField()
+    target_area_structures = serializers.SerializerMethodField()
+    rhc_id = serializers.SerializerMethodField()
+    rhc_name = serializers.SerializerMethodField()
+    rhc_structures = serializers.SerializerMethodField()
+    district_id = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
+    district_structures = serializers.SerializerMethodField()
+    sprayoperator_id = serializers.SerializerMethodField()
+    sprayoperator_name = serializers.SerializerMethodField()
+    sprayoperator_code = serializers.SerializerMethodField()
+    team_leader_assistant_id = serializers.SerializerMethodField()
+    team_leader_assistant_name = serializers.SerializerMethodField()
+    team_leader_id = serializers.SerializerMethodField()
+    team_leader_name = serializers.SerializerMethodField()
+    geom_lat = serializers.SerializerMethodField()
+    geom_lng = serializers.SerializerMethodField()
+    sprayed = serializers.SerializerMethodField()
+    sprayable = serializers.SerializerMethodField()
+    reason = serializers.SerializerMethodField()
+    submission_time = serializers.SerializerMethodField()
+    irs_sticker_num = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField()
+    is_duplicate = serializers.SerializerMethodField()
+    is_refused = serializers.SerializerMethodField()
+    bgeom_type = serializers.SerializerMethodField()
+    bgeom_srid = serializers.SerializerMethodField()
+    bgeom_coordinates = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SprayDay
+        fields = ['submission_id', 'spray_date', 'sprayed', 'reason', 'osmid',
+                  'location_id', 'location_name', 'target_area_id',
+                  'target_area_name', 'rhc_id', 'rhc_name', 'district_id',
+                  'district_name', 'sprayoperator_name', 'sprayoperator_id',
+                  'team_leader_assistant_id', 'team_leader_assistant_name',
+                  'team_leader_id', 'team_leader_name', 'geom_lat', 'geom_lng',
+                  'submission_time', 'is_new', 'target_area_structures',
+                  'rhc_structures', 'district_structures', 'sprayable',
+                  'is_duplicate', 'is_refused', 'sprayoperator_code',
+                  'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
+                  'bgeom_srid'
+                  ]
 
     def get_sprayoperator_id(self, obj):
         if obj and obj.spray_operator:
