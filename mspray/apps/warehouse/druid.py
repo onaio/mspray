@@ -168,7 +168,8 @@ def process_druid_data(druid_data, extractor='target_area_id'):
 
 
 def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
-                   order_by=["target_area_name"]):
+                   order_by=["target_area_name"],
+                   datasource=settings.DRUID_SPRAYDAY_DATASOURCE):
     """
     Runs a query against Druid, returns data with metrics
     Inputs:
@@ -182,9 +183,9 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource=settings.DRUID_DATASOURCE,
+        datasource=datasource,
         granularity='all',
-        intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
+        intervals=settings.DRUID_INTERVAL,
         aggregations={
             'num_not_sprayable': aggregators.filtered(
                 filters.Filter(
@@ -302,7 +303,8 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
         return request.result
 
 
-def druid_select_query(dimensions, filter_list=[], filter_type="and"):
+def druid_simple_groupby(dimensions, filter_list=[], filter_type="and",
+                         datasource=settings.DRUID_SPRAYDAY_DATASOURCE):
     """
     Inputs:
         dimensions => list of dimensions to group by
@@ -314,9 +316,9 @@ def druid_select_query(dimensions, filter_list=[], filter_type="and"):
     """
     query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
     params = dict(
-        datasource=settings.DRUID_DATASOURCE,
+        datasource=datasource,
         granularity='all',
-        intervals='1917-09-08T00:00:00+00:00/2017-09-08T10:41:37+00:00',
+        intervals=settings.DRUID_INTERVAL,
         limit_spec={
             "type": "default",
             "limit": 50000,

@@ -1,5 +1,6 @@
 import operator
 from dateutil import parser
+import pytz
 
 from django.conf import settings
 from django.urls import reverse
@@ -10,7 +11,7 @@ from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models import SprayDay, Location, Household
 from mspray.apps.main.serializers.sprayday import SprayBase
-from mspray.apps.warehouse.druid import get_druid_data, druid_select_query
+from mspray.apps.warehouse.druid import get_druid_data, druid_simple_groupby
 from mspray.apps.warehouse.utils import flatten
 
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
@@ -82,6 +83,7 @@ class HouseHoldDruidSerializer(LocationMixin, serializers.ModelSerializer):
     """
     Used to store Household objects in Druid
     """
+    timestamp = serializers.SerializerMethodField()
     target_area_id = serializers.SerializerMethodField()
     target_area_name = serializers.SerializerMethodField()
     rhc_id = serializers.SerializerMethodField()
@@ -95,7 +97,20 @@ class HouseHoldDruidSerializer(LocationMixin, serializers.ModelSerializer):
         model = Household
         fields = ['id', 'target_area_id', 'target_area_name', 'rhc_id',
                   'rhc_name', 'district_id', 'district_name', 'building',
-                  'source']
+                  'source', 'timestamp']
+
+    def get_timestamp(self, obj):
+        """
+        Household objects do not have a timestamp, but this is needed for
+        Druid.
+        We therefore create one, and we make sure it is always the same for
+        each object, so that we can update Druid for the same record
+        """
+        timestring = getattr(settings, "HOUSEHOLD_DATETIME",
+                             "2017-09-30 16:20:00")
+        datetime_obj = pytz.timezone("UTC").localize(
+            parser.parse(timestring), is_dst=None)
+        return datetime_obj
 
     def get_building(self, obj):
         if obj and obj.data:
@@ -440,9 +455,9 @@ class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
             return list(obj.geom.boundary.extent)
 
     def get_spray_dates(self, obj):
-        druid_result = druid_select_query(dimensions=['spray_date'],
-                                          filter_list=[['target_area_id',
-                                                        operator.eq, obj.id]])
+        druid_result = druid_simple_groupby(dimensions=['spray_date'],
+                                            filter_list=[['target_area_id',
+                                                         operator.eq, obj.id]])
         data = [x['event'] for x in druid_result if x['event']['spray_date']
                 is not None]
         return [parser.parse(x['spray_date']).date() for x in data]

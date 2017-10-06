@@ -2,7 +2,7 @@ import operator
 
 from django.core.paginator import Paginator
 
-from mspray.apps.warehouse.druid import druid_select_query
+from mspray.apps.warehouse.druid import druid_simple_groupby
 
 
 def chunked_iterator(queryset, chunk_size=500):
@@ -20,7 +20,7 @@ def get_duplicates(ta_pk=None, sprayed=True):
         filters.append(['sprayed', operator.eq, "no"])
     if ta_pk:
         filters.append(['target_area_id', operator.eq, ta_pk])
-    data = druid_select_query(dimensions, filters)
+    data = druid_simple_groupby(dimensions, filters)
     return [x['event'] for x in data if x['event']['osmid'] is not None]
 
 
