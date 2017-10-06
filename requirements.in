@@ -16,6 +16,8 @@ flake8
 django-extensions
 ipdb
 pylint
+pylint-django
+pylint-celery
 
 # deployment
 uwsgi

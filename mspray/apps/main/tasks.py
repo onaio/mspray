@@ -11,6 +11,7 @@ from django.db.utils import IntegrityError
 from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.models.spray_day import get_osmid
 from mspray.apps.main.ona import fetch_form_data
 from mspray.apps.main.osm import parse_osm
@@ -27,6 +28,7 @@ HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 STRUCTURE_GPS_FIELD = getattr(settings,
                               'MSPRAY_STRUCTURE_GPS_FIELD',
                               STRUCTURE_GPS_FIELD)
+FORM_ID = getattr(settings, 'ONA_FORM_PK', None)
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -107,9 +109,8 @@ def set_spraypoint_location(sp, location, geom, is_node=False):
 
 
 def get_updated_osm_from_ona(sp):
-    formid = getattr(settings, 'ONA_FORM_PK', 0)
-    if formid:
-        data = fetch_form_data(formid, dataid=sp.submission_id)
+    if FORM_ID:
+        data = fetch_form_data(FORM_ID, dataid=sp.submission_id)
         if data:
             osmid = get_osmid(data)
             if osmid:
@@ -272,3 +273,55 @@ def set_district_sprayed_visited():
             print(location.pk, location, location.sprayed, k,
                   location.sprayedt - k, e.get(location.pk))
     gc.collect()
+
+
+@app.task
+def remove_deleted_records():
+    count = 0
+    if FORM_ID:
+        data = fetch_form_data(FORM_ID, dataids_only=True)
+        pks = [i['_id'] for i in data]
+        deleted_submissions = SprayDay.objects.exclude(submission_id__in=pks)
+        count = deleted_submissions.count()
+        deleted_submissions.delete()
+
+    return count
+
+
+@app.task
+def update_edited_records():
+    """
+    Update edited records.
+    """
+    count = 0
+    if FORM_ID:
+        data = fetch_form_data(FORM_ID, dataids_only=True, edited_only=True)
+        pks = [i['_id'] for i in data]
+        edited_submissions = SprayDay.objects.filter(submission_id__in=pks)
+        for rec in edited_submissions:
+            data = fetch_form_data(FORM_ID, dataid=rec.submission_id)
+            if data:
+                from mspray.apps.main.utils import add_spray_data
+                add_spray_data(data)
+                count += 1
+
+    return count
+
+
+@app.task
+def remove_deleted_daily_summary_records():
+    """
+    Deletes deleted Daily Summary records.
+    """
+    count = 0
+    summary = SprayOperatorDailySummary.objects.last()
+    formid = summary and summary.data.get('_xform_id')
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True)
+        pks = [i['_id'] for i in data]
+        records = SprayOperatorDailySummary.objects.exclude(
+            submission_id__in=pks)
+        count = records.count()
+        records.delete()
+
+    return count
