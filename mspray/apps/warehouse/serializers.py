@@ -245,14 +245,14 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
                 id=obj.id, spraypoint__isnull=True).exists()
 
 
-class DruidBase(object):
+class SprayDayDruidBase(object):
     """
     Adds Druid data to Target Area Serializer
     """
 
     def __init__(self, *args, **kwargs):
         self.druid_data = kwargs.pop('druid_data', None)
-        super(DruidBase, self).__init__(*args, **kwargs)
+        super(SprayDayDruidBase, self).__init__(*args, **kwargs)
 
     def get_druid_data(self, obj):
         if self.druid_data:
@@ -399,7 +399,7 @@ class DruidBase(object):
             return self.get_druid_data(obj).get('osmid')
 
 
-class TargetAreaSerializer(DruidBase, GeoFeatureModelSerializer):
+class TargetAreaSerializer(SprayDayDruidBase, GeoFeatureModelSerializer):
     """
     Target Area serializer that uses Druid Data
     """
@@ -575,3 +575,28 @@ class AreaSerializer(AreaDruidBase, GeoFeatureModelSerializer):
         if len(data) > 0:
             return data[0]['event']
         return {}
+
+
+class HouseHoldDruidBase(object):
+
+    def __init__(self, *args, **kwargs):
+        self.druid_data = kwargs.pop('druid_data', None)
+        super(SprayDayDruidBase, self).__init__(*args, **kwargs)
+
+    def get_druid_data(self, obj):
+        if self.druid_data:
+            if isinstance(self.druid_data, list):
+                data = [x for x in self.druid_data if x['id'] == str(obj.id)]
+                if len(data) > 0:
+                    return data[0]
+            else:
+                return self.druid_data
+        return None
+
+    def get_location_name(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('target_area_name')
+
+    def get_location_id(self, obj):
+        if self.get_druid_data(obj):
+            return self.get_druid_data(obj).get('target_area_id')
