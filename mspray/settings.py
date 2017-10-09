@@ -10,6 +10,11 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+
+from django.core.exceptions import SuspiciousOperation
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 TEMPLATES = [
@@ -151,10 +156,6 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     )
 }
-
-import sys
-
-from django.core.exceptions import SuspiciousOperation
 
 
 def skip_suspicious_operations(record):
