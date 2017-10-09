@@ -3,7 +3,7 @@ from django.contrib.gis.geos import Point
 from rest_framework import serializers
 
 from mspray.apps.main.models import SprayDay
-from mspray.apps.warehouse.serializers import mSpraySerializer
+from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
 
 
 class RapidProBaseSerializer(serializers.Serializer):
@@ -95,7 +95,7 @@ class FoundCoverageSerializer(RapidProBaseSerializer):
             return self.target_area.structures
 
 
-class UserDistanceSerializer(mSpraySerializer):
+class UserDistanceSerializer(SprayDayDruidSerializer):
     """
     Serliazer for SpraDay object that calculates field between structure
     and user

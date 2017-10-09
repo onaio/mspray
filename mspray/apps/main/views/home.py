@@ -3,7 +3,6 @@ import json
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
-from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
 
@@ -16,51 +15,11 @@ from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
-from mspray.apps.main.utils import get_location_qs
+from mspray.apps.main.utils import get_location_qs, get_location_dict
 from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.main.definitions import DEFINITIONS
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
-
-
-def get_location_dict(code):
-    data = {}
-    if code:
-        district = get_object_or_404(Location, pk=code)
-        data['district'] = district
-        data['district_code'] = district.pk
-        data['district_name'] = district.name
-        if district.level == settings.MSPRAY_TA_LEVEL:
-            data['sub_locations'] = Location.objects\
-                .filter(parent=district.parent)\
-                .exclude(parent=None)\
-                .values('id', 'level', 'name', 'parent')\
-                .order_by('name')
-            data['locations'] = Location.objects\
-                .filter(parent=district.parent.parent)\
-                .exclude(parent=None)\
-                .values('id', 'level', 'name', 'parent')\
-                .order_by('name')
-        else:
-            data['sub_locations'] = district.location_set.all()\
-                .values('id', 'level', 'name', 'parent')\
-                .order_by('name')
-            data['locations'] = Location.objects\
-                .filter(parent=district.parent)\
-                .exclude(parent=None)\
-                .values('id', 'level', 'name', 'parent')\
-                .order_by('name')
-        data['top_level'] = Location.objects.filter(parent=None)\
-            .values('id', 'level', 'name', 'parent')\
-            .order_by('name')
-    if 'top_level' not in data:
-        data['locations'] = Location.objects.filter(parent=None)\
-            .values('id', 'level', 'name', 'parent')\
-            .order_by('name')
-    data['ta_level'] = settings.MSPRAY_TA_LEVEL
-    data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
-
-    return data
 
 
 class DistrictView(SiteNameMixin, ListView):

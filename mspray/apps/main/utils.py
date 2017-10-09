@@ -17,6 +17,7 @@ from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
 from django.db.models.functions import Coalesce
+from django.shortcuts import get_object_or_404
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
@@ -24,7 +25,7 @@ from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
 from mspray.apps.main.models.spray_day import SprayDay,\
-    SprayDayHealthCenterLocation, get_formid
+    SprayDayHealthCenterLocation
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -57,8 +58,15 @@ IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
-REASONS.pop(REASON_REFUSED)
+try:
+    REASONS.pop(REASON_REFUSED)
+except KeyError:
+    pass
 REASON_OTHER = REASONS.keys()
+
+
+def get_formid(spray_operator, spray_date):
+    return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
 
 
 def geojson_from_gps_string(geolocation, geom=False):
@@ -734,3 +742,44 @@ def parse_spray_date(request):
             return parse(spray_date).date()
         except ValueError:
             pass
+    return None
+
+
+def get_location_dict(code):
+    data = {}
+    if code:
+        district = get_object_or_404(Location, pk=code)
+        data['district'] = district
+        data['district_code'] = district.pk
+        data['district_name'] = district.name
+        if district.level == settings.MSPRAY_TA_LEVEL:
+            data['sub_locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+        else:
+            data['sub_locations'] = district.location_set.all()\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+            data['locations'] = Location.objects\
+                .filter(parent=district.parent)\
+                .exclude(parent=None)\
+                .values('id', 'level', 'name', 'parent')\
+                .order_by('name')
+        data['top_level'] = Location.objects.filter(parent=None)\
+            .values('id', 'level', 'name', 'parent')\
+            .order_by('name')
+    if 'top_level' not in data:
+        data['locations'] = Location.objects.filter(parent=None)\
+            .values('id', 'level', 'name', 'parent')\
+            .order_by('name')
+    data['ta_level'] = settings.MSPRAY_TA_LEVEL
+    data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
+
+    return data

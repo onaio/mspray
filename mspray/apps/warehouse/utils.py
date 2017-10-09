@@ -2,31 +2,13 @@ import operator
 
 from django.core.paginator import Paginator
 
-from rest_framework.renderers import JSONRenderer
-
-from mspray.apps.main.models import SprayDay
-from mspray.apps.warehouse.serializers import mSpraySerializer
-from mspray.apps.warehouse.druid import druid_select_query
+from mspray.apps.warehouse.druid import druid_simple_groupby
 
 
 def chunked_iterator(queryset, chunk_size=500):
     paginator = Paginator(queryset, chunk_size)
     for page in range(1, paginator.num_pages + 1):
         yield paginator.page(page).object_list
-
-
-def create_json_file(filename, queryset=None):
-    """
-    Goes through the Database and outputs submissions into a json file
-    that can be imported into druid
-    """
-    if not queryset:
-        queryset = SprayDay.objects.all().order_by('id')
-    for submissions in chunked_iterator(queryset):
-        data = mSpraySerializer(submissions, many=True).data
-        lines = [JSONRenderer().render(dd) for dd in data]
-        with open(filename, "ab") as fff:
-            fff.write(b'\n'.join(lines))
 
 
 def get_duplicates(ta_pk=None, sprayed=True):
@@ -38,5 +20,15 @@ def get_duplicates(ta_pk=None, sprayed=True):
         filters.append(['sprayed', operator.eq, "no"])
     if ta_pk:
         filters.append(['target_area_id', operator.eq, ta_pk])
-    data = druid_select_query(dimensions, filters)
+    data = druid_simple_groupby(dimensions, filters)
     return [x['event'] for x in data if x['event']['osmid'] is not None]
+
+
+def flatten(d, parent_key=''):
+    items = []
+    for k, v in d.items():
+        try:
+            items.extend(flatten(v, '%s%s__' % (parent_key, k)).items())
+        except AttributeError:
+            items.append(('%s%s' % (parent_key, k), v))
+    return dict(items)

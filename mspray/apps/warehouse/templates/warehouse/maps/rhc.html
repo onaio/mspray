@@ -1,0 +1,142 @@
+{% extends 'home/base.html' %}
+
+{% load staticfiles %}
+
+{% block styles %}
+    {{ block.super }}
+        <link href='{% static "css/L.Control.Locate.min.css" %}' rel='stylesheet' />
+{% endblock %}
+
+
+{% block spray_dates  %}
+    <li class="dropdown" id="spray_date_picker">
+        <a href="#" class="dropdown-toggle"
+           data-toggle="dropdown">
+            <span class="sprayday_label">Date: {{ spray_date }}</span>
+            <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu" id="spraydays_list">
+        {% for day in target_data.spray_dates %}
+            <li>
+                {% if object.parent %}
+                <a href="{% url 'target_area' object.parent.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                {% else %}
+                <a href="{% url 'target_area' object.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </li>
+{% endblock %}
+{% block target_area_stats  %}
+    <li class="active" id="target-area-stats-item"><a>Target Area Stats</a></li>
+{% endblock %}
+
+{% block content %}
+
+    <section class="info-panel">
+        <div class="info-holder">
+            <h4><span class="dist_label" id="target-area-label"> </span></h4>
+
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats-structures">
+                </dl>
+            </div>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                </dl>
+            </div>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                {% if sprayed_duplicates or not_sprayed_duplicates  %}
+                <p>Some structures were selected more than once.<br />
+                    <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
+                </p>
+                {% endif %}
+                {% if sprayed_duplicates %}
+                    <dt>{{ sprayed_duplicates }}</dt>
+                    <dd>Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not_sprayed_duplicates %}
+                    <dt>{{ not_sprayed_duplicates }}</dt>
+                    <dd>Not Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
+                <p>No structures were selected more than once.</p>
+                {% endif %}
+                </dl>
+            </div>
+            <hr>
+            <div id="not-sprayed-reasons">
+                <p>Not Sprayed Reasons</p>
+                <dl class="dl-horizontal" id="target-area-stats-not-sprayed">
+                </dl>
+            </div>
+        </div>
+    </section>
+
+    <div id="map"></div>
+
+    <div id="map-legend">
+
+        <h2><span class="day_label">Spray Effectiveness</span></h2>
+        <div class="big" style="text-align:center">
+            <div class="circle-holder">
+                <div id="circle-progress"> </div>
+                <p class="circle-text-p" id="progress-label">Sprayed</p>
+                <p class="circle-text-p numbers" id="progress-ratio"></p>
+            </div>
+        </div>
+
+        <div class="legend medium clearfix">
+            <div class="circle-holder">
+                <div id="found-coverage"> </div>
+                <p class="circle-text-p" id="found-label">Found Coverage</p>
+                <p class="circle-text-p numbers" id="found-ratio"></p>
+            </div>
+        </div>
+
+        <div class="legend medium clearfix">
+            <div class="circle-holder">
+                <div id="spray-coverage"> </div>
+                <p class="circle-text-p" id="sprayed-label">Spray Coverage</p>
+                <p class="circle-text-p numbers" id="sprayed-ratio"></p>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+    <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.0/mapbox.js'></script>
+    <script src="http://maps.google.com/maps/api/js?key={{ GOOGLE_API_KEY }}&v=3"></script>
+    <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
+    <script src="{% static "js/L.Control.Locate.min.js" %}"></script>
+    <script src="{% static "js/Google.js" %}"></script>
+    <script src="{% static "js/Bing.js" %}"></script>
+    <script src="{% static "js/circles.min.js" %}"></script>
+    <script src="{% static "js/app-warehouse.js" %}"></script>
+
+    <script type="text/javascript">
+        var targetAreaData = {% if rhc_data %} {{ rhc_data|safe }} {% else %} undefined {% endif %};
+        var bounds = targetAreaData.properties.bounds;
+
+        var hhData = {% if hh_geojson %} {{ hh_geojson|safe }} {% else %} undefined {% endif %};
+        var app = new App(undefined, targetAreaData, hhData);
+        app.fitBounds(bounds);
+
+        app.housesCount = targetAreaData.properties.total_structures;
+        app.visitedTotal = targetAreaData.properties.found;
+        app.visitedSprayed = targetAreaData.properties.visited_sprayed;
+        app.visitedNotSprayed = targetAreaData.properties.visited_not_sprayed;
+        app.visitedRefused = targetAreaData.properties.visited_refused;
+        app.visitedOther = targetAreaData.properties.visited_other;
+        app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
+        app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
+
+    </script>
+{% endblock %}
