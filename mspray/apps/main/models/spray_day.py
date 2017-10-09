@@ -91,6 +91,7 @@ def link_health_center_location(sender, instance=None, **kwargs):
             content_object=instance
         )
 
+
 post_save.connect(link_health_center_location, sender=SprayDay,
                   dispatch_uid='link_health_center_location')
 
@@ -109,6 +110,7 @@ def link_district_location(sender, instance=None, **kwargs):
             location=instance.location.parent,
             content_object=instance.content_object
         )
+
 
 post_save.connect(link_district_location, sender=SprayDayHealthCenterLocation,
                   dispatch_uid='link_district_location')
