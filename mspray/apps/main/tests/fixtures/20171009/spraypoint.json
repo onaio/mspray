@@ -1,0 +1,155 @@
+[
+{
+  "model": "main.spraypoint",
+  "pk": 24,
+  "fields": {
+    "data_id": "-41264",
+    "sprayday": 64,
+    "location": 1463
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 25,
+  "fields": {
+    "data_id": "-41389",
+    "sprayday": 65,
+    "location": 1463
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 26,
+  "fields": {
+    "data_id": "-41240",
+    "sprayday": 66,
+    "location": 1463
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 27,
+  "fields": {
+    "data_id": "-41172",
+    "sprayday": 67,
+    "location": 1463
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 28,
+  "fields": {
+    "data_id": "-3260604322024371787",
+    "sprayday": 68,
+    "location": 1463
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 29,
+  "fields": {
+    "data_id": "-43785",
+    "sprayday": 74,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 30,
+  "fields": {
+    "data_id": "-43608",
+    "sprayday": 69,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 31,
+  "fields": {
+    "data_id": "-43680",
+    "sprayday": 70,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 32,
+  "fields": {
+    "data_id": "-43702",
+    "sprayday": 71,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 33,
+  "fields": {
+    "data_id": "-43620",
+    "sprayday": 72,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 34,
+  "fields": {
+    "data_id": "-43764",
+    "sprayday": 73,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 35,
+  "fields": {
+    "data_id": "-43890",
+    "sprayday": 75,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 36,
+  "fields": {
+    "data_id": "-955131604808941411",
+    "sprayday": 76,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 37,
+  "fields": {
+    "data_id": "-43877",
+    "sprayday": 77,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 38,
+  "fields": {
+    "data_id": "-43871",
+    "sprayday": 78,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 39,
+  "fields": {
+    "data_id": "-43753",
+    "sprayday": 79,
+    "location": 1464
+  }
+},
+{
+  "model": "main.spraypoint",
+  "pk": 40,
+  "fields": {
+    "data_id": "-43731",
+    "sprayday": 80,
+    "location": 1464
+  }
+}
+]

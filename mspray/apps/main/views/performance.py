@@ -15,9 +15,7 @@ from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperatorDailySummary
-from mspray.apps.main.models.spray_day import get_formid
-from mspray.apps.main.utils import avg_time
-from mspray.apps.main.utils import avg_time_tuple
+from mspray.apps.main.utils import avg_time, get_formid, avg_time_tuple
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
