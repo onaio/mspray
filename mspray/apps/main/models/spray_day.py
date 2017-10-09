@@ -17,11 +17,6 @@ WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 OSM_STRUCTURE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 
 
-
-def get_formid(spray_operator, spray_date):
-        return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
-
-
 def get_osmid(data):
     if OSM_STRUCTURE_FIELD:
         return data.get('%s:way:id' % OSM_STRUCTURE_FIELD) \
@@ -60,6 +55,8 @@ class SprayDay(models.Model):
         return self.spray_date.isoformat()
 
     def save(self, *args, **kwargs):
+        from mspray.apps.main.utils import get_formid  # noqa
+
         data = self.data
 
         was_sprayed = data.get(WAS_SPRAYED_FIELD)
@@ -94,6 +91,7 @@ def link_health_center_location(sender, instance=None, **kwargs):
             content_object=instance
         )
 
+
 post_save.connect(link_health_center_location, sender=SprayDay,
                   dispatch_uid='link_health_center_location')
 
@@ -112,6 +110,7 @@ def link_district_location(sender, instance=None, **kwargs):
             location=instance.location.parent,
             content_object=instance.content_object
         )
+
 
 post_save.connect(link_district_location, sender=SprayDayHealthCenterLocation,
                   dispatch_uid='link_district_location')

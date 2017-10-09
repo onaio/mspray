@@ -11,5 +11,5 @@ def start_flow(flow_uuid, payload):
     """
     Starts a RapidPRo flow, sending the payload to the flow
     """
-    client.create_flow_start(flow_uuid, contacts=[default_contact_uuid],
-                             extra=payload)
+    return client.create_flow_start(flow_uuid, contacts=[default_contact_uuid],
+                                    extra=payload)

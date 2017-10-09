@@ -10,6 +10,11 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
+
+from django.core.exceptions import SuspiciousOperation
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 TEMPLATES = [
@@ -152,10 +157,6 @@ REST_FRAMEWORK = {
     )
 }
 
-import sys
-
-from django.core.exceptions import SuspiciousOperation
-
 
 def skip_suspicious_operations(record):
     """Prevent django from sending 500 error
@@ -251,7 +252,6 @@ MSPRAY_IRS_NUM_FIELD = 'irs_sticker_num'
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
 ONA_URI = 'https://ona.io'
-DRUID_BROKER_URI = 'http://10.20.25.56:8082'
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
 OSM_SUBMISSIONS = False
@@ -259,3 +259,18 @@ HAS_SPRAYABLE_QUESTION = False
 SITE_NAME = 'mSpray'
 SPRAYABLE_FIELD = 'sprayable_structure'
 NOT_SPRAYABLE_VALUE = 'no'
+
+DRUID_BROKER_URI = 'http://127.0.0.1:8082'
+DRUID_OVERLORD_URI = 'http://127.0.0.1:8090'
+DRUID_SPRAYDAY_DATASOURCE = "mspray"
+DRUID_HOUSEHOLD_DATASOURCE = "household"
+DRUID_INTERVAL = '1917-09-08T00:00:00+00:00/2018-09-08T10:41:37+00:00'
+
+RAPIDPRO_API_TOKEN = "api_token"
+RAPIDPRO_API_URL = "rapidpro.ona.io"
+RAPIDPRO_DEFAULT_CONTACT_ID = ""
+RAPIDPRO_DAILY_SPRAY_SUCCESS_FLOW_ID = ""
+RAPIDPRO_DAILY_FOUND_COVERAGE_FLOW_ID = ""
+RAPIDPRO_USER_DISTANCE_FLOW_ID = ""
+RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID = ""
+RAPIDPRO_NO_REVISIT_FLOW_ID = ""

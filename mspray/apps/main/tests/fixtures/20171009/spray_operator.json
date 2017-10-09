@@ -1,0 +1,3014 @@
+[
+{
+  "model": "main.sprayoperator",
+  "pk": 1,
+  "fields": {
+    "code": "2001",
+    "name": "SOP 1",
+    "team_leader": null,
+    "team_leader_assistant": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 2,
+  "fields": {
+    "code": "2002",
+    "name": "SOP 2",
+    "team_leader": null,
+    "team_leader_assistant": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 3,
+  "fields": {
+    "code": "2003",
+    "name": "SOP 3",
+    "team_leader": null,
+    "team_leader_assistant": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 4,
+  "fields": {
+    "code": "2004",
+    "name": "SOP 4",
+    "team_leader": null,
+    "team_leader_assistant": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 5,
+  "fields": {
+    "code": "2005",
+    "name": "SOP 5",
+    "team_leader": null,
+    "team_leader_assistant": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 6,
+  "fields": {
+    "code": "2006",
+    "name": "SOP 6",
+    "team_leader": null,
+    "team_leader_assistant": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 7,
+  "fields": {
+    "code": "2007",
+    "name": "SOP 7",
+    "team_leader": null,
+    "team_leader_assistant": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 8,
+  "fields": {
+    "code": "2008",
+    "name": "SOP 8",
+    "team_leader": null,
+    "team_leader_assistant": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 9,
+  "fields": {
+    "code": "2009",
+    "name": "SOP 9",
+    "team_leader": null,
+    "team_leader_assistant": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 10,
+  "fields": {
+    "code": "2010",
+    "name": "SOP 10",
+    "team_leader": null,
+    "team_leader_assistant": 4,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 11,
+  "fields": {
+    "code": "2011",
+    "name": "SOP 11",
+    "team_leader": null,
+    "team_leader_assistant": 4,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 12,
+  "fields": {
+    "code": "2012",
+    "name": "SOP 12",
+    "team_leader": null,
+    "team_leader_assistant": 4,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 13,
+  "fields": {
+    "code": "2013",
+    "name": "SOP 13",
+    "team_leader": null,
+    "team_leader_assistant": 5,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 14,
+  "fields": {
+    "code": "2014",
+    "name": "SOP 14",
+    "team_leader": null,
+    "team_leader_assistant": 5,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 15,
+  "fields": {
+    "code": "2015",
+    "name": "SOP 15",
+    "team_leader": null,
+    "team_leader_assistant": 5,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 16,
+  "fields": {
+    "code": "2016",
+    "name": "SOP 16",
+    "team_leader": null,
+    "team_leader_assistant": 6,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 17,
+  "fields": {
+    "code": "2017",
+    "name": "SOP 17",
+    "team_leader": null,
+    "team_leader_assistant": 6,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 18,
+  "fields": {
+    "code": "2018",
+    "name": "SOP 18",
+    "team_leader": null,
+    "team_leader_assistant": 6,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 19,
+  "fields": {
+    "code": "2019",
+    "name": "SOP 19",
+    "team_leader": null,
+    "team_leader_assistant": 7,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 20,
+  "fields": {
+    "code": "2020",
+    "name": "SOP 20",
+    "team_leader": null,
+    "team_leader_assistant": 7,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 21,
+  "fields": {
+    "code": "2021",
+    "name": "SOP 21",
+    "team_leader": null,
+    "team_leader_assistant": 7,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 22,
+  "fields": {
+    "code": "2022",
+    "name": "SOP 22",
+    "team_leader": null,
+    "team_leader_assistant": 8,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 23,
+  "fields": {
+    "code": "2023",
+    "name": "SOP 23",
+    "team_leader": null,
+    "team_leader_assistant": 8,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 24,
+  "fields": {
+    "code": "2024",
+    "name": "SOP 24",
+    "team_leader": null,
+    "team_leader_assistant": 8,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 25,
+  "fields": {
+    "code": "2025",
+    "name": "SOP 25",
+    "team_leader": null,
+    "team_leader_assistant": 9,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 26,
+  "fields": {
+    "code": "2026",
+    "name": "SOP 26",
+    "team_leader": null,
+    "team_leader_assistant": 9,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 27,
+  "fields": {
+    "code": "2027",
+    "name": "SOP 27",
+    "team_leader": null,
+    "team_leader_assistant": 9,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 28,
+  "fields": {
+    "code": "2028",
+    "name": "SOP 28",
+    "team_leader": null,
+    "team_leader_assistant": 10,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 29,
+  "fields": {
+    "code": "2029",
+    "name": "SOP 29",
+    "team_leader": null,
+    "team_leader_assistant": 10,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 30,
+  "fields": {
+    "code": "2030",
+    "name": "SOP 30",
+    "team_leader": null,
+    "team_leader_assistant": 10,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 31,
+  "fields": {
+    "code": "2031",
+    "name": "SOP 31",
+    "team_leader": null,
+    "team_leader_assistant": 11,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 32,
+  "fields": {
+    "code": "2032",
+    "name": "SOP 32",
+    "team_leader": null,
+    "team_leader_assistant": 11,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 33,
+  "fields": {
+    "code": "2033",
+    "name": "SOP 33",
+    "team_leader": null,
+    "team_leader_assistant": 11,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 34,
+  "fields": {
+    "code": "2034",
+    "name": "SOP 34",
+    "team_leader": null,
+    "team_leader_assistant": 12,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 35,
+  "fields": {
+    "code": "2035",
+    "name": "SOP 35",
+    "team_leader": null,
+    "team_leader_assistant": 12,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 36,
+  "fields": {
+    "code": "2036",
+    "name": "SOP 36",
+    "team_leader": null,
+    "team_leader_assistant": 12,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 37,
+  "fields": {
+    "code": "2037",
+    "name": "SOP 37",
+    "team_leader": null,
+    "team_leader_assistant": 13,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 38,
+  "fields": {
+    "code": "2038",
+    "name": "SOP 38",
+    "team_leader": null,
+    "team_leader_assistant": 13,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 39,
+  "fields": {
+    "code": "2039",
+    "name": "SOP 39",
+    "team_leader": null,
+    "team_leader_assistant": 13,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 40,
+  "fields": {
+    "code": "2040",
+    "name": "SOP 40",
+    "team_leader": null,
+    "team_leader_assistant": 14,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 41,
+  "fields": {
+    "code": "2041",
+    "name": "SOP 41",
+    "team_leader": null,
+    "team_leader_assistant": 14,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 42,
+  "fields": {
+    "code": "2042",
+    "name": "SOP 42",
+    "team_leader": null,
+    "team_leader_assistant": 14,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 43,
+  "fields": {
+    "code": "2043",
+    "name": "SOP 43",
+    "team_leader": null,
+    "team_leader_assistant": 15,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 44,
+  "fields": {
+    "code": "2044",
+    "name": "SOP 44",
+    "team_leader": null,
+    "team_leader_assistant": 15,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 45,
+  "fields": {
+    "code": "2045",
+    "name": "SOP 45",
+    "team_leader": null,
+    "team_leader_assistant": 15,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 46,
+  "fields": {
+    "code": "2046",
+    "name": "SOP 46",
+    "team_leader": null,
+    "team_leader_assistant": 16,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 47,
+  "fields": {
+    "code": "2047",
+    "name": "SOP 47",
+    "team_leader": null,
+    "team_leader_assistant": 16,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 48,
+  "fields": {
+    "code": "2048",
+    "name": "SOP 48",
+    "team_leader": null,
+    "team_leader_assistant": 16,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 49,
+  "fields": {
+    "code": "2049",
+    "name": "SOP 49",
+    "team_leader": null,
+    "team_leader_assistant": 17,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 50,
+  "fields": {
+    "code": "2050",
+    "name": "SOP 50",
+    "team_leader": null,
+    "team_leader_assistant": 17,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 51,
+  "fields": {
+    "code": "2051",
+    "name": "SOP 51",
+    "team_leader": null,
+    "team_leader_assistant": 17,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 52,
+  "fields": {
+    "code": "2052",
+    "name": "SOP 52",
+    "team_leader": null,
+    "team_leader_assistant": 18,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 53,
+  "fields": {
+    "code": "2053",
+    "name": "SOP 53",
+    "team_leader": null,
+    "team_leader_assistant": 18,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 54,
+  "fields": {
+    "code": "2054",
+    "name": "SOP 54",
+    "team_leader": null,
+    "team_leader_assistant": 18,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 55,
+  "fields": {
+    "code": "2055",
+    "name": "SOP 55",
+    "team_leader": null,
+    "team_leader_assistant": 19,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 56,
+  "fields": {
+    "code": "2056",
+    "name": "SOP 56",
+    "team_leader": null,
+    "team_leader_assistant": 19,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 57,
+  "fields": {
+    "code": "2057",
+    "name": "SOP 57",
+    "team_leader": null,
+    "team_leader_assistant": 19,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 58,
+  "fields": {
+    "code": "2058",
+    "name": "SOP 58",
+    "team_leader": null,
+    "team_leader_assistant": 20,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 59,
+  "fields": {
+    "code": "2059",
+    "name": "SOP 59",
+    "team_leader": null,
+    "team_leader_assistant": 20,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 60,
+  "fields": {
+    "code": "2060",
+    "name": "SOP 60",
+    "team_leader": null,
+    "team_leader_assistant": 20,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 61,
+  "fields": {
+    "code": "2061",
+    "name": "SOP 61",
+    "team_leader": null,
+    "team_leader_assistant": 21,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 62,
+  "fields": {
+    "code": "2062",
+    "name": "SOP 62",
+    "team_leader": null,
+    "team_leader_assistant": 21,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 63,
+  "fields": {
+    "code": "2063",
+    "name": "SOP 63",
+    "team_leader": null,
+    "team_leader_assistant": 21,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 64,
+  "fields": {
+    "code": "2064",
+    "name": "SOP 64",
+    "team_leader": null,
+    "team_leader_assistant": 22,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 65,
+  "fields": {
+    "code": "2065",
+    "name": "SOP 65",
+    "team_leader": null,
+    "team_leader_assistant": 22,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 66,
+  "fields": {
+    "code": "2066",
+    "name": "SOP 66",
+    "team_leader": null,
+    "team_leader_assistant": 22,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 67,
+  "fields": {
+    "code": "2067",
+    "name": "SOP 67",
+    "team_leader": null,
+    "team_leader_assistant": 23,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 68,
+  "fields": {
+    "code": "2068",
+    "name": "SOP 68",
+    "team_leader": null,
+    "team_leader_assistant": 23,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 69,
+  "fields": {
+    "code": "2069",
+    "name": "SOP 69",
+    "team_leader": null,
+    "team_leader_assistant": 23,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 70,
+  "fields": {
+    "code": "2070",
+    "name": "SOP 70",
+    "team_leader": null,
+    "team_leader_assistant": 24,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 71,
+  "fields": {
+    "code": "2071",
+    "name": "SOP 71",
+    "team_leader": null,
+    "team_leader_assistant": 24,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 72,
+  "fields": {
+    "code": "2072",
+    "name": "SOP 72",
+    "team_leader": null,
+    "team_leader_assistant": 24,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 73,
+  "fields": {
+    "code": "2073",
+    "name": "SOP 73",
+    "team_leader": null,
+    "team_leader_assistant": 25,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 74,
+  "fields": {
+    "code": "2074",
+    "name": "SOP 74",
+    "team_leader": null,
+    "team_leader_assistant": 25,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 75,
+  "fields": {
+    "code": "2075",
+    "name": "SOP 75",
+    "team_leader": null,
+    "team_leader_assistant": 25,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 76,
+  "fields": {
+    "code": "2076",
+    "name": "SOP 76",
+    "team_leader": null,
+    "team_leader_assistant": 26,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 77,
+  "fields": {
+    "code": "2077",
+    "name": "SOP 77",
+    "team_leader": null,
+    "team_leader_assistant": 26,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 78,
+  "fields": {
+    "code": "2078",
+    "name": "SOP 78",
+    "team_leader": null,
+    "team_leader_assistant": 26,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 79,
+  "fields": {
+    "code": "2079",
+    "name": "SOP 79",
+    "team_leader": null,
+    "team_leader_assistant": 27,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 80,
+  "fields": {
+    "code": "2080",
+    "name": "SOP 80",
+    "team_leader": null,
+    "team_leader_assistant": 27,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 81,
+  "fields": {
+    "code": "2081",
+    "name": "SOP 81",
+    "team_leader": null,
+    "team_leader_assistant": 27,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 82,
+  "fields": {
+    "code": "2082",
+    "name": "SOP 82",
+    "team_leader": null,
+    "team_leader_assistant": 28,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 83,
+  "fields": {
+    "code": "2083",
+    "name": "SOP 83",
+    "team_leader": null,
+    "team_leader_assistant": 28,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 84,
+  "fields": {
+    "code": "2084",
+    "name": "SOP 84",
+    "team_leader": null,
+    "team_leader_assistant": 28,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 85,
+  "fields": {
+    "code": "2085",
+    "name": "SOP 85",
+    "team_leader": null,
+    "team_leader_assistant": 29,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 86,
+  "fields": {
+    "code": "2086",
+    "name": "SOP 86",
+    "team_leader": null,
+    "team_leader_assistant": 29,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 87,
+  "fields": {
+    "code": "2087",
+    "name": "SOP 87",
+    "team_leader": null,
+    "team_leader_assistant": 29,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 88,
+  "fields": {
+    "code": "2088",
+    "name": "SOP 88",
+    "team_leader": null,
+    "team_leader_assistant": 30,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 89,
+  "fields": {
+    "code": "2089",
+    "name": "SOP 89",
+    "team_leader": null,
+    "team_leader_assistant": 30,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 90,
+  "fields": {
+    "code": "2090",
+    "name": "SOP 90",
+    "team_leader": null,
+    "team_leader_assistant": 31,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 91,
+  "fields": {
+    "code": "2091",
+    "name": "SOP 91",
+    "team_leader": null,
+    "team_leader_assistant": 31,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 92,
+  "fields": {
+    "code": "2092",
+    "name": "SOP 92",
+    "team_leader": null,
+    "team_leader_assistant": 31,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 93,
+  "fields": {
+    "code": "2093",
+    "name": "SOP 93",
+    "team_leader": null,
+    "team_leader_assistant": 32,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 94,
+  "fields": {
+    "code": "2094",
+    "name": "SOP 94",
+    "team_leader": null,
+    "team_leader_assistant": 32,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 95,
+  "fields": {
+    "code": "2095",
+    "name": "SOP 95",
+    "team_leader": null,
+    "team_leader_assistant": 32,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 96,
+  "fields": {
+    "code": "2096",
+    "name": "SOP 96",
+    "team_leader": null,
+    "team_leader_assistant": 33,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 97,
+  "fields": {
+    "code": "2097",
+    "name": "SOP 97",
+    "team_leader": null,
+    "team_leader_assistant": 33,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 98,
+  "fields": {
+    "code": "2098",
+    "name": "SOP 98",
+    "team_leader": null,
+    "team_leader_assistant": 33,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 99,
+  "fields": {
+    "code": "2099",
+    "name": "SOP 99",
+    "team_leader": null,
+    "team_leader_assistant": 34,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 100,
+  "fields": {
+    "code": "2100",
+    "name": "SOP 100",
+    "team_leader": null,
+    "team_leader_assistant": 34,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 101,
+  "fields": {
+    "code": "2101",
+    "name": "SOP 101",
+    "team_leader": null,
+    "team_leader_assistant": 34,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 102,
+  "fields": {
+    "code": "2102",
+    "name": "SOP 102",
+    "team_leader": null,
+    "team_leader_assistant": 35,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 103,
+  "fields": {
+    "code": "2103",
+    "name": "SOP 103",
+    "team_leader": null,
+    "team_leader_assistant": 35,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 104,
+  "fields": {
+    "code": "2104",
+    "name": "SOP 104",
+    "team_leader": null,
+    "team_leader_assistant": 35,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 105,
+  "fields": {
+    "code": "2105",
+    "name": "SOP 105",
+    "team_leader": null,
+    "team_leader_assistant": 36,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 106,
+  "fields": {
+    "code": "2106",
+    "name": "SOP 106",
+    "team_leader": null,
+    "team_leader_assistant": 36,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 107,
+  "fields": {
+    "code": "2107",
+    "name": "SOP 107",
+    "team_leader": null,
+    "team_leader_assistant": 36,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 108,
+  "fields": {
+    "code": "2108",
+    "name": "SOP 108",
+    "team_leader": null,
+    "team_leader_assistant": 37,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 109,
+  "fields": {
+    "code": "2109",
+    "name": "SOP 109",
+    "team_leader": null,
+    "team_leader_assistant": 37,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 110,
+  "fields": {
+    "code": "2110",
+    "name": "SOP 110",
+    "team_leader": null,
+    "team_leader_assistant": 37,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 111,
+  "fields": {
+    "code": "2111",
+    "name": "SOP 111",
+    "team_leader": null,
+    "team_leader_assistant": 38,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 112,
+  "fields": {
+    "code": "2112",
+    "name": "SOP 112",
+    "team_leader": null,
+    "team_leader_assistant": 38,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 113,
+  "fields": {
+    "code": "2113",
+    "name": "SOP 113",
+    "team_leader": null,
+    "team_leader_assistant": 38,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 114,
+  "fields": {
+    "code": "2114",
+    "name": "SOP 114",
+    "team_leader": null,
+    "team_leader_assistant": 39,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 115,
+  "fields": {
+    "code": "2115",
+    "name": "SOP 115",
+    "team_leader": null,
+    "team_leader_assistant": 39,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 116,
+  "fields": {
+    "code": "2116",
+    "name": "SOP 116",
+    "team_leader": null,
+    "team_leader_assistant": 39,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 117,
+  "fields": {
+    "code": "2117",
+    "name": "SOP 117",
+    "team_leader": null,
+    "team_leader_assistant": 40,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 118,
+  "fields": {
+    "code": "2118",
+    "name": "SOP 118",
+    "team_leader": null,
+    "team_leader_assistant": 40,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 119,
+  "fields": {
+    "code": "2119",
+    "name": "SOP 119",
+    "team_leader": null,
+    "team_leader_assistant": 40,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 120,
+  "fields": {
+    "code": "2120",
+    "name": "SOP 120",
+    "team_leader": null,
+    "team_leader_assistant": 41,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 121,
+  "fields": {
+    "code": "2121",
+    "name": "SOP 121",
+    "team_leader": null,
+    "team_leader_assistant": 41,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 122,
+  "fields": {
+    "code": "2122",
+    "name": "SOP 122",
+    "team_leader": null,
+    "team_leader_assistant": 41,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 123,
+  "fields": {
+    "code": "2123",
+    "name": "SOP 123",
+    "team_leader": null,
+    "team_leader_assistant": 42,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 124,
+  "fields": {
+    "code": "2124",
+    "name": "SOP 124",
+    "team_leader": null,
+    "team_leader_assistant": 42,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 125,
+  "fields": {
+    "code": "2125",
+    "name": "SOP 125",
+    "team_leader": null,
+    "team_leader_assistant": 42,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 126,
+  "fields": {
+    "code": "2126",
+    "name": "SOP 126",
+    "team_leader": null,
+    "team_leader_assistant": 43,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 127,
+  "fields": {
+    "code": "2127",
+    "name": "SOP 127",
+    "team_leader": null,
+    "team_leader_assistant": 43,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 128,
+  "fields": {
+    "code": "2128",
+    "name": "SOP 128",
+    "team_leader": null,
+    "team_leader_assistant": 43,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 129,
+  "fields": {
+    "code": "2129",
+    "name": "SOP 129",
+    "team_leader": null,
+    "team_leader_assistant": 44,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 130,
+  "fields": {
+    "code": "2130",
+    "name": "SOP 130",
+    "team_leader": null,
+    "team_leader_assistant": 44,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 131,
+  "fields": {
+    "code": "2131",
+    "name": "SOP 131",
+    "team_leader": null,
+    "team_leader_assistant": 44,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 132,
+  "fields": {
+    "code": "2132",
+    "name": "SOP 132",
+    "team_leader": null,
+    "team_leader_assistant": 45,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 133,
+  "fields": {
+    "code": "2133",
+    "name": "SOP 133",
+    "team_leader": null,
+    "team_leader_assistant": 45,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 134,
+  "fields": {
+    "code": "2134",
+    "name": "SOP 134",
+    "team_leader": null,
+    "team_leader_assistant": 45,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 135,
+  "fields": {
+    "code": "2135",
+    "name": "SOP 135",
+    "team_leader": null,
+    "team_leader_assistant": 46,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 136,
+  "fields": {
+    "code": "2136",
+    "name": "SOP 136",
+    "team_leader": null,
+    "team_leader_assistant": 46,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 137,
+  "fields": {
+    "code": "2137",
+    "name": "SOP 137",
+    "team_leader": null,
+    "team_leader_assistant": 46,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 138,
+  "fields": {
+    "code": "2138",
+    "name": "SOP 138",
+    "team_leader": null,
+    "team_leader_assistant": 47,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 139,
+  "fields": {
+    "code": "2139",
+    "name": "SOP 139",
+    "team_leader": null,
+    "team_leader_assistant": 47,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 140,
+  "fields": {
+    "code": "2140",
+    "name": "SOP 140",
+    "team_leader": null,
+    "team_leader_assistant": 47,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 141,
+  "fields": {
+    "code": "2141",
+    "name": "SOP 141",
+    "team_leader": null,
+    "team_leader_assistant": 48,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 142,
+  "fields": {
+    "code": "2142",
+    "name": "SOP 142",
+    "team_leader": null,
+    "team_leader_assistant": 48,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 143,
+  "fields": {
+    "code": "2143",
+    "name": "SOP 143",
+    "team_leader": null,
+    "team_leader_assistant": 48,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 144,
+  "fields": {
+    "code": "2144",
+    "name": "SOP 144",
+    "team_leader": null,
+    "team_leader_assistant": 49,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 145,
+  "fields": {
+    "code": "2145",
+    "name": "SOP 145",
+    "team_leader": null,
+    "team_leader_assistant": 49,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 146,
+  "fields": {
+    "code": "2146",
+    "name": "SOP 146",
+    "team_leader": null,
+    "team_leader_assistant": 49,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 147,
+  "fields": {
+    "code": "2147",
+    "name": "SOP 147",
+    "team_leader": null,
+    "team_leader_assistant": 50,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 148,
+  "fields": {
+    "code": "2148",
+    "name": "SOP 148",
+    "team_leader": null,
+    "team_leader_assistant": 50,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 149,
+  "fields": {
+    "code": "2149",
+    "name": "SOP 149",
+    "team_leader": null,
+    "team_leader_assistant": 50,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 150,
+  "fields": {
+    "code": "2150",
+    "name": "SOP 150",
+    "team_leader": null,
+    "team_leader_assistant": 51,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 151,
+  "fields": {
+    "code": "2151",
+    "name": "SOP 151",
+    "team_leader": null,
+    "team_leader_assistant": 51,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 152,
+  "fields": {
+    "code": "2152",
+    "name": "SOP 152",
+    "team_leader": null,
+    "team_leader_assistant": 51,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 153,
+  "fields": {
+    "code": "2153",
+    "name": "SOP 153",
+    "team_leader": null,
+    "team_leader_assistant": 52,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 154,
+  "fields": {
+    "code": "2154",
+    "name": "SOP 154",
+    "team_leader": null,
+    "team_leader_assistant": 52,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 155,
+  "fields": {
+    "code": "2155",
+    "name": "SOP 155",
+    "team_leader": null,
+    "team_leader_assistant": 52,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 156,
+  "fields": {
+    "code": "2156",
+    "name": "SOP 156",
+    "team_leader": null,
+    "team_leader_assistant": 53,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 157,
+  "fields": {
+    "code": "2157",
+    "name": "SOP 157",
+    "team_leader": null,
+    "team_leader_assistant": 53,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 158,
+  "fields": {
+    "code": "2158",
+    "name": "SOP 158",
+    "team_leader": null,
+    "team_leader_assistant": 53,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 159,
+  "fields": {
+    "code": "2159",
+    "name": "SOP 159",
+    "team_leader": null,
+    "team_leader_assistant": 54,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 160,
+  "fields": {
+    "code": "2160",
+    "name": "SOP 160",
+    "team_leader": null,
+    "team_leader_assistant": 54,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 161,
+  "fields": {
+    "code": "2161",
+    "name": "SOP 161",
+    "team_leader": null,
+    "team_leader_assistant": 54,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 162,
+  "fields": {
+    "code": "2162",
+    "name": "SOP 162",
+    "team_leader": null,
+    "team_leader_assistant": 55,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 163,
+  "fields": {
+    "code": "2163",
+    "name": "SOP 163",
+    "team_leader": null,
+    "team_leader_assistant": 55,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 164,
+  "fields": {
+    "code": "2164",
+    "name": "SOP 164",
+    "team_leader": null,
+    "team_leader_assistant": 55,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 165,
+  "fields": {
+    "code": "2165",
+    "name": "SOP 165",
+    "team_leader": null,
+    "team_leader_assistant": 56,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 166,
+  "fields": {
+    "code": "2166",
+    "name": "SOP 166",
+    "team_leader": null,
+    "team_leader_assistant": 56,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 167,
+  "fields": {
+    "code": "2167",
+    "name": "SOP 167",
+    "team_leader": null,
+    "team_leader_assistant": 57,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 168,
+  "fields": {
+    "code": "2168",
+    "name": "SOP 168",
+    "team_leader": null,
+    "team_leader_assistant": 57,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 169,
+  "fields": {
+    "code": "2169",
+    "name": "SOP 169",
+    "team_leader": null,
+    "team_leader_assistant": 57,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 170,
+  "fields": {
+    "code": "2170",
+    "name": "SOP 170",
+    "team_leader": null,
+    "team_leader_assistant": 58,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 171,
+  "fields": {
+    "code": "2171",
+    "name": "SOP 171",
+    "team_leader": null,
+    "team_leader_assistant": 58,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 172,
+  "fields": {
+    "code": "2172",
+    "name": "SOP 172",
+    "team_leader": null,
+    "team_leader_assistant": 58,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 173,
+  "fields": {
+    "code": "2173",
+    "name": "SOP 173",
+    "team_leader": null,
+    "team_leader_assistant": 59,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 174,
+  "fields": {
+    "code": "2174",
+    "name": "SOP 174",
+    "team_leader": null,
+    "team_leader_assistant": 59,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 175,
+  "fields": {
+    "code": "2175",
+    "name": "SOP 175",
+    "team_leader": null,
+    "team_leader_assistant": 59,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 176,
+  "fields": {
+    "code": "2176",
+    "name": "SOP 176",
+    "team_leader": null,
+    "team_leader_assistant": 60,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 177,
+  "fields": {
+    "code": "2177",
+    "name": "SOP 177",
+    "team_leader": null,
+    "team_leader_assistant": 60,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 178,
+  "fields": {
+    "code": "2178",
+    "name": "SOP 178",
+    "team_leader": null,
+    "team_leader_assistant": 60,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 179,
+  "fields": {
+    "code": "2179",
+    "name": "SOP 179",
+    "team_leader": null,
+    "team_leader_assistant": 61,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 180,
+  "fields": {
+    "code": "2180",
+    "name": "SOP 180",
+    "team_leader": null,
+    "team_leader_assistant": 61,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 181,
+  "fields": {
+    "code": "2181",
+    "name": "SOP 181",
+    "team_leader": null,
+    "team_leader_assistant": 61,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 182,
+  "fields": {
+    "code": "2182",
+    "name": "SOP 182",
+    "team_leader": null,
+    "team_leader_assistant": 62,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 183,
+  "fields": {
+    "code": "2183",
+    "name": "SOP 183",
+    "team_leader": null,
+    "team_leader_assistant": 62,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 184,
+  "fields": {
+    "code": "2184",
+    "name": "SOP 184",
+    "team_leader": null,
+    "team_leader_assistant": 62,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 185,
+  "fields": {
+    "code": "2185",
+    "name": "SOP 185",
+    "team_leader": null,
+    "team_leader_assistant": 63,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 186,
+  "fields": {
+    "code": "2186",
+    "name": "SOP 186",
+    "team_leader": null,
+    "team_leader_assistant": 63,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 187,
+  "fields": {
+    "code": "2187",
+    "name": "SOP 187",
+    "team_leader": null,
+    "team_leader_assistant": 63,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 188,
+  "fields": {
+    "code": "2188",
+    "name": "SOP 188",
+    "team_leader": null,
+    "team_leader_assistant": 64,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 189,
+  "fields": {
+    "code": "2189",
+    "name": "SOP 189",
+    "team_leader": null,
+    "team_leader_assistant": 64,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 190,
+  "fields": {
+    "code": "2190",
+    "name": "SOP 190",
+    "team_leader": null,
+    "team_leader_assistant": 64,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 191,
+  "fields": {
+    "code": "2191",
+    "name": "SOP 191",
+    "team_leader": null,
+    "team_leader_assistant": 65,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 192,
+  "fields": {
+    "code": "2192",
+    "name": "SOP 192",
+    "team_leader": null,
+    "team_leader_assistant": 65,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 193,
+  "fields": {
+    "code": "2193",
+    "name": "SOP 193",
+    "team_leader": null,
+    "team_leader_assistant": 65,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 194,
+  "fields": {
+    "code": "2194",
+    "name": "SOP 194",
+    "team_leader": null,
+    "team_leader_assistant": 66,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 195,
+  "fields": {
+    "code": "2195",
+    "name": "SOP 195",
+    "team_leader": null,
+    "team_leader_assistant": 66,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 196,
+  "fields": {
+    "code": "2196",
+    "name": "SOP 196",
+    "team_leader": null,
+    "team_leader_assistant": 66,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 197,
+  "fields": {
+    "code": "2197",
+    "name": "SOP 197",
+    "team_leader": null,
+    "team_leader_assistant": 67,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 198,
+  "fields": {
+    "code": "2198",
+    "name": "SOP 198",
+    "team_leader": null,
+    "team_leader_assistant": 67,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 199,
+  "fields": {
+    "code": "2199",
+    "name": "SOP 199",
+    "team_leader": null,
+    "team_leader_assistant": 67,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 200,
+  "fields": {
+    "code": "2200",
+    "name": "SOP 200",
+    "team_leader": null,
+    "team_leader_assistant": 68,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 201,
+  "fields": {
+    "code": "2201",
+    "name": "SOP 201",
+    "team_leader": null,
+    "team_leader_assistant": 68,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 202,
+  "fields": {
+    "code": "2202",
+    "name": "SOP 202",
+    "team_leader": null,
+    "team_leader_assistant": 68,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 203,
+  "fields": {
+    "code": "2203",
+    "name": "SOP 203",
+    "team_leader": null,
+    "team_leader_assistant": 69,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 204,
+  "fields": {
+    "code": "2204",
+    "name": "SOP 204",
+    "team_leader": null,
+    "team_leader_assistant": 69,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 205,
+  "fields": {
+    "code": "2205",
+    "name": "SOP 205",
+    "team_leader": null,
+    "team_leader_assistant": 69,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 206,
+  "fields": {
+    "code": "2206",
+    "name": "SOP 206",
+    "team_leader": null,
+    "team_leader_assistant": 70,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 207,
+  "fields": {
+    "code": "2207",
+    "name": "SOP 207",
+    "team_leader": null,
+    "team_leader_assistant": 70,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 208,
+  "fields": {
+    "code": "2208",
+    "name": "SOP 208",
+    "team_leader": null,
+    "team_leader_assistant": 70,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 209,
+  "fields": {
+    "code": "2209",
+    "name": "SOP 209",
+    "team_leader": null,
+    "team_leader_assistant": 71,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 210,
+  "fields": {
+    "code": "2210",
+    "name": "SOP 210",
+    "team_leader": null,
+    "team_leader_assistant": 71,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 211,
+  "fields": {
+    "code": "2211",
+    "name": "SOP 211",
+    "team_leader": null,
+    "team_leader_assistant": 71,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 212,
+  "fields": {
+    "code": "2212",
+    "name": "SOP 212",
+    "team_leader": null,
+    "team_leader_assistant": 72,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 213,
+  "fields": {
+    "code": "2213",
+    "name": "SOP 213",
+    "team_leader": null,
+    "team_leader_assistant": 72,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 214,
+  "fields": {
+    "code": "2214",
+    "name": "SOP 214",
+    "team_leader": null,
+    "team_leader_assistant": 72,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 215,
+  "fields": {
+    "code": "2215",
+    "name": "SOP 215",
+    "team_leader": null,
+    "team_leader_assistant": 73,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 216,
+  "fields": {
+    "code": "2216",
+    "name": "SOP 216",
+    "team_leader": null,
+    "team_leader_assistant": 73,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 217,
+  "fields": {
+    "code": "2217",
+    "name": "SOP 217",
+    "team_leader": null,
+    "team_leader_assistant": 73,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 218,
+  "fields": {
+    "code": "2218",
+    "name": "SOP 218",
+    "team_leader": null,
+    "team_leader_assistant": 74,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 219,
+  "fields": {
+    "code": "2219",
+    "name": "SOP 219",
+    "team_leader": null,
+    "team_leader_assistant": 74,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 220,
+  "fields": {
+    "code": "2220",
+    "name": "SOP 220",
+    "team_leader": null,
+    "team_leader_assistant": 74,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 221,
+  "fields": {
+    "code": "2221",
+    "name": "SOP 221",
+    "team_leader": null,
+    "team_leader_assistant": 75,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 222,
+  "fields": {
+    "code": "2222",
+    "name": "SOP 222",
+    "team_leader": null,
+    "team_leader_assistant": 75,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 223,
+  "fields": {
+    "code": "2223",
+    "name": "SOP 223",
+    "team_leader": null,
+    "team_leader_assistant": 75,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 224,
+  "fields": {
+    "code": "2224",
+    "name": "SOP 224",
+    "team_leader": null,
+    "team_leader_assistant": 76,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 225,
+  "fields": {
+    "code": "2225",
+    "name": "SOP 225",
+    "team_leader": null,
+    "team_leader_assistant": 76,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 226,
+  "fields": {
+    "code": "2226",
+    "name": "SOP 226",
+    "team_leader": null,
+    "team_leader_assistant": 76,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 227,
+  "fields": {
+    "code": "2227",
+    "name": "SOP 227",
+    "team_leader": null,
+    "team_leader_assistant": 77,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 228,
+  "fields": {
+    "code": "2228",
+    "name": "SOP 228",
+    "team_leader": null,
+    "team_leader_assistant": 77,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 229,
+  "fields": {
+    "code": "2229",
+    "name": "SOP 229",
+    "team_leader": null,
+    "team_leader_assistant": 78,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 230,
+  "fields": {
+    "code": "2230",
+    "name": "SOP 230",
+    "team_leader": null,
+    "team_leader_assistant": 78,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 231,
+  "fields": {
+    "code": "2231",
+    "name": "SOP 231",
+    "team_leader": null,
+    "team_leader_assistant": 78,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 232,
+  "fields": {
+    "code": "2232",
+    "name": "SOP 232",
+    "team_leader": null,
+    "team_leader_assistant": 79,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 233,
+  "fields": {
+    "code": "2233",
+    "name": "SOP 233",
+    "team_leader": null,
+    "team_leader_assistant": 79,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 234,
+  "fields": {
+    "code": "2234",
+    "name": "SOP 234",
+    "team_leader": null,
+    "team_leader_assistant": 79,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 235,
+  "fields": {
+    "code": "2235",
+    "name": "SOP 235",
+    "team_leader": null,
+    "team_leader_assistant": 80,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 236,
+  "fields": {
+    "code": "2236",
+    "name": "SOP 236",
+    "team_leader": null,
+    "team_leader_assistant": 80,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 237,
+  "fields": {
+    "code": "2237",
+    "name": "SOP 237",
+    "team_leader": null,
+    "team_leader_assistant": 80,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 238,
+  "fields": {
+    "code": "2238",
+    "name": "SOP 238",
+    "team_leader": null,
+    "team_leader_assistant": 81,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 239,
+  "fields": {
+    "code": "2239",
+    "name": "SOP 239",
+    "team_leader": null,
+    "team_leader_assistant": 81,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 240,
+  "fields": {
+    "code": "2240",
+    "name": "SOP 240",
+    "team_leader": null,
+    "team_leader_assistant": 81,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 241,
+  "fields": {
+    "code": "2241",
+    "name": "SOP 241",
+    "team_leader": null,
+    "team_leader_assistant": 82,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 242,
+  "fields": {
+    "code": "2242",
+    "name": "SOP 242",
+    "team_leader": null,
+    "team_leader_assistant": 82,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 243,
+  "fields": {
+    "code": "2243",
+    "name": "SOP 243",
+    "team_leader": null,
+    "team_leader_assistant": 82,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 244,
+  "fields": {
+    "code": "2244",
+    "name": "SOP 244",
+    "team_leader": null,
+    "team_leader_assistant": 83,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 245,
+  "fields": {
+    "code": "2245",
+    "name": "SOP 245",
+    "team_leader": null,
+    "team_leader_assistant": 83,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 246,
+  "fields": {
+    "code": "2246",
+    "name": "SOP 246",
+    "team_leader": null,
+    "team_leader_assistant": 83,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 247,
+  "fields": {
+    "code": "2247",
+    "name": "SOP 247",
+    "team_leader": null,
+    "team_leader_assistant": 84,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 248,
+  "fields": {
+    "code": "2248",
+    "name": "SOP 248",
+    "team_leader": null,
+    "team_leader_assistant": 84,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 249,
+  "fields": {
+    "code": "2249",
+    "name": "SOP 249",
+    "team_leader": null,
+    "team_leader_assistant": 84,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 250,
+  "fields": {
+    "code": "99208",
+    "name": "Test SOP 8",
+    "team_leader": null,
+    "team_leader_assistant": 85,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.sprayoperator",
+  "pk": 251,
+  "fields": {
+    "code": "99209",
+    "name": "Test SOP 9",
+    "team_leader": null,
+    "team_leader_assistant": 86,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+}
+]

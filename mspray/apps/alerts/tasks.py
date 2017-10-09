@@ -7,10 +7,12 @@ from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
+from mspray.celery import app
 
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
 
 
+@app.task
 def daily_spray_success_by_spray_area(district_id, spray_date):
     """
     Gets spray success rates for all the spray areas in a district, for a
@@ -30,9 +32,10 @@ def daily_spray_success_by_spray_area(district_id, spray_date):
         flow_uuid = settings.RAPIDPRO_DAILY_SPRAY_SUCCESS_FLOW_ID
         for item in data:
             payload = RapidProBaseSerializer(item, date=spray_date)
-            start_flow(flow_uuid, payload)
+            return start_flow(flow_uuid, payload)
 
 
+@app.task
 def daily_found_coverage_by_spray_area(district_id, spray_date):
     """
     Gets spray coverage data for spray areas in a district and compares this
@@ -90,9 +93,10 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
                                               date=spray_date,
                                               target_area=target_area)
 
-            start_flow(flow_uuid, payload.data)
+            return start_flow(flow_uuid, payload.data)
 
 
+@app.task
 def user_distance(spray_day_obj_id):
     """
     calculates the distance between a user and the structure and sends
@@ -105,9 +109,10 @@ def user_distance(spray_day_obj_id):
     else:
         payload = UserDistanceSerializer(spray_day_obj).data
         flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
-        start_flow(flow_uuid, payload)
+        return start_flow(flow_uuid, payload)
 
 
+@app.task
 def so_daily_form_completion(district_code, so_code, confrimdecisionform):
     """
     Gets district name and surveillance officer name and packages them into
@@ -127,9 +132,10 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
                            district_name=district.name,
                            confrimdecisionform=confrimdecisionform)
             flow_uuid = settings.RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID
-            start_flow(flow_uuid, payload)
+            return start_flow(flow_uuid, payload)
 
 
+@app.task
 def no_revisit(target_area_code, no_revisit_reason):
     """
     Retrieve target area spray data using target_area_code
@@ -154,4 +160,4 @@ def no_revisit(target_area_code, no_revisit_reason):
         payload = payload.data
         payload['no_revisit_reason'] = no_revisit_reason
         flow_uuid = settings.RAPIDPRO_NO_REVISIT_FLOW_ID
-        start_flow(flow_uuid, payload)
+        return start_flow(flow_uuid, payload)

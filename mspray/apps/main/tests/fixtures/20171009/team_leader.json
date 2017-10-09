@@ -1,0 +1,233 @@
+[
+{
+  "model": "main.teamleader",
+  "pk": 1,
+  "fields": {
+    "code": "101",
+    "name": "ChadizaSup 1",
+    "location": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 2,
+  "fields": {
+    "code": "102",
+    "name": "ChadizaSup 2",
+    "location": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 3,
+  "fields": {
+    "code": "103",
+    "name": "ChadizaSup 3",
+    "location": 1,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 4,
+  "fields": {
+    "code": "301",
+    "name": "KateteSup 1",
+    "location": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 5,
+  "fields": {
+    "code": "302",
+    "name": "KateteSup 2",
+    "location": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 6,
+  "fields": {
+    "code": "303",
+    "name": "KateteSup 3",
+    "location": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 7,
+  "fields": {
+    "code": "304",
+    "name": "KateteSup 4",
+    "location": 3,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 8,
+  "fields": {
+    "code": "201",
+    "name": "LundaziSup 1",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 9,
+  "fields": {
+    "code": "202",
+    "name": "LundaziSup2",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 10,
+  "fields": {
+    "code": "203",
+    "name": "LundaziSup 3",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 11,
+  "fields": {
+    "code": "204",
+    "name": "LundaziSup 4",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 12,
+  "fields": {
+    "code": "205",
+    "name": "LundaziSup 5",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 13,
+  "fields": {
+    "code": "206",
+    "name": "LundaziSup 6",
+    "location": 2,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 14,
+  "fields": {
+    "code": "501",
+    "name": "MambweSup 1",
+    "location": 5,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 15,
+  "fields": {
+    "code": "502",
+    "name": "MambweSup 2",
+    "location": 5,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 16,
+  "fields": {
+    "code": "401",
+    "name": "NyimbaSup 1",
+    "location": 4,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 17,
+  "fields": {
+    "code": "402",
+    "name": "NyimbaSup 2",
+    "location": 4,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 18,
+  "fields": {
+    "code": "601",
+    "name": "VubwiSup 1",
+    "location": 6,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 19,
+  "fields": {
+    "code": "602",
+    "name": "VubwiSup2",
+    "location": 6,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 20,
+  "fields": {
+    "code": "99401",
+    "name": "Test Supervisor 1",
+    "location": 1460,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+},
+{
+  "model": "main.teamleader",
+  "pk": 21,
+  "fields": {
+    "code": "99402",
+    "name": "Test Supervisor 2",
+    "location": 1460,
+    "data_quality_check": false,
+    "average_spray_quality_score": 0.0
+  }
+}
+]
