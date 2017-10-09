@@ -3,13 +3,14 @@ import operator
 from django.conf import settings
 
 from mspray.apps.warehouse.druid import get_druid_data, process_druid_data
+from mspray.apps.warehouse.druid import process_location_data
 from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
 from mspray.celery import app
-
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
+from mspray.apps.warehouse.serializers import AreaSerializer
 
 
 @app.task
@@ -161,3 +162,45 @@ def no_revisit(target_area_code, no_revisit_reason):
         payload['no_revisit_reason'] = no_revisit_reason
         flow_uuid = settings.RAPIDPRO_NO_REVISIT_FLOW_ID
         return start_flow(flow_uuid, payload)
+
+
+@app.task
+def health_facility_catchment(spray_day_obj_id):
+    """
+    Checks each submission for evidence that it represents data from a new
+    RHC.  If this is the case, then we send a summary of the 'previous RHC'
+    """
+    try:
+        spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
+    except SprayDay.DoesNotExist:
+        pass
+    else:
+        threshold = settings.HEALTH_FACILITY_CATCHMENT_THRESHOLD
+        current_rhc = spray_day_obj.location.parent
+        if current_rhc:
+            # count number of records for this RHC
+            current_rhc_records = SprayDay.objects.filter(
+                                        location__parent=current_rhc).count()
+            if current_rhc_records >= threshold:
+                # get previous RHC by looking for RHC with records from a
+                # previous date
+                previous_rhc = Location.objects.filter(
+                    level='RHC').filter(
+                    sprayday__spray_date__lt=spray_day_obj.spray_date
+                    ).order_by('-sprayday__spray_date').first()
+                if previous_rhc:
+                    # get summary data and send to flow
+                    dimensions = ['target_area_id', 'target_area_name',
+                                  'target_area_structures', 'rhc_id',
+                                  'rhc_name', 'district_id', 'district_name']
+                    filters = [['rhc_id', operator.eq, previous_rhc.id]]
+                    druid_result = get_druid_data(dimensions, filters)
+                    data, _ = process_druid_data(druid_result)
+                    payload = process_location_data(data)
+                    payload['rhc_id'] = previous_rhc.id
+                    payload['rhc_name'] = previous_rhc.name
+                    if previous_rhc.parent:
+                        payload['district_id'] = previous_rhc.parent.id
+                        payload['district_name'] = previous_rhc.parent.name
+                    flow_uuid = settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID
+                    return start_flow(flow_uuid, payload)
