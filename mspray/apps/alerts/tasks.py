@@ -10,7 +10,6 @@ from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
 from mspray.celery import app
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
-from mspray.apps.warehouse.serializers import AreaSerializer
 
 
 @app.task
@@ -184,10 +183,12 @@ def health_facility_catchment(spray_day_obj_id):
             if current_rhc_records >= threshold:
                 # get previous RHC by looking for RHC with records from a
                 # previous date
-                previous_rhc = Location.objects.filter(
-                    level='RHC').filter(
-                    sprayday__spray_date__lt=spray_day_obj.spray_date
-                    ).order_by('-sprayday__spray_date').first()
+                previous_record = SprayDay.objects.exclude(
+                    location__parent__id=current_rhc.id).filter(
+                    location__parent__parent__id=current_rhc.parent.id).filter(
+                    spray_date__lt=spray_day_obj.spray_date).order_by(
+                    '-spray_date').first()
+                previous_rhc = previous_record.parent
                 if previous_rhc:
                     # get summary data and send to flow
                     dimensions = ['target_area_id', 'target_area_name',
@@ -196,9 +197,16 @@ def health_facility_catchment(spray_day_obj_id):
                     filters = [['rhc_id', operator.eq, previous_rhc.id]]
                     druid_result = get_druid_data(dimensions, filters)
                     data, _ = process_druid_data(druid_result)
-                    payload = process_location_data(data)
+                    payload = process_location_data(previous_rhc.__dict__,
+                                                    data)
                     payload['rhc_id'] = previous_rhc.id
                     payload['rhc_name'] = previous_rhc.name
+                    payload['sprayed_coverage'] = int(
+                        payload['sprayed_coverage'])
+                    payload['sprayed_percentage'] = int(
+                        payload['sprayed_percentage'])
+                    payload['visited_percentage'] = int(
+                        payload['visited_percentage'])
                     if previous_rhc.parent:
                         payload['district_id'] = previous_rhc.parent.id
                         payload['district_name'] = previous_rhc.parent.name
