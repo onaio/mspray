@@ -3,10 +3,13 @@ from __future__ import absolute_import
 import gc
 import os
 
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db.models import Sum
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
 from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
@@ -29,6 +32,11 @@ STRUCTURE_GPS_FIELD = getattr(settings,
                               'MSPRAY_STRUCTURE_GPS_FIELD',
                               STRUCTURE_GPS_FIELD)
 FORM_ID = getattr(settings, 'ONA_FORM_PK', None)
+LOCATION_VISITED_PERCENTAGE = getattr(
+    settings, 'LOCATION_VISITED_PERCENTAGE', 20)
+LOCATION_SPRAYED_PERCENTAGE = getattr(
+    settings, 'LOCATION_SPRAYED_PERCENTAGE', 90)
+UPDATE_VISITED_MINUTES = getattr(settings, 'UPDATE_VISITED_MINUTES', 5)
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -208,6 +216,57 @@ def refresh_data_with_no_osm():
     return found
 
 
+def set_sprayed_visited(location):
+    from mspray.apps.main.serializers.target_area import get_spray_area_count
+    if location.level == 'ta':
+        sprayed = 0
+        visited = 0
+        visited_sprayed, found = get_spray_area_count(location)
+        if visited_sprayed:
+            ratio = round((visited_sprayed * 100) / found)
+            if ratio >= LOCATION_VISITED_PERCENTAGE:
+                visited = 1
+            if ratio >= LOCATION_SPRAYED_PERCENTAGE:
+                sprayed = 1
+
+        location.visited = visited
+        location.sprayed = sprayed
+        location.save()
+    else:
+        queryset = location.location_set.values('id').aggregate(
+            visited_sum=Sum('visited', distinct=True),
+            sprayed_sum=Sum('sprayed', distinct=True)
+        )
+        location.visited = queryset.get('visited_sum') or 0
+        location.sprayed = queryset.get('sprayed_sum') or 0
+        location.save()
+
+
+@app.task
+def update_sprayed_visited(time_within=UPDATE_VISITED_MINUTES):
+    """
+    Sets 'sprayed' and 'visited' values for locations on submissions within
+    UPDATE_VISITED_MINUTES which defaults to every 5 minutes.
+    """
+    def _set_sprayed_visited(key):
+        for loc_id in submissions.values_list(key, flat=True).distinct():
+            location = Location.objects.get(pk=loc_id)
+            set_sprayed_visited(location)
+
+    time_since = timezone.now() - timedelta(minutes=time_within + 1)
+    submissions = SprayDay.objects.filter(created_on__gte=time_since)\
+        .exclude(location__isnull=True)
+
+    # spray areas
+    _set_sprayed_visited('location')
+
+    # RHC
+    _set_sprayed_visited('location__parent')
+
+    # District
+    _set_sprayed_visited('location__parent__parent')
+
+
 @app.task
 def set_district_sprayed_visited():
     from mspray.apps.main.serializers.target_area import get_spray_area_count
@@ -215,19 +274,7 @@ def set_district_sprayed_visited():
 
     qs = Location.objects.filter(level='ta')
     for location in qs.iterator():
-        sprayed = 0
-        visited = 0
-        visited_sprayed, found = get_spray_area_count(location)
-        if visited_sprayed:
-            ratio = round((visited_sprayed * 100) / found)
-            if ratio >= 20:
-                visited = 1
-            if ratio >= 85:
-                sprayed = 1
-
-        location.visited = visited
-        location.sprayed = sprayed
-        location.save()
+        set_sprayed_visited(location)
 
     gc.collect()
     qs = Location.objects.filter(level='RHC').values('id').annotate(
@@ -241,12 +288,14 @@ def set_district_sprayed_visited():
         location.visited = l.get('visited_sum') or 0
         location.sprayed = l.get('sprayed_sum') or 0
         location.save()
-        k = count_key_if_percent(location, 'sprayed', 20)
+        k = count_key_if_percent(location, 'sprayed',
+                                 LOCATION_VISITED_PERCENTAGE)
         if k != location.visited:
             print(location, location.visited, k)
-        k = count_key_if_percent(location, 'sprayed', 85)
+        k = count_key_if_percent(location, 'sprayed',
+                                 LOCATION_SPRAYED_PERCENTAGE)
         if k != location.sprayed:
-            print(location, location.spprayed, k)
+            print(location, location.sprayed, k)
         if location.parent_id not in d:
             d[location.parent_id] = 0
         d[location.parent_id] += location.visited
@@ -264,11 +313,13 @@ def set_district_sprayed_visited():
         location.visited = l.get('visited_sum') or 0
         location.sprayed = l.get('sprayed_sum') or 0
         location.save()
-        k = count_key_if_percent(location, 'sprayed', 20)
+        k = count_key_if_percent(location, 'sprayed',
+                                 LOCATION_VISITED_PERCENTAGE)
         if k != location.visited:
             print(location.pk, location, location.visited, k,
                   location.visited - k, d.get(location.pk))
-        k = count_key_if_percent(location, 'sprayed', 85)
+        k = count_key_if_percent(location, 'sprayed',
+                                 LOCATION_SPRAYED_PERCENTAGE)
         if k != location.sprayed:
             print(location.pk, location, location.sprayed, k,
                   location.sprayedt - k, e.get(location.pk))
