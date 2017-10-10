@@ -164,7 +164,7 @@ def no_revisit(target_area_code, no_revisit_reason):
 
 
 @app.task
-def health_facility_catchment(spray_day_obj_id):
+def health_facility_catchment(spray_day_obj_id, force=False):
     """
     Checks each submission for evidence that it represents data from a new
     RHC.  If this is the case, then we send a summary of the 'previous RHC'
@@ -174,13 +174,22 @@ def health_facility_catchment(spray_day_obj_id):
     except SprayDay.DoesNotExist:
         pass
     else:
-        threshold = settings.HEALTH_FACILITY_CATCHMENT_THRESHOLD
         current_rhc = spray_day_obj.location.parent
+
         if current_rhc:
-            # count number of records for this RHC
-            current_rhc_records = SprayDay.objects.filter(
-                                        location__parent=current_rhc).count()
-            if current_rhc_records >= threshold:
+            should_continue = False
+
+            if force:
+                should_continue = True
+            else:
+                threshold = settings.HEALTH_FACILITY_CATCHMENT_THRESHOLD
+                # count number of records for this RHC
+                current_rhc_records = SprayDay.objects.filter(
+                    location__parent=current_rhc).count()
+                if current_rhc_records >= threshold:
+                    should_continue = True
+
+            if should_continue:
                 # get previous RHC by looking for RHC with records from a
                 # previous date
                 previous_record = SprayDay.objects.exclude(
@@ -188,7 +197,7 @@ def health_facility_catchment(spray_day_obj_id):
                     location__parent__parent__id=current_rhc.parent.id).filter(
                     spray_date__lt=spray_day_obj.spray_date).order_by(
                     '-spray_date').first()
-                previous_rhc = previous_record.parent
+                previous_rhc = previous_record.location.parent
                 if previous_rhc:
                     # get summary data and send to flow
                     dimensions = ['target_area_id', 'target_area_name',
@@ -196,6 +205,7 @@ def health_facility_catchment(spray_day_obj_id):
                                   'rhc_name', 'district_id', 'district_name']
                     filters = [['rhc_id', operator.eq, previous_rhc.id]]
                     druid_result = get_druid_data(dimensions, filters)
+                    import ipdb; ipdb.set_trace()
                     data, _ = process_druid_data(druid_result)
                     payload = process_location_data(previous_rhc.__dict__,
                                                     data)
