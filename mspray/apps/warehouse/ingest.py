@@ -35,7 +35,7 @@ def ingest_sprayday(path):
         settings.BASE_DIR)
     with open(schema) as f:
         schema_dict = json.load(f)
-    schema_dict['spec']['dataSchema']['dataSource'] = household_datasource
+    schema_dict['spec']['dataSchema']['dataSource'] = sprayday_datasource
     schema_dict['spec']['ioConfig']['inputSpec']['paths'] = path
     schema_json = json.dumps(schema_dict)
     return send_schema(schema_json)
