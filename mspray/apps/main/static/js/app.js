@@ -146,16 +146,9 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
         }
         var sprayed = L.mapbox.featureLayer().loadURL(url),
             sprayed_status = {}, reason_obj = {},
-            reasons = {
-            "S": "sick",
-            "L": "locked",
-            "F": "funeral",
-            "R": "refused",
-            "M": "no one home/missed",
-            "O": "other"
-        },
-        reasons_keys = ["S", "L", "F", "R", "M", "O"],
-        target_area_stats = "";
+            reasons = app.REASONS,
+            reasons_keys = Object.keys(app.REASONS),
+            target_area_stats = "";
         app.kk = [];
         sprayed.on("ready", function(){
             var geojson = sprayed.getGeoJSON();

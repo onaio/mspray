@@ -160,6 +160,8 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
         context.update({'map_menu': True})
         context.update(get_location_dict(self.object.pk))
+        context['not_sprayed_reasons'] = json.dumps(
+            settings.MSPRAY_UNSPRAYED_REASON_OTHER)
 
         return context
 

@@ -138,6 +138,7 @@
         app.visitedOther = {{ target_data.visited_other }};
         app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
         app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
+        app.REASONS = {{ not_sprayed_reasons|safe }};
 
         {% if sprayed_duplicates %}
         app.sprayedDuplicates = {{ sprayed_duplicates }};
