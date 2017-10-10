@@ -217,15 +217,20 @@ def refresh_data_with_no_osm():
 
 
 def set_sprayed_visited(location):
-    from mspray.apps.main.serializers.target_area import get_spray_area_count
+    from mspray.apps.main.serializers.target_area import get_spray_area_stats
     if location.level == 'ta':
         sprayed = 0
         visited = 0
-        visited_sprayed, found = get_spray_area_count(location)
-        if visited_sprayed:
-            ratio = round((visited_sprayed * 100) / found)
+        data, total_structures = get_spray_area_stats(location)
+        found = data.get('found')
+        visited_sprayed = data.get('sprayed')
+        if found:
+            ratio = round((found * 100) / total_structures)
             if ratio >= LOCATION_VISITED_PERCENTAGE:
                 visited = 1
+
+        if visited_sprayed:
+            ratio = round((visited_sprayed * 100) / total_structures)
             if ratio >= LOCATION_SPRAYED_PERCENTAGE:
                 sprayed = 1
 

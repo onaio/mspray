@@ -367,6 +367,18 @@ def get_spray_area_count(location, context=dict()):
     return sprayed, structures
 
 
+def get_spray_area_stats(location, context=dict()):
+    data = get_spray_data(location, context)
+    structures = (
+        location.structures +
+        (data.get('new_structures') or 0) +
+        count_duplicates(location, True) -
+        (data.get('not_sprayable') or 0)
+    )
+
+    return data, structures
+
+
 def count_key_if_percent(obj, key, percentage, context=dict()):
     def count_for(location):
         counter = 0
