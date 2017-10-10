@@ -30,6 +30,8 @@ HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
+LOCATION_SPRAYED_PERCENTAGE = getattr(
+    settings, 'LOCATION_SPRAYED_PERCENTAGE', 90)
 
 
 def cached_queryset_count(key, queryset, query=None, params=[]):
@@ -508,7 +510,7 @@ class TargetAreaMixin(object):
                 visited_sprayed = data.get('sprayed') or 0
             else:
                 visited_sprayed = count_key_if_percent(
-                    obj, 'sprayed', 85, self.context
+                    obj, 'sprayed', LOCATION_SPRAYED_PERCENTAGE, self.context
                 )
 
             return visited_sprayed
