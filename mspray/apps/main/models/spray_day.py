@@ -45,6 +45,8 @@ class SprayDay(models.Model):
     end_time = models.DateTimeField(null=True)
 
     was_sprayed = models.BooleanField(default=False)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
 
     objects = models.GeoManager()
 
