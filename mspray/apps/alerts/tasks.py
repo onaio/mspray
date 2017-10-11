@@ -133,7 +133,8 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
             pass
         else:
             payload = dict(so_name=team_leader.name,
-                           district_name=district.name)
+                           district_name=district.name,
+                           confrimdecisionform=confrimdecisionform)
             flow_uuid = settings.RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID
             return start_flow(flow_uuid, payload)
 

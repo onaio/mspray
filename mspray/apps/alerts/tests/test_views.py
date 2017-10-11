@@ -15,3 +15,7 @@ class TestViews(TestBase):
         request = self.factory.get(reverse('alerts:health_facility_catchment'))
         response = start_health_facility_catchment(request)
         self.assertEqual(response.status_code, 200)
+
+    def test_start_so_daily_form_completion(self):
+        response = self.client.get(reverse('alerts:so_daily_form_completion'))
+        self.assertEqual(response.status_code, 200)
