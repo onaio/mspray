@@ -2,11 +2,13 @@ from unittest.mock import patch
 from datetime import timedelta
 
 from django.utils import timezone
+from django.conf import settings
 
 from mspray.apps.main.tests.test_base import TestBase
-from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SprayDay, Location, TeamLeader
 from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
 from mspray.apps.alerts.tasks import health_facility_catchment_hook
+from mspray.apps.alerts.tasks import so_daily_form_completion
 from mspray.celery import app
 
 
@@ -68,3 +70,16 @@ class TestTasks(TestBase):
         record.save()
         health_facility_catchment_hook()
         self.assertTrue(mock.delay.called)
+
+    @patch('mspray.apps.alerts.tasks.start_flow')
+    def test_so_daily_form_completion(self, mock):
+        district = Location.objects.filter(level='district').first()
+        tla = TeamLeader.objects.first()
+        so_daily_form_completion(district.code, tla.code, "Yes")
+        self.assertTrue(mock.called)
+        args, kwargs = mock.call_args_list[0]
+        self.assertEqual(args[0],
+                         settings.RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID)
+        self.assertEqual(args[1]['district_name'], district.name)
+        self.assertEqual(args[1]['so_name'], tla.name)
+        self.assertEqual(args[1]['confrimdecisionform'], "Yes")
