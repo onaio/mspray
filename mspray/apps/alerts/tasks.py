@@ -97,11 +97,16 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
 
 
 @app.task
-def user_distance(spray_day_obj_id):
+def user_distance(spray_day_obj_id, rapidpro_function=None):
     """
     calculates the distance between a user and the structure and sends
     payload to RapidPro
+
+    The purpose of 'rapidpro_function' is to make user_distance testable
     """
+    if rapidpro_function is None:
+        rapidpro_function = start_flow
+
     try:
         spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
     except SprayDay.DoesNotExist:
@@ -109,7 +114,7 @@ def user_distance(spray_day_obj_id):
     else:
         payload = UserDistanceSerializer(spray_day_obj).data
         flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
-        return start_flow(flow_uuid, payload)
+        return rapidpro_function(flow_uuid, payload)
 
 
 @app.task
@@ -164,11 +169,21 @@ def no_revisit(target_area_code, no_revisit_reason):
 
 
 @app.task
-def health_facility_catchment(spray_day_obj_id, force=False):
+def health_facility_catchment(spray_day_obj_id, force=False,
+                              druid_function=None, rapidpro_function=None):
     """
     Checks each submission for evidence that it represents data from a new
     RHC.  If this is the case, then we send a summary of the 'previous RHC'
+
+    The purpose of the 'druid_function' and 'rapidpro_function' parameter is
+    to make health_facility_catchment testable
     """
+    if druid_function is None:
+        druid_function = get_druid_data
+
+    if rapidpro_function is None:
+        rapidpro_function = start_flow
+
     try:
         spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
     except SprayDay.DoesNotExist:
@@ -204,8 +219,7 @@ def health_facility_catchment(spray_day_obj_id, force=False):
                                   'target_area_structures', 'rhc_id',
                                   'rhc_name', 'district_id', 'district_name']
                     filters = [['rhc_id', operator.eq, previous_rhc.id]]
-                    druid_result = get_druid_data(dimensions, filters)
-                    import ipdb; ipdb.set_trace()
+                    druid_result = druid_function(dimensions, filters)
                     data, _ = process_druid_data(druid_result)
                     payload = process_location_data(previous_rhc.__dict__,
                                                     data)
@@ -221,4 +235,4 @@ def health_facility_catchment(spray_day_obj_id, force=False):
                         payload['district_id'] = previous_rhc.parent.id
                         payload['district_name'] = previous_rhc.parent.name
                     flow_uuid = settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID
-                    return start_flow(flow_uuid, payload)
+                    return rapidpro_function(flow_uuid, payload)
