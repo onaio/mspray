@@ -239,7 +239,7 @@ MSPRAY_UNSPRAYED_REASON_OTHER = {
     "Locked": "Locked",
     "No one home/Missed": "No one home/Missed"
 }
-
+MSPRAY_USER_LATLNG_FIELD = "osmstructure:userlatlng"
 MPSRAY_DATA_FILTER = '"sprayable_structure":"yes"'
 MSPRAY_DATA_ID_FIELD = '_id'
 MSPRAY_DATE_FIELD = 'today'

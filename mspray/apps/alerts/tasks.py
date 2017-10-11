@@ -1,6 +1,8 @@
 import operator
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
 
 from mspray.apps.warehouse.druid import get_druid_data, process_druid_data
 from mspray.apps.warehouse.druid import process_location_data
@@ -169,6 +171,24 @@ def no_revisit(target_area_code, no_revisit_reason):
 
 
 @app.task
+def health_facility_catchment_hook(task_function=None):
+    """
+    starts the health_facility_catchment task
+    """
+    # this is to make our function testable
+    if task_function is None:
+        task_function = health_facility_catchment.delay
+
+    yesterday = timezone.now() - timedelta(days=1)
+    processed_rhcs = []
+    records = SprayDay.objects.filter(created_on__gte=yesterday)
+    for record in records:
+        if record.location.parent not in processed_rhcs:
+            processed_rhcs.append(record.location.parent)
+            task_function(record.id)
+
+
+@app.task
 def health_facility_catchment(spray_day_obj_id, force=False,
                               druid_function=None, rapidpro_function=None):
     """
@@ -198,10 +218,11 @@ def health_facility_catchment(spray_day_obj_id, force=False,
                 should_continue = True
             else:
                 threshold = settings.HEALTH_FACILITY_CATCHMENT_THRESHOLD
+                upper_threshold = threshold * 2
                 # count number of records for this RHC
                 current_rhc_records = SprayDay.objects.filter(
                     location__parent=current_rhc).count()
-                if current_rhc_records >= threshold:
+                if upper_threshold >= current_rhc_records >= threshold:
                     should_continue = True
 
             if should_continue:
@@ -212,7 +233,9 @@ def health_facility_catchment(spray_day_obj_id, force=False,
                     location__parent__parent__id=current_rhc.parent.id).filter(
                     spray_date__lt=spray_day_obj.spray_date).order_by(
                     '-spray_date').first()
-                previous_rhc = previous_record.location.parent
+                previous_rhc = None
+                if previous_record:
+                    previous_rhc = previous_record.location.parent
                 if previous_rhc:
                     # get summary data and send to flow
                     dimensions = ['target_area_id', 'target_area_name',

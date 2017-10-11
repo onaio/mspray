@@ -1,8 +1,13 @@
 from unittest.mock import patch
+from datetime import timedelta
+
+from django.utils import timezone
 
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
 from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
+from mspray.apps.alerts.tasks import health_facility_catchment_hook
+from mspray.celery import app
 
 
 class TestTasks(TestBase):
@@ -35,9 +40,12 @@ class TestTasks(TestBase):
          'timestamp': '1917-09-08T00:00:00.000Z',
          'version': 'v1'}]
 
+    def setUp(self):
+        app.conf.update(CELERY_ALWAYS_EAGER=True)
+        self._load_fixtures()
+
     @patch('mspray.apps.alerts.rapidpro.start_flow', return_value=[])
     def test_user_distance(self, mock):
-        self._load_fixtures()
         sprayday = SprayDay.objects.first()
         user_distance(sprayday.id, rapidpro_function=mock)
         self.assertTrue(mock.called)
@@ -46,8 +54,19 @@ class TestTasks(TestBase):
            return_value=hf_druid_result)
     @patch('mspray.apps.alerts.rapidpro.start_flow', return_value=[])
     def test_health_facility_catchment(self, mock, mock2):
-        self._load_fixtures()
-        health_facility_catchment(69, force=True, druid_function=mock,
+        record = SprayDay.objects.filter(location__parent__id=1461).first()
+        health_facility_catchment(record.id, force=True, druid_function=mock,
                                   rapidpro_function=mock2)
         self.assertTrue(mock.called)
         self.assertTrue(mock2.called)
+
+    @patch('mspray.apps.alerts.tasks.health_facility_catchment.delay',
+           return_value=[])
+    def test_health_facility_catchment_hook(self, mock):
+        # make at least one SprayDay created on to be within last 10 hrs
+        record = SprayDay.objects.last()
+        ten_hours_ago = timezone.now() - timedelta(hours=10)
+        record.created_on = ten_hours_ago
+        record.save()
+        health_facility_catchment_hook(task_function=mock)
+        self.assertTrue(mock.called)
