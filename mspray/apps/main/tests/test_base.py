@@ -2,8 +2,14 @@ from django.test import TestCase
 from django.core.management import call_command
 from django.conf import settings
 
+from rest_framework.test import APIRequestFactory
+
 
 class TestBase(TestCase):
+
+    def setUp(self):
+        TestCase.setUp(self)
+        self.factory = APIRequestFactory()
 
     def _load_fixtures(self):
         call_command(
