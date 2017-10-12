@@ -24,7 +24,6 @@ REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
 REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
-WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
@@ -32,8 +31,6 @@ TEAM_LEADER_ASSISTANT_CODE = getattr(
     settings, 'MSPRAY_TEAM_LEADER_ASSISTANT_CODE', 'tla_code'
 )
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
-SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
-NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
 
 def calculate(numerator, denominator, percentage):
@@ -160,26 +157,23 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
 def get_totals(spraypoints, condition):
     if condition == "sprayable":
-        resultset = dict(spraypoints.annotate(c=Count('data')))
+        resultset = dict(
+            spraypoints.filter(sprayable=True).annotate(c=Count('data')))
     elif condition == "non-sprayable":
-        resultset = dict(spraypoints.extra(
-            where=['data->>%s = %s'],
-            params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]).annotate(
-                c=Count('data')))
+        resultset = dict(
+            spraypoints.filter(sprayable=False).annotate(c=Count('data')))
     elif condition == "sprayed":
-        resultset = dict(spraypoints
-                         .extra(where=['data->>%s = %s'],
-                                params=[WAS_SPRAYED_FIELD, 'yes'])
+        resultset = dict(spraypoints.filter(sprayable=True, was_sprayed=True)
                          .annotate(c=Count('data')))
     elif condition == "refused":
         resultset = dict(
-            spraypoints.extra(
+            spraypoints.filter(sprayable=True).extra(
                 where=['data->>%s = %s'],
                 params=[REASON_FIELD, REASON_REFUSED]).annotate(
                     c=Count('data')))
     elif condition == "other":
         resultset = dict(
-            spraypoints.extra(
+            spraypoints.filter(sprayable=True).extra(
                 where=["data->>%s IN ({})".format(
                     ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
                 params=[REASON_FIELD]).annotate(c=Count('data')))

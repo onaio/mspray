@@ -18,18 +18,12 @@ FUNCTION_TEMPLATE = '%(function)s(%(expressions)s AS FLOAT)'
 
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
-WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
-WAS_SPRAYED_VALUE = settings.MSPRAY_WAS_SPRAYED_VALUE
-WAS_NOT_SPRAYED_VALUE = settings.MSPRAY_WAS_NOT_SPRAYED_VALUE
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
 REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
-HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
-SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
-NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 LOCATION_SPRAYED_PERCENTAGE = getattr(
     settings, 'LOCATION_SPRAYED_PERCENTAGE', 90)
 
@@ -75,19 +69,13 @@ def get_spray_data(obj, context):
                 found=Sum(
                     Case(
                         When(
-                            data__has_key='osmstructure:way:id',
-                            data__contains={SPRAYABLE_FIELD:
-                                            NOT_SPRAYABLE_VALUE},
                             spraypoint__isnull=False,
-                            then=0
-                        ),
-                        When(
-                            spraypoint__isnull=False,
-                            data__has_key=WAS_SPRAYED_FIELD,
+                            sprayable=True,
                             then=1
                         ),
                         When(
                             spraypoint__isnull=True,
+                            sprayable=True,
                             was_sprayed=True,
                             then=1
                         ),
@@ -99,6 +87,7 @@ def get_spray_data(obj, context):
                     Case(
                         When(
                             was_sprayed=True,
+                            sprayable=True,
                             spraypoint__isnull=False,
                             then=1
                         ),
@@ -111,8 +100,7 @@ def get_spray_data(obj, context):
                         When(
                             was_sprayed=False,
                             spraypoint__isnull=False,
-                            data__contains={WAS_SPRAYED_FIELD:
-                                            WAS_NOT_SPRAYED_VALUE},
+                            sprayable=True,
                             then=1
                         ),
                         default=0,
@@ -122,9 +110,8 @@ def get_spray_data(obj, context):
                 not_sprayable=Sum(
                     Case(
                         When(
+                            sprayable=False,
                             data__has_key='osmstructure:way:id',
-                            data__contains={SPRAYABLE_FIELD:
-                                            NOT_SPRAYABLE_VALUE},
                             spraypoint__isnull=False,
                             then=1
                         ),
@@ -135,17 +122,15 @@ def get_spray_data(obj, context):
                 new_structures=Sum(
                     Case(
                         When(
-                            ~Q(data__contains={SPRAYABLE_FIELD:
-                                               NOT_SPRAYABLE_VALUE}) &
-                            Q(spraypoint__isnull=False) &
-                            Q(data__has_key='newstructure/gps'),
+                            sprayable=True,
+                            spraypoint__isnull=False,
+                            data__has_key='newstructure/gps',
                             then=1
                         ),
                         When(
-                            ~Q(data__contains={SPRAYABLE_FIELD:
-                                               NOT_SPRAYABLE_VALUE}) &
-                            Q(spraypoint__isnull=False) &
-                            Q(data__has_key='osmstructure:node:id'),
+                            sprayable=True,
+                            spraypoint__isnull=False,
+                            data__has_key='osmstructure:node:id',
                             then=1
                         ),
                         default=0,
@@ -155,6 +140,7 @@ def get_spray_data(obj, context):
                 refused=Sum(
                     Case(
                         When(
+                            sprayable=True,
                             was_sprayed=False,
                             spraypoint__isnull=False,
                             data__contains={REASON_FIELD: REASON_REFUSED},
@@ -167,12 +153,14 @@ def get_spray_data(obj, context):
                 other=Sum(
                     Case(
                         When(
+                            sprayable=True,
                             was_sprayed=False,
                             spraypoint__isnull=False,
                             data__contains={REASON_FIELD: REASON_REFUSED},
                             then=0
                         ),
                         When(
+                            sprayable=True,
                             was_sprayed=True,
                             then=0
                         ),
@@ -191,18 +179,18 @@ def get_spray_data(obj, context):
         found=Sum(
             Case(
                 When(
+                    sprayable=False,
                     data__has_key='osmstructure:way:id',
-                    data__contains={SPRAYABLE_FIELD:
-                                    NOT_SPRAYABLE_VALUE},
                     spraypoint__isnull=False,
                     then=0
                 ),
                 When(
+                    sprayable=True,
                     spraypoint__isnull=False,
-                    data__has_key=WAS_SPRAYED_FIELD,
                     then=1
                 ),
                 When(
+                    sprayable=True,
                     spraypoint__isnull=True,
                     was_sprayed=True,
                     then=1
@@ -214,6 +202,7 @@ def get_spray_data(obj, context):
         sprayed=Sum(
             Case(
                 When(
+                    sprayable=True,
                     was_sprayed=True,
                     then=1
                 ),
@@ -224,9 +213,9 @@ def get_spray_data(obj, context):
         not_sprayed=Sum(
             Case(
                 When(
+                    sprayable=True,
                     spraypoint__isnull=False,
                     was_sprayed=False,
-                    data__contains={WAS_SPRAYED_FIELD: WAS_NOT_SPRAYED_VALUE},
                     then=1
                 ),
                 default=0,
@@ -236,9 +225,8 @@ def get_spray_data(obj, context):
         not_sprayable=Sum(
             Case(
                 When(
+                    sprayable=False,
                     data__has_key='osmstructure:way:id',
-                    data__contains={SPRAYABLE_FIELD:
-                                    NOT_SPRAYABLE_VALUE},
                     spraypoint__isnull=False,
                     then=1
                 ),
@@ -249,22 +237,21 @@ def get_spray_data(obj, context):
         new_structures=Sum(
             Case(
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
-                    # spraypoint__isnull=False,
-                    Q(data__has_key='newstructure/gps'),
+                    sprayable=True,
+                    data__has_key='newstructure/gps',
                     then=1
                 ),
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
-                    Q(spraypoint__isnull=False) &
-                    Q(data__has_key='osmstructure:node:id'),
+                    sprayable=True,
+                    spraypoint__isnull=False,
+                    data__has_key='osmstructure:node:id',
                     then=1
                 ),
                 When(
-                    ~Q(data__contains={SPRAYABLE_FIELD: NOT_SPRAYABLE_VALUE}) &
-                    Q(spraypoint__isnull=True) &
-                    Q(was_sprayed=True) &
-                    Q(data__has_key='osmstructure:node:id'),
+                    sprayable=True,
+                    spraypoint__isnull=True,
+                    was_sprayed=True,
+                    data__has_key='osmstructure:node:id',
                     then=1
                 ),
                 default=0,
@@ -274,6 +261,7 @@ def get_spray_data(obj, context):
         refused=Sum(
             Case(
                 When(
+                    sprayable=True,
                     spraypoint__isnull=False,
                     was_sprayed=False,
                     data__contains={REASON_FIELD: REASON_REFUSED},
@@ -286,12 +274,14 @@ def get_spray_data(obj, context):
         other=Sum(
             Case(
                 When(
+                    sprayable=True,
                     spraypoint__isnull=False,
                     was_sprayed=False,
                     data__contains={REASON_FIELD: REASON_REFUSED},
                     then=0
                 ),
                 When(
+                    sprayable=True,
                     spraypoint__isnull=False,
                     was_sprayed=True,
                     then=0

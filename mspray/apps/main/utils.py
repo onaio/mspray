@@ -49,8 +49,6 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
-SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
-NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
@@ -644,16 +642,9 @@ def get_ta_in_location(location):
 
 def get_sprayable_or_nonsprayable_queryset(queryset, yes_or_no):
     if HAS_SPRAYABLE_QUESTION:
-        if yes_or_no == 'yes':
-            queryset = queryset.extra(
-                where=['data->>%s != %s'],
-                params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]
-            )
-        else:
-            queryset = queryset.extra(
-                where=['data->>%s = %s'],
-                params=[SPRAYABLE_FIELD, NOT_SPRAYABLE_VALUE]
-            )
+        is_sprayable = yes_or_no == 'yes'
+
+        return queryset.filter(sprayable=is_sprayable)
 
     return queryset
 
@@ -667,10 +658,7 @@ def not_sprayable_queryset(queryset):
 
 
 def sprayed_queryset(queryset):
-    return queryset.extra(
-        where=['data->>%s = %s'],
-        params=[WAS_SPRAYED_FIELD, 'yes']
-    )
+    return queryset.filter(was_sprayed=True)
 
 
 def refused_queryset(queryset):
