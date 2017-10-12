@@ -11,10 +11,12 @@ def start_health_facility_catchment(request):
     return Response({"success": True})
 
 
-@api_view()
+@api_view(['GET', 'POST'])
 def start_so_daily_form_completion(request):
-    district_code = request.data.get("district")
-    tla_code = request.data.get("SO_name")
-    confirmdecision = request.data.get("confirmdecisionform")
-    so_daily_form_completion.delay(district_code, tla_code, confirmdecision)
+    if request.method == 'POST':
+        district_code = request.data.get("district")
+        tla_code = request.data.get("SO_name")
+        confirmdecision = request.data.get("confirmdecisionform")
+        so_daily_form_completion.delay(district_code, tla_code,
+                                       confirmdecision)
     return Response({"success": True})
