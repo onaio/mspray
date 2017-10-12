@@ -121,6 +121,7 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
     Gets district name and surveillance officer name and packages them into
     payload for RapidPro
     """
+
     try:
         district = Location.objects.get(code=district_code, level='district')
     except Location.DoesNotExist:
