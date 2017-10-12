@@ -46,11 +46,14 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'index' %}">Spray Effectiveness</a>
-                                    <a href="{% url 'sprayareas' %}"> All Spray Areas</a>
-                                    <a href="{% url 'sprayareas' %}?format=csv"> CSV: All Spray Areas</a>
-                                </li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'index' %}">Spray Effectiveness</a></li>
+                                <!-- <li role="separator" class="divider"></li> -->
+                                <li class="dropdown-header"><a href="{% url 'sprayareas' %}">All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="{% url 'sprayareas' %}?format=csv"> CSV: All Spray Areas</a></li>
+                                <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
+                                <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
                             </ul>
                         </li>
