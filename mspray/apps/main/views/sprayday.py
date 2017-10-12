@@ -1,26 +1,38 @@
+# -*- coding=utf-8 -*-
+"""
+SprayDay viewset module - viewset for IRS HH submissions.
+"""
+import django_filters
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-
-from rest_framework import filters
-from rest_framework import status
-from rest_framework import viewsets
+from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
 
-from mspray.apps.main.models import Location
-from mspray.apps.main.models import SprayPoint
-from mspray.apps.main.models.spray_day import DATA_ID_FIELD
-from mspray.apps.main.models.spray_day import DATE_FIELD
-from mspray.apps.main.models.spray_day import SprayDay
-from mspray.apps.main.serializers.sprayday import SprayDaySerializer
-from mspray.apps.main.serializers.sprayday import SprayDayNamibiaSerializer
-from mspray.apps.main.serializers.sprayday import SprayDayShapeSerializer
-from mspray.apps.main.utils import add_spray_data
-from mspray.apps.main.utils import delete_cached_target_area_keys
+from mspray.apps.main.models import Location, SprayPoint
+from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
+                                               SprayDay)
+from mspray.apps.main.serializers.sprayday import (
+    SprayDayNamibiaSerializer, SprayDaySerializer, SprayDayShapeSerializer)
+from mspray.apps.main.utils import (add_spray_data,
+                                    delete_cached_target_area_keys)
+
+SPATIAL_QUERIES = False
 
 
+class SprayDateFilter(django_filters.FilterSet):
+    """
+    Spray date filter.
+    """
+
+    class Meta:
+        model = SprayDay
+        fields = {'spray_date': ['exact', 'lte']}
+
+
+# pylint: disable=too-many-ancestors
 class SprayDayViewSet(viewsets.ModelViewSet):
     """
     List of households that have been sprayed.
@@ -34,9 +46,10 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     queryset = SprayDay.objects.filter()
     serializer_class = SprayDaySerializer
     filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
-    filter_fields = ('spray_date',)
-    ordering_fields = ('spray_date',)
-    ordering = ('spray_date',)
+    filter_fields = ('spray_date', )
+    ordering_fields = ('spray_date', )
+    ordering = ('spray_date', )
+    filter_class = SprayDateFilter
 
     def get_serializer_class(self):
         if settings.OSM_SUBMISSIONS:
@@ -52,7 +65,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if targetid:
             target = get_object_or_404(Location, pk=targetid)
-            if False:  # settings.MSPRAY_SPATIAL_QUERIES:
+            if SPATIAL_QUERIES:  # settings.MSPRAY_SPATIAL_QUERIES:
                 queryset = queryset.filter(geom__coveredby=target.geom)
             else:
                 if target.parent is None:
@@ -62,8 +75,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if getattr(settings, 'MSPRAY_UNIQUE_FIELD', None):
             queryset = queryset.filter(
-                pk__in=SprayPoint.objects.values('sprayday')
-            )
+                pk__in=SprayPoint.objects.values('sprayday'))
 
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
@@ -73,23 +85,27 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if not has_id or not spray_date:
             data = {
-                "error": _("Not a valid submission: _id - %s, date - %s"
-                           % (has_id, spray_date))
+                "error":
+                _("Not a valid submission: _id - %s, date - %s" % (has_id,
+                                                                   spray_date))
             }
             status_code = status.HTTP_400_BAD_REQUEST
         else:
             try:
                 sprayday = add_spray_data(request.data)
-            except ValidationError as e:
-                data = {"error": "%s" % e}
+            except ValidationError as error:
+                data = {"error": "%s" % error}
                 status_code = status.HTTP_400_BAD_REQUEST
-            except IntegrityError as e:
-                data = {"error": "%s" % e}
+            except IntegrityError as error:
+                data = {"error": "%s" % error}
                 status_code = status.HTTP_400_BAD_REQUEST
             else:
-                data = {"success": _("Successfully imported submission with"
-                                     " submission id %(submission_id)s."
-                                     % {'submission_id': has_id})}
+                data = {
+                    "success":
+                    _("Successfully imported submission with"
+                      " submission id %(submission_id)s." %
+                      {'submission_id': has_id})
+                }
                 status_code = status.HTTP_201_CREATED
                 delete_cached_target_area_keys(sprayday)
 
@@ -97,6 +113,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get('dates_only') == 'true':
+            # pylint: disable=attribute-defined-outside-init
             self.object_list = self.filter_queryset(self.get_queryset())
             data = self.object_list\
                 .values_list('spray_date', flat=True).distinct()

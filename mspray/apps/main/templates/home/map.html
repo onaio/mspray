@@ -147,7 +147,7 @@
         app.notSprayedDuplicatesData = {{ not_sprayed_duplicates_data|safe }};
         {% endif %}
         {% if target_data.level == 'ta' %}
-        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date={{ spray_date|date:'Y-m-d' }}";
+        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date__lte={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
         {% endif %}
     </script>

@@ -47,7 +47,8 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
                 spray_points = SprayDay.objects.exclude(geom=None)
                 spray_date = self.kwargs.get('spray_date')
                 if spray_date:
-                    spray_points = spray_points.filter(spray_date=spray_date)
+                    spray_points = spray_points.filter(
+                        spray_date__lte=spray_date)
                 spray_points = spray_points.filter(
                     location__in=tas
                 ).values('geom')

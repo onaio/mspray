@@ -62,7 +62,7 @@ def get_spray_data(obj, context):
             kwargs = {'rhc': loc}
         qs = SprayDay.objects.filter(**kwargs)
         if spray_date:
-            qs = qs.filter(spray_date=spray_date)
+            qs = qs.filter(spray_date__lte=spray_date)
 
         return qs.values('location')\
             .annotate(
@@ -173,7 +173,7 @@ def get_spray_data(obj, context):
 
     qs = loc.sprayday_set
     if spray_date:
-        qs = qs.filter(spray_date=spray_date)
+        qs = qs.filter(spray_date__lte=spray_date)
 
     return qs.aggregate(
         found=Sum(
