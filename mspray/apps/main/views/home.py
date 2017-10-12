@@ -143,12 +143,15 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 )
                 response.render()
                 context['hh_geojson'] = response.content
-                sprayed_duplicates = list(get_duplicates(loc, True))
-                not_sprayed_duplicates = list(get_duplicates(loc, False))
+                sprayed_duplicates = list(
+                    get_duplicates(loc, True, spray_date))
+                not_sprayed_duplicates = list(
+                    get_duplicates(loc, False, spray_date))
                 context['sprayed_duplicates_data'] = json.dumps(
                     sprayed_duplicates
                 )
-                context['sprayed_duplicates'] = count_duplicates(loc, True)
+                context['sprayed_duplicates'] = count_duplicates(loc, True,
+                                                                 spray_date)
                 context['not_sprayed_duplicates_data'] = json.dumps(
                     not_sprayed_duplicates
                 )

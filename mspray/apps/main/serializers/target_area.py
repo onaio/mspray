@@ -293,28 +293,35 @@ def get_spray_data(obj, context):
     )
 
 
-def get_duplicates(obj, was_sprayed):
-    def duplicates(spray_status):
-        return loc.sprayday_set.filter(
-            osmid__isnull=False, was_sprayed=spray_status
-        ).values('osmid').annotate(
-            dupes=Count('osmid')
-        ).filter(dupes__gt=1)
+def get_duplicates(obj, was_sprayed, spray_date=None):
+    """
+    Returns SprayDay queryset for structures visited more than once.
+    """
+    def _duplicates(spray_status):
+        qs = loc.sprayday_set
+        if spray_date:
+            qs = qs.filter(spray_date__lte=spray_date)
+        return qs.filter(osmid__isnull=False, was_sprayed=spray_status)\
+            .values('osmid').annotate(dupes=Count('osmid'))\
+            .filter(dupes__gt=1)
 
     loc = Location.objects.get(pk=obj.get('pk') or obj.get('location')) \
         if type(obj) == dict else obj
-    dupes = duplicates(was_sprayed)
+    dupes = _duplicates(was_sprayed)
 
     if not was_sprayed:
-        sprayed = duplicates(True).values_list('osmid', flat=True)
+        sprayed = _duplicates(True).values_list('osmid', flat=True)
         dupes = dupes.exclude(spraypoint__isnull=False)\
             .exclude(osmid__in=sprayed)
 
     return dupes
 
 
-def count_duplicates(obj, was_sprayed):
-    dupes = get_duplicates(obj, was_sprayed)
+def count_duplicates(obj, was_sprayed, spray_date=None):
+    """
+    Count duplicate structures, does not include the first time visit.
+    """
+    dupes = get_duplicates(obj, was_sprayed, spray_date)
 
     return sum([i.get('dupes') - 1 for i in dupes])
 
