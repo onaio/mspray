@@ -9,6 +9,7 @@ from mspray.apps.main.models import SprayDay, Location, TeamLeader
 from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
 from mspray.apps.alerts.tasks import health_facility_catchment_hook
 from mspray.apps.alerts.tasks import so_daily_form_completion
+from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.celery import app
 
 
@@ -48,21 +49,47 @@ class TestTasks(TestBase):
 
     @patch('mspray.apps.alerts.tasks.start_flow')
     def test_user_distance(self, mock):
+        """
+        Test that the user distance task works:
+            - assert it calls the start_flow function with the right args
+        """
         sprayday = SprayDay.objects.first()
+        user_data = UserDistanceSerializer(sprayday).data
         user_distance(sprayday.id)
         self.assertTrue(mock.called)
+        args, kwargs = mock.call_args_list[0]
+        self.assertEqual(args[0], settings.RAPIDPRO_USER_DISTANCE_FLOW_ID)
+        self.assertEqual(args[1], user_data)
 
     @patch('mspray.apps.alerts.tasks.get_druid_data',
            return_value=hf_druid_result)
     @patch('mspray.apps.alerts.tasks.start_flow')
     def test_health_facility_catchment(self, mock, mock2):
+        """
+        test that the health_facility_catchment task works:
+            - assert that it calls the get_druid_data
+            - assert that it calls start_flow with the right args
+        """
         record = SprayDay.objects.filter(location__parent__id=1461).first()
+        expected_druid_result = {'target_area_count': 1, 'rhc_id': 1462,
+                                 'visited_percentage': 100,
+                                 'sprayed_percentage': 0, 'district_id': 1460,
+                                 'rhc_name': 'Akros', 'sprayed': 0,
+                                 'district_name': 'Lusaka',
+                                 'sprayed_coverage': 0, 'visited': 1}
         health_facility_catchment(record.id, force=True)
         self.assertTrue(mock.called)
+        args, kwargs = mock.call_args_list[0]
+        self.assertEqual(args[0], settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID)
+        self.assertEqual(args[1], expected_druid_result)
         self.assertTrue(mock2.called)
 
     @patch('mspray.apps.alerts.tasks.health_facility_catchment')
     def test_health_facility_catchment_hook(self, mock):
+        """
+        test that the health_facility_catchment_hook task works:
+            - assert that it calls health_facility_catchment
+        """
         # make at least one SprayDay created on to be within last 10 hrs
         record = SprayDay.objects.last()
         ten_hours_ago = timezone.now() - timedelta(hours=10)
@@ -70,9 +97,15 @@ class TestTasks(TestBase):
         record.save()
         health_facility_catchment_hook()
         self.assertTrue(mock.delay.called)
+        args, kwargs = mock.delay.call_args_list[0]
+        self.assertEqual(args[0], record.pk)
 
     @patch('mspray.apps.alerts.tasks.start_flow')
     def test_so_daily_form_completion(self, mock):
+        """
+        Test that the so_daily_form_completion task works:
+            - assert it calls the start_flow function with the right args
+        """
         district = Location.objects.filter(level='district').first()
         tla = TeamLeader.objects.first()
         so_daily_form_completion(district.code, tla.code, "Yes")
