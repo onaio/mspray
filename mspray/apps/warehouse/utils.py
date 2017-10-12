@@ -1,15 +1,8 @@
 import operator
 
-from django.core.paginator import Paginator
 from django.conf import settings
 
 from mspray.apps.warehouse.druid import druid_simple_groupby
-
-
-def chunked_iterator(queryset, chunk_size=500):
-    paginator = Paginator(queryset, chunk_size)
-    for page in range(1, paginator.num_pages + 1):
-        yield paginator.page(page).object_list
 
 
 def get_duplicates(ta_pk=None, sprayed=True):
