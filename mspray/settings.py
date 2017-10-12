@@ -227,6 +227,10 @@ LOGGING = {
 
 MSPRAY_LOCATION_FIELD = 'location_code'
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
+MSPRAY_WAS_SPRAYED_VALUE = 'yes'
+MSPRAY_WAS_NOT_SPRAYED_VALUE = 'no'
+SPRAYABLE_FIELD = 'sprayable_structure'
+NOT_SPRAYABLE_VALUE = 'no'
 MSPRAY_SPATIAL_QUERIES = True
 MSPRAY_UNSPRAYED_REASON_FIELD = "unsprayed/reason"
 MSPRAY_UNSPRAYED_REASON_REFUSED = "Refused"
@@ -237,7 +241,7 @@ MSPRAY_UNSPRAYED_REASON_OTHER = {
     "Locked": "Locked",
     "No one home/Missed": "No one home/Missed"
 }
-
+MSPRAY_USER_LATLNG_FIELD = "osmstructure:userlatlng"
 MPSRAY_DATA_FILTER = '"sprayable_structure":"yes"'
 MSPRAY_DATA_ID_FIELD = '_id'
 MSPRAY_DATE_FIELD = 'today'
@@ -251,6 +255,7 @@ MSPRAY_TA_LEVEL = 'ta'
 MSPRAY_IRS_NUM_FIELD = 'irs_sticker_num'
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
+HEALTH_FACILITY_CATCHMENT_THRESHOLD = 10
 ONA_URI = 'https://ona.io'
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
@@ -275,3 +280,4 @@ RAPIDPRO_DAILY_FOUND_COVERAGE_FLOW_ID = ""
 RAPIDPRO_USER_DISTANCE_FLOW_ID = ""
 RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID = ""
 RAPIDPRO_NO_REVISIT_FLOW_ID = ""
+RAPIDPRO_HF_CATCHMENT_FLOW_ID = ""

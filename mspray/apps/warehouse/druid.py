@@ -176,7 +176,7 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
         dimensions => list of dimensions to group by
         filter_list => list of list of things to filter with e.g.
                         filter_list=[['target_area_id', operator.ne, 1],
-                                     ['sprayed', operator.eq, "yes"],
+                                     ['sprayable', operator.eq, "true"],
                                      ['dimension', operator, "value"]])
         filter_type => type of Druid filter to perform,
         order_by => field(s) to order the data by
@@ -190,20 +190,22 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
             'num_not_sprayable': aggregators.filtered(
                 filters.Filter(
                     type='and',
-                    fields=[filters.Dimension('sprayable') == 'no']
+                    fields=[filters.Dimension('sprayable') == 'false']
                 ),
                 aggregators.longsum('count')
             ),
             'num_not_sprayed': aggregators.filtered(
                 filters.Filter(
                     type='and',
-                    fields=[filters.Dimension('sprayable') == 'yes',
-                            filters.Dimension('sprayed') == 'no']
+                    fields=[filters.Dimension('sprayable') == 'true',
+                            filters.Dimension('sprayed') ==
+                            settings.MSPRAY_WAS_NOT_SPRAYED_VALUE]
                 ),
                 aggregators.longsum('count')
             ),
             'num_sprayed': aggregators.filtered(
-                filters.Dimension('sprayed') == 'yes',
+                filters.Dimension('sprayed') ==
+                settings.MSPRAY_WAS_SPRAYED_VALUE,
                 aggregators.longsum('count')
             ),
             'num_new': aggregators.filtered(
@@ -226,7 +228,8 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
                 filters.Filter(
                     type='and',
                     fields=[filters.Dimension('is_duplicate') == 'false',
-                            filters.Dimension('sprayed') == 'yes']
+                            filters.Dimension('sprayed') ==
+                            settings.MSPRAY_WAS_SPRAYED_VALUE]
                 ),
                 aggregators.longsum('count')
             ),
@@ -234,8 +237,9 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
                 filters.Filter(
                     type='and',
                     fields=[filters.Dimension('is_duplicate') == 'false',
-                            filters.Dimension('sprayable') == 'yes',
-                            filters.Dimension('sprayed') == 'no']
+                            filters.Dimension('sprayable') == 'true',
+                            filters.Dimension('sprayed') ==
+                            settings.MSPRAY_WAS_NOT_SPRAYED_VALUE]
                 ),
                 aggregators.longsum('count')
             ),
@@ -243,8 +247,9 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
                 filters.Filter(
                     type='and',
                     fields=[filters.Dimension('is_duplicate') == 'true',
-                            filters.Dimension('sprayable') == 'yes',
-                            filters.Dimension('sprayed') == 'yes']
+                            filters.Dimension('sprayable') == 'true',
+                            filters.Dimension('sprayed') ==
+                            settings.MSPRAY_WAS_SPRAYED_VALUE]
                 ),
                 aggregators.longsum('count')
             ),
@@ -252,7 +257,7 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
                 filters.Filter(
                     type='and',
                     fields=[filters.Dimension('is_duplicate') == 'false',
-                            filters.Dimension('sprayable') == 'no']
+                            filters.Dimension('sprayable') == 'false']
                 ),
                 aggregators.longsum('count')
             ),
@@ -261,7 +266,8 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
                     type='and',
                     fields=[filters.Dimension('is_duplicate') == 'false',
                             filters.Dimension('is_refused') == 'true',
-                            filters.Dimension('sprayed') == 'no']
+                            filters.Dimension('sprayed') ==
+                            settings.MSPRAY_WAS_NOT_SPRAYED_VALUE]
                 ),
                 aggregators.longsum('count')
             ),
@@ -310,7 +316,7 @@ def druid_simple_groupby(dimensions, filter_list=[], filter_type="and",
         dimensions => list of dimensions to group by
         filter_list => list of list of things to filter with e.g.
                         filter_list=[['target_area_id', operator.ne, 1],
-                                     ['sprayed', operator.eq, "yes"],
+                                     ['sprayable', operator.eq, "true"],
                                      ['dimension', operator, "value"]])
         filter_type => type of Druid filter to perform
     """

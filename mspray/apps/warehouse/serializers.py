@@ -227,7 +227,10 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
 
     def get_sprayable(self, obj):
         if obj:
-            return obj.data.get('sprayable_structure')
+            sprayable_field = settings.SPRAYABLE_FIELD
+            not_sprayable_value = settings.NOT_SPRAYABLE_VALUE
+            was_sprayable = obj.data.get(sprayable_field)
+            return was_sprayable != not_sprayable_value
 
     def get_is_new(self, obj):
         if obj:

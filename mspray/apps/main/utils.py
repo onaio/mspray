@@ -41,7 +41,7 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance
+from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -59,10 +59,7 @@ IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
-try:
-    REASONS.pop(REASON_REFUSED)
-except KeyError:
-    pass
+REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 
 

@@ -1,4 +1,5 @@
 from django.contrib.gis.geos import Point
+from django.conf import settings
 
 from rest_framework import serializers
 
@@ -123,17 +124,19 @@ class UserDistanceSerializer(SprayDayDruidSerializer):
                   'distance_from_structure']
 
     def get_user_latlng(self, obj):
-        if obj and obj.data.get('osmstructure:userlatlng'):
-            return obj.data.get('osmstructure:userlatlng')
+        if obj and obj.data.get(settings.MSPRAY_USER_LATLNG_FIELD):
+            return obj.data.get(settings.MSPRAY_USER_LATLNG_FIELD)
 
     def get_structure_latlng(self, obj):
         if obj and obj.geom:
             return "{},{}".format(obj.geom.coords[1], obj.geom.coords[0])
 
     def get_distance_from_structure(self, obj):
-        if obj and obj.geom and obj.data.get('osmstructure:userlatlng'):
+        if obj and obj.geom and obj.data.get(
+                settings.MSPRAY_USER_LATLNG_FIELD):
             latlong = [float(x) for x in
-                       obj.data.get('osmstructure:userlatlng').split(",")]
+                       obj.data.get(settings.MSPRAY_USER_LATLNG_FIELD
+                                    ).split(",")]
             user_location = Point(latlong[1], latlong[0])
             return int(user_location.distance(obj.geom))
 

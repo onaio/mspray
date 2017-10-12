@@ -1,14 +1,16 @@
 import operator
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
 
 from mspray.apps.warehouse.druid import get_druid_data, process_druid_data
+from mspray.apps.warehouse.druid import process_location_data
 from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
 from mspray.celery import app
-
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
 
 
@@ -102,6 +104,7 @@ def user_distance(spray_day_obj_id):
     calculates the distance between a user and the structure and sends
     payload to RapidPro
     """
+
     try:
         spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
     except SprayDay.DoesNotExist:
@@ -161,3 +164,81 @@ def no_revisit(target_area_code, no_revisit_reason):
         payload['no_revisit_reason'] = no_revisit_reason
         flow_uuid = settings.RAPIDPRO_NO_REVISIT_FLOW_ID
         return start_flow(flow_uuid, payload)
+
+
+@app.task
+def health_facility_catchment_hook():
+    """
+    starts the health_facility_catchment task
+    """
+    yesterday = timezone.now() - timedelta(days=1)
+    processed_rhcs = []
+    records = SprayDay.objects.filter(created_on__gte=yesterday)
+    for record in records:
+        if record.location.parent not in processed_rhcs:
+            processed_rhcs.append(record.location.parent)
+            health_facility_catchment.delay(record.id)
+
+
+@app.task
+def health_facility_catchment(spray_day_obj_id, force=False):
+    """
+    Checks each submission for evidence that it represents data from a new
+    RHC.  If this is the case, then we send a summary of the 'previous RHC'
+    """
+
+    try:
+        spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
+    except SprayDay.DoesNotExist:
+        pass
+    else:
+        current_rhc = spray_day_obj.location.parent
+
+        if current_rhc:
+            should_continue = False
+
+            if force:
+                should_continue = True
+            else:
+                threshold = settings.HEALTH_FACILITY_CATCHMENT_THRESHOLD
+                upper_threshold = threshold * 2
+                # count number of records for this RHC
+                current_rhc_records = SprayDay.objects.filter(
+                    location__parent=current_rhc).count()
+                if upper_threshold >= current_rhc_records >= threshold:
+                    should_continue = True
+
+            if should_continue:
+                # get previous RHC by looking for RHC with records from a
+                # previous date
+                previous_record = SprayDay.objects.exclude(
+                    location__parent__id=current_rhc.id).filter(
+                    location__parent__parent__id=current_rhc.parent.id).filter(
+                    spray_date__lt=spray_day_obj.spray_date).order_by(
+                    '-spray_date').first()
+                previous_rhc = None
+                if previous_record:
+                    previous_rhc = previous_record.location.parent
+                if previous_rhc:
+                    # get summary data and send to flow
+                    dimensions = ['target_area_id', 'target_area_name',
+                                  'target_area_structures', 'rhc_id',
+                                  'rhc_name', 'district_id', 'district_name']
+                    filters = [['rhc_id', operator.eq, previous_rhc.id]]
+                    druid_result = get_druid_data(dimensions, filters)
+                    data, _ = process_druid_data(druid_result)
+                    payload = process_location_data(previous_rhc.__dict__,
+                                                    data)
+                    payload['rhc_id'] = previous_rhc.id
+                    payload['rhc_name'] = previous_rhc.name
+                    payload['sprayed_coverage'] = int(
+                        payload['sprayed_coverage'])
+                    payload['sprayed_percentage'] = int(
+                        payload['sprayed_percentage'])
+                    payload['visited_percentage'] = int(
+                        payload['visited_percentage'])
+                    if previous_rhc.parent:
+                        payload['district_id'] = previous_rhc.parent.id
+                        payload['district_name'] = previous_rhc.parent.name
+                    flow_uuid = settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID
+                    return start_flow(flow_uuid, payload)

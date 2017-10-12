@@ -7,6 +7,7 @@ from mspray.apps.main.views import (
 from mspray.apps.main.views import home
 from mspray.apps.main.views import performance
 from mspray.apps.warehouse import urls as warehouse_urls
+from mspray.apps.alerts import urls as alerts_urls
 
 from django.conf import settings
 from django.conf.urls import include, url, static
@@ -43,6 +44,7 @@ performance_urls = [
 ]
 
 urlpatterns = [
+    url(r'^api/alerts/', include(alerts_urls, namespace='alerts')),
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
     url(r'^warehouse/', include(warehouse_urls, namespace='warehouse')),
