@@ -44,29 +44,27 @@ class TestTasks(TestBase):
         app.conf.update(CELERY_ALWAYS_EAGER=True)
         self._load_fixtures()
 
-    @patch('mspray.apps.alerts.rapidpro.start_flow', return_value=[])
+    @patch('mspray.apps.alerts.tasks.start_flow')
     def test_user_distance(self, mock):
         sprayday = SprayDay.objects.first()
-        user_distance(sprayday.id, rapidpro_function=mock)
+        user_distance(sprayday.id)
         self.assertTrue(mock.called)
 
-    @patch('mspray.apps.warehouse.druid.get_druid_data',
+    @patch('mspray.apps.alerts.tasks.get_druid_data',
            return_value=hf_druid_result)
-    @patch('mspray.apps.alerts.rapidpro.start_flow', return_value=[])
+    @patch('mspray.apps.alerts.tasks.start_flow')
     def test_health_facility_catchment(self, mock, mock2):
         record = SprayDay.objects.filter(location__parent__id=1461).first()
-        health_facility_catchment(record.id, force=True, druid_function=mock,
-                                  rapidpro_function=mock2)
+        health_facility_catchment(record.id, force=True)
         self.assertTrue(mock.called)
         self.assertTrue(mock2.called)
 
-    @patch('mspray.apps.alerts.tasks.health_facility_catchment.delay',
-           return_value=[])
+    @patch('mspray.apps.alerts.tasks.health_facility_catchment')
     def test_health_facility_catchment_hook(self, mock):
         # make at least one SprayDay created on to be within last 10 hrs
         record = SprayDay.objects.last()
         ten_hours_ago = timezone.now() - timedelta(hours=10)
         record.created_on = ten_hours_ago
         record.save()
-        health_facility_catchment_hook(task_function=mock)
-        self.assertTrue(mock.called)
+        health_facility_catchment_hook()
+        self.assertTrue(mock.delay.called)
