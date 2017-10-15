@@ -35,6 +35,5 @@ def send_request(json, url):
     headers = {
         'Content-Type': 'application/json',
     }
-    r = requests.post('{}/druid/indexer/v1/task'.format(url), headers=headers,
-                      data=json)
+    r = requests.post(url, headers=headers, data=json)
     return r.json()
