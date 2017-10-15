@@ -494,6 +494,16 @@ i.green {
 #not-sprayed-reasons{
     display: none;
 }
+
+#target-area-stats-not-sprayed dd {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#target-area-stats-not-sprayed dd.active:hover {
+    text-decoration: underline;
+}
+
 .leaflet-control-locate a {
     background-size: 310% !important;
     background-position: -3px -2px;

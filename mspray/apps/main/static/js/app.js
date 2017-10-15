@@ -169,7 +169,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
 
             // geojson.features.filter(function(k, v){ return k.properties.reason !== null}) .reduce(function(k, v){return v.properties.reason === 'R' ? k + 1: k + 0}, 0)
             if(geojson.features !== undefined && geojson.features.length > 0) {
-                app.sprayLayer = L.geoJson(geojson, {
+                app.sprayLayer = L.mapbox.featureLayer(geojson, {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
@@ -200,6 +200,27 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
 
                     }
                 }).addTo(app.map);
+
+                app.sprayLayerFilter = function(reason) {
+                    app.sprayLayer.setFilter(function(feature) {
+                        if (reason !== undefined && reason !== null) {
+                            console.log(reason, app.notSprayedReason, feature.properties.reason);
+                            if (reason === app.notSprayedReason) {
+                                return true;
+                            }
+
+                            return feature.properties.reason === reason;
+                        }
+
+                        return true;
+                    });
+
+                    if (app.notSprayedReason === reason) {
+                        app.notSprayedReason = null;
+                    } else {
+                        app.notSprayedReason = reason;
+                    }
+                };
 
                 app.map.fitBounds(app.sprayLayer.getBounds());
                 app.duplicateLayer = L.geoJson(geojson, {
@@ -254,20 +275,31 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
             $("#target-area-stats").empty().append(target_area_stats);
 
             target_area_stats = "";
+            var nSDocs = [];
             var total_of_other = 0;
+            app.checkboxes = [];
+            app.reasonsElements = [];
             $.each(reasons, function(key, value) {
-                target_area_stats += "<dt class='reason";  //  reason-" + value.replace(/ /g, "-");
+                var dt = document.createElement('dt');
+                dt.setAttribute('class', 'reason');
+                var dd = document.createElement('dd');
+                dd.appendChild(document.createTextNode(value));
                 if (reason_obj[value]){
-                    target_area_stats += "'>" + reason_obj[value] + "</dt><dd>" + value + "</dd>";
+                    dt.appendChild(document.createTextNode(reason_obj[value]));
+                    dd.addEventListener('click', function() { app.sprayLayerFilter(key); });
+                    dd.setAttribute('class', 'active')
                     if (value !== "refused") {
                         total_of_other += reason_obj[value];
                     }
                 } else {
-                    target_area_stats += "'>0</dt><dd >" + value + "</dd>";
+                    dt.appendChild(document.createTextNode(reason_obj[value]));
+                    target_area_stats += '">0</dt><dd >' + value + '</dd>';
                 }
+                nSDocs = nSDocs.concat([dt, dd]);
             });
+            app.nsdocs = nSDocs;
 
-            $("#target-area-stats-not-sprayed").empty().append(target_area_stats);
+            $("#target-area-stats-not-sprayed").empty().append(nSDocs);
             $("#not-sprayed-reasons").show();
 
             $(".perc_label").text(app.sprayCount);
