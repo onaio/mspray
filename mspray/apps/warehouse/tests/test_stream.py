@@ -13,6 +13,7 @@ from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
 class TestStream(TestBase):
 
     def setUp(self):
+        TestBase.setUp(self)
         self._load_fixtures()
 
     @patch('mspray.apps.warehouse.stream.send_request')
