@@ -1,4 +1,5 @@
 import operator
+import requests
 
 from django.conf import settings
 
@@ -28,3 +29,12 @@ def flatten(d, parent_key=''):
         except AttributeError:
             items.append(('%s%s' % (parent_key, k), v))
     return dict(items)
+
+
+def send_request(json, url):
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    r = requests.post('{}/druid/indexer/v1/task'.format(url), headers=headers,
+                      data=json)
+    return r.json()
