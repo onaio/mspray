@@ -52,8 +52,9 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
                 spray_points = spray_points.filter(
                     location__in=tas
                 ).values('geom')
-                exclude = households.filter(geom__in=spray_points)\
-                    .values_list('pk', flat=True)
+                exclude = households.filter(
+                    hh_id__in=spray_points.values('osmid'))\
+                        .values_list('pk', flat=True)
                 households = households.exclude(pk__in=exclude)
 
             serializer = self.get_serializer(households, many=True)
