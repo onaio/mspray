@@ -56,7 +56,7 @@ class TestTasks(TestBase):
         """
         sprayday = SprayDay.objects.first()
         user_data = UserDistanceSerializer(sprayday).data
-        user_distance.delay(sprayday.id)
+        user_distance(sprayday.id)
         self.assertTrue(mock.called)
         args, kwargs = mock.call_args_list[0]
         self.assertEqual(args[0], settings.RAPIDPRO_USER_DISTANCE_FLOW_ID)
@@ -78,7 +78,7 @@ class TestTasks(TestBase):
                                  'rhc_name': 'Akros', 'sprayed': 0,
                                  'district_name': 'Lusaka',
                                  'sprayed_coverage': 0, 'visited': 1}
-        health_facility_catchment.delay(record.id, force=True)
+        health_facility_catchment(record.id, force=True)
         self.assertTrue(mock.called)
         args, kwargs = mock.call_args_list[0]
         self.assertEqual(args[0], settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID)
@@ -96,7 +96,7 @@ class TestTasks(TestBase):
         ten_hours_ago = timezone.now() - timedelta(hours=10)
         record.created_on = ten_hours_ago
         record.save()
-        health_facility_catchment_hook.delay()
+        health_facility_catchment_hook()
         self.assertTrue(mock.delay.called)
         args, kwargs = mock.delay.call_args_list[0]
         self.assertEqual(args[0], record.pk)
@@ -109,7 +109,7 @@ class TestTasks(TestBase):
         """
         district = Location.objects.filter(level='district').first()
         tla = TeamLeader.objects.first()
-        so_daily_form_completion.delay(district.code, tla.code, "Yes")
+        so_daily_form_completion(district.code, tla.code, "Yes")
         self.assertTrue(mock.called)
         args, kwargs = mock.call_args_list[0]
         self.assertEqual(args[0],

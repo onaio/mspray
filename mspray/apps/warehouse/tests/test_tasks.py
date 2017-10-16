@@ -20,7 +20,7 @@ class TestTasks(TestBase):
         Test that stream_to_druid calls send_to_tranquility with the right arg
         """
         sprayday = SprayDay.objects.first()
-        stream_to_druid.delay(sprayday.id)
+        stream_to_druid(sprayday.id)
         self.assertTrue(mock2.called)
         args, kwargs = mock2.call_args_list[0]
         self.assertEqual(args[0], sprayday)
