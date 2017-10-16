@@ -6,7 +6,7 @@ from mspray.apps.warehouse.stream import send_to_tranquility
 @app.task
 def stream_to_druid(spray_day_obj_id):
     """
-    Sends a SprayDay object to tranquility for ingestion intoto Druid
+    Sends a SprayDay object to tranquility for ingestion into Druid
     """
 
     try:

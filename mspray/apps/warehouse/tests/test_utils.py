@@ -26,9 +26,6 @@ def invalid_url(*args, **kwargs):
 
 class TestUtils(TestCase):
 
-    def connection_error():
-        raise requests.exceptions.ConnectionError
-
     def test_flatten(self):
         test = {'a': 1, 'c': {'a': 2, 'b': {'x': 5, 'y': 10}}, 'd': [1, 2, 3]}
         flattened = flatten(test)
