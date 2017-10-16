@@ -41,7 +41,8 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
+from mspray.apps.alerts.tasks import user_distance
+from mspray.apps.warehouse.tasks import stream_to_druid
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -217,6 +218,8 @@ def add_spray_data(data):
 
     # user distance alert
     user_distance.delay(sprayday.id)
+    # stream to druid
+    stream_to_druid.delay(sprayday.id)
 
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)

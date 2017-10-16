@@ -1,4 +1,7 @@
 import operator
+import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from django.conf import settings
 
@@ -28,3 +31,33 @@ def flatten(d, parent_key=''):
         except AttributeError:
             items.append(('%s%s' % (parent_key, k), v))
     return dict(items)
+
+
+def requests_retry_session(retries=3, backoff_factor=0.3,
+                           status_forcelist=(500, 502, 504), session=None):
+    """
+    A wrapper around the requests module which retries failed connections
+    https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+    """
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
+
+def send_request(json, url):
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    s = requests.Session()
+    s.headers.update(headers)
+    r = requests_retry_session(session=s).post(url, data=json)
+    return r.json()

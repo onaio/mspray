@@ -10,6 +10,11 @@ from django.conf import settings
 from mspray.apps.main.models import Location
 
 
+def get_druid_broker_url():
+    return "{}:{}".format(settings.DRUID_BROKER_URI,
+                          settings.DRUID_BROKER_PORT)
+
+
 def get_target_area_totals(data):
     """
     Loops through data and calculates totals
@@ -181,7 +186,7 @@ def get_druid_data(dimensions=None, filter_list=[], filter_type="and",
         filter_type => type of Druid filter to perform,
         order_by => field(s) to order the data by
     """
-    query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
+    query = PyDruid(get_druid_broker_url(), 'druid/v2')
     params = dict(
         datasource=datasource,
         granularity='all',
@@ -320,7 +325,7 @@ def druid_simple_groupby(dimensions, filter_list=[], filter_type="and",
                                      ['dimension', operator, "value"]])
         filter_type => type of Druid filter to perform
     """
-    query = PyDruid(settings.DRUID_BROKER_URI, 'druid/v2')
+    query = PyDruid(get_druid_broker_url(), 'druid/v2')
     params = dict(
         datasource=datasource,
         granularity='all',

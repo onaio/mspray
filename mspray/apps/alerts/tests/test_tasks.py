@@ -44,6 +44,7 @@ class TestTasks(TestBase):
          'version': 'v1'}]
 
     def setUp(self):
+        TestBase.setUp(self)
         app.conf.update(CELERY_ALWAYS_EAGER=True)
         self._load_fixtures()
 
