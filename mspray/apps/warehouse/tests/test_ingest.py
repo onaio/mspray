@@ -8,7 +8,7 @@ class TestIngest(TestBase):
         TestBase.setUp(self)
 
     def test_get_druid_broker_url(self):
-        """ test that we construct the full druid broker url successfully """
+        """ test that we construct the full druid indexer url successfully """
         with self.settings(DRUID_OVERLORD_URI='http://127.1.1.1',
                            DRUID_OVERLORD_PORT=8090):
             self.assertEqual(get_druid_indexer_url(),
