@@ -10,6 +10,11 @@ sprayday_datasource = getattr(settings, "DRUID_SPRAYDAY_DATASOURCE",
                               "sprayday2016")
 
 
+def get_druid_indexer_url():
+    return "{}:{}/druid/indexer/v1/task".format(settings.DRUID_OVERLORD_URI,
+                                                settings.DRUID_OVERLORD_PORT)
+
+
 def ingest_household(path):
     schema = "{}//mspray/apps/warehouse/druid-schemas/household.json".format(
         settings.BASE_DIR)
@@ -18,8 +23,7 @@ def ingest_household(path):
     schema_dict['spec']['dataSchema']['dataSource'] = household_datasource
     schema_dict['spec']['ioConfig']['inputSpec']['paths'] = path
     schema_json = json.dumps(schema_dict)
-    return send_request(schema_json, '{}/druid/indexer/v1/task'.format(
-            settings.DRUID_OVERLORD_URI))
+    return send_request(schema_json, get_druid_indexer_url())
 
 
 def ingest_sprayday(path):
@@ -30,5 +34,4 @@ def ingest_sprayday(path):
     schema_dict['spec']['dataSchema']['dataSource'] = sprayday_datasource
     schema_dict['spec']['ioConfig']['inputSpec']['paths'] = path
     schema_json = json.dumps(schema_dict)
-    return send_request(schema_json, '{}/druid/indexer/v1/task'.format(
-            settings.DRUID_OVERLORD_URI))
+    return send_request(schema_json, get_druid_indexer_url())
