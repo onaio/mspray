@@ -15,8 +15,8 @@ from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
 from mspray.apps.main.views.target_area import TargetAreaViewSet
 from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
-from mspray.apps.main.utils import get_location_qs, get_location_dict
-from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.utils import get_location_dict, parse_spray_date
+from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.definitions import DEFINITIONS
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE

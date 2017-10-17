@@ -11,12 +11,10 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
-from django.db.models import Q, F, ExpressionWrapper, OuterRef, Subquery, Value
-from django.db.models import IntegerField, PositiveIntegerField, Count
+from django.db.models import Q, Count
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
-from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from mspray.apps.main.models.location import Location
@@ -689,42 +687,6 @@ def unique_spray_points(queryset):
         )
 
     return queryset
-
-
-def get_location_qs(qs, level=None):
-    if level == 'RHC':
-        sprays = SprayDayHealthCenterLocation.objects.filter(
-            location=OuterRef('pk'),
-            content_object__data__has_key='osmstructure:node:id'
-        ).order_by().values('location')
-        new_structure_count = sprays.annotate(c=Count('location')).values('c')
-        qs = qs.annotate(
-            num_new_structures=Coalesce(Subquery(
-                queryset=new_structure_count,
-                output_field=IntegerField()), Value(0))
-        ).annotate(
-            total_structures=ExpressionWrapper(
-                F('num_new_structures') + F('structures'),
-                output_field=IntegerField()
-            )
-        )
-    else:
-        sprays = SprayDay.objects.filter(
-            location=OuterRef('pk'),
-            data__has_key='osmstructure:node:id').order_by().values('location')
-        new_structure_count = sprays.annotate(c=Count('location')).values('c')
-        qs = qs.annotate(
-            num_new_structures=Coalesce(Subquery(
-                queryset=new_structure_count,
-                output_field=PositiveIntegerField()), Value(0))
-        ).annotate(
-            total_structures=ExpressionWrapper(
-                F('num_new_structures') + F('structures'),
-                output_field=PositiveIntegerField()
-            )
-        )
-
-    return qs
 
 
 def parse_spray_date(request):

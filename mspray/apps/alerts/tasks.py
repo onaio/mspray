@@ -10,8 +10,17 @@ from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
+from mspray.apps.alerts.emails import send_weekly_update_email
 from mspray.celery import app
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
+
+
+@app.task
+def task_send_weekly_update_email():
+    """
+    Runs send_weekly_update_email
+    """
+    send_weekly_update_email()
 
 
 @app.task
