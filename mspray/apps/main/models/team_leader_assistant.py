@@ -7,6 +7,7 @@ class TeamLeaderAssistant(models.Model):
     location = models.ForeignKey('Location', null=True)
     data_quality_check = models.BooleanField(default=False)
     average_spray_quality_score = models.FloatField(default=0.0)
+    team_leader = models.ForeignKey('TeamLeader', null=True)
 
     class Meta:
         app_label = 'main'
