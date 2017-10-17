@@ -438,3 +438,22 @@ def fetch_updated_directly_observed():
                 count += 1
 
     return count
+
+
+@app.task
+def remove_deleted_dos_records():
+    """
+    Remove directly observed records..
+    """
+    count = 0
+    dos = DirectlyObservedSprayingForm.objects.last()
+    formid = dos.data.get('_xform_id') if dos else DIRECTLY_OBSERVED_FORM_ID
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True)
+        pks = [i['_id'] for i in data]
+        deleted_submissions = DirectlyObservedSprayingForm.objects.exclude(
+            submission_id__in=pks)
+        count = deleted_submissions.count()
+        deleted_submissions.delete()
+
+    return count
