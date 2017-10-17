@@ -225,6 +225,7 @@ LOGGING = {
     }
 }
 
+MSPRAY_EMAIL = "mspray@example.com"
 MSPRAY_LOCATION_FIELD = 'location_code'
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
 MSPRAY_WAS_SPRAYED_VALUE = 'yes'
@@ -257,6 +258,7 @@ HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
 HEALTH_FACILITY_CATCHMENT_THRESHOLD = 10
 ONA_URI = 'https://ona.io'
+MSPRAY_WEEKLY_DASHBOARD_UPDATE_URL = "http://example.com"
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
 OSM_SUBMISSIONS = False

@@ -15,27 +15,6 @@ from mspray.apps.main.models import Location, SprayDay, TeamLeader
 
 
 @app.task
-def weekly_dashboard_update():
-    """
-    Goes through eahc district and if there was data collected in the last
-    week, sends an email update of the summary of activites during that week
-    """
-    dimensions = ['target_area_id', 'target_area_name',
-                  'target_area_structures', 'rhc_id', 'rhc_name',
-                  'district_id', 'district_name']
-    today = timezone.now()
-    # 8 days because we want the day just before
-    one_week_ago = today - timedelta(days=8)
-    districts = Location.objects.filter(level='district')
-    for district in districts:
-        filters = [['district_id', operator.eq, district.id],
-                   ['spray_date', operator.gt,
-                    one_week_ago.strftime('%Y-%m-%d')]]
-        druid_result = get_druid_data(dimensions, filters)
-        data, _ = process_druid_data(druid_result)
-
-
-@app.task
 def daily_spray_success_by_spray_area(district_id, spray_date):
     """
     Gets spray success rates for all the spray areas in a district, for a
