@@ -9,6 +9,7 @@ from mspray.apps.main.models import SprayDay, Location, TeamLeader
 from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
 from mspray.apps.alerts.tasks import health_facility_catchment_hook
 from mspray.apps.alerts.tasks import so_daily_form_completion
+from mspray.apps.alerts.tasks import task_send_weekly_update_email
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.celery import app
 
@@ -100,6 +101,15 @@ class TestTasks(TestBase):
         self.assertTrue(mock.delay.called)
         args, kwargs = mock.delay.call_args_list[0]
         self.assertEqual(args[0], record.pk)
+
+    @patch('mspray.apps.alerts.tasks.send_weekly_update_email')
+    def test_task_send_weekly_update_email(self, mock):
+        """
+        Test that task_send_weekly_update_email  task works and that it calls
+        send_weekly_update_email
+        """
+        task_send_weekly_update_email()
+        self.assertTrue(mock.delay.called)
 
     @patch('mspray.apps.alerts.tasks.start_flow')
     def test_so_daily_form_completion(self, mock):

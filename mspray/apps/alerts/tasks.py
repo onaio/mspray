@@ -20,7 +20,7 @@ def task_send_weekly_update_email():
     """
     Runs send_weekly_update_email
     """
-    send_weekly_update_email()
+    send_weekly_update_email.delay()
 
 
 @app.task
