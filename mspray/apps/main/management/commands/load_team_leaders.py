@@ -1,3 +1,7 @@
+# -*- coding=utf-8 -*-
+"""
+Load TeamLeaders from a CSV file.
+"""
 import codecs
 import csv
 import os
@@ -5,11 +9,13 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext as _
 
-from mspray.apps.main.models import Location
-from mspray.apps.main.models import TeamLeader
+from mspray.apps.main.models import Location, TeamLeader
 
 
 class Command(BaseCommand):
+    """
+    Load TeamLeaders from a CSV file command.
+    """
     args = '<path to team leaders csv with columns code|name>'
     help = _('Load team leaders')
 
@@ -22,11 +28,11 @@ class Command(BaseCommand):
         else:
             try:
                 path = os.path.abspath(options['csv_file'])
-            except Exception as e:
-                raise CommandError(_('Error: %(msg)s' % {"msg": e}))
+            except FileNotFoundError as error:
+                raise CommandError(_('Error: %(msg)s' % {"msg": error}))
             else:
-                with codecs.open(path, encoding='utf-8') as f:
-                    csv_reader = csv.DictReader(f)
+                with codecs.open(path, encoding='utf-8') as csv_file:
+                    csv_reader = csv.DictReader(csv_file)
                     for row in csv_reader:
                         team_leader, created = \
                             TeamLeader.objects.get_or_create(
@@ -37,7 +43,7 @@ class Command(BaseCommand):
                             print(row)
                         district = row['district'].strip()
                         if district:
-                            location = Location.objects.get(code=district,
-                                                            level='district')
+                            location = Location.objects.get(
+                                code=district, level='district')
                             team_leader.location = location
                             team_leader.save()
