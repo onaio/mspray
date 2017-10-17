@@ -6,6 +6,7 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import Location, TeamLeader
 from mspray.apps.alerts.views import start_health_facility_catchment
 from mspray.apps.alerts.views import start_so_daily_form_completion
+from mspray.apps.alerts.views import start_send_weekly_update_email
 from mspray.celery import app
 
 
@@ -23,6 +24,17 @@ class TestViews(TestBase):
         """
         request = self.factory.get(reverse('alerts:health_facility_catchment'))
         response = start_health_facility_catchment(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock.delay.called)
+
+    @patch('mspray.apps.alerts.views.task_send_weekly_update_email')
+    def test_start_send_weekly_update_email(self, mock):
+        """
+        We are testing that the start_send_weekly_update_email view is working
+        and that it calls the task_send_weekly_update_email task
+        """
+        request = self.factory.get(reverse('alerts:send_weekly_update_email'))
+        response = start_send_weekly_update_email(request)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock.delay.called)
 

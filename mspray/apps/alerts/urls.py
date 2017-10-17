@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from mspray.apps.alerts.views import start_health_facility_catchment
 from mspray.apps.alerts.views import start_so_daily_form_completion
-from mspray.apps.alerts.views import  start_send_weekly_update_email
+from mspray.apps.alerts.views import start_send_weekly_update_email
 
 urlpatterns = [
     url(r'^health-facility-catchment/$', start_health_facility_catchment,
