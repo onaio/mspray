@@ -331,35 +331,64 @@ def get_calculate_avg_dos_score(spray_operator_code):
     )
 
 
+def update_directly_observed(data, submission_id, spray_operator_code):
+    """
+    Updates an existing directly observed form.
+    """
+    dos = DirectlyObservedSprayingForm.objects.get(submission_id=submission_id)
+    dos.correct_removal = data.get('correct_removal')
+    dos.correct_mix = data.get('correct_mix')
+    dos.rinse = data.get('rinse')
+    dos.PPE = data.get('PPE')
+    dos.CFV = data.get('CFV')
+    dos.correct_covering = data.get('correct_covering')
+    dos.leak_free = data.get('leak_free')
+    dos.correct_distance = data.get('correct_distance')
+    dos.correct_speed = data.get('correct_speed')
+    dos.correct_overlap = data.get('correct_overlap')
+    dos.district = data.get('district')
+    dos.health_facility = data.get('health_facility')
+    dos.supervisor_name = data.get('supervisor_name')
+    dos.sprayop_code_name = spray_operator_code
+    dos.tl_code_name = data.get('tl_code_name')
+    dos.data = data
+    dos.spray_date = data.get('today')
+    dos.save()
+
+
 def add_directly_observed_spraying_data(data):
     spray_operator_code = data.get('sprayop_code_name')
     submission_id = data.get('_id')
     try:
-        DirectlyObservedSprayingForm.objects.create(
-            submission_id=submission_id,
-            correct_removal=data.get('correct_removal'),
-            correct_mix=data.get('correct_mix'),
-            rinse=data.get('rinse'),
-            PPE=data.get('PPE'),
-            CFV=data.get('CFV'),
-            correct_covering=data.get('correct_covering'),
-            leak_free=data.get('leak_free'),
-            correct_distance=data.get('correct_distance'),
-            correct_speed=data.get('correct_speed'),
-            correct_overlap=data.get('correct_overlap'),
-            district=data.get('district'),
-            health_facility=data.get('health_facility'),
-            supervisor_name=data.get('supervisor_name'),
-            sprayop_code_name=spray_operator_code,
-            tl_code_name=data.get('tl_code_name'),
-            data=data,
-            spray_date=data.get('today'),
-        )
-    except IntegrityError:
+        update_directly_observed(data, submission_id, spray_operator_code)
+    except DirectlyObservedSprayingForm.DoesNotExist:
         pass
     else:
-        avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
-        update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
+        try:
+            DirectlyObservedSprayingForm.objects.create(
+                submission_id=submission_id,
+                correct_removal=data.get('correct_removal'),
+                correct_mix=data.get('correct_mix'),
+                rinse=data.get('rinse'),
+                PPE=data.get('PPE'),
+                CFV=data.get('CFV'),
+                correct_covering=data.get('correct_covering'),
+                leak_free=data.get('leak_free'),
+                correct_distance=data.get('correct_distance'),
+                correct_speed=data.get('correct_speed'),
+                correct_overlap=data.get('correct_overlap'),
+                district=data.get('district'),
+                health_facility=data.get('health_facility'),
+                supervisor_name=data.get('supervisor_name'),
+                sprayop_code_name=spray_operator_code,
+                tl_code_name=data.get('tl_code_name'),
+                data=data,
+                spray_date=data.get('today'),
+            )
+        except IntegrityError:
+            pass
+    avg_dos_score = get_calculate_avg_dos_score(spray_operator_code)
+    update_average_dos_score_all_levels(spray_operator_code, avg_dos_score)
 
 
 def get_hh_submission(spray_form_id):

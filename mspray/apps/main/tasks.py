@@ -413,8 +413,27 @@ def fetch_directly_observed():
             data = fetch_form_data(formid, dataid=rec)
             if data:
                 from mspray.apps.main.utils import add_directly_observed_spraying_data  # NOQA
-                import ipdb
-                ipdb.set_trace()
+                add_directly_observed_spraying_data(data)
+                count += 1
+
+    return count
+
+
+@app.task
+def fetch_updated_directly_observed():
+    """
+    Update edited records.
+    """
+    count = 0
+    dos = DirectlyObservedSprayingForm.objects.last()
+    formid = dos.data.get('_xform_id') if dos else DIRECTLY_OBSERVED_FORM_ID
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True, edited_only=True)
+        pks = [i['_id'] for i in data]
+        for rec in pks:
+            data = fetch_form_data(formid, dataid=rec)
+            if data:
+                from mspray.apps.main.utils import add_directly_observed_spraying_data  # NOQA
                 add_directly_observed_spraying_data(data)
                 count += 1
 
