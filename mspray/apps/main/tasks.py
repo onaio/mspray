@@ -11,6 +11,7 @@ from django.db.models import Sum
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
+from mspray.apps.main.models import DirectlyObservedSprayingForm
 from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
@@ -39,6 +40,8 @@ LOCATION_VISITED_PERCENTAGE = getattr(
 LOCATION_SPRAYED_PERCENTAGE = getattr(
     settings, 'LOCATION_SPRAYED_PERCENTAGE', 90)
 UPDATE_VISITED_MINUTES = getattr(settings, 'UPDATE_VISITED_MINUTES', 5)
+DIRECTLY_OBSERVED_FORM_ID = getattr(settings, 'DIRECTLY_OBSERVED_FORM_ID',
+                                    None)
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -387,5 +390,70 @@ def remove_deleted_daily_summary_records():
             submission_id__in=pks)
         count = records.count()
         records.delete()
+
+    return count
+
+
+@app.task
+def fetch_directly_observed():
+    """
+    Update edited records.
+    """
+    count = 0
+    dos = DirectlyObservedSprayingForm.objects.last()
+    formid = dos.data.get('_xform_id') if dos else DIRECTLY_OBSERVED_FORM_ID
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True)
+        pks = [i['_id'] for i in data]
+        received = DirectlyObservedSprayingForm.objects.values_list(
+            'submission_id', flat=True)
+        new_ids = set(pks).difference(set((i for i in received)))
+
+        for rec in new_ids:
+            data = fetch_form_data(formid, dataid=rec)
+            if data:
+                from mspray.apps.main.utils import add_directly_observed_spraying_data  # NOQA
+                add_directly_observed_spraying_data(data)
+                count += 1
+
+    return count
+
+
+@app.task
+def fetch_updated_directly_observed():
+    """
+    Update edited records.
+    """
+    count = 0
+    dos = DirectlyObservedSprayingForm.objects.last()
+    formid = dos.data.get('_xform_id') if dos else DIRECTLY_OBSERVED_FORM_ID
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True, edited_only=True)
+        pks = [i['_id'] for i in data]
+        for rec in pks:
+            data = fetch_form_data(formid, dataid=rec)
+            if data:
+                from mspray.apps.main.utils import add_directly_observed_spraying_data  # NOQA
+                add_directly_observed_spraying_data(data)
+                count += 1
+
+    return count
+
+
+@app.task
+def remove_deleted_dos_records():
+    """
+    Remove directly observed records..
+    """
+    count = 0
+    dos = DirectlyObservedSprayingForm.objects.last()
+    formid = dos.data.get('_xform_id') if dos else DIRECTLY_OBSERVED_FORM_ID
+    if formid:
+        data = fetch_form_data(formid, dataids_only=True)
+        pks = [i['_id'] for i in data]
+        deleted_submissions = DirectlyObservedSprayingForm.objects.exclude(
+            submission_id__in=pks)
+        count = deleted_submissions.count()
+        deleted_submissions.delete()
 
     return count
