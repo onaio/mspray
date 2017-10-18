@@ -22,8 +22,7 @@ from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
-from mspray.apps.main.models.spray_day import SprayDay,\
-    SprayDayHealthCenterLocation
+from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -735,47 +734,3 @@ def get_location_dict(code):
 
     return data
 
-
-def get_district_summary_data():
-    """
-    Gets a queryset of Districts and serializes it
-    """
-
-    queryset = Location.objects.filter(level='district')
-    queryset = get_location_qs(queryset).extra(select={
-            "xmin": 'ST_xMin("main_location"."geom")',
-            "ymin": 'ST_yMin("main_location"."geom")',
-            "xmax": 'ST_xMax("main_location"."geom")',
-            "ymax": 'ST_yMax("main_location"."geom")'
-        }).values(
-            'pk', 'code', 'level', 'name', 'parent', 'structures',
-            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
-            'num_new_structures', 'total_structures', 'visited', 'sprayed'
-        )
-    serialized = DistrictSerializer(queryset, many=True)
-    return serialized.data
-
-
-def get_district_summary_totals(district_list):
-    """
-    Takes a serialized list of districts and returns totals of certain fields
-    """
-    fields = ['structures', 'visited_total', 'visited_sprayed',
-              'visited_not_sprayed', 'visited_refused', 'visited_other',
-              'not_visited', 'found', 'num_of_spray_areas']
-    totals = {}
-    for rec in district_list:
-        for field in fields:
-            totals[field] = rec[field] + (totals[field]
-                                          if field in totals else 0)
-    return totals
-
-
-def get_district_summary():
-    """
-    Returns a summary of spray effectiveness data for Districts
-    Does not use Druid
-    """
-    district_list = get_district_summary_data()
-    totals = get_district_summary_totals(district_list)
-    return district_list, totals

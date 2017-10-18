@@ -283,7 +283,6 @@ def update_sprayed_visited(time_within=UPDATE_VISITED_MINUTES):
 
 @app.task
 def set_district_sprayed_visited():
-    from mspray.apps.main.serializers.target_area import get_spray_area_count
     from mspray.apps.main.serializers.target_area import count_key_if_percent
 
     qs = Location.objects.filter(level='ta')
