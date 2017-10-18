@@ -1,0 +1,2 @@
+{% load i18n %}
+{% trans 'Please visit the following link to view the weekly dashboard update:' %} {{url}}

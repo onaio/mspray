@@ -10,7 +10,7 @@ from mspray.apps.main.serializers.target_area import (
     TargetAreaSerializer, GeoTargetAreaSerializer)
 from mspray.apps.main.serializers.household import HouseholdSerializer
 from mspray.apps.main.serializers.household import HouseholdBSerializer
-from mspray.apps.main.utils import get_location_qs
+from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import get_ta_in_location
 
 
@@ -54,7 +54,7 @@ class TargetAreaHouseholdsViewSet(mixins.RetrieveModelMixin,
                 ).values('geom')
                 exclude = households.filter(
                     hh_id__in=spray_points.values('osmid'))\
-                        .values_list('pk', flat=True)
+                    .values_list('pk', flat=True)
                 households = households.exclude(pk__in=exclude)
 
             serializer = self.get_serializer(households, many=True)

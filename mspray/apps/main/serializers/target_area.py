@@ -1,4 +1,4 @@
-from django.db.models import Case, Count, F, Sum, When, Q
+from django.db.models import Case, Count, F, Sum, When
 from django.db.models import IntegerField
 from django.conf import settings
 from django.core.cache import cache

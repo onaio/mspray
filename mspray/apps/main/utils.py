@@ -11,12 +11,10 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
-from django.db.models import Q, F, ExpressionWrapper, OuterRef, Subquery, Value
-from django.db.models import IntegerField, PositiveIntegerField, Count
+from django.db.models import Q, Count
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
-from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 
 from mspray.apps.main.models.location import Location
@@ -24,8 +22,7 @@ from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.models.target_area import namibia_mapping
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.household import household_mapping
-from mspray.apps.main.models.spray_day import SprayDay,\
-    SprayDayHealthCenterLocation
+from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spray_day import sprayday_mapping
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.models.spray_day import DATE_FIELD
@@ -41,8 +38,7 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance
-from mspray.apps.warehouse.tasks import stream_to_druid
+from mspray.apps.main.tasks import run_tasks_after_spray_data
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -216,17 +212,15 @@ def add_spray_data(data):
 
     sprayday.save()
 
-    # user distance alert
-    user_distance.delay(sprayday.id)
-    # stream to druid
-    stream_to_druid.delay(sprayday.id)
-
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)
 
     unique_field = HAS_UNIQUE_FIELD
     if unique_field and location:
         add_unique_data(sprayday, unique_field, location)
+
+    # run tasks after creating SprayDay obj
+    run_tasks_after_spray_data()
 
     return sprayday
 
@@ -691,42 +685,6 @@ def unique_spray_points(queryset):
     return queryset
 
 
-def get_location_qs(qs, level=None):
-    if level == 'RHC':
-        sprays = SprayDayHealthCenterLocation.objects.filter(
-            location=OuterRef('pk'),
-            content_object__data__has_key='osmstructure:node:id'
-        ).order_by().values('location')
-        new_structure_count = sprays.annotate(c=Count('location')).values('c')
-        qs = qs.annotate(
-            num_new_structures=Coalesce(Subquery(
-                queryset=new_structure_count,
-                output_field=IntegerField()), Value(0))
-        ).annotate(
-            total_structures=ExpressionWrapper(
-                F('num_new_structures') + F('structures'),
-                output_field=IntegerField()
-            )
-        )
-    else:
-        sprays = SprayDay.objects.filter(
-            location=OuterRef('pk'),
-            data__has_key='osmstructure:node:id').order_by().values('location')
-        new_structure_count = sprays.annotate(c=Count('location')).values('c')
-        qs = qs.annotate(
-            num_new_structures=Coalesce(Subquery(
-                queryset=new_structure_count,
-                output_field=PositiveIntegerField()), Value(0))
-        ).annotate(
-            total_structures=ExpressionWrapper(
-                F('num_new_structures') + F('structures'),
-                output_field=PositiveIntegerField()
-            )
-        )
-
-    return qs
-
-
 def parse_spray_date(request):
     spray_date = request.GET.get('spray_date')
     if spray_date:
@@ -775,3 +733,4 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
+
