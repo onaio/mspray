@@ -39,8 +39,7 @@ from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance
-from mspray.apps.warehouse.tasks import stream_to_druid
+from mspray.apps.main.tasks import run_tasks_after_spray_data
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -214,17 +213,15 @@ def add_spray_data(data):
 
     sprayday.save()
 
-    # user distance alert
-    user_distance.delay(sprayday.id)
-    # stream to druid
-    stream_to_druid.delay(sprayday.id)
-
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)
 
     unique_field = HAS_UNIQUE_FIELD
     if unique_field and location:
         add_unique_data(sprayday, unique_field, location)
+
+    # run tasks after creating SprayDay obj
+    run_tasks_after_spray_data()
 
     return sprayday
 
@@ -737,3 +734,48 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
+
+
+def get_district_summary_data():
+    """
+    Gets a queryset of Districts and serializes it
+    """
+
+    queryset = Location.objects.filter(level='district')
+    queryset = get_location_qs(queryset).extra(select={
+            "xmin": 'ST_xMin("main_location"."geom")',
+            "ymin": 'ST_yMin("main_location"."geom")',
+            "xmax": 'ST_xMax("main_location"."geom")',
+            "ymax": 'ST_yMax("main_location"."geom")'
+        }).values(
+            'pk', 'code', 'level', 'name', 'parent', 'structures',
+            'xmin', 'ymin', 'xmax', 'ymax', 'num_of_spray_areas',
+            'num_new_structures', 'total_structures', 'visited', 'sprayed'
+        )
+    serialized = DistrictSerializer(queryset, many=True)
+    return serialized.data
+
+
+def get_district_summary_totals(district_list):
+    """
+    Takes a serialized list of districts and returns totals of certain fields
+    """
+    fields = ['structures', 'visited_total', 'visited_sprayed',
+              'visited_not_sprayed', 'visited_refused', 'visited_other',
+              'not_visited', 'found', 'num_of_spray_areas']
+    totals = {}
+    for rec in district_list:
+        for field in fields:
+            totals[field] = rec[field] + (totals[field]
+                                          if field in totals else 0)
+    return totals
+
+
+def get_district_summary():
+    """
+    Returns a summary of spray effectiveness data for Districts
+    Does not use Druid
+    """
+    district_list = get_district_summary_data()
+    totals = get_district_summary_totals(district_list)
+    return district_list, totals

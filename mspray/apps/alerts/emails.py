@@ -3,6 +3,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 from mspray.apps.alerts.rapidpro import get_contacts
+from mspray.apps.alerts.utils import get_district_summary
 
 
 def send_weekly_update_email():
@@ -10,8 +11,6 @@ def send_weekly_update_email():
     Gets weekly update data and contacts
     Then sends the data to each contact, via email
     """
-    from mspray.apps.main.utils import get_district_summary
-
     group_uuid = settings.RAPIDPRO_WEEKLY_UPDATE_CONTACT_GROUP
     contacts = get_contacts(group_uuid)
     district_list, totals = get_district_summary()
