@@ -1,0 +1,21 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="container">
+    <form action="/login" method="post">{% csrf_token %}
+        {% if error %} <div class="alert alert-danger">{{ error }}</div>{% endif %}
+        <div class="form-group{% if error %} has-error{% endif %}" >
+            <label for="username1">Username</label>
+            <input type="text" class="form-control" name="username1" id="username1" placeholder="Username">
+        </div>
+        <div class="form-group{% if error %} has-error{% endif %}">
+            <label for="password1">Password</label>
+            <input type="password" class="form-control" name="password1" id="password1" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-default">Login</button>
+    </form>
+</div>
+{% endblock %}

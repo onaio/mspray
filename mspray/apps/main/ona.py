@@ -4,8 +4,10 @@ Ona API access util functions
 """
 from urllib.parse import urljoin
 
-import requests
 from django.conf import settings
+
+import requests
+from requests.auth import HTTPDigestAuth
 
 ATTACHMENTS_KEY = '_attachments'
 ONA_URI = getattr(settings, 'ONA_URI', 'https://ona.io')
@@ -51,9 +53,28 @@ def fetch_form_data(formid, latest=None, dataid=None, dataids_only=False,
     else:
         url = urljoin(ONA_URI, '/api/v1/data/{}.json'.format(formid))
     headers = {'Authorization': 'Token {}'.format(ONA_TOKEN)}
-    data = None
     response = requests.get(url, headers=headers, params=query)
-    if response.status_code == 200:
-        data = response.json()
 
-    return data
+    return response.json() if response.status_code == 200 else None
+
+
+def fetch_form(formid):
+    """
+    Fetch Ona Form.
+    """
+    headers = {'Authorization': 'Token {}'.format(ONA_TOKEN)}
+    url = urljoin(ONA_URI, '/api/v1/forms/{}.json'.format(formid))
+    response = requests.get(url, headers=headers)
+
+    return response.json() if response.status_code == 200 else None
+
+
+def login(username, password):
+    """
+    Login with Ona Credetials
+    """
+    auth = HTTPDigestAuth(username, password)
+    url = urljoin(ONA_URI, '/api/v1/user.json')
+    response = requests.get(url, auth=auth)
+
+    return response.json() if response.status_code == 200 else None

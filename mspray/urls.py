@@ -5,6 +5,7 @@ from mspray.apps.main.views import (
     spray_operator_daily, directly_observed_spraying_form
 )
 from mspray.apps.main.views import home
+from mspray.apps.main.views import user
 from mspray.apps.main.views import performance
 from mspray.apps.warehouse import urls as warehouse_urls
 from mspray.apps.alerts import urls as alerts_urls
@@ -47,6 +48,8 @@ urlpatterns = [
     url(r'^api/alerts/', include(alerts_urls, namespace='alerts')),
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
+    url(r'^login$', user.login, name='login'),
+    url(r'^logout$', user.logout, name='logout'),
     url(r'^warehouse/', include(warehouse_urls, namespace='warehouse')),
     url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
         name='district'),
