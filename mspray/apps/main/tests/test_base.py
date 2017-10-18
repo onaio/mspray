@@ -7,6 +7,7 @@ from rest_framework.test import APIRequestFactory
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.serializers.target_area import DistrictSerializer
+from mspray.apps.alerts.rapidpro import RapidProContact
 
 
 class TestBase(TestCase):
@@ -63,3 +64,9 @@ class TestBase(TestCase):
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
         return totals
+
+    def _get_rapidpro_contact(self):
+        name = "Mosh"
+        urns = ['tel:+254722000000', 'mailto:one@example.com',
+                'mailto:mosh@example.com']
+        return RapidProContact(name=name, raw=urns)
