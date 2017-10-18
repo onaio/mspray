@@ -109,7 +109,7 @@ class TestTasks(TestBase):
         send_weekly_update_email
         """
         task_send_weekly_update_email()
-        self.assertTrue(mock.delay.called)
+        self.assertTrue(mock.called)
 
     @patch('mspray.apps.alerts.tasks.start_flow')
     def test_so_daily_form_completion(self, mock):
