@@ -1,2 +1,2 @@
 {% load i18n %}
-{% trans 'Please visit the following link to view the weekly dashboard update:' %} {{url}}
+{% trans "This dashboard shows IRS progress to date in each of the districts. You can 'reply all' to this email to share your comments or thoughts with the provincial and district leaders receiving this update. You can also drill down to examine a further breakdown of data, by district or catchment area, using this URL" %}: {{url}}
