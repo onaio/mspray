@@ -91,7 +91,7 @@ def spray_date_calculations(locs, spray_date, stdout_write=print):
     sprayable = qs.filter(
         data__contains={'sprayable_structure': 'yes'}
     )
-    stdout_write(unsprayable, "Total Unsprayable")
+    stdout_write(unsprayable, "Total Non-eligible")
     sprayed = qs.filter(was_sprayed=True).count()
     stdout_write(sprayed, "Total Sprayed")
     not_sprayed = qs.filter(
@@ -103,7 +103,7 @@ def spray_date_calculations(locs, spray_date, stdout_write=print):
         Q(data__has_key='newstructure/gps')
     ).count()
     stdout_write(new_structures,
-                 "Total New structures(not sprayable not included)")
+                 "Total New structures(not eligible not included)")
     osmids = qs.filter(
         was_sprayed=True, data__contains={'sprayable_structure': 'yes'}
     ).values('osmid').distinct()
@@ -117,7 +117,7 @@ def spray_date_calculations(locs, spray_date, stdout_write=print):
         osmid__in=osmids, spray_date__lt=spray_date
     ).values('osmid').count()
     stdout_write(not_sprayable_before,
-                 "structures that had 'not sprayable' status before "
+                 "structures that had 'not eligible' status before "
                  "%s (previous count)" % spray_date)
     not_sprayed_before = SprayDay.objects.filter(
         location__name__in=locs, was_sprayed=False,
