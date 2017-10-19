@@ -172,5 +172,5 @@ class GPSSerializer(SprayDayDruidSerializer):
         off when the submission was made
         """
         if obj and settings.MSPRAY_USER_LATLNG_FIELD in obj.data:
-            return True
-        return False
+            return 1
+        return 0
