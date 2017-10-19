@@ -220,7 +220,8 @@ def add_spray_data(data):
         add_unique_data(sprayday, unique_field, location)
 
     # run tasks after creating SprayDay obj
-    run_tasks_after_spray_data()
+    if sprayday.has_osm_data():
+        run_tasks_after_spray_data(spray_date)
 
     return sprayday
 

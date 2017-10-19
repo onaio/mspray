@@ -26,7 +26,7 @@ from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
 from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
 from mspray.celery import app
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance
+from mspray.apps.alerts.tasks import user_distance, no_gps
 from mspray.apps.warehouse.tasks import stream_to_druid
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -134,6 +134,8 @@ def get_updated_osm_from_ona(sp):
 
 
 def run_tasks_after_spray_data(sprayday):
+    # no gps alert
+    no_gps.delay(sprayday.id)
     # user distance alert
     user_distance.delay(sprayday.id)
     # stream to druid

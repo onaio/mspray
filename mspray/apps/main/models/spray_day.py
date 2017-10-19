@@ -76,6 +76,14 @@ class SprayDay(models.Model):
         # pylint: disable=no-member
         self.sprayable = self.data.get(SPRAYABLE_FIELD) != NOT_SPRAYABLE_VALUE
 
+    def has_osm_data(self):
+        """
+        Check if OSM data has been received for this record
+        we assume that if settings.MSPRAY_OSM_PRESENCE_FIELD is present
+        then this record has received OSM data
+        """
+        return settings.MSPRAY_OSM_PRESENCE_FIELD in self.data
+
     # pylint: disable=arguments-differ
     def save(self, *args, **kwargs):
         from mspray.apps.main.utils import get_formid  # noqa

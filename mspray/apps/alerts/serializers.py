@@ -140,3 +140,37 @@ class UserDistanceSerializer(SprayDayDruidSerializer):
             user_location = Point(latlong[1], latlong[0])
             return int(user_location.distance(obj.geom))
 
+
+class GPSSerializer(SprayDayDruidSerializer):
+    """
+    Checks whether SprayDay object was created form a submission made when GPS
+    was on or off
+    """
+    target_area_id = serializers.SerializerMethodField()
+    target_area_name = serializers.SerializerMethodField()
+    rhc_id = serializers.SerializerMethodField()
+    rhc_name = serializers.SerializerMethodField()
+    district_id = serializers.SerializerMethodField()
+    district_code = serializers.SerializerMethodField()
+    district_name = serializers.SerializerMethodField()
+    sprayoperator_name = serializers.SerializerMethodField()
+    sprayoperator_code = serializers.SerializerMethodField()
+    team_leader_assistant_name = serializers.SerializerMethodField()
+    team_leader_name = serializers.SerializerMethodField()
+    gps_on = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SprayDay
+        fields = ['target_area_id', 'target_area_name', 'rhc_id', 'rhc_name',
+                  'district_id', 'district_name', 'sprayoperator_name',
+                  'sprayoperator_code', 'team_leader_assistant_name',
+                  'team_leader_name', 'gps_on', 'district_code']
+
+    def get_gps_on(self, obj):
+        """
+        if settings.MSPRAY_USER_LATLNG_FIELD is missing from data then GPS was
+        off when the submission was made
+        """
+        if obj and settings.MSPRAY_USER_LATLNG_FIELD in obj.data:
+            return 1
+        return 0
