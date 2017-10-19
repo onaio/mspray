@@ -36,6 +36,8 @@ def weekly_update_email(recipient, district_list, totals):
         'alerts/emails/weekly_update_body.html', c).replace('\n', '')
     from_email = settings.MSPRAY_EMAIL
     to = recipient
-    msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+    reply_to = settings.MSPRAY_REPLY_TO_EMAIL
+    msg = EmailMultiAlternatives(subject=subject, body=text_content, to=[to],
+                                 from_email=from_email, reply_to=[reply_to])
     msg.attach_alternative(html_content, "text/html")
     return msg.send(fail_silently=False)

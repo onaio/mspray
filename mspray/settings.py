@@ -226,6 +226,7 @@ LOGGING = {
 }
 
 MSPRAY_EMAIL = "mspray@example.com"
+MSPRAY_REPLY_TO_EMAIL = "mspray@example.com"
 MSPRAY_LOCATION_FIELD = 'location_code'
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
 MSPRAY_WAS_SPRAYED_VALUE = 'yes'
