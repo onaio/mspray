@@ -170,4 +170,4 @@ class GPSSerializer(SprayDayDruidSerializer):
         if settings.MSPRAY_USER_LATLNG_FIELD is missing from data then GPS was
         off when the submission was made
         """
-        return obj and obj.data.get(settings.MSPRAY_USER_LATLNG_FIELD)
+        return obj and settings.MSPRAY_USER_LATLNG_FIELD in obj.data
