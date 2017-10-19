@@ -41,3 +41,6 @@ class AlertLog(models.Model):
         return "{} - {}".format(self.date_created,
                                 self.get_notification_type_display())
 
+    def make_successful(self):
+        self.success = True
+        self.save()
