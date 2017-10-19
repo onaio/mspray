@@ -127,8 +127,8 @@ def user_distance(spray_day_obj_id):
 
 def no_gps(spray_day_obj_id):
     """
-    Checks if a SprayDay object was made with the user's GPS turned off or not
-    and sends a payload with this information to RapidPro
+    Sends a payload to RapidPro that includes information on whether GPS was
+    off or not for the SprayDay record
     """
 
     try:
