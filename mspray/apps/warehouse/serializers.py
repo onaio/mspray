@@ -31,6 +31,10 @@ class LocationMixin(object):
         if obj and obj.location:
             return obj.location.id
 
+    def get_target_area_code(self, obj):
+        if obj and obj.location:
+            return obj.location.code
+
     def get_target_area_name(self, obj):
         if obj and obj.location:
             return obj.location.name
@@ -44,6 +48,12 @@ class LocationMixin(object):
             this_rhc = obj.location.get_family().filter(level='RHC').first()
             if this_rhc:
                 return this_rhc.id
+
+    def get_rhc_code(self, obj):
+        if obj and obj.location:
+            this_rhc = obj.location.get_family().filter(level='RHC').first()
+            if this_rhc:
+                return this_rhc.code
 
     def get_rhc_name(self, obj):
         if obj and obj.location:
@@ -63,6 +73,13 @@ class LocationMixin(object):
                 level='district').first()
             if this_district:
                 return this_district.id
+
+    def get_district_code(self, obj):
+        if obj and obj.location:
+            this_district = obj.location.get_family().filter(
+                level='district').first()
+            if this_district:
+                return this_district.code
 
     def get_district_name(self, obj):
         if obj and obj.location:

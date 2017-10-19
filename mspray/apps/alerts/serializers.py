@@ -151,6 +151,7 @@ class GPSSerializer(SprayDayDruidSerializer):
     rhc_id = serializers.SerializerMethodField()
     rhc_name = serializers.SerializerMethodField()
     district_id = serializers.SerializerMethodField()
+    district_code = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     sprayoperator_name = serializers.SerializerMethodField()
     sprayoperator_code = serializers.SerializerMethodField()
@@ -163,7 +164,7 @@ class GPSSerializer(SprayDayDruidSerializer):
         fields = ['target_area_id', 'target_area_name', 'rhc_id', 'rhc_name',
                   'district_id', 'district_name', 'sprayoperator_name',
                   'sprayoperator_code', 'team_leader_assistant_name',
-                  'team_leader_name', 'gps_on']
+                  'team_leader_name', 'gps_on', 'district_code']
 
     def get_gps_on(self, obj):
         """
