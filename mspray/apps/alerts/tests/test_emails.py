@@ -41,7 +41,7 @@ class TestEmails(TestBase):
         self.assertEqual(contact_args[0],
                          settings.RAPIDPRO_WEEKLY_UPDATE_CONTACT_GROUP)
         email_args, email_kwargs = email_mock.call_args_list[0]
-        self.assertEqual(email_args[0], 'Mosh <one@example.com>')
+        self.assertEqual(email_args[0][0], 'Mosh <one@example.com>')
         self.assertEqual(email_args[1], district_list)
         self.assertEqual(email_args[2], totals)
 
@@ -62,7 +62,7 @@ class TestEmails(TestBase):
             'alerts/emails/weekly_update_body.html', c).replace('\n', '')
         memory_backend = 'django.core.mail.backends.locmem.EmailBackend'
         with self.settings(EMAIL_BACKEND=memory_backend):
-            weekly_update_email('Mosh <one@example.com>', district_list,
+            weekly_update_email(['Mosh <one@example.com>'], district_list,
                                 totals)
             self.assertEqual(len(mail.outbox), 1)
             email = mail.outbox[0]
