@@ -10,6 +10,7 @@ from mspray.apps.alerts.rapidpro import start_flow
 from mspray.apps.alerts.serializers import UserDistanceSerializer
 from mspray.apps.alerts.serializers import RapidProBaseSerializer
 from mspray.apps.alerts.serializers import FoundCoverageSerializer
+from mspray.apps.alerts.serializers import GPSSerializer
 from mspray.apps.alerts.emails import send_weekly_update_email
 from mspray.celery import app
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
@@ -121,6 +122,22 @@ def user_distance(spray_day_obj_id):
     else:
         payload = UserDistanceSerializer(spray_day_obj).data
         flow_uuid = settings.RAPIDPRO_USER_DISTANCE_FLOW_ID
+        return start_flow(flow_uuid, payload)
+
+
+def no_gps(spray_day_obj_id):
+    """
+    Checks if a SprayDay object was made with the user's GPS turned off or not
+    and sends a payload with this information to RapidPro
+    """
+
+    try:
+        spray_day_obj = SprayDay.objects.get(pk=spray_day_obj_id)
+    except SprayDay.DoesNotExist:
+        pass
+    else:
+        payload = GPSSerializer(spray_day_obj).data
+        flow_uuid = settings.RAPIDPRO_NO_GPS_FLOW_ID
         return start_flow(flow_uuid, payload)
 
 

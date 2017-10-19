@@ -8,9 +8,10 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay, Location, TeamLeader
 from mspray.apps.alerts.tasks import user_distance, health_facility_catchment
 from mspray.apps.alerts.tasks import health_facility_catchment_hook
-from mspray.apps.alerts.tasks import so_daily_form_completion
+from mspray.apps.alerts.tasks import so_daily_form_completion, no_gps
 from mspray.apps.alerts.tasks import task_send_weekly_update_email
 from mspray.apps.alerts.serializers import UserDistanceSerializer
+from mspray.apps.alerts.serializers import GPSSerializer
 from mspray.celery import app
 
 
@@ -62,6 +63,20 @@ class TestTasks(TestBase):
         args, kwargs = mock.call_args_list[0]
         self.assertEqual(args[0], settings.RAPIDPRO_USER_DISTANCE_FLOW_ID)
         self.assertEqual(args[1], user_data)
+
+    @patch('mspray.apps.alerts.tasks.start_flow')
+    def test_no_gps(self, mock):
+        """
+        Test that the no_gps task works:
+            - assert it calls the start_flow function with the right args
+        """
+        sprayday = SprayDay.objects.first()
+        gps_data = GPSSerializer(sprayday).data
+        no_gps(sprayday.id)
+        self.assertTrue(mock.called)
+        args, kwargs = mock.call_args_list[0]
+        self.assertEqual(args[0], settings.RAPIDPRO_NO_GPS_FLOW_ID)
+        self.assertEqual(args[1], gps_data)
 
     @patch('mspray.apps.alerts.tasks.get_druid_data',
            return_value=hf_druid_result)
