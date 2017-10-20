@@ -763,4 +763,3 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
-
