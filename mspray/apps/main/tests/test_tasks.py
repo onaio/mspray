@@ -88,19 +88,15 @@ class TestTasks(TestBase):
 
     @patch('mspray.apps.main.tasks.fetch_osm_xml')
     def test_link_spraypoint_with_osm(self, mock):
+        """
+        Test that we can successfully link spraypoint wiht osm
+        """
         self._load_fixtures()
         mock.return_value = OSMXML.strip()
         sp = add_spray_data(SUBMISSION_DATA)
         link_spraypoint_with_osm(sp.pk)
         sp = SprayDay.objects.get(pk=sp.pk)
         self.assertTrue(sp.location is not None)
-
-    def test_add_spray_data(self):
-        self.assertEqual(SprayDay.objects.all().count(), 0)
-        add_spray_data(SUBMISSION_DATA)
-        self.assertEqual(SprayDay.objects.all().count(), 1)
-        sp = SprayDay.objects.first()
-        self.assertEqual(SUBMISSION_DATA, sp.data)
 
     @patch('mspray.apps.main.tasks.user_distance')
     @patch('mspray.apps.main.tasks.no_gps')
