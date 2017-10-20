@@ -125,6 +125,7 @@ def user_distance(spray_day_obj_id):
         return start_flow(flow_uuid, payload)
 
 
+@app.task
 def no_gps(spray_day_obj_id):
     """
     Sends a payload to RapidPro that includes information on whether GPS was

@@ -221,7 +221,7 @@ def add_spray_data(data):
 
     # run tasks after creating SprayDay obj
     if sprayday.has_osm_data():
-        run_tasks_after_spray_data(spray_date)
+        run_tasks_after_spray_data(sprayday)
 
     return sprayday
 
@@ -763,4 +763,3 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
-
