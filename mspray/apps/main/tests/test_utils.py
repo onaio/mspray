@@ -61,8 +61,9 @@ class TestUtils(TestBase):
         add_spray_data(SUBMISSION_DATA[0])
         self.assertTrue(SprayDay.objects.count() > count)
 
+    @patch('mspray.apps.main.tasks.fetch_osm_xml')
     @patch('mspray.apps.main.utils.run_tasks_after_spray_data')
-    def test_add_spray_data_with_osm(self, mock):
+    def test_add_spray_data_with_osm(self, mock, mock2):
         """
         Test that add_spray_data createsa SprayDay object and that if it has
         OSM data it runs run_tasks_after_spray_data
