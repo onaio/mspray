@@ -1,4 +1,3 @@
-from httmock import urlmatch, HTTMock
 from unittest.mock import patch
 
 from mspray.apps.main.tests.test_base import TestBase
@@ -8,26 +7,77 @@ from mspray.apps.main.tasks import run_tasks_after_spray_data
 from mspray.apps.main.utils import add_spray_data
 from mspray.celery import app
 
-OSMXML = """<?xml version='1.0' encoding='UTF-8' ?><osm version="0.6" generator="OpenMapKit 0.7" user="theoutpost"><node id="-1943" lat="-11.202901601" lon="28.883830387" /><node id="-1946" lat="-11.202926082" lon="28.883944473" /><node id="-1945" lat="-11.202845645" lon="28.88396943" /><node id="-1944" lat="-11.202821164" lon="28.883858908" /><node id="-1943" lat="-11.202901601" lon="28.883830387" /><way id="-1942" action="modify"><nd ref="-1943" /><nd ref="-1946" /><nd ref="-1945" /><nd ref="-1944" /><nd ref="-1943" /><tag k="Shape_Area" v="0.00000000969" /><tag k="district_1" v="Mansa" /><tag k="manual_c_1" v="Targeted" /><tag k="OBJECTID" v="79621" /><tag k="rank_1" v="300.000000" /><tag k="province_1" v="Luapula" /><tag k="Shape_Leng" v="0.00039944548" /><tag k="psa_id_1" v="300 / 450" /><tag k="y" v="-11.20287380280" /><tag k="x3" v="28.88390064920" /><tag k="structur_1" v="450.000000" /><tag k="id" v="300 / 450_Mansa" /><tag k="spray_status" v="yes" /></way></osm>"""  # noqa
+
+OSMXML = """
+    <?xml version='1.0' encoding='UTF-8' ?>
+    <osm version="0.6" generator="OpenMapKit Android 1.1.16-ona" user="">
+    <node id="-41351" timestamp="2017-10-04T20:03:35Z" user=""
+    lat="-15.4189358" lon="28.3545641" /><node id="-41356"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4190764"
+    lon="28.3547381" /><node id="-41357" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4191478" lon="28.3546759" /><node id="-41358"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4191416"
+    lon="28.3546682" /><node id="-41359" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4191617" lon="28.3546507" /><node id="-41360"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4191244"
+    lon="28.3546046" /><node id="-41361" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4191049" lon="28.3546216" /><node id="-41362"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4190864"
+    lon="28.3545987" /><node id="-41363" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4191126" lon="28.3545759" /><node id="-41364"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4190536"
+    lon="28.3545031" /><node id="-41365" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4190285" lon="28.354525" /><node id="-41366"
+    timestamp="2017-10-04T20:03:35Z" user="" lat="-15.4190087"
+    lon="28.3545006" /><node id="-41351" timestamp="2017-10-04T20:03:35Z"
+    user="" lat="-15.4189358" lon="28.3545641" /><way id="-41367"
+    action="modify" timestamp="2017-10-04T20:03:35Z" user=""><nd ref="-41351"
+    /><nd ref="-41356" /><nd ref="-41357" /><nd ref="-41358" />
+    <nd ref="-41359" /><nd ref="-41360" /><nd ref="-41361" />
+    <nd ref="-41362" /><nd ref="-41363" /><nd ref="-41364" />
+    <nd ref="-41365" /><nd ref="-41366" /><nd ref="-41351" />
+    <tag k="building" v="residential" /><tag k="osm_way_id" v="528511977" />
+    <tag k="spray_status" v="notsprayed" /><tag k="notsprayed_reason"
+    v="sick" /></way></osm>
+"""
+
 SUBMISSION_DATA = {
-    "today": "2015-09-16",
-    "osm_building": "OSMWay-1760.osm",
+    'tla_leader': '99101', '_tags': [], '_media_count': 1, '_id': 3563261,
+    'sprayable/unsprayed/population/unsprayed_pregnant_women': '0',
+    'today': '2017-10-04', 'imei': '353750066007314',
+    'sprayable/unsprayed/population/unsprayed_children_u5': '0',
+    'sprayable/sprayop_name': '99209', 'osmstructure:way:id': '-41367',
+    'start': '2017-10-04T22:03:13.238+02', '_status': 'submitted_via_web',
+    'spray_area': 'test5.99', '_edited': False, '_version': '20170927',
+    'meta/instanceID': 'uuid:30d11f1e-39f2-40b2-b3b0-201b6e043bc2',
+    'deviceid': '353750066007314', '_geolocation': [None, None],
+    '_uuid': '30d11f1e-39f2-40b2-b3b0-201b6e043bc2',
+    'formhub/uuid': 'fbe6a176b1494b608c683ca27f3599db',
+    'sprayable/unsprayed/population/unsprayed_nets': '0',
+    '_submission_time': '2017-10-04T20:06:35',
+    'sprayable/unsprayed/unsprayed_totalpop': '4',
+    'sprayformid': '04.10.99209', 'health_facility': '202',
+    'sprayable/unsprayed/unsprayed_females': 2,
+    '_notes': [], 'sprayable/unsprayed/population/unsprayed_roomsfound': 2,
+    '_xform_id_string': 'Zambia_2017IRS_HH', '_xform_id': 244266,
+    'sprayable/sprayop_code': '99209',
+    'sprayable/structure_head_name': 'H3', '_submitted_by': 'msprayzambia2017',
+    'sprayable/unsprayed/reason': 'L',
+    'values_from_omk/spray_status': 'notsprayed', 'supervisor_name': '99402',
+    'sprayable/irs_card_num': '12345678', '_total_media': 0,
     "_id": 3563261,
-    "_attachments": [{
-        "mimetype": "text/xml",
-        "download_url": "/api/v1/files/583377?filename=osm_experiments/attachments/OSMWay-1942.osm",  # noqa
-        "filename": "osm_experiments/attachments/OSMWay-1942.osm",
-        "instance": 3542171,
-        "id": 583377,
-        "xform": 79639
-    }],
-    "meta/instanceID": "uuid:da51a5c9-e87d-49df-9559-43f670f2079b"
+    '_attachments': [
+        {
+            'filename': 'akros_health/attachments/'
+                        '1410dd5377f692456ab1a1515786f1045189ca8e.osm',
+            'download_url': '/api/v1/files/5551567?filename=akros_health'
+                            '/attachments/'
+                            '1410dd5377f692456ab1a1515786f1045189ca8e.osm',
+            'id': 5551567, "mimetype": "text/xml",
+        }
+    ],
+
 }
-
-
-@urlmatch(netloc=r'(.*\.)?ona\.io$')
-def onaio_mock(url, request):
-    return OSMXML.strip()
 
 
 class TestTasks(TestBase):
@@ -36,13 +86,14 @@ class TestTasks(TestBase):
         TestBase.setUp(self)
         app.conf.update(CELERY_ALWAYS_EAGER=True)
 
-    def test_link_spraypoint_with_osm(self):
+    @patch('mspray.apps.main.tasks.fetch_osm_xml')
+    def test_link_spraypoint_with_osm(self, mock):
+        self._load_fixtures()
+        mock.return_value = OSMXML.strip()
         sp = add_spray_data(SUBMISSION_DATA)
-
-        with HTTMock(onaio_mock):
-            link_spraypoint_with_osm(sp.pk)
-            sp = SprayDay.objects.get(pk=sp.pk)
-            self.assertTrue(sp.location is not None)
+        link_spraypoint_with_osm(sp.pk)
+        sp = SprayDay.objects.get(pk=sp.pk)
+        self.assertTrue(sp.location is not None)
 
     @patch('mspray.apps.main.tasks.user_distance')
     @patch('mspray.apps.main.tasks.no_gps')
@@ -68,8 +119,3 @@ class TestTasks(TestBase):
         self.assertEqual(druid_args[0], sprayday.id)
         self.assertEqual(gps_args[0], sprayday.id)
         self.assertEqual(distance_args[0], sprayday.id)
-
-
-
-
-
