@@ -95,6 +95,13 @@ class TestTasks(TestBase):
         sp = SprayDay.objects.get(pk=sp.pk)
         self.assertTrue(sp.location is not None)
 
+    def test_add_spray_data(self):
+        self.assertEqual(SprayDay.objects.all().count(), 0)
+        add_spray_data(SUBMISSION_DATA)
+        self.assertEqual(SprayDay.objects.all().count(), 1)
+        sp = SprayDay.objects.first()
+        self.assertEqual(SUBMISSION_DATA, sp.data)
+
     @patch('mspray.apps.main.tasks.user_distance')
     @patch('mspray.apps.main.tasks.no_gps')
     @patch('mspray.apps.main.tasks.stream_to_druid')
