@@ -62,3 +62,14 @@ class TestTasks(TestBase):
         self.assertTrue(druid_mock.delay.called)
         self.assertTrue(gps_mock.delay.called)
         self.assertTrue(distance_mock.delay.called)
+        druid_args, druid_kwargs = druid_mock.delay.call_args_list[0]
+        gps_args, gps_kwargs = gps_mock.delay.call_args_list[0]
+        distance_args, distance_kwargs = distance_mock.delay.call_args_list[0]
+        self.assertEqual(druid_args[0], sprayday.id)
+        self.assertEqual(gps_args[0], sprayday.id)
+        self.assertEqual(distance_args[0], sprayday.id)
+
+
+
+
+
