@@ -166,7 +166,6 @@ def add_spray_data(data):
     """"
     Add spray data submission from aggregate submission to the dashboard
     """
-    data = data.dict()
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')

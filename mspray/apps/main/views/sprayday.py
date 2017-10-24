@@ -92,7 +92,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             status_code = status.HTTP_400_BAD_REQUEST
         else:
             try:
-                sprayday = add_spray_data(request.data)
+                sprayday = add_spray_data(request.data.dict())
             except ValidationError as error:
                 data = {"error": "%s" % error}
                 status_code = status.HTTP_400_BAD_REQUEST
