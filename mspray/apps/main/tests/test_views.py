@@ -39,14 +39,29 @@ class TestViews(TestBase):
         self._load_fixtures()
         sp = SprayDay.objects.filter(
                 data__has_key=settings.MSPRAY_OSM_PRESENCE_FIELD).first()
-        data_osm = sp.data
+        data_osm = sp.data.copy()
+        data_no_osm = sp.data.copy()
+
         # change the _id field so that we can reuse this data
         data_osm[DATA_ID_FIELD] = 111
+        data_no_osm[DATA_ID_FIELD] = 111
+
+        # first send the request with no osm
+        osm_fields = [x for x in data_osm.keys() if 'osmstructure:' in x]
+        for osm_field in osm_fields:
+            data_no_osm.pop(osm_field)
+
+        request_no_osm = self.factory.post("/api/spraydays", data_no_osm)
+        response_no_osm = view(request_no_osm)
+        self.assertEqual(response_no_osm.status_code, 201)
+        self.assertFalse(tasks_mock.called)
+        self.assertTrue(osm_mock.called)
+
+        # then send with OSm
         request_osm = self.factory.post("/api/spraydays", data_osm)
         response_osm = view(request_osm)
         self.assertEqual(response_osm.status_code, 201)
         self.assertTrue(tasks_mock.called)
         self.assertTrue(osm_mock.called)
-        request_osm2 = self.factory.post("/api/spraydays", data_osm)
-        response_osm2 = view(request_osm2)
-        self.assertEqual(response_osm2.status_code, 201)
+        self.assertEqual(osm_mock.call_count, 2)
+        self.assertEqual(tasks_mock.call_count, 1)
