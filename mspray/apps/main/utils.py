@@ -187,10 +187,15 @@ def add_spray_data(data):
 
     sprayday, created = SprayDay.objects.get_or_create(
         submission_id=submission_id,
-        spray_date=spray_date,
-        geom=geom,
-        location=location
+        spray_date=spray_date
     )
+
+    if created:
+        if geom is not None:
+            sprayday.geom = geom
+        if location is not None:
+            sprayday.location = location
+
     sprayday.data = data
 
     if settings.OSM_SUBMISSIONS and geom is not None:
