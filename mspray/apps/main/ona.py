@@ -14,6 +14,18 @@ ONA_URI = getattr(settings, 'ONA_URI', 'https://ona.io')
 ONA_TOKEN = getattr(settings, 'ONA_API_TOKEN', '')
 
 
+def fetch_osm_xml_data(data):
+    data_id = data.get('_id')
+    xform_id = 141279
+    url = urljoin(ONA_URI, '/api/v1/data/%s/%s.osm' % (xform_id, data_id))
+    headers = {'Authorization': 'Token {}'.format(ONA_TOKEN)}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        return response.content
+
+    return None
+
+
 def fetch_osm_xml(data):
     """
     Fetch OSM file for a given data from Ona API.
