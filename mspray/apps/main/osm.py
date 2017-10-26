@@ -41,15 +41,20 @@ def parse_osm_ways(osm_xml, include_osm_id=False):
         try:
             geom = Polygon(points)
         except:
-            geom = LineString(points)
+            try:
+                geom = LineString(points)
+            except Exception as e:
+                print(way.values())
+                pass
 
-        tags = parse_osm_tags(way, include_osm_id)
-        items.append({
-            'osm_id': way.get('id'),
-            'geom': geom,
-            'tags': tags,
-            'osm_type': 'way'
-        })
+        if geom:
+            tags = parse_osm_tags(way, include_osm_id)
+            items.append({
+                'osm_id': way.get('id'),
+                'geom': geom,
+                'tags': tags,
+                'osm_type': 'way'
+            })
 
     return items
 
