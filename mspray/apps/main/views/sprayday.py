@@ -8,6 +8,8 @@ from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
+from django.http import QueryDict
+
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
 
@@ -91,8 +93,12 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             }
             status_code = status.HTTP_400_BAD_REQUEST
         else:
+            request_data = request.data
+            if isinstance(request.data, QueryDict):
+                request_data = request.data.dict()
+
             try:
-                sprayday = add_spray_data(request.data.dict())
+                sprayday = add_spray_data(request_data)
             except ValidationError as error:
                 data = {"error": "%s" % error}
                 status_code = status.HTTP_400_BAD_REQUEST
