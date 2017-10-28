@@ -2,6 +2,7 @@ import operator
 import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
+from json.decoder import JSONDecodeError
 
 from django.conf import settings
 
@@ -60,4 +61,7 @@ def send_request(json, url):
     s = requests.Session()
     s.headers.update(headers)
     r = requests_retry_session(session=s).post(url, data=json)
-    return r.json()
+    try:
+        return r.json()
+    except JSONDecodeError:
+        return r.text
