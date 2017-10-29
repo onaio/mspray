@@ -10,6 +10,7 @@ from django.contrib.gis.geos import Point
 from django.db.models import Sum
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from django.contrib.gis.geos.polygon import Polygon
 
 from mspray.apps.main.models import DirectlyObservedSprayingForm
 from mspray.apps.main.models import Household
@@ -175,11 +176,16 @@ def link_spraypoint_with_osm(pk):
 
 
 def _create_household(way, location):
+
+    bgeom = None
+    if isinstance(way.get('geom'), Polygon):
+        bgeom = way.get('geom')
+
     try:
         Household.objects.create(
             hh_id=way.get('osm_id'),
             geom=way.get('geom').centroid,
-            bgeom=way.get('geom'),
+            bgeom=bgeom,
             data=way.get('tags'),
             location=location
         )
