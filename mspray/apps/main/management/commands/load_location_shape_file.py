@@ -1,5 +1,9 @@
+# -*- coding=utf-8 -*-
+"""
+load_location_shapefile command - loads districts, health facility catchment
+area and spray area shapefiles.
+"""
 import os
-
 from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import SpatialReference
@@ -11,8 +15,13 @@ from mspray.apps.main.models import Location
 
 
 def get_parent(geom, parent_level, parent_name):
+    """
+    Return a location/parent of the provided geom object, parent_level and
+    parent_name. geom is used first and if that fails the parent name is used.
+    In both cases the parent level is used to limit the results.
+    """
     parent = Location.objects.filter(
-        geom__contained=geom.wkt, level=parent_level
+        geom__covers=geom.wkt, level=parent_level
     ).first()
 
     if parent is None:
@@ -23,17 +32,23 @@ def get_parent(geom, parent_level, parent_name):
             parent = Location.objects.filter(
                 level=parent_level, name=parent_name
             ).first()
-    else:
-        assert parent.name == parent_name
+    # else:
+    #     assert parent.name == parent_name
 
     return parent
 
 
 def get_parent_by_code(code, level):
+    """
+    Get parent location by code given the level.
+    """
     return Location.objects.filter(code=code, level=level).first()
 
 
 class Command(BaseCommand):
+    """
+    Uploads location information from a shapefile.
+    """
     help = _('Load locations')
 
     def add_arguments(self, parser):
@@ -91,14 +106,14 @@ class Command(BaseCommand):
             help="skip value to use to skip records in the shape file"
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options):  # pylint: disable=R0912,R0914,R0915
         if 'shape_file' not in options:
             raise CommandError(_('Missing locations shape file path'))
         else:
             try:
                 path = os.path.abspath(options['shape_file'])
-            except Exception as e:
-                raise CommandError(_('Error: %(msg)s' % {"msg": e}))
+            except Exception as error:
+                raise CommandError(_('Error: %(msg)s' % {"msg": error}))
             else:
                 code_field = options['code_field']
                 level = options['level']
@@ -113,15 +128,17 @@ class Command(BaseCommand):
                 skip_value = options.get('skip_value')
                 if skip_field and not skip_value:
                     raise CommandError(_('Error: please provide skip value'))
+                skip_value = int(skip_value) \
+                    if skip_value is not None else None
 
                 count = exception_raised = failed = skipped = updated = 0
                 srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
-                ds = DataSource(path)
-                layer = ds[0]
+                data_source = DataSource(path)
+                layer = data_source[0]
 
                 for feature in layer:
                     # skip
-                    if skip_field and skip_value:
+                    if skip_field and skip_value is not None:
                         if feature.get(skip_field) == skip_value:
                             skipped += 1
                             continue
@@ -173,7 +190,7 @@ class Command(BaseCommand):
                             )
                         except IntegrityError:
                             failed += 1
-                        except Exception as e:
+                        except Exception:  # pylint: disable=broad-except
                             exception_raised += 1
                         else:
                             count += 1
