@@ -146,20 +146,25 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
     location_id = serializers.SerializerMethodField()
     location_name = serializers.SerializerMethodField()
     target_area_id = serializers.SerializerMethodField()
+    target_area_code = serializers.SerializerMethodField()
     target_area_name = serializers.SerializerMethodField()
     target_area_structures = serializers.SerializerMethodField()
     rhc_id = serializers.SerializerMethodField()
+    rhc_code = serializers.SerializerMethodField()
     rhc_name = serializers.SerializerMethodField()
     rhc_structures = serializers.SerializerMethodField()
     district_id = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
+    district_code = serializers.SerializerMethodField()
     district_structures = serializers.SerializerMethodField()
     sprayoperator_id = serializers.SerializerMethodField()
     sprayoperator_name = serializers.SerializerMethodField()
     sprayoperator_code = serializers.SerializerMethodField()
     team_leader_assistant_id = serializers.SerializerMethodField()
+    team_leader_assistant_code = serializers.SerializerMethodField()
     team_leader_assistant_name = serializers.SerializerMethodField()
     team_leader_id = serializers.SerializerMethodField()
+    team_leader_code = serializers.SerializerMethodField()
     team_leader_name = serializers.SerializerMethodField()
     geom_lat = serializers.SerializerMethodField()
     geom_lng = serializers.SerializerMethodField()
@@ -187,7 +192,8 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
                   'rhc_structures', 'district_structures', 'sprayable',
                   'is_duplicate', 'is_refused', 'sprayoperator_code',
                   'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
-                  'bgeom_srid'
+                  'bgeom_srid', 'team_leader_code', 'district_code',
+                  'rhc_code', 'target_area_code', 'team_leader_assistant_code'
                   ]
 
     def get_sprayoperator_id(self, obj):
@@ -210,6 +216,10 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
         if obj and obj.team_leader_assistant:
             return obj.team_leader_assistant.name
 
+    def get_team_leader_assistant_code(self, obj):
+        if obj and obj.team_leader_assistant:
+            return obj.team_leader_assistant.code
+
     def get_team_leader_id(self, obj):
         if obj and obj.team_leader:
             return obj.team_leader.id
@@ -217,6 +227,10 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
     def get_team_leader_name(self, obj):
         if obj and obj.team_leader:
             return obj.team_leader.name
+
+    def get_team_leader_code(self, obj):
+        if obj and obj.team_leader:
+            return obj.team_leader.code
 
     def get_geom_lat(self, obj):
         if obj and obj.geom:
