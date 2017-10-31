@@ -23,6 +23,21 @@ class TestSerializers(TestBase):
         we expect
         """
         sprayday = SprayDay.objects.first()
+        expected_keys = ['submission_id', 'spray_date', 'sprayed', 'reason',
+                         'osmid', 'location_id', 'location_name',
+                         'target_area_id', 'target_area_name', 'rhc_id',
+                         'rhc_name', 'district_id', 'district_name',
+                         'sprayoperator_name', 'sprayoperator_id',
+                         'team_leader_assistant_id',
+                         'team_leader_assistant_name', 'team_leader_id',
+                         'team_leader_name', 'geom_lat', 'geom_lng',
+                         'submission_time', 'is_new', 'target_area_structures',
+                         'rhc_structures', 'district_structures', 'sprayable',
+                         'is_duplicate', 'is_refused', 'sprayoperator_code',
+                         'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
+                         'bgeom_srid', 'team_leader_code', 'district_code',
+                         'rhc_code', 'target_area_code',
+                         'team_leader_assistant_code']
         # sprayable
         sprayable_field = settings.SPRAYABLE_FIELD
         not_sprayable_value = settings.NOT_SPRAYABLE_VALUE
@@ -43,6 +58,10 @@ class TestSerializers(TestBase):
                             level='district').first()
         serialized = SprayDayDruidSerializer(sprayday).data
         self.assertTrue(isinstance(serialized, ReturnDict))
+        received_keys = serialized.keys()
+        self.assertEqual(len(received_keys), len(expected_keys))
+        for key in received_keys:
+            self.assertTrue(key in expected_keys)
         self.assertEqual(serialized['location_id'], sprayday.location.id)
         self.assertEqual(serialized['location_name'], sprayday.location.name)
         self.assertEqual(serialized['target_area_id'], sprayday.location.id)
