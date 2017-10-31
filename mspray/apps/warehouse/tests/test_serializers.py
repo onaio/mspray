@@ -41,7 +41,6 @@ class TestSerializers(TestBase):
         this_rhc = sprayday.location.get_family().filter(level='RHC').first()
         this_district = sprayday.location.get_family().filter(
                             level='district').first()
-
         serialized = SprayDayDruidSerializer(sprayday).data
         self.assertTrue(isinstance(serialized, ReturnDict))
         self.assertEqual(serialized['location_id'], sprayday.location.id)
