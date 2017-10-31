@@ -4,8 +4,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
-from mspray.apps.alerts.serializers import UserDistanceSerializer
-from mspray.apps.alerts.serializers import  GPSSerializer
+from mspray.apps.alerts.serializers import GPSSerializer
 
 
 class TestSerializers(TestBase):
