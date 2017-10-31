@@ -16,6 +16,7 @@ class RapidProBaseSerializer(serializers.Serializer):
     rhc_id = serializers.IntegerField()
     rhc_name = serializers.CharField()
     district_id = serializers.IntegerField()
+    district_code = serializers.IntegerField()
     district_name = serializers.CharField()
     num_found = serializers.IntegerField(default=0)
     num_sprayed = serializers.IntegerField(default=0)
@@ -43,6 +44,7 @@ class FoundCoverageSerializer(RapidProBaseSerializer):
     rhc_id = serializers.SerializerMethodField()
     rhc_name = serializers.SerializerMethodField()
     district_id = serializers.SerializerMethodField()
+    district_code = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     has_submissions_today = serializers.IntegerField(default=0)
     today_is_working_day = serializers.IntegerField(default=0)
@@ -83,6 +85,12 @@ class FoundCoverageSerializer(RapidProBaseSerializer):
         if self.target_area:
             return self.target_area.parent.parent.id
 
+    def get_district_code(self, data):
+        if data.get('district_code'):
+            return data['district_code']
+        if self.target_area:
+            return self.target_area.parent.parent.code
+
     def get_district_name(self, data):
         if data.get('district_name'):
             return data['district_name']
@@ -106,6 +114,7 @@ class UserDistanceSerializer(SprayDayDruidSerializer):
     rhc_id = serializers.SerializerMethodField()
     rhc_name = serializers.SerializerMethodField()
     district_id = serializers.SerializerMethodField()
+    district_code = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     sprayoperator_name = serializers.SerializerMethodField()
     sprayoperator_code = serializers.SerializerMethodField()
@@ -121,7 +130,7 @@ class UserDistanceSerializer(SprayDayDruidSerializer):
                   'district_id', 'district_name', 'sprayoperator_name',
                   'sprayoperator_code', 'team_leader_assistant_name',
                   'team_leader_name', 'user_latlng', 'structure_latlng',
-                  'distance_from_structure']
+                  'distance_from_structure', 'district_code']
 
     def get_user_latlng(self, obj):
         if obj and obj.data.get(settings.MSPRAY_USER_LATLNG_FIELD):
