@@ -50,6 +50,7 @@ WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TEAM_LEADER_CODE = settings.MSPRAY_TEAM_LEADER_CODE
+TEAM_LEADER_ASSISTANT_CODE = settings.MSPRAY_TEAM_LEADER_ASSISTANT_CODE
 IRS_NUMBER = settings.MSPRAY_IRS_NUM_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
@@ -162,6 +163,59 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             obj.save()
 
 
+def link_sprayday_to_actors(sprayday, data=None):
+    """
+    Links a SprayDay object with one:
+        - spray operator
+        - team leader assistant
+        - team leader
+    """
+    if data is None:
+        data = sprayday.data
+
+    if sprayday.spray_date:
+        spray_date = sprayday.spray_date
+    else:
+        spray_date = data.get(DATE_FIELD)
+        spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
+
+    # attempt to get spray operator from form data
+    so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
+    if so:
+        sprayday.spray_operator = so
+        # set sprayformid
+        sprayday.data['sprayformid'] = get_formid(so, spray_date)
+
+    # attempt to get team leader assistant from form data
+    team_leader_assistant = get_team_leader_assistant(
+        data.get(TEAM_LEADER_ASSISTANT_CODE)
+    )
+    if team_leader_assistant:
+        sprayday.team_leader_assistant = team_leader_assistant
+
+    # attempt to get team leader from form data
+    team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
+    if team_leader:
+        sprayday.team_leader = team_leader
+
+    # if at this point we have not gotten the tla using the form data, we
+    # get her using the dasboard data
+    if not sprayday.team_leader_assistant:
+        if so and so.team_leader_assistant:
+            sprayday.team_leader_assistant = so.team_leader_assistant
+
+    # if at this point we have not gotten the team leader using the form data,
+    # we get him using the dasboard data
+    if not sprayday.team_leader:
+        tla = sprayday.team_leader_assistant
+        if tla and tla.team_leader:
+            sprayday.team_leader = tla.team_leader
+        elif so and so.team_leader:
+            sprayday.team_leader = so.team_leader
+
+    sprayday.save()
+
+
 def add_spray_data(data):
     """"
     Add spray data submission from aggregate submission to the dashboard
@@ -204,18 +258,7 @@ def add_spray_data(data):
             sprayday.geom, BUFFER_SIZE
         )
 
-    so = get_spray_operator(data.get(SPRAY_OPERATOR_CODE))
-    if so:
-        sprayday.spray_operator = so
-        sprayday.data['sprayformid'] = get_formid(so, spray_date)
-
-    set_team_leader_assistant(sprayday, save=False)
-
-    team_leader = get_team_leader(data.get(TEAM_LEADER_CODE))
-    if team_leader:
-        sprayday.team_leader = team_leader
-
-    sprayday.save()
+    link_sprayday_to_actors(sprayday=sprayday, data=data)
 
     if settings.OSM_SUBMISSIONS:
         link_spraypoint_with_osm.delay(sprayday.pk)
@@ -233,7 +276,7 @@ def add_spray_data(data):
 
 def set_team_leader_assistant(sprayday, save=True):
     team_leader_assistant = get_team_leader_assistant(
-        sprayday.data.get(TEAM_LEADER_CODE)
+        sprayday.data.get(TEAM_LEADER_ASSISTANT_CODE)
     )
     if team_leader_assistant:
         sprayday.team_leader_assistant = team_leader_assistant

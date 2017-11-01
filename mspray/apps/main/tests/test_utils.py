@@ -3,11 +3,14 @@ from unittest.mock import patch
 from django.conf import settings
 
 from mspray.apps.main.tests.test_base import TestBase
-from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SprayDay, TeamLeader, TeamLeaderAssistant
+from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import avg_time_per_group
+from mspray.apps.main.utils import get_formid
+from mspray.apps.main.utils import link_sprayday_to_actors
 from mspray.celery import app
 
 SUBMISSION_DATA = [{
@@ -56,10 +59,18 @@ class TestUtils(TestBase):
         self.assertEqual(avg_time_per_group(results), (13, 54))
         self.assertEqual(avg_time_per_group([]), (None, None))
 
-    def test_add_spray_data(self):
+    @patch('mspray.apps.main.utils.link_sprayday_to_actors')
+    def test_add_spray_data(self, mock):
+        """
+        test that add spray daya works as expected
+        """
         count = SprayDay.objects.count()
         add_spray_data(SUBMISSION_DATA[0])
         self.assertTrue(SprayDay.objects.count() > count)
+        self.assertTrue(mock.called)
+        args, kwargs = mock.call_args_list[0]
+        self.assertEqual(kwargs['sprayday'], SprayDay.objects.first())
+        self.assertEqual(kwargs['data'], SUBMISSION_DATA[0])
 
     @patch('mspray.apps.main.tasks.fetch_osm_xml')
     @patch('mspray.apps.main.utils.run_tasks_after_spray_data')
@@ -81,3 +92,39 @@ class TestUtils(TestBase):
         self.assertTrue(mock.called)
         args, kwargs = mock.call_args_list[0]
         self.assertEqual(args[0], sp)
+
+    def test_link_sprayday_to_actors(self):
+        """
+        Test that from link_sprayday_to_actors correctly links a sprayday
+        object with the right spray operator, team leader assistant and team
+        leader.
+        """
+        self._load_fixtures()
+        so = SprayOperator.objects.first()
+        tl = TeamLeader.objects.first()
+        tla = TeamLeaderAssistant.objects.first()
+        sprayday = SprayDay.objects.first()
+        data = {
+            settings.MSPRAY_SPRAY_OPERATOR_CODE: so.code,
+            settings.MSPRAY_TEAM_LEADER_CODE: tl.code,
+            settings.MSPRAY_TEAM_LEADER_ASSISTANT_CODE: tla.code
+        }
+        # make sure we have the objects to work with
+        self.assertFalse(None in [so, tl, tla, sprayday])
+
+        # set fields to None so that we can test with certainty that the right
+        # ones were added
+        sprayday.spray_operator = None
+        sprayday.team_leader_assistant = None
+        sprayday.team_leader = None
+        sprayday.save()
+
+        link_sprayday_to_actors(sprayday, data)
+
+        sprayday.refresh_from_db()
+        self.assertEqual(sprayday.spray_operator, so)
+        self.assertEqual(sprayday.team_leader_assistant, tla)
+        self.assertEqual(sprayday.team_leader, tl)
+        self.assertEqual(sprayday.team_leader, tl)
+        self.assertEqual(sprayday.data['sprayformid'],
+                         get_formid(so, sprayday.spray_date))
