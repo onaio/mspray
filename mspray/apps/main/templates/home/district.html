@@ -8,7 +8,7 @@
 {% block content %}
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
-        <h1 id="district-name">District:{% if district_name %} {{ district_name }} {% if district.level == 'district' %}<a href="{% url 'target_area' district_code district.pk %}">{% else %}<a href="{% url 'target_area' district.parent.pk district.pk %}">{% endif %}<i class="fa fa-map"></i></a>{% else %} All{% endif%}</h1>
+        <h1 id="district-name">{% if district.level == 'district' %}District:{% elif district.level == 'RHC' %}Health Facility Catchment:{% endif %}{% if district_name %} {{ district_name }} {% if district.level == 'district' %}<a href="{% url 'target_area' district_code district.pk %}">{% else %}<a href="{% url 'target_area' district.parent.pk district.pk %}">{% endif %}<i class="fa fa-map"></i></a>{% else %} All{% endif%}</h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
                 {% if not district or district.level == 'district' %}
