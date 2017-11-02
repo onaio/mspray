@@ -13,6 +13,7 @@ from mspray.apps.main.utils import avg_time_per_group
 from mspray.apps.main.utils import get_formid
 from mspray.apps.main.utils import link_sprayday_to_actors
 from mspray.apps.main.utils import remove_duplicate_sprayoperatordailysummary
+from mspray.apps.main.utils import add_spray_operator_daily
 from mspray.celery import app
 
 SUBMISSION_DATA = [{
@@ -176,3 +177,42 @@ class TestUtils(TestBase):
                                              .filter(count__gt=1)
         )
         self.assertEqual(dups2.count(), 0)
+
+    @patch('mspray.apps.main.utils.calculate_data_quality_check')
+    def test_add_spray_operator_daily(self, mock):
+        """
+        Test that add_spray_operator_daily actually adds a new
+        SprayOperatorDailySummary object
+        """
+        self._load_fixtures()
+        data = SprayOperatorDailySummary.objects.first().data
+        SprayOperatorDailySummary.objects.all().delete()
+        self.assertEqual(SprayOperatorDailySummary.objects.count(), 0)
+        add_spray_operator_daily(data)
+        self.assertTrue(mock.called)
+        self.assertEqual(SprayOperatorDailySummary.objects.count(), 1)
+
+    @patch('mspray.apps.main.utils.calculate_data_quality_check')
+    def test_update_spray_operator_daily(self, mock):
+        """
+        Test that add_spray_operator_daily actually updates an existing record
+        if it receives data for the same spray_operator in the same date
+        """
+        self._load_fixtures()
+        data = SprayOperatorDailySummary.objects.first().data
+        SprayOperatorDailySummary.objects.all().delete()
+        self.assertEqual(SprayOperatorDailySummary.objects.count(), 0)
+        add_spray_operator_daily(data)
+        self.assertTrue(mock.called)
+        self.assertEqual(SprayOperatorDailySummary.objects.count(), 1)
+        new_data = data.copy()
+        new_data['supervisor_name'] = "MOSH"
+        new_data['sprayed'] = 97
+        new_data['found'] = 100
+        add_spray_operator_daily(new_data)
+        self.assertEqual(SprayOperatorDailySummary.objects.count(), 1)
+        obj = SprayOperatorDailySummary.objects.first()
+        self.assertEqual(obj.sprayed, new_data['sprayed'])
+        self.assertEqual(obj.found, new_data['found'])
+        self.assertEqual(obj.data.get('supervisor_name'), "MOSH")
+        self.assertEqual(mock.call_count, 2)

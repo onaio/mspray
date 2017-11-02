@@ -841,4 +841,3 @@ def remove_duplicate_sprayoperatordailysummary():
                         '-submission_id')
         # only keep the latest based on submission id
         objects.exclude(id=objects.first().id).delete()
-
