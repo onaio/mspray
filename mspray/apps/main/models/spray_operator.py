@@ -18,7 +18,7 @@ class SprayOperator(models.Model):
 
 
 class SprayOperatorDailySummary(models.Model):
-    spray_form_id = models.CharField(max_length=50)
+    spray_form_id = models.CharField(max_length=50, unique=True)
     submission_id = models.PositiveIntegerField(unique=True)
     sprayed = models.IntegerField()
     found = models.IntegerField()

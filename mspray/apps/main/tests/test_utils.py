@@ -1,16 +1,18 @@
 from unittest.mock import patch
 
 from django.conf import settings
+from django.db.models import Count
 
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay, TeamLeader, TeamLeaderAssistant
-from mspray.apps.main.models import SprayOperator
+from mspray.apps.main.models import SprayOperator, SprayOperatorDailySummary
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import avg_time_per_group
 from mspray.apps.main.utils import get_formid
 from mspray.apps.main.utils import link_sprayday_to_actors
+from mspray.apps.main.utils import remove_duplicate_sprayoperatordailysummary
 from mspray.celery import app
 
 SUBMISSION_DATA = [{
@@ -127,3 +129,50 @@ class TestUtils(TestBase):
         self.assertEqual(sprayday.team_leader, tl)
         self.assertEqual(sprayday.data['sprayformid'],
                          get_formid(so, sprayday.spray_date))
+
+    def test_remove_duplicate_sprayoperatordailysummary(self):
+        """
+        test that remove_duplicate_sprayoperatordailysummary:
+            removes all duplicates
+            does not delete everything
+            retains the desired objects
+        """
+        self._load_fixtures()
+        dups = (
+            SprayOperatorDailySummary.objects.values('spray_form_id')
+                                             .annotate(count=Count('id'))
+                                             .values('spray_form_id')
+                                             .order_by()
+                                             .filter(count__gt=1)
+        )
+        # get objects that need to be kept and objects that need to be removed
+        to_keep = []
+        to_remove = []
+        for dup in dups:
+            objects = SprayOperatorDailySummary.objects.filter(
+                        spray_form_id=dup['spray_form_id']).order_by(
+                            '-submission_id')
+            # keep this
+            to_keep.append(objects.first().id)
+            # remove these
+            to_remove = to_remove + [x.id for x in objects.exclude(
+                                                        id=objects.first().id)]
+
+        # import ipdb; ipdb.set_trace()
+        remove_duplicate_sprayoperatordailysummary()
+        # check that we removed what we needed to remove and kept what we
+        # needed to keep
+        self.assertEqual(len(to_keep),
+                         SprayOperatorDailySummary.objects.filter(
+                            id__in=to_keep).count())
+        self.assertEqual(SprayOperatorDailySummary.objects.filter(
+                            id__in=to_remove).count(), 0)
+        # check that no duplicates exist
+        dups2 = (
+            SprayOperatorDailySummary.objects.values('spray_form_id')
+                                             .annotate(count=Count('id'))
+                                             .values('spray_form_id')
+                                             .order_by()
+                                             .filter(count__gt=1)
+        )
+        self.assertEqual(dups2.count(), 0)

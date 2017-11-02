@@ -821,3 +821,24 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
+
+
+def remove_duplicate_sprayoperatordailysummary():
+    """
+    Removes duplicate SprayOperatorDailySummary objects based on the
+    spray_form_id field
+    """
+    dups = (
+        SprayOperatorDailySummary.objects.values('spray_form_id')
+                                         .annotate(count=Count('id'))
+                                         .values('spray_form_id')
+                                         .order_by()
+                                         .filter(count__gt=1)
+    )
+    for dup in dups:
+        objects = SprayOperatorDailySummary.objects.filter(
+                    spray_form_id=dup['spray_form_id']).order_by(
+                        '-submission_id')
+        # only keep the latest based on submission id
+        objects.exclude(id=objects.first().id).delete()
+
