@@ -38,6 +38,9 @@ class TestBase(TestCase):
         call_command(
             'loaddata', settings.BASE_DIR + '/mspray/apps/main/tests/fixtures'
             '/20171009/household.json', verbosity=0)
+        call_command(
+            'loaddata', settings.BASE_DIR + '/mspray/apps/main/tests/'
+            'fixtures/20171009/sprayoperatordailysummary.json', verbosity=0)
 
     def _district_summary_data(self):
         queryset = Location.objects.filter(level='district')

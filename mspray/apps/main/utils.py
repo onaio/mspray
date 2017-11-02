@@ -533,6 +533,13 @@ def calculate_data_quality_check(spray_form_id, spray_operator_code):
 
 
 def add_spray_operator_daily(data):
+    """
+    Adds or updates a SprayOperatorDailySummary object
+
+    If we receive data that has both a spray_date and spray_operator_code
+    that already exist, then we update the existing SprayOperatorDailySummary
+    object instead of creating a new one.
+    """
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
     sprayed = data.get('sprayed', 0)
@@ -542,14 +549,17 @@ def add_spray_operator_daily(data):
     spray_date = datetime.strptime(spray_date, '%Y-%m-%d')
     spray_form_id = data.get('sprayformid', get_formid(so, spray_date))
     data['sprayformid'] = spray_form_id
+
     try:
-        SprayOperatorDailySummary.objects.create(
+        obj, created = SprayOperatorDailySummary.objects.update_or_create(
             spray_form_id=spray_form_id,
-            sprayed=sprayed,
-            found=found,
-            submission_id=submission_id,
-            sprayoperator_code=spray_operator_code,
-            data=data,
+            defaults={
+                'sprayed': sprayed,
+                'found': found,
+                'submission_id': submission_id,
+                'sprayoperator_code': spray_operator_code,
+                'data': data,
+            },
         )
     except IntegrityError:
         pass
@@ -811,3 +821,23 @@ def get_location_dict(code):
     data['higher_level_map'] = settings.HIGHER_LEVEL_MAP
 
     return data
+
+
+def remove_duplicate_sprayoperatordailysummary():
+    """
+    Removes duplicate SprayOperatorDailySummary objects based on the
+    spray_form_id field
+    """
+    dups = (
+        SprayOperatorDailySummary.objects.values('spray_form_id')
+                                         .annotate(count=Count('id'))
+                                         .values('spray_form_id')
+                                         .order_by()
+                                         .filter(count__gt=1)
+    )
+    for dup in dups:
+        objects = SprayOperatorDailySummary.objects.filter(
+                    spray_form_id=dup['spray_form_id']).order_by(
+                        '-submission_id')
+        # only keep the latest based on submission id
+        objects.exclude(id=objects.first().id).delete()
