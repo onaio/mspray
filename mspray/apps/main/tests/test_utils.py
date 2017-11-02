@@ -125,6 +125,5 @@ class TestUtils(TestBase):
         self.assertEqual(sprayday.spray_operator, so)
         self.assertEqual(sprayday.team_leader_assistant, tla)
         self.assertEqual(sprayday.team_leader, tl)
-        self.assertEqual(sprayday.team_leader, tl)
         self.assertEqual(sprayday.data['sprayformid'],
                          get_formid(so, sprayday.spray_date))
