@@ -77,8 +77,8 @@
                 <hr>
                 <div>
                     <dl class="dl-horizontal" id="target-area-stats">
-                        <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-next-structure' value='Previous Structure' />
-                        <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' />
+                        <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-previous-structure' value='Previous Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data"/>
+                        <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data" />
                     </dl>
                 </div>
             </div>
@@ -158,20 +158,28 @@
 
         var count = 0;
         function nextStructure() {
-            layers = app.sprayLayer.getLayers()
-            var arrayLength = layers.length;
-            if(count == arrayLength){
-               count = 0;
+            if(app.sprayLayer !== undefined) {
+                layers = app.sprayLayer.getLayers()
+                var arrayLength = layers.length;
+                if(count == arrayLength){
+                   count = 0;
+                }
+                layers[count].openPopup();
+                count++;
+            } else {
+                $('#show-next-structure').tooltip('show');
             }
-            layers[count].openPopup();
-            count++;
         }
         function previousStructure() {
-            layers = app.sprayLayer.getLayers()
-            var arrayLength = layers.length;
-            layers[count].openPopup();
-            if (count > 0) {
-                count--;
+            if(app.sprayLayer !== undefined) {
+                layers = app.sprayLayer.getLayers()
+                var arrayLength = layers.length;
+                layers[count].openPopup();
+                if (count > 0) {
+                    count--;
+                }
+            } else {
+                $('#show-previous-structure').tooltip('show');
             }
         }
         {% endif %}
