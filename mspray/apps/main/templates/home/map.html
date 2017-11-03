@@ -74,6 +74,13 @@
                     <p>Not Sprayed Reasons</p>
                     <dl class="dl-horizontal" id="target-area-stats-not-sprayed"></dl>
                 </div>
+                <hr>
+                <div>
+                    <dl class="dl-horizontal" id="target-area-stats">
+                        <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-previous-structure' value='Previous Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data"/>
+                        <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data" />
+                    </dl>
+                </div>
             </div>
         </section>
 
@@ -148,6 +155,33 @@
         {% if target_data.level == 'ta' %}
         var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date__lte={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
+
+        var count = 0;
+        function nextStructure() {
+            if(app.sprayLayer !== undefined) {
+                layers = app.sprayLayer.getLayers()
+                var arrayLength = layers.length;
+                if(count == arrayLength){
+                   count = 0;
+                }
+                layers[count].openPopup();
+                count++;
+            } else {
+                $('#show-next-structure').tooltip('show');
+            }
+        }
+        function previousStructure() {
+            if(app.sprayLayer !== undefined) {
+                layers = app.sprayLayer.getLayers()
+                var arrayLength = layers.length;
+                layers[count].openPopup();
+                if (count > 0) {
+                    count--;
+                }
+            } else {
+                $('#show-previous-structure').tooltip('show');
+            }
+        }
         {% endif %}
     </script>
 {% endblock %}

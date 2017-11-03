@@ -169,7 +169,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
 
             // geojson.features.filter(function(k, v){ return k.properties.reason !== null}) .reduce(function(k, v){return v.properties.reason === 'R' ? k + 1: k + 0}, 0)
             if(geojson.features !== undefined && geojson.features.length > 0) {
-                app.sprayLayer = L.mapbox.featureLayer(geojson, {
+                app.sprayLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
                         if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
                             app.sprayOptions.fillColor = "#D82118";
@@ -190,14 +190,19 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                         }
                         return app.sprayOptions;
                     },
-                    onEachFeature: function(features){
-                        var was_sprayed = features.properties.sprayed;
-                        if (sprayed_status[features.properties.sprayed] === undefined) {
-                            sprayed_status[features.properties.sprayed] = 1;
+                    onEachFeature: function(feature, layer) {
+                        var was_sprayed = feature.properties.sprayed;
+                        if (sprayed_status[feature.properties.sprayed] === undefined) {
+                            sprayed_status[feature.properties.sprayed] = 1;
                         } else {
-                            sprayed_status[features.properties.sprayed]++;
+                            sprayed_status[feature.properties.sprayed]++;
                         }
-
+                        var content = "<strong>Submission ID</strong>: " + feature.properties.submission_id + "<br/>";
+                        content += "<strong>Spray Date</strong>: " + feature.properties.spray_date + "<br/>";
+                        content += "<strong>OSM ID</strong>: " + feature.properties.osmid + "<br/>";
+                        content += "<strong>Spray Status</strong>: " + was_sprayed + "<br/>";
+                        content += "<strong>Spray Operator Code</strong>: " + feature.properties.spray_operator_code + "<br/>";
+                        layer.bindPopup(content);
                     }
                 }).addTo(app.map);
 
