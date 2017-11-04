@@ -469,7 +469,9 @@ def refresh_data_with_no_location():
     """
     Refresh actively data with no OSM.
     """
-    data = SprayDay.objects.filter(location__isnull=True)
+    time_since = timezone.now() - timedelta(minutes=5)
+    data = SprayDay.objects.filter(location__isnull=True,
+                                   created_on__lte=time_since)
     found = data.count()
     for rec in data:
         link_spraypoint_with_osm(rec.pk)
