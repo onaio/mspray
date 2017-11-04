@@ -462,3 +462,16 @@ def remove_deleted_dos_records():
         deleted_submissions.delete()
 
     return count
+
+
+@app.task
+def refresh_data_with_no_location():
+    """
+    Refresh actively data with no OSM.
+    """
+    data = SprayDay.objects.filter(location__isnull=True)
+    found = data.count()
+    for rec in data:
+        link_spraypoint_with_osm(rec.pk)
+
+    return found
