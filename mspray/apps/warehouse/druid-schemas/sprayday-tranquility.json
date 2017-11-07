@@ -1,0 +1,106 @@
+{
+  "dataSources" : {
+    "mspraytest": {
+      "spec" : {
+        "dataSchema" : {
+          "dataSource" : "mspraytest",
+          "granularitySpec" : {
+            "type" : "uniform",
+            "segmentGranularity" : "day",
+            "queryGranularity" : "none"
+          },
+          "parser" : {
+            "type" : "string",
+            "parseSpec" : {
+              "format" : "json",
+              "dimensionsSpec" : {
+                "dimensions" : [
+                  "submission_id",
+                  "spray_date",
+                  "location_id",
+                  "location_name",
+                  "target_area_id",
+                  "target_area_name",
+                  "rhc_id",
+                  "rhc_name",
+                  "district_id",
+                  "district_name",
+                  "sprayoperator_id",
+                  "sprayoperator_name",
+                  "sprayoperator_code",
+                  "team_leader_assistant_id",
+                  "team_leader_assistant_name",
+                  "team_leader_id",
+                  "team_leader_name",
+                  "sprayed",
+                  "sprayable",
+                  "submission_time",
+                  "reason",
+                  "osmid",
+                  "bgeom_type",
+                  "bgeom_srid",
+                  "bgeom_coordinates",
+                  "is_new",
+                  "is_refused",
+                  "is_duplicate",
+                  {
+                    "type": "long",
+                    "name": "target_area_structures"
+                  },
+                  {
+                    "type": "long",
+                    "name": "rhc_structures"
+                  },
+                  {
+                    "type": "long",
+                    "name": "district_structures"
+                  }
+                ],
+                "dimensionExclusions": [],
+                "spatialDimensions": [
+                  {
+                    "dimName": "geom",
+                    "dims": [
+                      "geom_lat",
+                      "geom_lng"
+                    ]
+                  }
+                ]
+              },
+              "timestampSpec" : {
+                "format" : "auto",
+                "column" : "submission_time"
+              }
+            }
+          },
+          "metricsSpec" : [
+            {
+              "name" : "count",
+              "type" : "count"
+            }
+          ]
+        },
+        "ioConfig" : {
+          "type" : "realtime"
+        },
+        "tuningConfig" : {
+          "type" : "realtime",
+          "maxRowsInMemory" : "100000",
+          "intermediatePersistPeriod" : "PT10M",
+          "windowPeriod" : "PT10M"
+        }
+      },
+      "properties" : {
+        "task.partitions" : "1",
+        "task.replicants" : "1"
+      }
+    }
+  },
+  "properties" : {
+    "zookeeper.connect" : "localhost",
+    "druid.discovery.curator.path" : "/druid/discovery",
+    "druid.selectors.indexing.serviceName" : "druid/overlord",
+    "http.port" : "8200",
+    "http.threads" : "9"
+  }
+}

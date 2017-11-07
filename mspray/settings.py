@@ -76,6 +76,7 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'rest_framework_gis',
+    'storages',
     'mspray.apps.main',
     'mspray.apps.warehouse',
     'mspray.apps.alerts',
@@ -263,6 +264,7 @@ HH_BUFFER = False
 HEALTH_FACILITY_CATCHMENT_THRESHOLD = 10
 ONA_URI = 'https://ona.io'
 MSPRAY_WEEKLY_DASHBOARD_UPDATE_URL = "http://example.com"
+MSPRAY_AWS_PATH = "mspray"
 
 BROKER_URL = 'amqp://guest:guest@localhost//'
 OSM_SUBMISSIONS = False
@@ -294,3 +296,5 @@ RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID = ""
 RAPIDPRO_NO_REVISIT_FLOW_ID = ""
 RAPIDPRO_HF_CATCHMENT_FLOW_ID = ""
 RAPIDPRO_WEEKLY_UPDATE_CONTACT_GROUP = ""
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
