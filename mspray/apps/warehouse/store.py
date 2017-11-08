@@ -29,20 +29,29 @@ def get_intervals(queryset):
     return "{}/{}".format(first, last)
 
 
+def get_queryset(minutes):
+    """
+    Returns a queryset of objects created x minutes ago
+    """
+    x_minutes_ago = timezone.now() - timedelta(minutes=minutes)
+    queryset = SprayDay.objects.filter(
+                    created_on__gte=x_minutes_ago).order_by('created_on')
+    return queryset
+
+
 def get_data(minutes=10):
     """
     Gets data submitted in the last x minutes and stores it
     returns filename
     """
-    x_minutes_ago = timezone.now() - timedelta(minutes=minutes)
-    queryset = SprayDay.objects.filter(
-                    created_on__gte=x_minutes_ago).order_by('created_on')
+    queryset = get_queryset(minutes)
     # get intervals
     first = queryset.first().data['_submission_time']
     last = queryset.last().data['_submission_time']
     intervals = get_intervals(queryset)
     filename = "{}/minutes".format(settings.DRUID_SPRAYDAY_DATASOURCE) + \
         "/sprayday-{}-{}.json".format(first, last)
+
     path = create_sprayday_druid_json_file(queryset=queryset,
                                            filename=filename)
     url = settings.AWS_S3_BASE_URL + path
