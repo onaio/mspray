@@ -7,6 +7,7 @@ from django.conf import settings
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
 from mspray.apps.warehouse.store import get_intervals, get_data, get_queryset
+from mspray.apps.warehouse.store import get_historical_data
 
 
 class TestStore(TestBase):
@@ -59,3 +60,72 @@ class TestStore(TestBase):
         args, kwargs = ingest_mock.call_args_list[0]
         self.assertEqual(args[0], settings.AWS_S3_BASE_URL + "filename.json")
         self.assertEqual(kwargs['intervals'], get_intervals(queryset))
+
+    @patch('mspray.apps.warehouse.store.ingest_sprayday')
+    @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
+    def test_get_historical_data_day(self, json_file_mock, ingest_mock):
+        """
+        Asset that the filename is correct when you supply just the day
+        """
+        path = "/".join([str(x) for x in [None, None, 10] if x is not None])
+        filename = "{}/".format(settings.DRUID_SPRAYDAY_DATASOURCE) + path +\
+            "/sprayday.json"
+        get_historical_data(day=10)
+        self.assertTrue(json_file_mock.called)
+        self.assertTrue(ingest_mock.called)
+        args, kwargs = json_file_mock.call_args_list[0]
+        self.assertEqual(kwargs['filename'], filename)
+
+    @patch('mspray.apps.warehouse.store.ingest_sprayday')
+    @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
+    def test_get_historical_data_month(self, json_file_mock, ingest_mock):
+        """
+        Asset that the filename is correct when you supply just the month
+        """
+        path = "/".join([str(x) for x in [None, 10, None] if x is not None])
+        filename = "{}/".format(settings.DRUID_SPRAYDAY_DATASOURCE) + path +\
+            "/sprayday.json"
+        get_historical_data(month=10)
+        self.assertTrue(json_file_mock.called)
+        self.assertTrue(ingest_mock.called)
+        args, kwargs = json_file_mock.call_args_list[0]
+        self.assertEqual(kwargs['filename'], filename)
+
+    @patch('mspray.apps.warehouse.store.ingest_sprayday')
+    @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
+    def test_get_historical_data_year(self, json_file_mock, ingest_mock):
+        """
+        Asset that the filename is correct when you supply just the year
+        """
+        path = "/".join([str(x) for x in [2017, None, None] if x is not None])
+        filename = "{}/".format(settings.DRUID_SPRAYDAY_DATASOURCE) + path +\
+            "/sprayday.json"
+        get_historical_data(year=2017)
+        self.assertTrue(json_file_mock.called)
+        self.assertTrue(ingest_mock.called)
+        args, kwargs = json_file_mock.call_args_list[0]
+        self.assertEqual(kwargs['filename'], filename)
+
+    @patch('mspray.apps.warehouse.store.get_intervals')
+    @patch('mspray.apps.warehouse.store.ingest_sprayday')
+    @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
+    def test_get_historical_data(self, json_file_mock, ingest_mock,
+                                 intervals_mock):
+        """
+        Test that get historical data actually works by ensuring it calls
+        ingest_sprayday with the right arguments
+        """
+        path = "/".join([str(x) for x in [2017, 10, 10] if x is not None])
+        filename = "{}/".format(settings.DRUID_SPRAYDAY_DATASOURCE) + path +\
+            "/sprayday.json"
+        json_file_mock.return_value = filename
+        intervals_mock.return_value = "2013-01-01/2013-01-02"
+        get_historical_data(day=10, month=10, year=2017)
+        self.assertTrue(json_file_mock.called)
+        self.assertTrue(ingest_mock.called)
+        mock1_args, mock1_kwargs = json_file_mock.call_args_list[0]
+        self.assertEqual(mock1_kwargs['filename'], filename)
+        mock2_args, mock2_kwargs = ingest_mock.call_args_list[0]
+        self.assertEqual(mock2_args[0], settings.AWS_S3_BASE_URL + filename)
+        self.assertEqual(mock2_kwargs['intervals'], "2013-01-01/2013-01-02")
+
