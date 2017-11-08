@@ -73,6 +73,14 @@ def get_druid_indexer_url():
                                                 settings.DRUID_OVERLORD_PORT)
 
 
+def get_sprayday_schema():
+    schema_file = "{}/mspray/apps/warehouse/druid-schemas/{}.json".format(
+        settings.BASE_DIR, "sprayday-index-task")
+    with open(schema_file) as f:
+        schema = json.load(f)
+    return schema
+
+
 def ingest_sprayday(file_url, intervals=None):
     """
     posts a json file on a public url to a Druid indexer task for SprayDay
@@ -82,10 +90,7 @@ def ingest_sprayday(file_url, intervals=None):
         file_url => https://example.com/data.json
         intervals => 2013-01-01/2013-01-02
     """
-    schema_file = "{}/mspray/apps/warehouse/druid-schemas/{}.json".format(
-        settings.BASE_DIR, "sprayday-index-task")
-    with open(schema_file) as f:
-        schema = json.load(f)
+    schema = get_sprayday_schema()
     schema['spec']['dataSchema']['dataSource'] = sprayday_datasource
     schema['spec']['ioConfig']['firehose']['uris'] = [file_url]
     schema['spec']['dataSchema']['parser']['parseSpec']['dimensionsSpec'] =\
