@@ -12,9 +12,10 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
 from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
 from mspray.apps.main.utils import queryset_iterator
-from mspray.apps.warehouse.store import get_intervals, get_data, get_queryset
+from mspray.apps.warehouse.store import get_druid_intervals, get_data
 from mspray.apps.warehouse.store import get_historical_data
 from mspray.apps.warehouse.store import create_sprayday_druid_json_file
+from mspray.apps.warehouse.store import get_sprayday_queryset_from_x_minutes
 
 
 class TestStore(TestBase):
@@ -23,17 +24,17 @@ class TestStore(TestBase):
         TestBase.setUp(self)
         self._load_fixtures()
 
-    def test_get_intervals(self):
+    def test_get_druid_intervals(self):
         """ test that we get the right intervals back """
         queryset = SprayDay.objects.all()
         first = queryset.first().data['_submission_time']
         last = queryset.last().data['_submission_time']
         expected = "{}/{}".format(first, last)
-        self.assertEqual(expected, get_intervals(queryset))
+        self.assertEqual(expected, get_druid_intervals(queryset))
 
-    def test_get_queryset(self):
+    def test_get_sprayday_queryset_from_x_minutes(self):
         """
-        test that get_queryset works
+        test that get_sprayday_queryset_from_x_minutes works
         """
         earliest = SprayDay.objects.order_by('created_on').first().created_on
         dt = timezone.now() - earliest
@@ -41,13 +42,13 @@ class TestStore(TestBase):
         x_minutes_ago = timezone.now() - timedelta(minutes=minutes)
         queryset = SprayDay.objects.filter(
                         created_on__gte=x_minutes_ago).order_by('created_on')
-        queryset2 = get_queryset(minutes)
+        queryset2 = get_sprayday_queryset_from_x_minutes(minutes)
         self.assertTrue(queryset.count() > 0)
         self.assertEqual(queryset.count(), queryset2.count())
 
     @patch('mspray.apps.warehouse.store.ingest_sprayday')
     @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
-    @patch('mspray.apps.warehouse.store.get_queryset')
+    @patch('mspray.apps.warehouse.store.get_sprayday_queryset_from_x_minutes')
     def test_get_data(self, queryset_mock, json_file_mock, ingest_mock):
         """
         Test that we store data by calling create_sprayday_druid_json_file
@@ -66,7 +67,7 @@ class TestStore(TestBase):
         self.assertTrue(ingest_mock.called)
         args, kwargs = ingest_mock.call_args_list[0]
         self.assertEqual(args[0], settings.AWS_S3_BASE_URL + "filename.json")
-        self.assertEqual(kwargs['intervals'], get_intervals(queryset))
+        self.assertEqual(kwargs['intervals'], get_druid_intervals(queryset))
 
     @patch('mspray.apps.warehouse.store.ingest_sprayday')
     @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
@@ -113,7 +114,7 @@ class TestStore(TestBase):
         args, kwargs = json_file_mock.call_args_list[0]
         self.assertEqual(kwargs['filename'], filename)
 
-    @patch('mspray.apps.warehouse.store.get_intervals')
+    @patch('mspray.apps.warehouse.store.get_druid_intervals')
     @patch('mspray.apps.warehouse.store.ingest_sprayday')
     @patch('mspray.apps.warehouse.store.create_sprayday_druid_json_file')
     def test_get_historical_data(self, json_file_mock, ingest_mock,
