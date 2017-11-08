@@ -11,7 +11,6 @@ from rest_framework.renderers import JSONRenderer
 
 from mspray.apps.main.models import SprayDay
 from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
-from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.warehouse.ingest import ingest_sprayday
 
 
@@ -90,6 +89,8 @@ def create_sprayday_druid_json_file(queryset=None, filename=None,
     Takes a queryset and creates a json file containing druid-ready data
     returns the filename
     """
+    from mspray.apps.main.utils import queryset_iterator  # noqa
+
     if not queryset:
         queryset = SprayDay.objects.all().order_by('spray_date')
 
