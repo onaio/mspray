@@ -1,13 +1,20 @@
+import os
+
 from unittest.mock import patch
 from datetime import timedelta
 
 from django.utils import timezone
 from django.conf import settings
 
+from rest_framework.renderers import JSONRenderer
+
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
+from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
+from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.warehouse.store import get_intervals, get_data, get_queryset
 from mspray.apps.warehouse.store import get_historical_data
+from mspray.apps.warehouse.store import create_sprayday_druid_json_file
 
 
 class TestStore(TestBase):
@@ -129,3 +136,32 @@ class TestStore(TestBase):
         self.assertEqual(mock2_args[0], settings.AWS_S3_BASE_URL + filename)
         self.assertEqual(mock2_kwargs['intervals'], "2013-01-01/2013-01-02")
 
+    def test_create_sprayday_druid_json_file(self):
+        """
+        Test that create_sprayday_druid_json_file actually gets the right JSON
+        data and that it saves it and returns the filename
+        """
+        queryset = SprayDay.objects.order_by('spray_date')[:10]
+
+        try:
+            os.remove("/tmp/somefile.json")
+        except OSError:
+            pass
+
+        lines = []
+        for record in queryset_iterator(queryset, 1000):
+            data = SprayDayDruidSerializer(record).data
+            line = JSONRenderer().render(data)
+            lines.append(line)
+
+        expected_content = b'\n'.join(lines)
+
+        default_file_storage = 'django.core.files.storage.FileSystemStorage'
+        with self.settings(DEFAULT_FILE_STORAGE=default_file_storage,
+                           MEDIA_ROOT="/tmp/"):
+            result = create_sprayday_druid_json_file(queryset=queryset,
+                                                     filename="somefile.json")
+            self.assertEqual(result, "/tmp/somefile.json")
+            with open(result, "r") as f:
+                content = f.read()
+            self.assertEqual(content.encode(), expected_content)
