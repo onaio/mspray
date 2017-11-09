@@ -1,3 +1,4 @@
+import os
 import json
 
 from django.conf import settings
@@ -69,8 +70,18 @@ dimensions_spec = {
 
 
 def get_druid_indexer_url():
-    return "{}:{}/druid/indexer/v1/task".format(settings.DRUID_OVERLORD_URI,
-                                                settings.DRUID_OVERLORD_PORT)
+    return "{uri}:{port}/druid/indexer/v1/task".format(
+                uri=settings.DRUID_OVERLORD_URI,
+                port=settings.DRUID_OVERLORD_PORT)
+
+
+def get_sprayday_schema():
+    schema_file = os.path.join(
+        settings.BASE_DIR,
+        "mspray/apps/warehouse/druid-schemas/sprayday-index-task.json")
+    with open(schema_file) as f:
+        schema = json.load(f)
+    return schema
 
 
 def ingest_sprayday(file_url, intervals=None):
@@ -82,10 +93,7 @@ def ingest_sprayday(file_url, intervals=None):
         file_url => https://example.com/data.json
         intervals => 2013-01-01/2013-01-02
     """
-    schema_file = "{}/mspray/apps/warehouse/druid-schemas/{}.json".format(
-        settings.BASE_DIR, "sprayday-index-task")
-    with open(schema_file) as f:
-        schema = json.load(f)
+    schema = get_sprayday_schema()
     schema['spec']['dataSchema']['dataSource'] = sprayday_datasource
     schema['spec']['ioConfig']['firehose']['uris'] = [file_url]
     schema['spec']['dataSchema']['parser']['parseSpec']['dimensionsSpec'] =\
