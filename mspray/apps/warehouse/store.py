@@ -44,19 +44,20 @@ def get_data(minutes=10):
     returns filename
     """
     queryset = get_sprayday_queryset_from_x_minutes(minutes)
-    # get intervals
-    first = queryset.first().data['_submission_time']
-    last = queryset.last().data['_submission_time']
-    intervals = get_druid_intervals(queryset)
-    filename = "{datasource}/minutes".format(
-        datasource=settings.DRUID_SPRAYDAY_DATASOURCE) + \
-        "/sprayday-{start_time}-{end_time}.json".format(start_time=first,
-                                                        end_time=last)
+    if queryset:
+        # get intervals
+        first = queryset.first().data['_submission_time']
+        last = queryset.last().data['_submission_time']
+        intervals = get_druid_intervals(queryset)
+        filename = "{datasource}/minutes".format(
+            datasource=settings.DRUID_SPRAYDAY_DATASOURCE) + \
+            "/sprayday-{start_time}-{end_time}.json".format(start_time=first,
+                                                            end_time=last)
 
-    path = create_sprayday_druid_json_file(queryset=queryset,
-                                           filename=filename)
-    url = settings.AWS_S3_BASE_URL + path
-    return ingest_sprayday(url, intervals=intervals)
+        path = create_sprayday_druid_json_file(queryset=queryset,
+                                               filename=filename)
+        url = settings.AWS_S3_BASE_URL + path
+        return ingest_sprayday(url, intervals=intervals)
 
 
 def get_historical_data(day=None, month=None, year=None):
