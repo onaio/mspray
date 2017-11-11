@@ -239,7 +239,7 @@ def get_district_data(district):
 
     team_leaders = TeamLeaderAssistant.objects.filter(
         location=district
-    ).order_by('name')
+    ).order_by('name')[:2]
 
     for team_leader_assistant in team_leaders:
         k = get_tla_data(team_leader_assistant)[1]
@@ -568,27 +568,33 @@ def get_spray_operator_data(spray_operator, spray_date):
         found=Coalesce(Subquery(
             queryset=found_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         sprayed=Coalesce(Subquery(
             queryset=was_sprayed_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         sprayed_sprayformid=Coalesce(Subquery(
             queryset=sprayed_sprayformid_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         not_sprayed=Coalesce(Subquery(
             queryset=not_sprayed_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         refused=Coalesce(Subquery(
             queryset=refused_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         found_sprayformid=Coalesce(Subquery(
             queryset=found_sprayformid_count,
             output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
+    )
+    sop = sop.annotate(
         success_rate=Case(When(found__gt=0, then=ExpressionWrapper(
             F('sprayed') * 100 / Func(
                 F('found'), function='CAST',
@@ -596,15 +602,18 @@ def get_spray_operator_data(spray_operator, spray_date):
             ),
             FloatField()
         )), default=0, output_field=FloatField())
-    ).annotate(
+    )
+    sop = sop.annotate(
         other=Case(When(not_sprayed__gt=0,
                         then=F('not_sprayed') - F('refused')),
                    default=0, output_field=IntegerField())
-    ).values(
-        'pk', 'code', 'found', 'sprayed', 'refused', 'other',
-        'not_sprayed', 'sprayday__spray_date', 'success_rate',
-        'found_sprayformid', 'sprayed_sprayformid'
-    ).distinct('id').first()
+    )
+    sop = sop.values(
+        # 'pk', 'code', 'found', 'sprayed', 'refused', 'other',
+        # 'not_sprayed', 'sprayday__spray_date', 'success_rate',
+        # 'found_sprayformid', 'sprayed_sprayformid'
+    )
+    sop = sop.distinct('id').first()
 
     sprayed_sprayformid = sop.get('sprayed_sprayformid')
     found_sprayformid = sop.get('found_sprayformid')
