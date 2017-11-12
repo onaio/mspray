@@ -1,4 +1,8 @@
-from datetime import datetime
+# -*- coding=utf-8 -*-
+"""
+Custom performance template tags and filters.
+"""
+from datetime import datetime, time, timedelta
 from django import template
 
 register = template.Library()
@@ -6,6 +10,9 @@ register = template.Library()
 
 @register.filter
 def sprayed_color(value):
+    """
+    Returns 'green' or 'red' or 'yellow' string depending on value.
+    """
     try:
         if not isinstance(value, (int, float, complex)):
             value = float(value)
@@ -24,6 +31,9 @@ def sprayed_color(value):
 
 @register.filter
 def format_avg_time(value):
+    """
+    Formats a (hour, minute) tuple to 'hour:minute' string.
+    """
     if not isinstance(value, tuple):
         return value if value is not None else ''
 
@@ -37,6 +47,9 @@ def format_avg_time(value):
 
 @register.filter
 def avg_start_time_color(value):
+    """
+    Returns 'red' or 'green' or 'yellow' string depending on the start hour.
+    """
     if not isinstance(value, tuple) or value is None:
         return ''
 
@@ -54,6 +67,9 @@ def avg_start_time_color(value):
 
 @register.filter
 def avg_end_time_color(value):
+    """
+    Returns 'red' or 'green' or 'yellow' string depending on the end hour.
+    """
     if not isinstance(value, tuple) or value is None:
         return ''
 
@@ -72,9 +88,25 @@ def avg_end_time_color(value):
 
 @register.simple_tag
 def avg_time_interval(value, from_value):
-    if (not isinstance(value, tuple) or value is None) or \
-            (not isinstance(from_value, tuple) or from_value is None):
+    """
+    Returns the time differennce between value - from_value.
+    """
+    value_is_time = isinstance(value, time)
+    from_value_is_time = isinstance(value, time)
+    values_are_none = value is None or from_value is None
+    if ((not isinstance(value, tuple) and not value_is_time) or
+            values_are_none or (not isinstance(from_value, tuple) and
+                                not from_value_is_time)):
         return ''
+    if value_is_time and from_value_is_time:
+        start_time, end_time = from_value, value
+        return '%s' % (
+            timedelta(hours=end_time.hour, minutes=end_time.minute,
+                      seconds=end_time.second) - timedelta(
+                          hours=start_time.hour, minutes=start_time.minute,
+                          seconds=start_time.second)
+        )
+
     start_time = '{}:{}'.format(*from_value)
     end_time = '{}:{}'.format(*value)
 
@@ -85,7 +117,7 @@ def avg_time_interval(value, from_value):
     end_time = datetime.strptime(end_time, '%H:%M')
     time_diff = end_time - start_time
 
-    minutes, seconds = divmod(time_diff.seconds, 60)
+    minutes, _seconds = divmod(time_diff.seconds, 60)
     hours, minutes = divmod(minutes, 60)
 
     return '{:02}:{:02}'.format(hours, minutes)
@@ -93,6 +125,9 @@ def avg_time_interval(value, from_value):
 
 @register.simple_tag
 def percentage(numerator, denominator):
+    """
+    Returns percentage formatted string from numerator/denominator.
+    """
     try:
         denominator = float(denominator)
         numerator = float(numerator)

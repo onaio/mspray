@@ -1,3 +1,7 @@
+# -*- coding=utf-8 -*-
+"""
+main.models
+"""
 from .household import Household  # noqa
 from .households_buffer import HouseholdsBuffer  # noqa
 from .spray_day import SprayDay  # noqa
@@ -16,3 +20,4 @@ from .spraypoint import SprayPointView  # noqa
 from .spraypoint import Hhcsv  # noqa
 from .spraypoint import OsmData  # noqa
 from .spraypoint import MatchedData  # noqa
+from .performance_report import PerformanceReport  # noqa

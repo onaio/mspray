@@ -12,10 +12,12 @@ from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
 from django.db.models import Q, Count
+from django.db.models.expressions import RawSQL
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
 from django.contrib.gis.geos import Point
 from django.shortcuts import get_object_or_404
+from django.utils.dateparse import parse_datetime
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.target_area import TargetArea
@@ -36,6 +38,7 @@ from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.spraypoint import SprayPointView
 from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
+from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
 from mspray.apps.main.tasks import run_tasks_after_spray_data
@@ -60,7 +63,20 @@ REASON_OTHER = REASONS.keys()
 
 
 def get_formid(spray_operator, spray_date):
+    """
+    Returns a string with 'DAY.MONTH.SPRAY_OPERATOR_CODE' from a spray_operator
+    and spray_date.
+    """
     return '%s.%s' % (spray_date.strftime('%d.%m'), spray_operator.code)
+
+
+def formid_date(sprayformid):
+    """
+    Return a date from sprayformid.
+    """
+    parts = sprayformid.split('.')
+
+    return datetime(year=datetime.now().year, month=parts[1], day=parts[0])
 
 
 def geojson_from_gps_string(geolocation, geom=False):
@@ -841,3 +857,103 @@ def remove_duplicate_sprayoperatordailysummary():
                         '-submission_id')
         # only keep the latest based on submission id
         objects.exclude(id=objects.first().id).delete()
+
+
+def start_end_time(sprayday_qs, sprayformid):
+    """
+    Returns start, end times and spray_date for a given sprayformid.
+    """
+    start_time = sprayday_qs.filter(data__sprayformid=sprayformid)\
+        .annotate(start=RawSQL("data->>'start'", ()))\
+        .values_list('start', flat=True).order_by('start').first()
+    end_time = sprayday_qs.filter(data__sprayformid=sprayformid)\
+        .annotate(end=RawSQL("data->>'end'", ()))\
+        .values_list('end', flat=True).order_by('-end').first()
+    spray_date = parse_datetime(start_time).date() \
+        if start_time else formid_date(sprayformid)
+    start_time = parse_datetime(start_time).time() if start_time else None
+    end_time = parse_datetime(end_time).time() if end_time else None
+
+    return start_time, end_time, spray_date
+
+
+def performance_report(spray_operator):
+    """
+    Update performance report for spray_operator.
+    """
+    operator_qs = SprayDay.objects.filter(spray_operator=spray_operator,
+                                          sprayable=True)
+    queryset = operator_qs.annotate(
+        sprayformid=RawSQL("data->'sprayformid'", ())
+    ).values_list('sprayformid', flat=True).order_by('spray_date').distinct()
+    report_qs = SprayOperatorDailySummary.objects.filter(
+        sprayoperator_code=spray_operator.code)
+    for sprayformid in queryset:
+        found = operator_qs.filter(data__sprayformid=sprayformid).count()
+        sprayed = operator_qs.filter(data__sprayformid=sprayformid,
+                                     was_sprayed=True).count()
+        refused = operator_qs.filter(
+            data__sprayformid=sprayformid,
+            was_sprayed=False,
+            data__contains={REASON_FIELD: REASON_REFUSED},
+        ).count()
+        other = operator_qs.filter(
+            data__sprayformid=sprayformid,
+            was_sprayed=False
+        ).exclude(
+            data__contains={REASON_FIELD: REASON_REFUSED},
+        ).count()
+        reported = report_qs.filter(spray_form_id=sprayformid)\
+            .order_by('date_created').last()
+        reported_found = 0 if not reported else reported.found
+        reported_sprayed = 0 if not reported else reported.sprayed
+        found_difference = reported_found - found
+        sprayed_difference = reported_sprayed - sprayed
+        data_quality_check = found_difference == 0 and sprayed_difference == 0
+        start_time, end_time, spray_date = start_end_time(operator_qs,
+                                                          sprayformid)
+        report = PerformanceReport(sprayformid=sprayformid,
+                                   spray_operator=spray_operator)
+        try:
+            report = PerformanceReport.objects.get(
+                sprayformid=sprayformid, spray_operator=spray_operator)
+        except PerformanceReport.DoesNotExist:
+            pass
+        report.found = found
+        report.sprayed = sprayed
+        report.refused = refused
+        report.other = other
+        report.reported_found = reported_found
+        report.reported_sprayed = reported_sprayed
+        report.start_time = start_time
+        report.end_time = end_time
+        report.data_quality_check = data_quality_check
+        report.spray_date = spray_date
+        report.team_leader = spray_operator.team_leader
+        report.team_leader_assistant = spray_operator.team_leader_assistant
+        report.save()
+
+
+def create_performance_reports():
+    """
+    Create PerfomanceReports for all spray operators.
+    """
+    for spray_operator in SprayOperator.objects.filter().iterator():
+        performance_report(spray_operator)
+        gc.collect()
+
+
+def average_time(times):
+    """
+    Average time from a list of times.
+    """
+    count = len(times)
+    if not count:
+        return ''
+    seconds = sum([
+        timedelta(hours=x.hour, minutes=x.minute, seconds=x.second).seconds
+        for x in times
+    ])
+    avg = timedelta(seconds=(seconds / round(count)))
+
+    return datetime.strptime('%s' % avg, '%H:%M:%S.%f').time()
