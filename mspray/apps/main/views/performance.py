@@ -16,7 +16,8 @@ from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.models import SprayOperatorDailySummary
-from mspray.apps.main.serializers import PerformanceReportSerializer
+from mspray.apps.main.serializers import (
+    PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer)
 from mspray.apps.main.utils import (
     avg_time, get_formid, avg_time_tuple, average_time)
 
@@ -503,11 +504,44 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         team_leader = self.kwargs.get('team_leader')
         team_leader_assistant = get_object_or_404(TeamLeaderAssistant,
                                                   code=team_leader)
-        data, totals = get_tla_data(team_leader_assistant)
+        queryset = team_leader_assistant.sprayoperator_set.annotate(
+            found=Sum('performancereport__found'),
+            sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+        )
+        serializer = SprayOperatorPerformanceReportSerializer(queryset,
+                                                              many=True)
+        totals = {
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': sum([
+                i['avg_structures_per_so'] for i in serializer.data]),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data]),
+            'avg_end_time': average_time([i['avg_end_time']
+                                          for i in serializer.data]),
+        }
 
         context.update(
             {
-                'data': data,
+                'data': serializer.data,
                 'totals': totals,
                 'team_leader': team_leader,
                 'team_leader_name':
@@ -650,6 +684,7 @@ def get_spray_operator_data(spray_operator, spray_date):
     return data
 
 
+# pylint: disable=too-many-ancestors
 class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     """
     Spray Operator Daily view.

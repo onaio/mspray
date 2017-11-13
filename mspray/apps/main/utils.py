@@ -956,4 +956,5 @@ def average_time(times):
     ])
     avg = timedelta(seconds=(seconds / round(count)))
 
-    return datetime.strptime('%s' % avg, '%H:%M:%S.%f').time()
+    time_format_str = '%H:%M:%S.%f' if avg.microseconds != 0 else '%H:%M:%S'
+    return datetime.strptime('%s' % avg, time_format_str).time()
