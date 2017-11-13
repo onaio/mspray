@@ -931,6 +931,8 @@ def performance_report(spray_operator):
         report.spray_date = spray_date
         report.team_leader = spray_operator.team_leader
         report.team_leader_assistant = spray_operator.team_leader_assistant
+        report.not_eligible = spray_operator.sprayday_set.filter(
+            sprayable=False, data__sprayformid=sprayformid).count()
         report.save()
 
 
@@ -941,20 +943,3 @@ def create_performance_reports():
     for spray_operator in SprayOperator.objects.filter().iterator():
         performance_report(spray_operator)
         gc.collect()
-
-
-def average_time(times):
-    """
-    Average time from a list of times.
-    """
-    count = len(times)
-    if not count:
-        return ''
-    seconds = sum([
-        timedelta(hours=x.hour, minutes=x.minute, seconds=x.second).seconds
-        for x in times
-    ])
-    avg = timedelta(seconds=(seconds / round(count)))
-
-    time_format_str = '%H:%M:%S.%f' if avg.microseconds != 0 else '%H:%M:%S'
-    return datetime.strptime('%s' % avg, time_format_str).time()

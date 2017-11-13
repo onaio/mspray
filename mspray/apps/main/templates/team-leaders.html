@@ -43,14 +43,14 @@
                         <tr>
                             <td><a href="{% url "performance:spray-operator-summary" district.pk row.team_leader %}">{{ row.team_leader_name }}</a></td>
                             <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                            <td class='numbers'>{{ row.not_sprayable|intcomma  }}</td>
+                            <td class='numbers'>{{ row.not_eligible|intcomma  }}</td>
                             <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
                             <td class='numbers'>{{ row.refused|intcomma  }}</td>
                             <td class='numbers'>{{ row.other|intcomma  }}</td>
                             <td class='numbers'>{{ row.not_sprayed_total }}</td>
                             <!-- <td class='numbers'>{{ row.spray_success_rate }}%</td> -->
                             <td class='numbers {{ row.avg_structures_per_so|sprayed_color }}'>
-                                {{ row.avg_structures_per_so }}
+                                {{ row.avg_structures_per_so|floatformat:"0" }}
                             </td>
                             <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                             <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
@@ -69,14 +69,14 @@
                     <tr>
                         <td>Totals</td>
                         <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
-                        <td class='numbers'>{{ totals.not_sprayable|intcomma  }}</td>
+                        <td class='numbers'>{{ totals.not_eligible|intcomma  }}</td>
                         <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
                         <td class='numbers'>{{ totals.refused|intcomma  }}</td>
                         <td class='numbers'>{{ totals.other|intcomma  }}</td>
                         <td class='numbers'>{{ totals.not_sprayed_total }}</td>
                         <!-- <td class='numbers'>{{ totals.spray_success_rate }}%</td> -->
                         <td class='numbers {{ totals.avg_structures_per_so|sprayed_color }}'>
-                            {{ totals.avg_structures_per_so }}
+                            {{ totals.avg_structures_per_so|floatformat:"0" }}
                         </td>
                         <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                         <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>

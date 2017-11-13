@@ -17,9 +17,11 @@ from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.serializers import (
-    PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer)
+    PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer,
+    TLAPerformanceReportSerializer)
 from mspray.apps.main.utils import (
-    avg_time, get_formid, avg_time_tuple, average_time)
+    avg_time, get_formid, avg_time_tuple)
+from mspray.apps.main.datetime_tools import average_time
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
@@ -322,6 +324,7 @@ def get_district_data(district):
     return (data, totals)
 
 
+# pylint: disable=too-many-ancestors
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
     model = Location
     slug_field = 'id'
@@ -332,10 +335,47 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
 
-        data, totals = get_district_data(district)
+        queryset = TeamLeaderAssistant.objects.filter(location=district)
+        queryset = queryset.annotate(
+            found=Sum('performancereport__found'),
+            sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+            not_eligible=Sum('performancereport__not_eligible'),
+        )
+        serializer = TLAPerformanceReportSerializer(queryset, many=True)
+
+        totals = {
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_eligible': sum([i['not_eligible'] for i in serializer.data]),
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': (
+                sum([i['avg_structures_per_so'] for i in serializer.data]) /
+                round(queryset.count())),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data]),
+            'avg_end_time': average_time([i['avg_end_time']
+                                          for i in serializer.data]),
+        }
 
         context.update({
-            'data': data,
+            'data': serializer.data,
             'totals': totals,
             'district': district,
             'district_name': district.name
@@ -492,7 +532,11 @@ def get_tla_data(team_leader_assistant):
     return (data, totals)
 
 
+# pylint: disable=too-many-ancestors
 class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
+    """
+    Spray Operator summary performance page.
+    """
     template_name = 'spray-operator-summary.html'
     model = Location
     slug_field = 'id'

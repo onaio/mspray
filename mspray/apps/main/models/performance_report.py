@@ -23,6 +23,7 @@ class PerformanceReport(models.Model):
     data_quality_check = models.BooleanField()
     reported_found = models.IntegerField(default=0)
     reported_sprayed = models.IntegerField(default=0)
+    not_eligible = models.IntegerField(default=0)
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
