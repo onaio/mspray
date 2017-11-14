@@ -179,15 +179,15 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
     team_leader_name = serializers.CharField(source='name')
-    spray_operator_code = serializers.CharField(source='code')
+    team_leader_code = serializers.CharField(source='code')
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
     not_eligible = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('name', 'no_of_days_worked', 'spray_operator_code',
-                  'team_leader', 'team_leader_name', 'sprayed', 'not_eligible',
+        fields = ('name', 'no_of_days_worked', 'team_leader_code',
+                  'team_leader_name', 'sprayed', 'not_eligible',
                   'refused', 'other', 'data_quality_check', 'sprayable',
                   'found_difference', 'sprayed_difference', 'avg_start_time',
                   'avg_end_time', 'not_sprayed_total', 'avg_structures_per_so')
