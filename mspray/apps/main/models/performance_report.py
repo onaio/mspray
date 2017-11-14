@@ -24,6 +24,7 @@ class PerformanceReport(models.Model):
     reported_found = models.IntegerField(default=0)
     reported_sprayed = models.IntegerField(default=0)
     not_eligible = models.IntegerField(default=0)
+    district = models.ForeignKey('Location')
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)

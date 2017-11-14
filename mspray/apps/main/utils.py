@@ -933,6 +933,7 @@ def performance_report(spray_operator):
         report.team_leader_assistant = spray_operator.team_leader_assistant
         report.not_eligible = spray_operator.sprayday_set.filter(
             sprayable=False, data__sprayformid=sprayformid).count()
+        report.district = spray_operator.team_leader_assistant.location
         report.save()
 
 

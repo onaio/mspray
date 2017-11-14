@@ -2,8 +2,11 @@
 """
 main.serializers
 """
-from mspray.apps.main.serializers.performance_report import (
-    PerformanceReportSerializer,  # noqa
-    SprayOperatorPerformanceReportSerializer,  # noqa
-    TLAPerformanceReportSerializer,  # noqa
-)  # noqa
+from mspray.apps.main.serializers.performance_report import \
+    DistrictPerformanceReportSerializer  # noqa
+from mspray.apps.main.serializers.performance_report import \
+    PerformanceReportSerializer  # noqa
+from mspray.apps.main.serializers.performance_report import \
+    SprayOperatorPerformanceReportSerializer  # noqa
+from mspray.apps.main.serializers.performance_report import \
+    TLAPerformanceReportSerializer  # noqa

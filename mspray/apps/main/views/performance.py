@@ -18,7 +18,7 @@ from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.serializers import (
     PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer,
-    TLAPerformanceReportSerializer)
+    TLAPerformanceReportSerializer, DistrictPerformanceReportSerializer)
 from mspray.apps.main.utils import (
     avg_time, get_formid, avg_time_tuple)
 from mspray.apps.main.datetime_tools import average_time
@@ -82,7 +82,11 @@ class DefinitionAndConditionView(IsPerformanceViewMixin, TemplateView):
     template_name = 'definitions-and-conditions.html'
 
 
+# pylint: disable=too-many-ancestors
 class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
+    """
+    District perfomance view
+    """
     model = Location
     template_name = 'performance.html'
 
@@ -95,66 +99,54 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         context = super(DistrictPerfomanceView, self)\
             .get_context_data(**kwargs)
         districts = Location.objects.filter(parent=None).order_by('name')
-        results = []
 
-        for district in districts:
-            district_data, district_totals = get_district_data(district)
-            district_totals.update(
-                {'location': district,
-                 'structures': district.structures,
-                 'pre_season_target': district.pre_season_target})
-            results.append(district_totals)
-
-        district_count = districts.count()
-        avg_start_time = avg_time_tuple([
-            i.get('avg_start_time') for i in results if i.get('avg_start_time')
-        ])
-        avg_end_time = avg_time_tuple([
-            i.get('avg_end_time') for i in results if i.get('avg_end_time')
-        ])
-
-        def _sum_key(a, b): return sum([i.get(a, 0) for i in b])
-
-        try:
-            avg_structures_per_so = round(
-                _sum_key('avg_structures_per_so', results) / district_count
-            )
-        except ZeroDivisionError:
-            avg_structures_per_so = 0
-
-        try:
-            spray_success_rate = round(
-                _sum_key('spray_success_rate', results) / district_count, 1
-            )
-        except ZeroDivisionError:
-            spray_success_rate = 0
-
-        try:
-            spray_progress = round(_sum_key('spray_progress', results) /
-                                   _sum_key('pre_season_target', results), 1)
-        except ZeroDivisionError:
-            spray_progress = 0
+        queryset = districts.annotate(
+            found=Sum('performancereport__found'),
+            p_sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+            not_eligible=Sum('performancereport__not_eligible'),
+        )
+        serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
         totals = {
-            'avg_start_time': avg_start_time,
-            'avg_end_time': avg_end_time,
-            'avg_structures_per_so': avg_structures_per_so,
-            'sprayed': _sum_key('sprayed', results),
-            'houses': _sum_key('structures', results),
-            'pre_season_target': _sum_key('pre_season_target', results),
-            'sprayable': _sum_key('sprayable', results),
-            'not_sprayable': _sum_key('not_sprayable', results),
-            'refused': _sum_key('refused', results),
-            'other': _sum_key('other', results),
-            'not_sprayed_total': _sum_key('not_sprayed_total', results),
-            'spray_success_rate': spray_success_rate,
-            'spray_progress': spray_progress,
-            'data_quality_check': any([i.get('data_quality_check')
-                                       for i in results])
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_eligible': sum([i['not_eligible'] for i in serializer.data]),
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'pre_season_target': sum([i['location'].pre_season_target for i in
+                                      serializer.data]),
+            'houses': sum([i['location'].structures for i in serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': (
+                sum([i['avg_structures_per_so'] for i in serializer.data]) /
+                round(queryset.count())),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data
+                 if i['avg_start_time'] != '']),
+            'avg_end_time': average_time([
+                i['avg_end_time'] for i in serializer.data
+                if i['avg_start_time'] != '']),
+            'success_rate': (
+                sum([i['success_rate'] for i in serializer.data]) /
+                round(len([i for i in serializer.data]))),
         }
-
         context.update({
-            'data': results, 'totals': totals
+            'data': serializer.data, 'totals': totals
         })
         context.update(DEFINITIONS['performance:district'])
 
@@ -326,6 +318,9 @@ def get_district_data(district):
 
 # pylint: disable=too-many-ancestors
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
+    """
+    TeamLeaderAssistant performance view.
+    """
     model = Location
     slug_field = 'id'
     template_name = 'team-leaders.html'
