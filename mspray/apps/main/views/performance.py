@@ -364,9 +364,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 sum([i['avg_structures_per_so'] for i in serializer.data]) /
                 round(queryset.count())),
             'avg_start_time': average_time(
-                [i['avg_start_time'] for i in serializer.data]),
-            'avg_end_time': average_time([i['avg_end_time']
-                                          for i in serializer.data]),
+                [i['avg_start_time'] for i in serializer.data
+                 if i['avg_start_time'] != '']),
+            'avg_end_time': average_time([
+                i['avg_end_time'] for i in serializer.data
+                if i['avg_end_time'] != '']),
         }
 
         context.update({

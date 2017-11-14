@@ -169,9 +169,9 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
     PerformanceReportSerializer
     """
     sprayable = serializers.SerializerMethodField()
-    sprayed = serializers.IntegerField()
-    refused = serializers.IntegerField()
-    other = serializers.IntegerField()
+    sprayed = serializers.SerializerMethodField()
+    refused = serializers.SerializerMethodField()
+    other = serializers.SerializerMethodField()
     not_sprayed_total = serializers.SerializerMethodField()
     avg_start_time = serializers.SerializerMethodField()
     avg_end_time = serializers.SerializerMethodField()
@@ -183,7 +183,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
-    not_eligible = serializers.IntegerField()
+    not_eligible = serializers.SerializerMethodField()
 
     class Meta:
         fields = ('name', 'no_of_days_worked', 'spray_operator_code',
@@ -192,6 +192,31 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
                   'found_difference', 'sprayed_difference', 'avg_start_time',
                   'avg_end_time', 'not_sprayed_total', 'avg_structures_per_so')
         model = TeamLeaderAssistant
+
+    def get_sprayed(self, obj):  # pylint: disable=no-self-use
+        """
+        Returns number of sprayable structures sprayed.
+        """
+        return 0 if obj.sprayed is None else obj.sprayed
+
+    def get_refused(self, obj):  # pylint: disable=no-self-use
+        """
+        Returns number of sprayable structures not sprayed refused reason.
+        """
+        return 0 if obj.refused is None else obj.refused
+
+    def get_other(self, obj):  # pylint: disable=no-self-use
+        """
+        Returns number of sprayable structures not sprayed other reason.
+        """
+        return 0 if obj.other is None else obj.other
+
+    def get_not_eligible(self, obj):  # pylint: disable=no-self-use
+        """
+        Returns number of sprayable structures not eligible reason.
+        """
+        return SprayDay.objects.filter(
+            sprayable=False, team_leader_assistant=obj).count()
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
         """
@@ -206,7 +231,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns number of sprayable structures.
         """
-        return obj.found
+        return obj.found or 0
 
     def get_data_quality_check(self, obj):  # pylint: disable=no-self-use
         """
@@ -242,19 +267,28 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns not sprayed other + refused.
         """
-        return obj.other + obj.refused
+        other = obj.other or 0
+        refused = obj.refused or 0
+
+        return other + refused
 
     def get_found_difference(self, obj):  # pylint: disable=no-self-use
         """
         Returns spray operator found - submitted found difference.
         """
-        return obj.reported_found - obj.found
+        reported_found = obj.reported_found or 0
+        found = obj.found or 0
+
+        return reported_found - found
 
     def get_sprayed_difference(self, obj):  # pylint: disable=no-self-use
         """
         Returns spray operator sprayed - submitted sprayed difference.
         """
-        return obj.reported_sprayed - obj.sprayed
+        reported_sprayed = obj.reported_sprayed or 0
+        sprayed = obj.sprayed or 0
+
+        return reported_sprayed - sprayed
 
 
 class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
@@ -399,5 +433,4 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         if obj.sprayed is None or obj.found is None or obj.found == 0:
             return 0
 
-        print(obj.name, obj.p_sprayed / obj.found)
         return (100 * obj.p_sprayed) / obj.found
