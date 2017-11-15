@@ -42,6 +42,7 @@ from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.tasks import link_spraypoint_with_osm
 from mspray.libs.utils.geom_buffer import with_metric_buffer
 from mspray.apps.main.tasks import run_tasks_after_spray_data
+from mspray.apps.main.ona import fetch_form_data
 
 
 BUFFER_SIZE = getattr(settings, 'MSPRAY_NEW_BUFFER_WIDTH', 4)  # default to 4m
@@ -944,3 +945,35 @@ def create_performance_reports():
     for spray_operator in SprayOperator.objects.filter().iterator():
         performance_report(spray_operator)
         gc.collect()
+
+
+def sync_missing_sprays(formid, log_writer):
+    """
+    Sync missing data for the given formid from Ona.
+    """
+    if not formid:
+        raise ValueError("'formid' is required.")
+    old_data = SprayDay.objects.filter().order_by('-submission_id')\
+        .values_list('submission_id', flat=True)
+    raw_data = fetch_form_data(formid, dataids_only=True)
+    if isinstance(raw_data, list):
+        all_data = [rec['_id'] for rec in raw_data]
+        all_data.sort()
+        if all_data is not None and isinstance(all_data, list):
+            new_data = list(set(all_data) - set(old_data))
+            count = len(new_data)
+            counter = 0
+            log_writer("Need to pull {} records from Ona.".format(count))
+            for dataid in new_data:
+                counter += 1
+                log_writer("Pulling {} of {}".format(counter, count))
+                rec = fetch_form_data(formid, dataid=dataid)
+                if isinstance(rec, dict):
+                    try:
+                        add_spray_data(rec)
+                    except IntegrityError:
+                        continue
+                if counter % 100 == 0:
+                    gc.collect()
+    else:
+        log_writer("DATA not fetched: {}".format(raw_data))

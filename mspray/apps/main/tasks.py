@@ -419,3 +419,12 @@ def remove_deleted_dos_records():
         deleted_submissions.delete()
 
     return count
+
+
+@app.task
+def check_missing_data():
+    """
+    Sync missing data from Ona.
+    """
+    from mspray.apps.main.utils import sync_missing_sprays
+    sync_missing_sprays(FORM_ID, print)
