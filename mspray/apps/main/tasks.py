@@ -428,3 +428,17 @@ def check_missing_data():
     """
     from mspray.apps.main.utils import sync_missing_sprays
     sync_missing_sprays(FORM_ID, print)
+
+
+@app.task
+def check_missing_unique_link():
+    """
+    Checks and forces a linking of submitted data that has not yet been
+    identified as unique.
+    """
+    from mspray.apps.main.utils import queryset_iterator
+    queryset = SprayDay.objects.filter(spraypoint__isnull=True).only(
+        'pk', 'location_id')
+    for record in queryset_iterator(queryset):
+        add_unique_record(record.pk, record.location_id)
+        gc.collect()
