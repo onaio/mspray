@@ -221,14 +221,21 @@ def process_osm_file(path):
 
 @app.task
 def refresh_data_with_no_osm():
+    def _process_no_osm(queryset):
+        for rec in data:
+            osmid = get_updated_osm_from_ona(rec)
+            if osmid:
+                link_spraypoint_with_osm.delay(rec.pk)
+
     data = SprayDay.objects.exclude(data__has_key='osmstructure:way:id')\
         .exclude(data__has_key='osmstructure:node:id')\
         .filter(data__has_key='osmstructure')
     found = data.count()
-    for rec in data:
-        osmid = get_updated_osm_from_ona(rec)
-        if osmid:
-            link_spraypoint_with_osm.delay(rec.pk)
+    _process_no_osm(data)
+
+    data = SprayDay.objects.filter(geom__isnull=True)
+    found = data.count() + found
+    _process_no_osm(data)
 
     return found
 
