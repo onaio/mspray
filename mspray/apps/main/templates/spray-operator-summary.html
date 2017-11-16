@@ -38,14 +38,14 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_code %}">{{ row.spray_operator_name }}</a></td>
+                                    <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_code %}">{{ row.name }}</a></td>
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayed_total }}</td>
                                     <!-- <td class='numbers'>{{ row.spray_success_rate }}%</td> -->
                                     <td class='numbers {{ row.avg_structures_per_so|sprayed_color }}'>
-                                        {{ row.avg_structures_per_so }}
+                                        {{row.avg_structures_per_so|floatformat:"0" }}
                                     </td>
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
@@ -71,7 +71,7 @@
                                 <td class='numbers'>{{ totals.not_sprayed_total }}</td>
                                 <!-- <td class='numbers'>{{ totals.spray_success_rate }}%</td> -->
                                 <td class='numbers {{ totals.avg_structures_per_so|sprayed_color }}'>
-                                    {{ totals.avg_structures_per_so }}
+                                    {{ totals.avg_structures_per_so|floatformat:"0" }}
                                 </td>
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>

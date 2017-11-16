@@ -14,8 +14,14 @@ from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
+from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.models import SprayOperatorDailySummary
-from mspray.apps.main.utils import avg_time, get_formid, avg_time_tuple
+from mspray.apps.main.serializers import (
+    PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer,
+    TLAPerformanceReportSerializer, DistrictPerformanceReportSerializer)
+from mspray.apps.main.utils import (
+    avg_time, get_formid, avg_time_tuple)
+from mspray.apps.main.datetime_tools import average_time
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
@@ -33,36 +39,6 @@ TEAM_LEADER_ASSISTANT_CODE = getattr(
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
 
 
-def calculate(numerator, denominator, percentage):
-    if denominator == 0:
-        return 0
-
-    coverage = numerator / denominator
-
-    if coverage > percentage:
-        return 1
-
-    return 0
-
-
-def update_sprayed_structures(spray_points_sprayed, sprayed_structures,
-                              per_so=True):
-    # set structures sprayed per day per spray operator
-    for a in spray_points_sprayed:
-        date_sprayed = a.data.get('today')
-        if per_so:
-            spray_operator = a.data.get(SPRAY_OPERATOR_CODE)
-            key = "%s-%s" % (date_sprayed, spray_operator)
-        else:
-            key = date_sprayed
-        if sprayed_structures.get(key):
-            sprayed_structures[key] = sprayed_structures[key] + 1
-        else:
-            sprayed_structures[key] = 1
-
-    return sprayed_structures
-
-
 class IsPerformanceViewMixin(SiteNameMixin):
     def get_context_data(self, **kwargs):
         context = super(IsPerformanceViewMixin, self)\
@@ -76,7 +52,11 @@ class DefinitionAndConditionView(IsPerformanceViewMixin, TemplateView):
     template_name = 'definitions-and-conditions.html'
 
 
+# pylint: disable=too-many-ancestors
 class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
+    """
+    District perfomance view
+    """
     model = Location
     template_name = 'performance.html'
 
@@ -89,236 +69,65 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         context = super(DistrictPerfomanceView, self)\
             .get_context_data(**kwargs)
         districts = Location.objects.filter(parent=None).order_by('name')
-        results = []
 
-        for district in districts:
-            district_data, district_totals = get_district_data(district)
-            district_totals.update(
-                {'location': district,
-                 'structures': district.structures,
-                 'pre_season_target': district.pre_season_target})
-            results.append(district_totals)
-
-        district_count = districts.count()
-        avg_start_time = avg_time_tuple([
-            i.get('avg_start_time') for i in results if i.get('avg_start_time')
-        ])
-        avg_end_time = avg_time_tuple([
-            i.get('avg_end_time') for i in results if i.get('avg_end_time')
-        ])
-
-        def _sum_key(a, b): return sum([i.get(a, 0) for i in b])
-
-        try:
-            avg_structures_per_so = round(
-                _sum_key('avg_structures_per_so', results) / district_count
-            )
-        except ZeroDivisionError:
-            avg_structures_per_so = 0
-
-        try:
-            spray_success_rate = round(
-                _sum_key('spray_success_rate', results) / district_count, 1
-            )
-        except ZeroDivisionError:
-            spray_success_rate = 0
-
-        try:
-            spray_progress = round(_sum_key('spray_progress', results) /
-                                   _sum_key('pre_season_target', results), 1)
-        except ZeroDivisionError:
-            spray_progress = 0
+        queryset = districts.annotate(
+            found=Sum('performancereport__found'),
+            p_sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+            not_eligible=Sum('performancereport__not_eligible'),
+        )
+        serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
         totals = {
-            'avg_start_time': avg_start_time,
-            'avg_end_time': avg_end_time,
-            'avg_structures_per_so': avg_structures_per_so,
-            'sprayed': _sum_key('sprayed', results),
-            'houses': _sum_key('structures', results),
-            'pre_season_target': _sum_key('pre_season_target', results),
-            'sprayable': _sum_key('sprayable', results),
-            'not_sprayable': _sum_key('not_sprayable', results),
-            'refused': _sum_key('refused', results),
-            'other': _sum_key('other', results),
-            'not_sprayed_total': _sum_key('not_sprayed_total', results),
-            'spray_success_rate': spray_success_rate,
-            'spray_progress': spray_progress,
-            'data_quality_check': any([i.get('data_quality_check')
-                                       for i in results])
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_eligible': sum([i['not_eligible'] for i in serializer.data]),
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'pre_season_target': sum([i['location'].pre_season_target for i in
+                                      serializer.data]),
+            'houses': sum([i['location'].structures for i in serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': (
+                sum([i['avg_structures_per_so'] for i in serializer.data]) /
+                round(queryset.count())),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data
+                 if i['avg_start_time'] != '']),
+            'avg_end_time': average_time([
+                i['avg_end_time'] for i in serializer.data
+                if i['avg_start_time'] != '']),
+            'success_rate': (
+                sum([i['success_rate'] for i in serializer.data]) /
+                round(len([i for i in serializer.data]))),
         }
-
         context.update({
-            'data': results, 'totals': totals
+            'data': serializer.data, 'totals': totals
         })
         context.update(DEFINITIONS['performance:district'])
 
         return context
 
 
-def get_totals(spraypoints, condition):
-    if condition == "sprayable":
-        resultset = dict(
-            spraypoints.filter(sprayable=True).annotate(c=Count('data')))
-    elif condition == "non-sprayable":
-        resultset = dict(
-            spraypoints.filter(sprayable=False).annotate(c=Count('data')))
-    elif condition == "sprayed":
-        resultset = dict(spraypoints.filter(sprayable=True, was_sprayed=True)
-                         .annotate(c=Count('data')))
-    elif condition == "refused":
-        resultset = dict(
-            spraypoints.filter(sprayable=True).extra(
-                where=['data->>%s = %s'],
-                params=[REASON_FIELD, REASON_REFUSED]).annotate(
-                    c=Count('data')))
-    elif condition == "other":
-        resultset = dict(
-            spraypoints.filter(sprayable=True).extra(
-                where=["data->>%s IN ({})".format(
-                    ",".join(["'{}'".format(i) for i in REASON_OTHER]))],
-                params=[REASON_FIELD]).annotate(c=Count('data')))
-
-    return resultset
-
-
-def get_tla_data_quality_check(team_leader_assistant, spray_operator=None):
-    data = dict(
-        found_difference=[],
-        sprayed_difference=[],
-        data_quality_check=[]
-    )
-    qs = team_leader_assistant.sprayoperator_set.all()
-    if spray_operator:
-        qs = qs.filter(pk=spray_operator.pk)
-    for spray_operator in qs:
-        try:
-            _date = spray_operator.sprayday_set.values_list(
-                'spray_date', flat=True
-            ).latest('spray_date')
-        except SprayDay.DoesNotExist:
-            pass
-        else:
-            if _date:
-                sopdiff = get_spray_operator_data(spray_operator, _date)
-                data['found_difference'].append(
-                    sopdiff.get('found_difference')
-                )
-                data['sprayed_difference'].append(
-                    sopdiff.get('sprayed_difference')
-                )
-                data['data_quality_check'].append(
-                    sopdiff.get('data_quality_check')
-                )
-
-    return (
-        sum(data.get('sprayed_difference')),
-        sum(data.get('found_difference')),
-        all(data.get('data_quality_check'))
-    )
-
-
-def get_district_data(district):
-    data = []
-    totals = {
-        'avg_structures_per_so': 0,
-        'other': 0,
-        'refused': 0,
-        'sprayed': 0,
-        'sprayable': 0,
-        'not_sprayable': 0,
-        'not_sprayed_total': 0,
-        'spray_success_rate': 0,
-        'avg_quality_score': 0,
-        'data_quality_check': True,
-        'found_difference': 0,
-        'sprayed_difference': 0,
-        'spray_progress': 0
-    }
-    start_times = []
-    end_times = []
-
-    team_leaders = TeamLeaderAssistant.objects.filter(
-        location=district
-    ).order_by('name')
-
-    for team_leader_assistant in team_leaders:
-        k = get_tla_data(team_leader_assistant)[1]
-        sprayed_difference, found_difference, data_quality_check = \
-            get_tla_data_quality_check(team_leader_assistant)
-
-        tla_code = team_leader_assistant.code
-        tla_name = team_leader_assistant.name
-        tla_not_sprayable = team_leader_assistant.sprayday_set.filter(
-            data__contains={'osmstructure:spray_status': 'notsprayable'}
-        ).count()
-        tla_sprayable = k.get('sprayable')
-        tla_sprayed = k.get('sprayed')
-        tla_refused = k.get('refused')
-        tla_other = k.get('other')
-        tla_not_sprayed = k.get('not_sprayed_total')
-        avg_structures_per_so = k.get('avg_structures_per_so')
-
-        _end_time = k.get('avg_end_time') or (None, None)
-        end_times.append(_end_time)
-        _start_time = k.get('avg_start_time') or (None, None)
-        start_times.append(_start_time)
-
-        data.append({
-            'team_leader': tla_code,
-            'team_leader_name': tla_name,
-            'sprayable': tla_sprayable,
-            'not_sprayable': tla_not_sprayable,
-            'sprayed': tla_sprayed,
-            'refused': tla_refused,
-            'other': tla_other,
-            # 'no_of_days_worked': no_of_days_worked,
-            'spray_success_rate': k.get('spray_success_rate'),
-            'avg_structures_per_so': avg_structures_per_so,
-            'not_sprayed_total': tla_not_sprayed,
-            'avg_start_time': _start_time,
-            'avg_end_time': _end_time,
-            'data_quality_check': data_quality_check,
-            'found_difference': found_difference,
-            'sprayed_difference': sprayed_difference
-        })
-
-        # totals
-        totals['sprayed'] += tla_sprayed
-        totals['sprayable'] += tla_sprayable
-        totals['not_sprayable'] += tla_not_sprayable
-        totals['refused'] += tla_refused
-        totals['other'] += tla_other
-        totals['not_sprayed_total'] += tla_not_sprayed
-        # totals['number_of_days_worked'] += no_of_days_worked
-        totals['avg_structures_per_so'] += avg_structures_per_so
-        if not data_quality_check:
-            totals['data_quality_check'] = data_quality_check
-        totals['found_difference'] += found_difference
-        totals['sprayed_difference'] += sprayed_difference
-
-    # calculate spray_success_rate total
-    numerator = totals['sprayed']
-    denominator = 1 if totals['sprayable'] == 0 \
-        else totals['sprayable']
-    sprayed_success_rate = round((numerator / denominator) * 100, 1)
-    totals['spray_success_rate'] = sprayed_success_rate
-
-    if len(team_leaders):
-        # calculate avg_structures_per_user_per_so total
-        totals['avg_structures_per_so'] = round(
-            totals['avg_structures_per_so'] / len(team_leaders))
-        totals['avg_quality_score'] = round(
-            totals['avg_quality_score'] / len(list(team_leaders)), 2
-        )
-
-    if len(start_times) and len(end_times):
-        totals['avg_start_time'] = avg_time_tuple(start_times)
-        totals['avg_end_time'] = avg_time_tuple(end_times)
-
-    return (data, totals)
-
-
+# pylint: disable=too-many-ancestors
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
+    """
+    TeamLeaderAssistant performance view.
+    """
     model = Location
     slug_field = 'id'
     template_name = 'team-leaders.html'
@@ -328,10 +137,49 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
             .get_context_data(**kwargs)
         district = context['object']
 
-        data, totals = get_district_data(district)
+        queryset = TeamLeaderAssistant.objects.filter(location=district)
+        queryset = queryset.annotate(
+            found=Sum('performancereport__found'),
+            sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+            not_eligible=Sum('performancereport__not_eligible'),
+        )
+        serializer = TLAPerformanceReportSerializer(queryset, many=True)
+
+        totals = {
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_eligible': sum([i['not_eligible'] for i in serializer.data]),
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': (
+                sum([i['avg_structures_per_so'] for i in serializer.data]) /
+                round(queryset.count())),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data
+                 if i['avg_start_time'] != '']),
+            'avg_end_time': average_time([
+                i['avg_end_time'] for i in serializer.data
+                if i['avg_end_time'] != '']),
+        }
 
         context.update({
-            'data': data,
+            'data': serializer.data,
             'totals': totals,
             'district': district,
             'district_name': district.name
@@ -341,154 +189,11 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         return context
 
 
-def get_sop_data(team_leader_assistant, spray_operator):
-    return SprayOperator.objects.filter(
-        team_leader_assistant=team_leader_assistant,
-        pk=spray_operator.pk
-    )\
-        .values('team_leader_assistant')\
-        .annotate(
-            d_found=Count('sprayday'),
-            d_sprayed=Sum(Case(
-                When(sprayday__was_sprayed=True, then=1),
-                default=0,
-                output_field=IntegerField()
-            )),
-            d_not_sprayed=Sum(Case(
-                When(sprayday__was_sprayed=False, then=1),
-                default=0,
-                output_field=IntegerField()
-            )),
-            d_refused=Sum(Case(When(
-                sprayday__was_sprayed=False,
-                sprayday__data__contains={
-                    'osmstructure:notsprayed_reason': 'refused'
-                }, then=1
-            ), default=0, output_field=IntegerField())
-            ),
-            d_number_of_days_worked=Count('sprayday__spray_date',
-                                          distinct=True)
-        ).annotate(
-            d_success_rate=Case(When(d_found__gt=0, then=ExpressionWrapper(
-                F('d_sprayed') * 100 / Func(
-                    F('d_found'), function='CAST',
-                    template='%(function)s(%(expressions)s AS FLOAT)'
-                ),
-                FloatField()
-            )), default=0, output_field=FloatField()),
-            d_other=Case(When(d_not_sprayed__gt=0,
-                              then=F('d_not_sprayed') - F('d_refused')),
-                         default=0, output_field=IntegerField())
-        )\
-        .aggregate(
-            found=Sum('d_found'),
-            sprayed=Sum('d_sprayed'),
-            not_sprayed=Sum('d_not_sprayed'),
-            refused=Sum('d_refused'),
-            number_of_days_worked=Sum('d_number_of_days_worked'),
-            success_rate=Avg('d_success_rate'),
-            other=Sum('d_other')
-        )
-
-
-def get_tla_data(team_leader_assistant):
-    data = []
-    totals = {
-        'no_of_days_worked': 0,
-        'avg_structures_per_so': 0,
-        'other': 0,
-        'refused': 0,
-        'sprayed': 0,
-        'sprayable': 0,
-        'not_sprayable': 0,
-        'not_sprayed_total': 0,
-        'spray_success_rate': 0,
-        'data_quality_check': True,
-        'found_difference': 0,
-        'sprayed_difference': 0
-    }
-    start_times = []
-    end_times = []
-
-    sops = team_leader_assistant.sprayoperator_set.all().order_by('name')
-    for spray_operator in sops:
-        # spray_operator = SprayOperator.objects.get(pk=sop.get('pk'))
-        sop = get_sop_data(team_leader_assistant, spray_operator)
-        found_difference = sprayed_difference = 0
-        sprayed_difference, found_difference, data_quality_check = \
-            get_tla_data_quality_check(team_leader_assistant,
-                                       spray_operator)
-
-        sop_code = spray_operator.code
-        sop_name = spray_operator.name
-        sop_found = sop.get('found')
-        sop_sprayed = sop.get('sprayed')
-        sop_refused = sop.get('refused')
-        sop_other = sop.get('other')
-        sop_success_rate = sop.get('success_rate')
-        sop_not_sprayed = sop.get('not_sprayed')
-        no_of_days_worked = sop.get('number_of_days_worked')
-        avg_structures_per_so = round(sop_found / no_of_days_worked) \
-            if no_of_days_worked else 0
-        qs = SprayDay.objects.filter(
-            spray_operator_id=spray_operator.pk
-        )
-        pks = list(qs.values_list('id', flat=True))
-        _end_time = avg_time(pks, 'start')
-        end_times.append(_end_time)
-        _start_time = avg_time(pks, 'end')
-        start_times.append(_start_time)
-
-        data.append({
-            'spray_operator_code': sop_code,
-            'spray_operator_name': sop_name,
-            'sprayable': sop_found,
-            'sprayed': sop_sprayed,
-            'refused': sop_refused,
-            'other': sop_other,
-            'no_of_days_worked': sop.get('number_of_days_worked'),
-            'spray_success_rate': round(sop_success_rate, 1),
-            'avg_structures_per_so': avg_structures_per_so,
-            'not_sprayed_total': sop_not_sprayed,
-            'avg_start_time': _start_time,
-            'avg_end_time': _end_time,
-            'data_quality_check': data_quality_check,
-            'found_difference': found_difference,
-            'sprayed_difference': sprayed_difference
-        })
-
-        # totals
-        totals['sprayed'] += sop_sprayed
-        totals['sprayable'] += sop_found
-        # totals['not_sprayable'] += \
-        #     non_sprayable.get(sop_code, 0)
-        totals['refused'] += sop_refused
-        totals['other'] += sop_other
-        totals['not_sprayed_total'] += sop_not_sprayed
-        totals['no_of_days_worked'] += no_of_days_worked
-        totals['avg_structures_per_so'] += avg_structures_per_so
-        if not data_quality_check:
-            totals['data_quality_check'] = data_quality_check
-        totals['found_difference'] += found_difference
-        totals['sprayed_difference'] += sprayed_difference
-
-    numerator = totals['sprayed']
-    denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
-    sprayed_success_rate = round((numerator / denominator) * 100, 1)
-    totals['spray_success_rate'] = sprayed_success_rate
-
-    if len(sops):
-        totals['avg_structures_per_so'] = round(
-            totals['avg_structures_per_so'] / len(list(sops))
-        )
-
-    totals['avg_start_time'] = avg_time_tuple(start_times)
-    totals['avg_end_time'] = avg_time_tuple(end_times)
-
-    return (data, totals)
-
-
+# pylint: disable=too-many-ancestors
 class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
+    """
+    Spray Operator summary performance page.
+    """
     template_name = 'spray-operator-summary.html'
     model = Location
     slug_field = 'id'
@@ -500,11 +205,44 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         team_leader = self.kwargs.get('team_leader')
         team_leader_assistant = get_object_or_404(TeamLeaderAssistant,
                                                   code=team_leader)
-        data, totals = get_tla_data(team_leader_assistant)
+        queryset = team_leader_assistant.sprayoperator_set.annotate(
+            found=Sum('performancereport__found'),
+            sprayed=Sum('performancereport__sprayed'),
+            refused=Sum('performancereport__refused'),
+            other=Sum('performancereport__other'),
+            reported_found=Sum('performancereport__reported_found'),
+            reported_sprayed=Sum('performancereport__reported_sprayed'),
+            no_of_days_worked=Count('performancereport'),
+        )
+        serializer = SprayOperatorPerformanceReportSerializer(queryset,
+                                                              many=True)
+        totals = {
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'no_of_days_worked': sum([
+                i['no_of_days_worked'] for i in serializer.data]),
+            'avg_structures_per_so': sum([
+                i['avg_structures_per_so'] for i in serializer.data]),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data]),
+            'avg_end_time': average_time([i['avg_end_time']
+                                          for i in serializer.data]),
+        }
 
         context.update(
             {
-                'data': data,
+                'data': serializer.data,
                 'totals': totals,
                 'team_leader': team_leader,
                 'team_leader_name':
@@ -518,146 +256,16 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         return context
 
 
-def get_spray_operator_data(spray_operator, spray_date):
-    formid = get_formid(spray_operator, spray_date)
-
-    was_sprayed_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), spray_date=spray_date,
-        was_sprayed=True).order_by().values('spray_operator')
-    was_sprayed_count = was_sprayed_sprays.annotate(
-        a=Count('spray_operator')).values('a')
-
-    sprayed_sprayformid_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), was_sprayed=True, spray_date=spray_date,
-        data__contains={
-            'sprayformid': formid}).order_by().values('spray_operator')
-    sprayed_sprayformid_count = sprayed_sprayformid_sprays.annotate(
-        b=Count('spray_operator')).values('b')
-
-    not_sprayed_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), spray_date=spray_date,
-        was_sprayed=False).order_by().values('spray_operator')
-    not_sprayed_count = not_sprayed_sprays.annotate(
-        c=Count('spray_operator')).values('c')
-
-    refused_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), was_sprayed=False,
-        spray_date=spray_date,
-        data__contains={
-            'osmstructure:notsprayed_reason': 'refused'
-        }).order_by().values('spray_operator')
-    refused_count = refused_sprays.annotate(
-        d=Count('spray_operator')).values('d')
-
-    found_sprayformid_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'), data__contains={'sprayformid': formid},
-        spray_date=spray_date
-    ).order_by().values('spray_operator')
-    found_sprayformid_count = found_sprayformid_sprays.annotate(
-        e=Count('spray_operator')).values('e')
-
-    found_sprays = SprayDay.objects.filter(
-        spray_operator=OuterRef('pk'),
-        spray_date=spray_date).order_by().values('spray_operator')
-    found_count = found_sprays.annotate(
-        f=Count('spray_operator')).values('f')
-
-    sop = SprayOperator.objects.filter(
-        code=spray_operator.code
-    ).annotate(
-        found=Coalesce(Subquery(
-            queryset=found_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        sprayed=Coalesce(Subquery(
-            queryset=was_sprayed_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        sprayed_sprayformid=Coalesce(Subquery(
-            queryset=sprayed_sprayformid_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        not_sprayed=Coalesce(Subquery(
-            queryset=not_sprayed_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        refused=Coalesce(Subquery(
-            queryset=refused_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        found_sprayformid=Coalesce(Subquery(
-            queryset=found_sprayformid_count,
-            output_field=PositiveIntegerField()), Value(0))
-    ).annotate(
-        success_rate=Case(When(found__gt=0, then=ExpressionWrapper(
-            F('sprayed') * 100 / Func(
-                F('found'), function='CAST',
-                template='%(function)s(%(expressions)s AS FLOAT)'
-            ),
-            FloatField()
-        )), default=0, output_field=FloatField())
-    ).annotate(
-        other=Case(When(not_sprayed__gt=0,
-                        then=F('not_sprayed') - F('refused')),
-                   default=0, output_field=IntegerField())
-    ).values(
-        'pk', 'code', 'found', 'sprayed', 'refused', 'other',
-        'not_sprayed', 'sprayday__spray_date', 'success_rate',
-        'found_sprayformid', 'sprayed_sprayformid'
-    ).distinct('id').first()
-
-    sprayed_sprayformid = sop.get('sprayed_sprayformid')
-    found_sprayformid = sop.get('found_sprayformid')
-
-    summary = SprayOperatorDailySummary.objects.filter(
-        sprayoperator_code=spray_operator.code,
-        data__sprayformid=formid
-    ).aggregate(
-        r_found=Sum('found'),
-        r_sprayed=Sum('sprayed')
-    )
-
-    r_found = summary.get('r_found') or 0
-    r_sprayed = summary.get('r_sprayed') or 0
-
-    found_difference = r_found - found_sprayformid
-    sprayed_difference = r_sprayed - sprayed_sprayformid
-    data_quality_check = r_found == found_sprayformid \
-        and r_sprayed == sprayed_sprayformid
-
-    data = dict()
-    for k, v in sop.items():
-        data[k] = v
-
-    data['sop_found'] = r_found
-    data['sop_sprayed'] = r_sprayed
-    data['found_difference'] = found_difference
-    data['sprayed_difference'] = sprayed_difference
-    data['data_quality_check'] = data_quality_check
-
-    return data
-
-
+# pylint: disable=too-many-ancestors
 class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
+    """
+    Spray Operator Daily view.
+    """
     template_name = 'spray-operator-daily.html'
     model = Location
     slug_field = 'id'
 
     def get_context_data(self, **kwargs):
-        data = []
-        totals = {
-            'other': 0,
-            'refused': 0,
-            'sprayed': 0,
-            'sprayable': 0,
-            'not_sprayable': 0,
-            'not_sprayed_total': 0,
-            'spray_success_rate': 0,
-            'data_quality_check': True,
-            'found_difference': 0,
-            'sprayed_difference': 0
-
-        }
         context = super(SprayOperatorDailyView, self)\
             .get_context_data(**kwargs)
         district = context['object']
@@ -666,67 +274,31 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         spray_operator_code = self.kwargs.get('spray_operator')
         spray_operator = get_object_or_404(SprayOperator,
                                            code=spray_operator_code)
-        dates = spray_operator.sprayday_set.values_list(
-            'spray_date', flat=True
-        ).distinct().order_by('spray_date')
-        start_times = []
-        end_times = []
-
-        for index, _date in enumerate(dates):
-            sop = get_spray_operator_data(spray_operator, _date)
-            found = sop.get('found')
-            sprayed = sop.get('sprayed')
-            found_difference = sop.get('found_difference')
-            sprayed_difference = sop.get('sprayed_difference')
-            data_quality_check = sop.get('data_quality_check')
-            qs = spray_operator.sprayday_set.filter(spray_date=_date)
-            pks = list(qs.values_list('id', flat=True))
-            _end_time = avg_time(pks, 'start')
-            end_times.append(_end_time)
-            _start_time = avg_time(pks, 'end')
-            start_times.append(_start_time)
-
-            data.append({
-                'day': index + 1,
-                'date': _date,
-                'sprayable': found,
-                'sprayed': sprayed,
-                'refused': sop.get('refused'),
-                'other': sop.get('other'),
-                'spray_success_rate': round(
-                    sop.get('success_rate'), 1),
-                'not_sprayed_total': sop.get('not_sprayed'),
-                'avg_start_time': _start_time,
-                'avg_end_time': _end_time,
-                'data_quality_check': data_quality_check,
-                'found_difference': found_difference,
-                'sprayed_difference': sprayed_difference
-            })
-
-            # calculate totals
-            totals['sprayed'] += sop.get('sprayed')
-            totals['sprayable'] += sop.get('found')
-            totals['refused'] += sop.get('refused')
-            totals['other'] += sop.get('other')
-            totals['not_sprayed_total'] += sop.get('not_sprayed')
-            if not data_quality_check:
-                totals['data_quality_check'] = data_quality_check
-            totals['found_difference'] += found_difference
-            totals['sprayed_difference'] += sprayed_difference
-
-        numerator = totals['sprayed']
-        denominator = 1 if totals['sprayable'] == 0 else totals['sprayable']
-        sprayed_success_rate = round((numerator / denominator) * 100, 1)
-        totals['spray_success_rate'] = sprayed_success_rate
-        totals['avg_start_time'] = avg_time_tuple(start_times)
-        totals['avg_end_time'] = avg_time_tuple(end_times)
-        totals['avg_sprayed'] = 0
-        if len(dates) != 0:
-            totals['avg_sprayed'] = round(numerator / len(dates))
-
+        queryset = PerformanceReport.objects.filter(
+            spray_operator=spray_operator).order_by('spray_date')
+        serializer = PerformanceReportSerializer(queryset, many=True)
+        totals = {
+            'other': sum([i['other'] for i in serializer.data]),
+            'refused': sum([i['refused'] for i in serializer.data]),
+            'sprayed': sum([i['sprayed'] for i in serializer.data]),
+            'sprayable': sum([i['sprayable'] for i in serializer.data]),
+            'not_sprayable': 0,
+            'not_sprayed_total': sum([i['not_sprayed_total']
+                                      for i in serializer.data]),
+            'data_quality_check': all([i['data_quality_check']
+                                       for i in serializer.data]),
+            'found_difference': sum([i['found_difference']
+                                     for i in serializer.data]),
+            'sprayed_difference': sum([i['sprayed_difference'] for i in
+                                       serializer.data]),
+            'avg_start_time': average_time(
+                [i['avg_start_time'] for i in serializer.data]),
+            'avg_end_time': average_time([i['avg_end_time']
+                                          for i in serializer.data]),
+        }
         context.update(
             {
-                'data': data,
+                'data': serializer.data,
                 'totals': totals,
                 'spray_operator': spray_operator.code,
                 'spray_operator_name': spray_operator.name,

@@ -43,7 +43,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td>{{ row.day }}</a></td>
+                                    <td>{{ forloop.counter }}</a></td>
                                     <td>{{ row.date|date:'d-M' }}</a></td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>

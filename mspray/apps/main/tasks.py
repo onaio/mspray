@@ -419,3 +419,44 @@ def remove_deleted_dos_records():
         deleted_submissions.delete()
 
     return count
+
+
+@app.task
+def check_missing_data():
+    """
+    Sync missing data from Ona.
+    """
+    from mspray.apps.main.utils import sync_missing_sprays
+    sync_missing_sprays(FORM_ID, print)
+
+
+@app.task
+def check_missing_unique_link():
+    """
+    Checks and forces a linking of submitted data that has not yet been
+    identified as unique.
+    """
+    from mspray.apps.main.utils import queryset_iterator
+    queryset = SprayDay.objects.filter(spraypoint__isnull=True).only(
+        'pk', 'location_id')
+    for record in queryset_iterator(queryset):
+        add_unique_record(record.pk, record.location_id)
+        gc.collect()
+
+
+@app.task
+def update_performance_reports():
+    """
+    Update perfomance records updated in the last UPDATE_VISITED_MINUTES
+    minutes.
+    """
+    from mspray.apps.main.utils import performance_report
+    time_within = UPDATE_VISITED_MINUTES
+    time_since = timezone.now() - timedelta(minutes=time_within + 1)
+    submissions = SprayDay.objects.filter(created_on__gte=time_since)
+    queryset = submissions.filter(spray_operator__isnull=False)\
+        .only('spray_operator').distinct('spray_operator')
+    for record in queryset:
+        performance_report(
+            record.spray_operator,
+            submissions.filter(spray_operator=record.spray_operator))
