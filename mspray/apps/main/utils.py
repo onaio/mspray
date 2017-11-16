@@ -878,18 +878,26 @@ def start_end_time(sprayday_qs, sprayformid):
     return start_time, end_time, spray_date
 
 
-def performance_report(spray_operator):
+def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
     operator_qs = SprayDay.objects.filter(spray_operator=spray_operator,
                                           sprayable=True)
-    queryset = operator_qs.annotate(
-        sprayformid=RawSQL("data->'sprayformid'", ())
-    ).values_list('sprayformid', flat=True).order_by('spray_date').distinct()
+    if queryset is None:
+        queryset = operator_qs.annotate(
+            sprayformid=RawSQL("data->'sprayformid'", ())
+        )
+    else:
+        queryset = queryset.annotate(
+            sprayformid=RawSQL("data->'sprayformid'", ())
+        )
+    queryset = queryset.values_list('sprayformid', flat=True)\
+        .order_by('spray_date').distinct()
     report_qs = SprayOperatorDailySummary.objects.filter(
         sprayoperator_code=spray_operator.code)
     for sprayformid in queryset:
+        print(sprayformid, spray_operator.name)
         found = operator_qs.filter(data__sprayformid=sprayformid).count()
         sprayed = operator_qs.filter(data__sprayformid=sprayformid,
                                      was_sprayed=True).count()
