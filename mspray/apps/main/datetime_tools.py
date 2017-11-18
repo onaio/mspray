@@ -14,8 +14,10 @@ def average_time(times):
         return ''
     seconds = sum([
         timedelta(hours=x.hour, minutes=x.minute, seconds=x.second).seconds
-        for x in times
+        for x in times if x != ''
     ])
+    if seconds == 0:
+        return None
     avg = timedelta(seconds=(seconds / round(count)))
 
     time_format_str = '%H:%M:%S.%f' if avg.microseconds != 0 else '%H:%M:%S'
