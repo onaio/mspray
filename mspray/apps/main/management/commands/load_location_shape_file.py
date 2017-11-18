@@ -141,6 +141,8 @@ class Command(BaseCommand):
                     if skip_field and skip_value is not None:
                         if feature.get(skip_field) == skip_value:
                             skipped += 1
+                            self.stdout.write('Skipping %s - skip.' %
+                                              feature.get(name_field))
                             continue
 
                     if isinstance(feature.geom, geometries.Polygon):
@@ -155,6 +157,8 @@ class Command(BaseCommand):
                         code = int(feature.get(code_field))
                         if code == 0:
                             skipped += 1
+                            self.stdout.write('Skipping %s - code.' %
+                                              feature.get(name_field))
                             continue
                     if bytearray(structures_field.encode('utf8')) in \
                             feature.fields:
@@ -176,6 +180,8 @@ class Command(BaseCommand):
                         parent = get_parent(geom, parent_level, parent_name)
 
                     if skip_parent != 'yes' and not parent:
+                        self.stdout.write('Skipping %s - parent.' %
+                                          feature.get(name_field))
                         skipped += 1
                         continue
                     try:

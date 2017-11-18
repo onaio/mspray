@@ -1,21 +1,46 @@
-FROM ubuntu
+FROM ubuntu:16.04
 
-MAINTAINER Ukang'a Dickson
+ENV DEBIAN_FRONTEND noninteractive
+ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yqq python3 python3-dev python3-setuptools python3-pip git-core libpq-dev libproj-dev gdal-bin
-RUN apt-get install -yqq supervisor
+RUN apt-get update \
+  && apt-get install -y postgresql-client \
+    binutils \
+    libproj-dev \
+    gdal-bin \
+    memcached \
+    libmemcached-dev \
+    build-essential \
+    python3.5 \
+    python3-pip \
+    python3.5-dev \
+    python-virtualenv \
+    git \
+    libssl-dev \
+    gfortran \
+    libatlas-base-dev \
+    libxml2-dev \
+    libxslt-dev \
+    libpq-dev
 
-RUN mkdir -p /var/www
-ADD . /var/www/mspray
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
-RUN chmod +x /var/www/mspray/scripts/start
-RUN pip3 install -r /var/www/mspray/requirements.pip
-RUN ln -s /var/www/mspray/supervisor-app.conf /etc/supervisor/conf.d/
-RUN mkdir -p /var/log/uwsgi
+RUN mkdir -p /srv/mspray
 
-ENV DJANGO_SETTINGS_MODULE mspray.preset.local_settings
+ADD requirements.pip /srv/mspray/
 
-EXPOSE 8000
+WORKDIR /srv/mspray
 
-CMD ["/var/www/mspray/scripts/start"]
+RUN virtualenv -p `which python3` /srv/.virtualenv
+RUN . /srv/.virtualenv/bin/activate; \
+    pip install pip --upgrade && pip install pip-tools && pip-sync requirements.pip
+
+ADD . /srv/mspray/
+
+ENV DJANGO_SETTINGS_MODULE mspray.preset.docker
+
+RUN rm -rf /var/lib/apt/lists/* \
+  && find . -name '*.pyc' -type f -delete
+
+CMD ["/srv/mspray/docker/docker-entrypoint.sh"]

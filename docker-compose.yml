@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  db:
+    build: ./docker/postgis
+    image: postgis:9.6
+  queue:
+    image: rabbitmq
+  web:
+    build: .
+    image: mspray:master
+    volumes:
+      - .:/srv/mspray
+      - ../../data/mspray:/srv/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - queue
+

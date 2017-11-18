@@ -4,7 +4,6 @@ import gc
 import os
 
 from datetime import timedelta
-
 from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.db.models import Sum
