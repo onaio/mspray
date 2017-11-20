@@ -985,3 +985,39 @@ def sync_missing_sprays(formid, log_writer):
                     gc.collect()
     else:
         log_writer("DATA not fetched: {}".format(raw_data))
+
+
+def remove_household_geom_duplicates(spray_area):
+    """
+    Gets all the Household objects that have duplicate geom fields in a spray
+    area, and removes duplicates
+    Also prints a "report" to screen - the expectation is that this function
+    will be run from the command line
+    """
+    dups = (
+        Household.objects.filter(location=spray_area)
+                         .values('geom')
+                         .annotate(count=Count('id'))
+                         .values('geom')
+                         .order_by()
+                         .filter(count__gt=1)
+    )
+    print("Processing Spray Area: {}\n".format(spray_area.name))
+    for dup in dups:
+        hh_objects = Household.objects.filter(geom=dup['geom'])
+        # take the first one as the Household object to keep
+        hh_obj_to_keep = hh_objects[0]
+        hh_to_delete = []
+        for other_hh_obj in hh_objects[1:]:
+            # get any SprayDay objects attached to this Household object
+            # change the attached Household object to the one we want
+            # to keep
+            SprayDay.objects.filter(osmid=other_hh_obj.hh_id).update(
+                osmid=hh_obj_to_keep.hh_id)
+            # delete the duplicate Household object
+            hh_to_delete.append(other_hh_obj.hh_id)
+            other_hh_obj.delete()
+        print("Kept OSM ID: {}\n".format(hh_obj_to_keep.hh_id))
+        print("Deleted OSM IDs:\n")
+        for x in hh_to_delete:
+            print("{}\n".format(x))

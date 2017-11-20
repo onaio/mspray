@@ -6,6 +6,7 @@ from django.db.models import Count
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay, TeamLeader, TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperator, SprayOperatorDailySummary
+from mspray.apps.main.models import Household
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
@@ -14,6 +15,7 @@ from mspray.apps.main.utils import get_formid
 from mspray.apps.main.utils import link_sprayday_to_actors
 from mspray.apps.main.utils import remove_duplicate_sprayoperatordailysummary
 from mspray.apps.main.utils import add_spray_operator_daily
+from mspray.apps.main.utils import remove_household_geom_duplicates
 from mspray.celery import app
 
 SUBMISSION_DATA = [{
@@ -216,3 +218,25 @@ class TestUtils(TestBase):
         self.assertEqual(obj.found, new_data['found'])
         self.assertEqual(obj.data.get('supervisor_name'), "MOSH")
         self.assertEqual(mock.call_count, 2)
+
+    def test_remove_household_geom_duplicates(self):
+        """
+        Test that remove_household_geom_duplicates removes duplicate Household
+        objects
+        """
+        self._load_fixtures()
+        hh_obj = Household.objects.first()
+        # create a duplicate Household object
+        duplicate_hh_obj = Household(
+            hh_id=-99999999,
+            geom=hh_obj.geom,
+            bgeom=hh_obj.bgeom,
+            location=hh_obj.location,
+            data=hh_obj.data
+        )
+        duplicate_hh_obj.save()
+        # check that we actually have duplicates
+        self.assertEqual(Household.objects.filter(geom=hh_obj.geom).count(), 2)
+        # remove the duplicate and test that it is removed
+        remove_household_geom_duplicates(hh_obj.location)
+        self.assertEqual(Household.objects.filter(geom=hh_obj.geom).count(), 1)
