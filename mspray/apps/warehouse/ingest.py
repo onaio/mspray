@@ -84,7 +84,17 @@ def get_sprayday_schema():
     return schema
 
 
-def ingest_sprayday(file_url, intervals=None):
+def get_sprayday_hadoop_schema():
+    schema_file = os.path.join(
+        settings.BASE_DIR,
+        "mspray/apps/warehouse/druid-schemas/sprayday-hadoop.json")
+    with open(schema_file) as f:
+        schema = json.load(f)
+    return schema
+
+
+def ingest_sprayday(file_url, intervals=None,
+                    timestamp_column=settings.DRUID_TIMESTAMP_COLUMN):
     """
     posts a json file on a public url to a Druid indexer task for SprayDay
     objects
@@ -92,14 +102,22 @@ def ingest_sprayday(file_url, intervals=None):
     inputs:
         file_url => https://example.com/data.json
         intervals => 2013-01-01/2013-01-02
+
     """
-    schema = get_sprayday_schema()
+    if settings.DRUID_USE_INDEX_HADOOP:
+        schema = get_sprayday_hadoop_schema()
+        schema['spec']['ioConfig']['inputSpec']['paths'] = file_url
+    else:
+        schema = get_sprayday_schema()
+        schema['spec']['ioConfig']['firehose']['uris'] = [file_url]
+
     schema['spec']['dataSchema']['dataSource'] = sprayday_datasource
-    schema['spec']['ioConfig']['firehose']['uris'] = [file_url]
-    schema['spec']['dataSchema']['parser']['parseSpec']['dimensionsSpec'] =\
-        dimensions_spec
+    parse_spec = schema['spec']['dataSchema']['parser']['parseSpec']
+    parse_spec['dimensionsSpec'] = dimensions_spec
+    parse_spec['timestampSpec']['column'] = timestamp_column
     if intervals:
         schema['spec']['dataSchema']['granularitySpec']['intervals'] =\
             [intervals]
+
     schema_json = json.dumps(schema)
     return send_request(schema_json, get_druid_indexer_url())
