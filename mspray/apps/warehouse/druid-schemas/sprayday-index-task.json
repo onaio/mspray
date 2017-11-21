@@ -8,7 +8,7 @@
         "parseSpec" : {
           "format" : "json",
           "timestampSpec" : {
-            "column" : "submission_time",
+            "column" : "timestamp",
             "format" : "auto"
           },
           "dimensionsSpec" : {}
