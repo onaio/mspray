@@ -172,6 +172,7 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
     sprayable = serializers.SerializerMethodField()
     reason = serializers.SerializerMethodField()
     submission_time = serializers.SerializerMethodField()
+    timestamp = serializers.SerializerMethodField()
     irs_sticker_num = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField()
     is_duplicate = serializers.SerializerMethodField()
@@ -193,7 +194,8 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
                   'is_duplicate', 'is_refused', 'sprayoperator_code',
                   'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
                   'bgeom_srid', 'team_leader_code', 'district_code',
-                  'rhc_code', 'target_area_code', 'team_leader_assistant_code'
+                  'rhc_code', 'target_area_code', 'team_leader_assistant_code',
+                  'timestamp'
                   ]
 
     def get_sprayoperator_id(self, obj):
@@ -255,6 +257,11 @@ class SprayDayDruidSerializer(SprayBase, LocationMixin,
     def get_submission_time(self, obj):
         if obj:
             return obj.data.get('_submission_time')
+
+    def get_timestamp(self, obj):
+        if obj:
+            end = obj.data.get('end')
+            return parser.parse(end).isoformat()
 
     def get_sprayable(self, obj):
         if obj:
