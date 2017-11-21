@@ -22,9 +22,9 @@ def get_druid_intervals(queryset):
     """
     Gets intervals from Queryset to be used by Druid ingestion
     """
-    queryset = queryset.order_by('created_on')
-    first = queryset.first().data['_submission_time']
-    last = queryset.last().data['_submission_time']
+    queryset = queryset.order_by('spray_date')
+    first = queryset.first().spray_date
+    last = queryset.last().spray_date
     return "{start_time}/{end_time}".format(start_time=first, end_time=last)
 
 
