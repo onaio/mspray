@@ -38,6 +38,16 @@ def get_sprayday_queryset_from_x_minutes(minutes):
     return queryset
 
 
+def get_s3_url(path):
+    """
+    Constructs and returns the s3 url for the given path
+    """
+    if settings.DRUID_USE_INDEX_HADOOP:
+        return settings.AWS_S3_HADOOP_BASE_URL + path
+    else:
+        return settings.AWS_S3_BASE_URL + path
+
+
 def get_data(minutes=10):
     """
     Gets data submitted in the last x minutes and stores it
@@ -56,7 +66,7 @@ def get_data(minutes=10):
 
         path = create_sprayday_druid_json_file(queryset=queryset,
                                                filename=filename)
-        url = settings.AWS_S3_BASE_URL + path
+        url = get_s3_url(path)
         return ingest_sprayday(url, intervals=intervals)
 
 
@@ -83,7 +93,7 @@ def get_historical_data(day=None, month=None, year=None):
             intervals = get_druid_intervals(queryset)
             path = create_sprayday_druid_json_file(queryset=queryset,
                                                    filename=filename)
-            url = settings.AWS_S3_BASE_URL + path
+            url = get_s3_url(path)
             return ingest_sprayday(url, intervals=intervals)
 
 
