@@ -1,6 +1,7 @@
 from django.conf import settings
 
 from rest_framework.utils.serializer_helpers import ReturnDict
+from dateutil import parser
 
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay
@@ -36,7 +37,7 @@ class TestSerializers(TestBase):
                          'is_duplicate', 'is_refused', 'sprayoperator_code',
                          'irs_sticker_num', 'bgeom_type', 'bgeom_coordinates',
                          'bgeom_srid', 'team_leader_code', 'district_code',
-                         'rhc_code', 'target_area_code',
+                         'rhc_code', 'target_area_code', 'timestamp',
                          'team_leader_assistant_code']
         # sprayable
         sprayable_field = settings.SPRAYABLE_FIELD
@@ -56,7 +57,11 @@ class TestSerializers(TestBase):
         this_rhc = sprayday.location.get_family().filter(level='RHC').first()
         this_district = sprayday.location.get_family().filter(
                             level='district').first()
+        # timestamp
+        timestamp = parser.parse(sprayday.data.get('end')).isoformat()
+
         serialized = SprayDayDruidSerializer(sprayday).data
+
         self.assertTrue(isinstance(serialized, ReturnDict))
         received_keys = serialized.keys()
         self.assertEqual(len(received_keys), len(expected_keys))
@@ -119,6 +124,7 @@ class TestSerializers(TestBase):
         self.assertEqual(serialized['irs_sticker_num'],
                          sprayday.data.get(IRS_NUM_FIELD))
         self.assertEqual(serialized['is_new'], is_new)
+        self.assertEqual(serialized['timestamp'], timestamp)
         self.assertEqual(serialized['is_duplicate'], is_duplicate)
         self.assertEqual(serialized['is_refused'], is_refused)
         self.assertEqual(serialized['bgeom_type'], "Polygon")

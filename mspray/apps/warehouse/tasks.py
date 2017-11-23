@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.utils import timezone
+from django.conf import settings
 
 from mspray.celery import app
 from mspray.apps.main.models import SprayDay
@@ -23,7 +24,7 @@ def stream_to_druid(spray_day_obj_id):
 
 
 @app.task
-def reload_druid_data(minutes=10):
+def reload_druid_data(minutes=settings.DRUID_BATCH_PROCESS_TIME_INTERVAL):
     """
     Refreshes Druid data for records created in the last x minutes
     """

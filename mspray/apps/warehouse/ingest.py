@@ -35,6 +35,7 @@ dimensions_spec = {
         "sprayed",
         "sprayable",
         "submission_time",
+        "timestamp",
         "reason",
         "osmid",
         "bgeom_type",
