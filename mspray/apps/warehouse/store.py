@@ -25,6 +25,9 @@ def get_druid_intervals(queryset):
     queryset = queryset.order_by('spray_date')
     first = queryset.first().spray_date
     last = queryset.last().spray_date
+    # in case first and last are the same day, increment last by one day
+    if first == last:
+        last = last + timedelta(days=1)
     return "{start_time}/{end_time}".format(start_time=first, end_time=last)
 
 
@@ -48,7 +51,7 @@ def get_s3_url(path):
         return settings.AWS_S3_BASE_URL + path
 
 
-def get_data(minutes=10):
+def get_data(minutes=settings.DRUID_BATCH_PROCESS_TIME_INTERVAL):
     """
     Gets data submitted in the last x minutes and stores it
     returns filename
