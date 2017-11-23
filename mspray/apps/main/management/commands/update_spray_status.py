@@ -20,9 +20,15 @@ class Command(BaseCommand):
 
             return count
 
-        print(settings.MSPRAY_WAS_SPRAYED_FIELD)
-        true_mismatch = int(update_mismatched(True, 'yes'))
-        false_mismatch = int(update_mismatched(False, 'no'))
+        print("SPRAYED FIELD: {}".format(settings.MSPRAY_WAS_SPRAYED_FIELD))
+        print("SPRAYED VALUE: {}".format(settings.MSPRAY_WAS_SPRAYED_VALUE))
+        print("NOT SPRAYED VALUE: {}".format(
+            settings.MSPRAY_WAS_NOT_SPRAYED_VALUE))
+
+        true_mismatch = int(update_mismatched(
+            True, settings.MSPRAY_WAS_SPRAYED_VALUE))
+        false_mismatch = int(update_mismatched(
+            False, settings.MSPRAY_WAS_NOT_SPRAYED_VALUE))
 
         self.stdout.write(
             "Mismatched to True: %s. Mismatched to False: %s." % (
