@@ -3,6 +3,7 @@ import time
 from datetime import timedelta
 
 from django.core.files.storage import default_storage
+from django.db.models.expressions import RawSQL, OrderBy
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
@@ -18,16 +19,26 @@ sprayday_dir_path = getattr(settings, 'SPRAYDAY_DRUID_DATA_DIRECTORY',
                             'sprayday/')
 
 
-def get_druid_intervals(queryset):
+def get_druid_intervals(queryset, use_timestamp=False):
     """
     Gets intervals from Queryset to be used by Druid ingestion
+
+    Notes:
+        use_timestamp is to be used when indexing data for just part of a day
+        where it would be inappropriate to use spray_date
     """
-    queryset = queryset.order_by('spray_date')
-    first = queryset.first().spray_date
-    last = queryset.last().spray_date
-    # in case first and last are the same day, increment last by one day
-    if first == last:
-        last = last + timedelta(days=1)
+    if use_timestamp:
+        queryset = queryset.order_by(OrderBy(RawSQL(
+            "LOWER(data->>%s)", ("end",)), descending=False))
+        first = queryset.first().data.get('end', queryset.first().spray_date)
+        last = queryset.last().data.get('end', queryset.last().spray_date)
+    else:
+        queryset = queryset.order_by('spray_date')
+        first = queryset.first().spray_date
+        last = queryset.last().spray_date
+        # in case first and last are the same day, increment last by one day
+        if first == last:
+            last = last + timedelta(days=1)
     return "{start_time}/{end_time}".format(start_time=first, end_time=last)
 
 
@@ -61,7 +72,7 @@ def get_data(minutes=settings.DRUID_BATCH_PROCESS_TIME_INTERVAL):
         # get intervals
         first = queryset.first().data['_submission_time']
         last = queryset.last().data['_submission_time']
-        intervals = get_druid_intervals(queryset)
+        intervals = get_druid_intervals(queryset, use_timestamp=True)
         filename = "{datasource}/minutes".format(
             datasource=settings.DRUID_SPRAYDAY_DATASOURCE) + \
             "/sprayday-{start_time}-{end_time}.json".format(start_time=first,

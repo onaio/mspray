@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 from django.conf import settings
+from django.db.models.expressions import RawSQL, OrderBy
 
 from rest_framework.renderers import JSONRenderer
 
@@ -24,7 +25,7 @@ class TestStore(TestBase):
         TestBase.setUp(self)
         self._load_fixtures()
 
-    def test_get_druid_intervals(self):
+    def test_get_druid_intervals_use_timestamp_false(self):
         """ test that we get the right intervals back """
         queryset = SprayDay.objects.all().order_by('spray_date')
         first = queryset.first().spray_date
@@ -32,7 +33,18 @@ class TestStore(TestBase):
         if first == last:
             last = last + timedelta(days=1)
         expected = "{}/{}".format(first, last)
-        self.assertEqual(expected, get_druid_intervals(queryset))
+        self.assertEqual(expected,
+                         get_druid_intervals(queryset, use_timestamp=False))
+
+    def test_get_druid_intervals_use_timestamp_true(self):
+        """ test that we get the right intervals back """
+        queryset = SprayDay.objects.all().order_by(OrderBy(RawSQL(
+            "LOWER(data->>%s)", ("end",)), descending=False))
+        first = queryset.first().data.get('end', queryset.first().spray_date)
+        last = queryset.last().data.get('end', queryset.last().spray_date)
+        expected = "{}/{}".format(first, last)
+        self.assertEqual(expected,
+                         get_druid_intervals(queryset, use_timestamp=True))
 
     def test_get_s3_url_hadoop_false(self):
         """
