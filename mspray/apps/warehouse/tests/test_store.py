@@ -29,6 +29,8 @@ class TestStore(TestBase):
         queryset = SprayDay.objects.all().order_by('spray_date')
         first = queryset.first().spray_date
         last = queryset.last().spray_date
+        if first == last:
+            last = last + timedelta(days=1)
         expected = "{}/{}".format(first, last)
         self.assertEqual(expected, get_druid_intervals(queryset))
 
