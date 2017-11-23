@@ -13,7 +13,7 @@ from mspray.apps.main.models import SprayDay
 from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
 from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.warehouse.store import get_druid_intervals, get_data
-from mspray.apps.warehouse.store import get_historical_data
+from mspray.apps.warehouse.store import get_historical_data, get_s3_url
 from mspray.apps.warehouse.store import create_sprayday_druid_json_file
 from mspray.apps.warehouse.store import get_sprayday_queryset_from_x_minutes
 
@@ -31,6 +31,26 @@ class TestStore(TestBase):
         last = queryset.last().data['_submission_time']
         expected = "{}/{}".format(first, last)
         self.assertEqual(expected, get_druid_intervals(queryset))
+
+    def test_get_s3_url_hadoop_false(self):
+        """
+        test that get_s3_url returns the expected url when not using hadoop
+        index tasks
+        """
+        path = "mosh.json"
+        with self.settings(DRUID_USE_INDEX_HADOOP=False):
+            url = get_s3_url(path)
+            self.assertEqual(url, settings.AWS_S3_BASE_URL + path)
+
+    def test_get_s3_url_hadoop_true(self):
+        """
+        test that get_s3_url returns the expected url when using hadoop
+        index tasks
+        """
+        path = "mosh.json"
+        with self.settings(DRUID_USE_INDEX_HADOOP=True):
+            url = get_s3_url(path)
+            self.assertEqual(url, settings.AWS_S3_HADOOP_BASE_URL + path)
 
     def test_get_sprayday_queryset_from_x_minutes(self):
         """
