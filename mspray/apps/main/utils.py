@@ -1021,3 +1021,30 @@ def remove_household_geom_duplicates(spray_area):
         print("Deleted OSM IDs:\n")
         for x in hh_to_delete:
             print("{}\n".format(x))
+
+
+def find_mismatched_spraydays(was_sprayed=True):
+    """
+    Returns a queryset of SprayDay where the 'was-sprayed' field does not match
+    the data
+
+    e.g. the data says the structure was not sprayed yet the 'was_sprayed'
+    field is set to True
+
+    """
+    if was_sprayed is True:
+        # return SprayDay objects where the data says it was not sprayed
+        # yet the was_sprayed field is True
+        return SprayDay.objects.filter(
+            was_sprayed=was_sprayed).extra(
+            where=['(data->>%s) != %s'],
+            params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
+                    settings.MSPRAY_WAS_SPRAYED_VALUE])
+    elif was_sprayed is False:
+        # return SprayDay objects where the data says it was sprayed
+        # yet the was_sprayed field is False
+        return SprayDay.objects.filter(
+            was_sprayed=was_sprayed).extra(
+            where=['(data->>%s) = %s'],
+            params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
+                    settings.MSPRAY_WAS_SPRAYED_VALUE])

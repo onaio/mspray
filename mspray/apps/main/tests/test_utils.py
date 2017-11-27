@@ -11,7 +11,7 @@ from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
 from mspray.apps.main.utils import avg_time_per_group
-from mspray.apps.main.utils import get_formid
+from mspray.apps.main.utils import get_formid, find_mismatched_spraydays
 from mspray.apps.main.utils import link_sprayday_to_actors
 from mspray.apps.main.utils import remove_duplicate_sprayoperatordailysummary
 from mspray.apps.main.utils import add_spray_operator_daily
@@ -240,3 +240,47 @@ class TestUtils(TestBase):
         # remove the duplicate and test that it is removed
         remove_household_geom_duplicates(hh_obj.location)
         self.assertEqual(Household.objects.filter(geom=hh_obj.geom).count(), 1)
+
+    def test_find_mismatched_spraydays_true(self):
+        """
+        Test that find_mismatched_spraydays returns all SprayDay objects
+        that have was_sprayed=True yet the data says these objects are not
+        sprayed
+        """
+        self._load_fixtures()
+        mismatched = find_mismatched_spraydays(was_sprayed=True)
+        # assert that no mismatched items exist
+        self.assertEqual(mismatched.count(), 0)
+        # add one mismatched item
+        items = SprayDay.objects.filter(pk=89).extra(
+                    where=['(data->>%s) != %s'],
+                    params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
+                            settings.MSPRAY_WAS_SPRAYED_VALUE])
+        items.update(was_sprayed=True)
+        # check that this one item is now found
+        mismatched2 = find_mismatched_spraydays(was_sprayed=True)
+        # assert that no mismatched items exist
+        self.assertEqual(mismatched2.count(), 1)
+        self.assertEqual(mismatched2.first(), items.first())
+
+    def test_find_mismatched_spraydays_false(self):
+        """
+        Test that find_mismatched_spraydays returns all SprayDay objects
+        that have was_sprayed=False yet the data says these objects are
+        sprayed
+        """
+        self._load_fixtures()
+        mismatched = find_mismatched_spraydays(was_sprayed=False)
+        # assert that no mismatched items exist
+        self.assertEqual(mismatched.count(), 0)
+        # add one mismatched item
+        items = SprayDay.objects.filter(pk=90).extra(
+                    where=['(data->>%s) = %s'],
+                    params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
+                            settings.MSPRAY_WAS_SPRAYED_VALUE])
+        items.update(was_sprayed=False)
+        # check that this one item is now found
+        mismatched2 = find_mismatched_spraydays(was_sprayed=False)
+        # assert that no mismatched items exist
+        self.assertEqual(mismatched2.count(), 1)
+        self.assertEqual(mismatched2.first(), items.first())
