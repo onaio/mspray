@@ -80,6 +80,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             no_of_days_worked=Count('performancereport'),
             not_eligible=Sum('performancereport__not_eligible'),
         )
+
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
         totals = {

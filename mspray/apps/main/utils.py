@@ -987,22 +987,31 @@ def sync_missing_sprays(formid, log_writer):
         log_writer("DATA not fetched: {}".format(raw_data))
 
 
-def remove_household_geom_duplicates(spray_area):
+def remove_household_geom_duplicates(spray_area=None):
     """
     Gets all the Household objects that have duplicate geom fields in a spray
     area, and removes duplicates
     Also prints a "report" to screen - the expectation is that this function
     will be run from the command line
     """
-    dups = (
-        Household.objects.filter(location=spray_area)
-                         .values('geom')
-                         .annotate(count=Count('id'))
-                         .values('geom')
-                         .order_by()
-                         .filter(count__gt=1)
-    )
-    print("Processing Spray Area: {}\n".format(spray_area.name))
+    if spray_area:
+        dups = (
+            Household.objects.filter(location=spray_area)
+                             .values('geom')
+                             .annotate(count=Count('id'))
+                             .values('geom')
+                             .order_by()
+                             .filter(count__gt=1)
+        )
+        print("Processing Spray Area: {}\n".format(spray_area.name))
+    else:
+        dups = (
+            Household.objects.values('geom')
+                             .annotate(count=Count('id'))
+                             .values('geom')
+                             .order_by()
+                             .filter(count__gt=1)
+        )
     for dup in dups:
         hh_objects = Household.objects.filter(geom=dup['geom'])
         # take the first one as the Household object to keep
