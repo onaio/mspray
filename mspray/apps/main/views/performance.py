@@ -1,8 +1,5 @@
 from django.conf import settings
-from django.db.models import Case, Count, F, Func, Sum, ExpressionWrapper,\
-    When, Avg, FloatField, PositiveIntegerField, IntegerField, OuterRef,\
-    Subquery, Value
-from django.db.models.functions import Coalesce
+from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -11,11 +8,9 @@ from django.views.generic import TemplateView
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
-from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperator
 from mspray.apps.main.models import TeamLeaderAssistant
 from mspray.apps.main.models.performance_report import PerformanceReport
-from mspray.apps.main.models import SprayOperatorDailySummary
 from mspray.apps.main.serializers import (
     PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer,
     TLAPerformanceReportSerializer, DistrictPerformanceReportSerializer)
@@ -80,7 +75,6 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             no_of_days_worked=Count('performancereport'),
             not_eligible=Sum('performancereport__not_eligible'),
         )
-
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
         totals = {
