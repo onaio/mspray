@@ -14,8 +14,6 @@ from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.serializers import (
     PerformanceReportSerializer, SprayOperatorPerformanceReportSerializer,
     TLAPerformanceReportSerializer, DistrictPerformanceReportSerializer)
-from mspray.apps.main.utils import (
-    avg_time, get_formid, avg_time_tuple)
 from mspray.apps.main.datetime_tools import average_time
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
