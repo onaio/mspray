@@ -1014,22 +1014,47 @@ def remove_household_geom_duplicates(spray_area=None):
         )
     for dup in dups:
         hh_objects = Household.objects.filter(geom=dup['geom'])
-        # take the first one as the Household object to keep
-        hh_obj_to_keep = hh_objects[0]
-        hh_to_delete = []
-        for other_hh_obj in hh_objects[1:]:
-            # get any SprayDay objects attached to this Household object
-            # change the attached Household object to the one we want
-            # to keep
-            SprayDay.objects.filter(osmid=other_hh_obj.hh_id).update(
-                osmid=hh_obj_to_keep.hh_id)
-            # delete the duplicate Household object
-            hh_to_delete.append(other_hh_obj.hh_id)
-            other_hh_obj.delete()
-        print("Kept OSM ID: {}\n".format(hh_obj_to_keep.hh_id))
-        print("Deleted OSM IDs:\n")
-        for x in hh_to_delete:
-            print("{}\n".format(x))
+        clean_household_duplicates_queryset(hh_objects)
+
+
+def clean_household_duplicates_queryset(hh_objects):
+    """
+    Given a queryset of duplicate Household objects, keep the first object
+    and remove the rest after transferring any spray data to the first one
+    that is kept
+    """
+
+    # take the first one as the Household object to keep
+    hh_obj_to_keep = hh_objects[0]
+    hh_to_delete = []
+    for other_hh_obj in hh_objects[1:]:
+        # get any SprayDay objects attached to this Household object
+        # change the attached Household object to the one we want
+        # to keep
+        SprayDay.objects.filter(osmid=other_hh_obj.hh_id).update(
+            osmid=hh_obj_to_keep.hh_id)
+        # delete the duplicate Household object
+        hh_to_delete.append(other_hh_obj.hh_id)
+        other_hh_obj.delete()
+    print("Kept OSM ID: {}\n".format(hh_obj_to_keep.hh_id))
+    print("Deleted OSM IDs:\n")
+    for x in hh_to_delete:
+        print("{}\n".format(x))
+
+
+def remove_household_overlapping_duplicates(spray_area=None):
+    """
+    Gets Household objects that have overlaping bgeom fields
+    (These respresent duplicate structres that cannot be fond using the
+    remove_household_geom_duplicates function)
+    Once such duplicates are foound, they are removed and a report printed
+    to the screen - the expectation is that this function will be run from
+    the command line
+    """
+    all_households = Household.objects.all()
+    for hh in all_households:
+        dups = all_households.filter(geom__within=hh.bgeom)
+        clean_household_duplicates_queryset(dups)
 
 
 def find_mismatched_spraydays(was_sprayed=True):
