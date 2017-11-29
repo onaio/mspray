@@ -1053,9 +1053,10 @@ def remove_household_overlapping_duplicates(spray_area=None):
     """
     all_households = Household.objects.all()
     for hh in all_households:
-        dups = all_households.filter(geom__within=hh.bgeom)
-        if dups.count() > 1:
-            clean_household_duplicates_queryset(dups)
+        if hh.bgeom is not None:
+            dups = all_households.filter(geom__within=hh.bgeom)
+            if dups is not None and dups.count() > 1:
+                clean_household_duplicates_queryset(dups)
 
 
 def find_mismatched_spraydays(was_sprayed=True):
