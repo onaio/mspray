@@ -1,5 +1,6 @@
 from django.conf import settings
-from django.db.models import Count, Sum
+from django.db.models import Count, Sum, Value
+from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -30,6 +31,13 @@ TEAM_LEADER_ASSISTANT_CODE = getattr(
     settings, 'MSPRAY_TEAM_LEADER_ASSISTANT_CODE', 'tla_code'
 )
 TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
+
+
+DISTRICT_PERFORMANCE_SQL = """
+SELECT "main_location"."id", "main_location"."name", "main_location"."code", "main_location"."level", "main_location"."parent_id", "main_location"."structures", "main_location"."pre_season_target", "main_location"."num_of_spray_areas", "main_location"."geom", "main_location"."data_quality_check", "main_location"."average_spray_quality_score", "main_location"."visited", "main_location"."sprayed", "main_location"."lft", "main_location"."rght", "main_location"."tree_id", "main_location"."mptt_level", "subq"."found", "subq"."no_of_days_worked", "subq"."reported_sprayed", "subq"."refused", "subq"."reported_found", "subq"."other", "subq"."p_sprayed", "subq"."not_eligible"
+FROM
+(SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_performancereport" ON ("main_location"."id" = "main_performancereport"."district_id") WHERE "main_location"."parent_id" IS NULL GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
+"""  # noqa
 
 
 class IsPerformanceViewMixin(SiteNameMixin):
@@ -63,16 +71,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             .get_context_data(**kwargs)
         districts = Location.objects.filter(parent=None).order_by('name')
 
-        queryset = districts.annotate(
-            found=Sum('performancereport__found'),
-            p_sprayed=Sum('performancereport__sprayed'),
-            refused=Sum('performancereport__refused'),
-            other=Sum('performancereport__other'),
-            reported_found=Sum('performancereport__reported_found'),
-            reported_sprayed=Sum('performancereport__reported_sprayed'),
-            no_of_days_worked=Count('performancereport'),
-            not_eligible=Sum('performancereport__not_eligible'),
-        )
+        queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
+
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
         totals = {
@@ -97,7 +97,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 i['no_of_days_worked'] for i in serializer.data]),
             'avg_structures_per_so': (
                 sum([i['avg_structures_per_so'] for i in serializer.data]) /
-                round(queryset.count())),
+                round(districts.count())),
             'avg_start_time': average_time(
                 [i['avg_start_time'] for i in serializer.data
                  if i['avg_start_time'] != '']),
