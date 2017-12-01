@@ -451,7 +451,7 @@ def check_missing_unique_link():
 
 
 @app.task
-def update_performance_reports(update_all=False):
+def update_performance_reports(update_all=True):
     """
     Update perfomance records updated in the last UPDATE_VISITED_MINUTES
     minutes.
