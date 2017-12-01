@@ -50,6 +50,7 @@ HH_BUFFER = True
 MSPRAY_NEW_BUFFER_WIDTH = 4
 
 MSPRAY_WAS_SPRAYED_FIELD = 'values_from_omk/spray_status'
+MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD = 'newstructure/manual_spray_status'
 MSPRAY_WAS_SPRAYED_VALUE = 'sprayed'
 MSPRAY_WAS_NOT_SPRAYED_VALUE = 'notsprayed'
 MSPRAY_UNSPRAYED_REASON_FIELD = "osmstructure:notsprayed_reason"
@@ -74,6 +75,7 @@ MSPRAY_UNIQUE_FIELD = 'osmstructure'
 MSPRAY_STRUCTURE_GPS_FIELD = 'newstructure/gps'
 
 SPRAYABLE_FIELD = 'values_from_omk/spray_status'
+NEW_STRUCTURE_SPRAYABLE_FIELD = 'newstructure/manual_spray_status'
 NOT_SPRAYABLE_VALUE = 'noteligible'
 
 GOOGLE_API_KEY = ''

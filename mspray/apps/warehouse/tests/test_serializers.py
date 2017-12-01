@@ -9,6 +9,7 @@ from mspray.apps.warehouse.serializers import SprayDayDruidSerializer
 
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+NEW_WAS_SPRAYED_FIELD = settings.MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD
 IRS_NUM_FIELD = settings.MSPRAY_IRS_NUM_FIELD
 
 
@@ -39,8 +40,19 @@ class TestSerializers(TestBase):
                          'bgeom_srid', 'team_leader_code', 'district_code',
                          'rhc_code', 'target_area_code', 'timestamp',
                          'team_leader_assistant_code']
+        # was sprayed
+        if sprayday.data.get(NEW_WAS_SPRAYED_FIELD):
+            was_sprayed_field = NEW_WAS_SPRAYED_FIELD
+        elif sprayday.data.get(WAS_SPRAYED_FIELD):
+            was_sprayed_field = WAS_SPRAYED_FIELD
         # sprayable
-        sprayable_field = settings.SPRAYABLE_FIELD
+        sprayable_field = None
+
+        if sprayday.data.get(settings.NEW_STRUCTURE_SPRAYABLE_FIELD):
+            sprayable_field = settings.NEW_STRUCTURE_SPRAYABLE_FIELD
+        elif sprayday.data.get(settings.SPRAYABLE_FIELD):
+            sprayable_field = settings.SPRAYABLE_FIELD
+
         not_sprayable_value = settings.NOT_SPRAYABLE_VALUE
         was_sprayable = sprayday.data.get(sprayable_field)
         sprayable = was_sprayable != not_sprayable_value
@@ -116,7 +128,7 @@ class TestSerializers(TestBase):
         self.assertEqual(serialized['geom_lat'], sprayday.geom.coords[1])
         self.assertEqual(serialized['geom_lng'], sprayday.geom.coords[0])
         self.assertEqual(serialized['sprayed'],
-                         sprayday.data.get(WAS_SPRAYED_FIELD))
+                         sprayday.data.get(was_sprayed_field))
         self.assertEqual(serialized['sprayable'], sprayable)
         self.assertEqual(serialized['reason'], sprayday.data.get(REASON_FIELD))
         self.assertEqual(serialized['submission_time'],

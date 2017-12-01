@@ -50,6 +50,7 @@ HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
 TA_LEVEL = settings.MSPRAY_TA_LEVEL
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+NEW_WAS_SPRAYED_FIELD = settings.MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD
 WAS_SPRAYED_VALUE = getattr(settings, 'MSPRAY_WAS_SPRAYED_VALUE', 'yes')
 HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 SPRAY_OPERATOR_CODE = settings.MSPRAY_SPRAY_OPERATOR_CODE
@@ -633,7 +634,12 @@ def add_unique_data(sprayday, unique_field, location):
                 data_id=data_id,
                 location=location,
             )
-            was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
+
+            was_sprayed = None
+            if sp.sprayday.data.get(WAS_SPRAYED_FIELD):
+                was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
+            elif sp.sprayday.data.get(NEW_WAS_SPRAYED_FIELD):
+                was_sprayed = sp.sprayday.data.get(NEW_WAS_SPRAYED_FIELD)
 
             if was_sprayed != WAS_SPRAYED_VALUE:
                 sp.sprayday = sprayday
@@ -1068,22 +1074,26 @@ def find_mismatched_spraydays(was_sprayed=True):
     field is set to True
 
     """
+    was_sprayed_kwargs = {
+        "data__{}".format(settings.MSPRAY_WAS_SPRAYED_FIELD):
+        settings.MSPRAY_WAS_SPRAYED_VALUE}
+
+    new_was_sprayed_kwargs = {
+        "data__{}".format(settings.MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD):
+        settings.MSPRAY_WAS_SPRAYED_VALUE}
+
     if was_sprayed is True:
         # return SprayDay objects where the data says it was not sprayed
         # yet the was_sprayed field is True
         return SprayDay.objects.filter(
-            was_sprayed=was_sprayed).extra(
-            where=['(data->>%s) != %s'],
-            params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
-                    settings.MSPRAY_WAS_SPRAYED_VALUE])
+            was_sprayed=was_sprayed).exclude(
+            Q(**was_sprayed_kwargs) & Q(**new_was_sprayed_kwargs))
     elif was_sprayed is False:
         # return SprayDay objects where the data says it was sprayed
         # yet the was_sprayed field is False
         return SprayDay.objects.filter(
-            was_sprayed=was_sprayed).extra(
-            where=['(data->>%s) = %s'],
-            params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
-                    settings.MSPRAY_WAS_SPRAYED_VALUE])
+            was_sprayed=was_sprayed).filter(
+            Q(**was_sprayed_kwargs) | Q(**new_was_sprayed_kwargs))
 
 
 def find_missing_performance_report_records():
