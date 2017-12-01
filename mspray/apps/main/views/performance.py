@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.db.models import Count, Sum
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.views.generic import ListView
@@ -42,6 +41,12 @@ TLA_PERFORMANCE_SQL = """
 SELECT "main_teamleaderassistant"."id", "main_teamleaderassistant"."code", "main_teamleaderassistant"."name", "main_teamleaderassistant"."location_id", "main_teamleaderassistant"."data_quality_check", "main_teamleaderassistant"."average_spray_quality_score", "main_teamleaderassistant"."team_leader_id", "subq"."no_of_days_worked", "subq"."found", "subq"."reported_sprayed", "subq"."reported_found", "subq"."not_eligible", "subq"."sprayed", "subq"."other", "subq"."refused"
 FROM
 (SELECT "main_teamleaderassistant"."id", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused" FROM "main_teamleaderassistant" LEFT OUTER JOIN "main_performancereport" ON ("main_teamleaderassistant"."id" = "main_performancereport"."team_leader_assistant_id") WHERE "main_teamleaderassistant"."location_id" = %s GROUP BY "main_teamleaderassistant"."id") "subq" JOIN "main_teamleaderassistant" on "main_teamleaderassistant"."id" = "subq"."id"
+"""  # noqa
+
+SOP_PERFORMANCE_SQL = """
+SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
+FROM
+(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."team_leader_assistant_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id"
 """  # noqa
 
 
@@ -196,15 +201,10 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         team_leader = self.kwargs.get('team_leader')
         team_leader_assistant = get_object_or_404(TeamLeaderAssistant,
                                                   code=team_leader)
-        queryset = team_leader_assistant.sprayoperator_set.annotate(
-            found=Sum('performancereport__found'),
-            sprayed=Sum('performancereport__sprayed'),
-            refused=Sum('performancereport__refused'),
-            other=Sum('performancereport__other'),
-            reported_found=Sum('performancereport__reported_found'),
-            reported_sprayed=Sum('performancereport__reported_sprayed'),
-            no_of_days_worked=Count('performancereport'),
-        )
+
+        queryset = SprayOperator.objects.raw(
+            SOP_PERFORMANCE_SQL, [team_leader_assistant.id])
+
         serializer = SprayOperatorPerformanceReportSerializer(queryset,
                                                               many=True)
         totals = {
