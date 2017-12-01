@@ -1084,3 +1084,20 @@ def find_mismatched_spraydays(was_sprayed=True):
             where=['(data->>%s) = %s'],
             params=[settings.MSPRAY_WAS_SPRAYED_FIELD,
                     settings.MSPRAY_WAS_SPRAYED_VALUE])
+
+
+def find_missing_performance_report_records():
+    """
+    Checks if all submitted data is stored in the performance report table
+    """
+    # find sprayform ids on SprayDay table
+    sprayday_sprayformids = SprayDay.objects.annotate(
+        sprayformid=RawSQL("data->'sprayformid'", ())).values_list(
+        'sprayformid', flat=True).order_by('spray_date').distinct()
+
+    performace_sprayformids = PerformanceReport.objects.values_list(
+        'sprayformid', flat=True).order_by('sprayformid').distinct()
+
+    return list(
+        set([x for x in sprayday_sprayformids if x not in
+             performace_sprayformids]))
