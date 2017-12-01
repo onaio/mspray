@@ -17,6 +17,7 @@ STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_STRUCTURE_GPS_FIELD',
 NON_STRUCTURE_GPS_FIELD = getattr(settings, 'MSPRAY_NON_STRUCTURE_GPS_FIELD',
                                   'non_structure_gps')
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+NEW_WAS_SPRAYED_FIELD = settings.MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD
 SPRAYABLE_FIELD = settings.SPRAYABLE_FIELD
 NEW_STRUCTURE_SPRAYABLE_FIELD = settings.NEW_STRUCTURE_SPRAYABLE_FIELD
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
@@ -71,7 +72,12 @@ class SprayDay(models.Model):
 
     def _set_sprayed_status(self):
         # pylint: disable=no-member
-        self.was_sprayed = self.data.get(WAS_SPRAYED_FIELD) == SPRAYED_VALUE
+        if self.data.get(WAS_SPRAYED_FIELD):
+            self.was_sprayed = self.data.get(WAS_SPRAYED_FIELD) == \
+                SPRAYED_VALUE
+        elif self.data.get(NEW_WAS_SPRAYED_FIELD):
+            self.was_sprayed = self.data.get(NEW_WAS_SPRAYED_FIELD) == \
+                SPRAYED_VALUE
 
     def _set_sprayable_status(self):
         # pylint: disable=no-member

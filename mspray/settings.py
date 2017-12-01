@@ -230,6 +230,7 @@ MSPRAY_EMAIL = "mspray@example.com"
 MSPRAY_REPLY_TO_EMAIL = "mspray@example.com"
 MSPRAY_LOCATION_FIELD = 'location_code'
 MSPRAY_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
+MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD = 'sprayed/was_sprayed'
 MSPRAY_WAS_SPRAYED_VALUE = 'yes'
 MSPRAY_WAS_NOT_SPRAYED_VALUE = 'no'
 SPRAYABLE_FIELD = 'sprayable_structure'
@@ -271,7 +272,7 @@ OSM_SUBMISSIONS = False
 HAS_SPRAYABLE_QUESTION = False
 SITE_NAME = 'mSpray'
 SPRAYABLE_FIELD = 'sprayable_structure'
-NEW_STRUCTURE_SPRAYABLE_FIELD = 'new_sprayable_structure'
+NEW_STRUCTURE_SPRAYABLE_FIELD = 'sprayable_structure'
 NOT_SPRAYABLE_VALUE = 'no'
 LOCATION_SPRAYED_PERCENTAGE = 90
 

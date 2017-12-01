@@ -9,6 +9,7 @@ from mspray.apps.main.models import (
 )
 
 WAS_SPRAYED_FIELD = settings.MSPRAY_WAS_SPRAYED_FIELD
+NEW_WAS_SPRAYED_FIELD = settings.MSPRAY_NEW_STRUCTURE_WAS_SPRAYED_FIELD
 REASON_FIELD = settings.MSPRAY_UNSPRAYED_REASON_FIELD
 IRS_NUM_FIELD = settings.MSPRAY_IRS_NUM_FIELD
 SPRAY_OPERATOR_NAME = settings.MSPRAY_SPRAY_OPERATOR_NAME
@@ -23,7 +24,10 @@ class SprayBase(object):
 
     def get_sprayed(self, obj):
         if obj:
-            return obj.data.get(WAS_SPRAYED_FIELD)
+            if obj.data.get(WAS_SPRAYED_FIELD):
+                return obj.data.get(WAS_SPRAYED_FIELD)
+            elif obj.data.get(NEW_WAS_SPRAYED_FIELD):
+                return obj.data.get(NEW_WAS_SPRAYED_FIELD)
 
     def get_reason(self, obj):
         if obj:
