@@ -6,7 +6,7 @@ import os
 from datetime import timedelta
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.contrib.gis.geos.polygon import Polygon
@@ -451,18 +451,28 @@ def check_missing_unique_link():
 
 
 @app.task
-def update_performance_reports():
+def update_performance_reports(update_all=True):
     """
     Update perfomance records updated in the last UPDATE_VISITED_MINUTES
     minutes.
     """
     from mspray.apps.main.utils import performance_report
+
     time_within = UPDATE_VISITED_MINUTES
     time_since = timezone.now() - timedelta(minutes=time_within + 1)
-    submissions = SprayDay.objects.filter(created_on__gte=time_since)
-    queryset = submissions.filter(spray_operator__isnull=False)\
-        .only('spray_operator').distinct('spray_operator')
-    for record in queryset:
+
+    if update_all:
+        submissions = SprayDay.objects.all()
+    else:
+        submissions = SprayDay.objects.filter(
+            Q(created_on__gte=time_since) | Q(modified_on__gte=time_since))
+
+    sop_queryset = SprayDay.objects.filter(
+        Q(created_on__gte=time_since) | Q(modified_on__gte=time_since)).filter(
+        spray_operator__isnull=False).only('spray_operator').distinct(
+        'spray_operator')
+
+    for record in sop_queryset:
         performance_report(
             record.spray_operator,
             submissions.filter(spray_operator=record.spray_operator))
