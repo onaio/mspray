@@ -74,6 +74,7 @@ MSPRAY_UNIQUE_FIELD = 'osmstructure'
 MSPRAY_STRUCTURE_GPS_FIELD = 'newstructure/gps'
 
 SPRAYABLE_FIELD = 'values_from_omk/spray_status'
+NEW_STRUCTURE_SPRAYABLE_FIELD = 'newstructure/manual_spray_status'
 NOT_SPRAYABLE_VALUE = 'noteligible'
 
 GOOGLE_API_KEY = ''

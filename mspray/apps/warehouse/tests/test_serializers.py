@@ -40,7 +40,13 @@ class TestSerializers(TestBase):
                          'rhc_code', 'target_area_code', 'timestamp',
                          'team_leader_assistant_code']
         # sprayable
-        sprayable_field = settings.SPRAYABLE_FIELD
+        sprayable_field = None
+
+        if sprayday.data.get(settings.NEW_STRUCTURE_SPRAYABLE_FIELD):
+            sprayable_field = settings.NEW_STRUCTURE_SPRAYABLE_FIELD
+        elif sprayday.data.get(settings.SPRAYABLE_FIELD):
+            sprayable_field = settings.SPRAYABLE_FIELD
+
         not_sprayable_value = settings.NOT_SPRAYABLE_VALUE
         was_sprayable = sprayday.data.get(sprayable_field)
         sprayable = was_sprayable != not_sprayable_value
