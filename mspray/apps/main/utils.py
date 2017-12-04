@@ -11,7 +11,7 @@ from django.contrib.gis.geos import MultiPolygon
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.db import connection
-from django.db.models import Q, Count
+from django.db.models import Q, Count, F
 from django.db.models.expressions import RawSQL
 from django.db.utils import IntegrityError
 from django.core.exceptions import ValidationError
@@ -1111,3 +1111,10 @@ def find_missing_performance_report_records():
     return list(
         set([x for x in sprayday_sprayformids if x not in
              performace_sprayformids]))
+
+
+def get_spraydays_with_mismatched_locations():
+    """
+    Gets all SprayDay objects where the geom is not within the location geom
+    """
+    return SprayDay.objects.exclude(geom__within=F('location__geom'))

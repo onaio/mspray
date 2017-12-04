@@ -6,7 +6,7 @@ from django.db.models import Count
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.models import SprayDay, TeamLeader, TeamLeaderAssistant
 from mspray.apps.main.models import SprayOperator, SprayOperatorDailySummary
-from mspray.apps.main.models import Household
+from mspray.apps.main.models import Household, Location
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.utils import add_spray_data
 from mspray.apps.main.utils import avg_time_tuple
@@ -16,6 +16,7 @@ from mspray.apps.main.utils import link_sprayday_to_actors
 from mspray.apps.main.utils import remove_duplicate_sprayoperatordailysummary
 from mspray.apps.main.utils import add_spray_operator_daily
 from mspray.apps.main.utils import remove_household_geom_duplicates
+from mspray.apps.main.utils import get_spraydays_with_mismatched_locations
 from mspray.celery import app
 
 SUBMISSION_DATA = [{
@@ -284,3 +285,23 @@ class TestUtils(TestBase):
         # assert that no mismatched items exist
         self.assertEqual(mismatched2.count(), 1)
         self.assertEqual(mismatched2.first(), items.first())
+
+    def test_get_spraydays_with_mismatched_locations(self):
+        """
+        Test that get_spraydays_with_mismatched_locations returns all
+        mismatched spraydays
+        """
+        self._load_fixtures()
+        no_mismatched = get_spraydays_with_mismatched_locations()
+        # assert that there are no mismatched objects
+        self.assertEqual(no_mismatched.count(), 0)
+        # create one mismatched object
+        sprayday = SprayDay.objects.first()
+        other_location = Location.objects.filter(level='ta').exclude(
+            location=sprayday.location).first()
+        sprayday.location = other_location
+        sprayday.save()
+        # test that we find this mismatched
+        mismatched = get_spraydays_with_mismatched_locations()
+        self.assertEqual(mismatched.count(), 1)
+        self.assertEqual(mismatched.first(), sprayday)
