@@ -14,8 +14,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         queryset = get_spraydays_with_mismatched_locations()
-        print("{} mismatched records".format(queryset.count()))
+        self.stdout.write("{} mismatched records".format(queryset.count()))
         for record in queryset_iterator(queryset):
-            print("SprayDay ID: {} ".format(record.pk))
+            self.stdout.write("SprayDay ID: {} ".format(record.pk))
             link_spraypoint_with_osm.delay(record.pk)
             gc.collect()
