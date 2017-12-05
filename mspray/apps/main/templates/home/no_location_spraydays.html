@@ -1,0 +1,48 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">No Location Spray Data</h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>Found Structures</th>
+                    <th>New Structures</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class='numbers'>{{ data.found|intcomma }}</td>
+                    <td class='numbers'>{{ data.new_structures|intcomma }}</td>
+                    <td class='numbers'>{{ data.sprayed|intcomma }}</td>
+                     {% calc_percentage data.sprayed data.found as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
