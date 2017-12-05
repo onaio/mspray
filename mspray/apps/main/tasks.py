@@ -42,6 +42,7 @@ LOCATION_SPRAYED_PERCENTAGE = getattr(
 UPDATE_VISITED_MINUTES = getattr(settings, 'UPDATE_VISITED_MINUTES', 5)
 DIRECTLY_OBSERVED_FORM_ID = getattr(settings, 'DIRECTLY_OBSERVED_FORM_ID',
                                     None)
+FALLBACK_TO_ODK = settings.FALLBACK_TO_SUBMISSION_DATA_LOCATION
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -165,7 +166,7 @@ def link_spraypoint_with_osm(pk):
         location, geom, is_node = get_location_from_osm(sp.data)
         if location is None:
             location, geom = get_new_structure_location(sp.data, geom, is_node)
-            if location is None:
+            if location is None and settings.FALLBACK_TO_ODK:
                 location = get_location_from_data(sp.data)
             else:
                 is_node = True
