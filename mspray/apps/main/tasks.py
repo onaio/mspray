@@ -476,3 +476,22 @@ def update_performance_reports(update_all=True):
         performance_report(
             record.spray_operator,
             submissions.filter(spray_operator=record.spray_operator))
+
+
+@app.task
+def sync_performance_reports():
+    """
+    Task to find missing performance reports and sync them back in
+    """
+    from mspray.apps.main.utils import find_missing_performance_report_records
+    from mspray.apps.main.utils import performance_report
+    from mspray.apps.main.utils import queryset_iterator
+
+    missing_sprayformids = find_missing_performance_report_records()
+
+    queryset = SprayDay.objects.filter(
+        data__sprayformid__in=missing_sprayformids).distinct(
+        'spray_operator')
+
+    for record in queryset_iterator(queryset):
+        performance_report(record.spray_operator)
