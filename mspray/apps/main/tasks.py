@@ -169,7 +169,7 @@ def link_spraypoint_with_osm(pk):
             if location is None and FALLBACK_TO_ODK:
                 location = get_location_from_data(sp.data)
             else:
-                is_node = True
+                is_node = isinstance(geom, Point)
 
         if location is None and FALLBACK_TO_ODK is False:
             sp.location = None
