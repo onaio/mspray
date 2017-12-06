@@ -52,7 +52,7 @@ urlpatterns = [
     url(r'^login$', user.login, name='login'),
     url(r'^logout$', user.logout, name='logout'),
     url(r'^no-location/$', NoLocationSprayDayView.as_view(),
-        name='no_location'),
+        name='no_location_spray_effectiveness'),
     url(r'^warehouse/', include(warehouse_urls, namespace='warehouse')),
     url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
         name='district'),

@@ -4,6 +4,7 @@
 {% load staticfiles %}
 {% load performance_extras %}
 {% load progress_extras %}
+{% load i18n %}
 
 {% block content %}
 <div class="container" id="district_table">
@@ -66,6 +67,9 @@
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td colspan="5"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "No Location Structures" %}</a></td>
+                </tr>
             {% else %}
                 {% for district in district_list %}
                     <tr>
