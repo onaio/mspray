@@ -23,8 +23,13 @@
                     <td class='numbers'>{{ data.found|intcomma }}</td>
                     <td class='numbers'>{{ data.new_structures|intcomma }}</td>
                     <td class='numbers'>{{ data.sprayed|intcomma }}</td>
+                    {% if data.sprayed and data.found %}
                      {% calc_percentage data.sprayed data.found as spray_effectiveness_percentage %}
-                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                     <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+
                 </tr>
             </tbody>
         </table>
