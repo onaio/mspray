@@ -15,6 +15,7 @@ from django.views.generic.base import TemplateView
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
 
+from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, SprayPoint
 from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
@@ -164,5 +165,6 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
         cursor = connection.cursor()
         cursor.execute(spray_area_indicator_sql)
         results = dictfetchall(cursor)
+        context.update(DEFINITIONS['ta'])
         context['data'] = results[0]
         return context
