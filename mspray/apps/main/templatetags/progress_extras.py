@@ -38,3 +38,11 @@ def calc_percentage(numerator, denominator):
         return ''
 
     return '{:.0%}'.format(numerator / denominator)
+
+
+@register.filter
+def key(data, key_name):
+    """
+    Returns the value in the given key_name of a dict.
+    """
+    return data.get(key_name)

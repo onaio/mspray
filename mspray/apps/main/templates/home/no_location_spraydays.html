@@ -8,15 +8,16 @@
 {% block content %}
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
-        <h1 id="district-name">No Location Spray Data</h1>
+        <h1 id="district-name">Structures not in Target Areas</h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
                     <th>District</th>
                     <th>Found Structures</th>
-                    <th>New Structures</th>
+                    <!-- <th>New Structures</th> -->
                     <th>Sprayed</th>
-                    <th>Spray Effectiveness</th>
+                    <th>% of Total Sprayed</th>
+                    <th>Spray Coverage</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,9 +30,11 @@
                             <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
                         </td>
                         <td class='numbers'>{{ val.found|default_if_none:" "|intcomma }}</td>
-                        <td class='numbers'>{{ val.new_structures|default_if_none:" "|intcomma }}</td>
+                        <!-- <td class='numbers'>{{ val.new_structures|default_if_none:" "|intcomma }}</td> -->
                         <td class='numbers'>{{ val.sprayed|default_if_none:" "|intcomma }}</td>
                         {% if val.sprayed and val.found %}
+                        {% calc_percentage val.found district_sprayed|key:district.district_name as cov %}
+                        <td class='numbers'>{{ cov }}</td>
                          {% calc_percentage val.sprayed val.found as spray_effectiveness_percentage %}
                          <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
                         {% else %}
@@ -43,8 +46,9 @@
                 <tr>
                     <td>Not in Targeted Districts</td>
                     <td class='numbers'>{{ no_location.found|default_if_none:" "|intcomma }}</td>
-                    <td class='numbers'>{{ no_location.new_structures|default_if_none:" "|intcomma }}</td>
+                    <!-- <td class='numbers'>{{ no_location.new_structures|default_if_none:" "|intcomma }}</td> -->
                     <td class='numbers'>{{ no_location.sprayed|default_if_none:" "|intcomma }}</td>
+                        <td class='numbers'></td>
                     {% if no_location.sprayed and no_location.found %}
                      {% calc_percentage no_location.sprayed no_location.found as spray_effectiveness_percentage %}
                      <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
@@ -57,8 +61,9 @@
                 <tr>
                     <td>Total</td>
                     <td class='numbers'>{{ total.found|intcomma }}</td>
-                    <td class='numbers'>{{ total.new_structures|intcomma }}</td>
+                    <!-- <td class='numbers'>{{ total.new_structures|intcomma }}</td> -->
                     <td class='numbers'>{{ total.sprayed|intcomma }}</td>
+                        <td class='numbers'></td>
                     {% if total.sprayed and total.found %}
                      {% calc_percentage total.sprayed total.found as spray_effectiveness_percentage %}
                      <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
@@ -69,7 +74,7 @@
                 </tr>
             </tfoot>
         </table>
-        <p>* To sort a column, click on the column name</p>
+        <!-- <p>* To sort a column, click on the column name</p> -->
 
         {% include 'definitions-and-conditions.html' %}
     </div>

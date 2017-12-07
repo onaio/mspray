@@ -4,15 +4,15 @@ SprayDay viewset module - viewset for IRS HH submissions.
 """
 import django_filters
 from django.conf import settings
+from django.contrib.gis.db.backends.postgis.adapter import PostGISAdapter
 from django.core.exceptions import ValidationError
+from django.db import connection
+from django.db.models import Count
 from django.db.utils import IntegrityError
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
-from django.http import QueryDict
-from django.db import connection
 from django.views.generic.base import TemplateView
-from django.contrib.gis.db.backends.postgis.adapter import PostGISAdapter
-
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
 
@@ -21,15 +21,16 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, SprayPoint
 from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
                                                SprayDay)
-from mspray.apps.main.serializers.sprayday import (
-    SprayDayNamibiaSerializer, SprayDaySerializer, SprayDayShapeSerializer)
+from mspray.apps.main.serializers.sprayday import (SprayDayNamibiaSerializer,
+                                                   SprayDaySerializer,
+                                                   SprayDayShapeSerializer)
+from mspray.apps.main.serializers.target_area import dictfetchall
 from mspray.apps.main.utils import (add_spray_data,
                                     delete_cached_target_area_keys)
-from mspray.apps.main.serializers.target_area import dictfetchall
 
 SPATIAL_QUERIES = False
 
-spray_area_indicator_sql = """
+SPRAY_AREA_INDICATOR_SQL = """
 SELECT
 COALESCE(SUM(CASE WHEN "other" > 0 THEN 1 ELSE 0 END), 0) AS "other",
 COALESCE(SUM(CASE WHEN "not_sprayable" > 0 THEN 1 ELSE 0 END), 0) AS "not_sprayable",
@@ -60,13 +61,32 @@ def get_not_targeted_within_geom(geom):
     objects that are within that geom field
     """
     cursor = connection.cursor()
-    sql = spray_area_indicator_sql.replace(
+    sql = SPRAY_AREA_INDICATOR_SQL.replace(
         '"main_sprayday"."location_id" IS NULL',
         '"main_sprayday"."location_id" IS NULL AND '
         'ST_Within("main_sprayday"."geom", {})'.format(
             PostGISAdapter(geom).getquoted()))
     cursor.execute(sql)
     return dictfetchall(cursor)
+
+
+def get_num_sprayed_for_districts():
+    """
+    Returns a dict with the number of unique sprayed structures per district.
+    """
+    return dict(list(
+        SprayPoint.objects.filter(
+            sprayday__location__isnull=False,
+            sprayday__was_sprayed=True
+        ).values(
+            'sprayday__location__parent__parent__name'
+        ).annotate(
+            sprayed=Count('id')
+        ).values_list(
+            'sprayday__location__parent__parent__name',
+            'sprayed'
+        )
+    ))
 
 
 class SprayDateFilter(django_filters.FilterSet):
@@ -175,6 +195,9 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
 
 class NoLocationSprayDayView(SiteNameMixin, TemplateView):
+    """
+    Found structures not in a target area.
+    """
     template_name = 'home/no_location_spraydays.html'
 
     def get_context_data(self, **kwargs):
@@ -194,21 +217,22 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
 
         # totals
         cursor = connection.cursor()
-        cursor.execute(spray_area_indicator_sql)
+        cursor.execute(SPRAY_AREA_INDICATOR_SQL)
 
         total_results = dictfetchall(cursor)
         context['district_data'] = district_data
         context['total'] = total_results[0]
+        context['district_sprayed'] = get_num_sprayed_for_districts()
 
         context['no_location'] = {
             'found': total_results[0]['found'] - sum(
                 [v['found'] for k, v in district_data.items() if v['found']]),
             'sprayed': total_results[0]['sprayed'] - sum(
                 [v['sprayed'] for k, v in district_data.items()
-                    if v['sprayed']]),
+                 if v['sprayed']]),
             'new_structures': total_results[0]['new_structures'] - sum(
                 [v['new_structures'] for k, v in district_data.items()
-                    if v['new_structures']])
+                 if v['new_structures']])
         }
 
         return context
