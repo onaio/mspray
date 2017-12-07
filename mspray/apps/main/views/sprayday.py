@@ -53,6 +53,21 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
 """  # noqa
 
 
+def get_not_targeted_within_geom(geom):
+    """
+    Takes an object wiht a geom field and runs a query to find spray day
+    objects that are within that geom field
+    """
+    cursor = connection.cursor()
+    sql = spray_area_indicator_sql.replace(
+        '"main_sprayday"."location_id" IS NULL',
+        '"main_sprayday"."location_id" IS NULL AND '
+        'ST_Within("main_sprayday"."geom", {})'.format(
+            PostGISAdapter(geom).getquoted()))
+    cursor.execute(sql)
+    return dictfetchall(cursor)
+
+
 class SprayDateFilter(django_filters.FilterSet):
     """
     Spray date filter.
@@ -173,14 +188,8 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
         # per district
         district_data = {}
         for district in districts:
-            district_cursor = connection.cursor()
-            district_sql = spray_area_indicator_sql.replace(
-                '"main_sprayday"."location_id" IS NULL',
-                '"main_sprayday"."location_id" IS NULL AND '
-                'ST_Within("main_sprayday"."geom", {})'.format(
-                    PostGISAdapter(district.geom).getquoted()))
-            district_cursor.execute(district_sql)
-            district_data[district] = dictfetchall(district_cursor)[0]
+            result = get_not_targeted_within_geom(district.geom)
+            district_data[district] = result[0]
 
         # totals
         cursor = connection.cursor()
