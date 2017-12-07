@@ -67,9 +67,13 @@
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                     </tr>
                 {% endfor %}
-                <tr>
-                    <td colspan="5"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "Not in Targeted Area" %}</a></td>
-                </tr>
+
+                {% if district_name %}
+                {% else %}
+                    <tr>
+                        <td colspan="5"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "Not in Targeted Area" %}</a></td>
+                    </tr>
+                {% endif%}
             {% else %}
                 {% for district in district_list %}
                     <tr>
@@ -101,6 +105,7 @@
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
                     </tr>
                 {% endfor %}
+
             {% endif%}
             </tbody>
             <tfoot>
