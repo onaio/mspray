@@ -11,6 +11,7 @@ from django.utils.translation import ugettext as _
 from django.http import QueryDict
 from django.db import connection
 from django.views.generic.base import TemplateView
+from django.contrib.gis.db.backends.postgis.adapter import PostGISAdapter
 
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
@@ -46,7 +47,8 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
   SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:node:id' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:node:id' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "new_structures",
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "not_sprayed",
   SUM(CASE WHEN ("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "refused"
-  FROM "main_sprayday" LEFT OUTER JOIN "main_spraypoint" ON ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE ("main_sprayday"."location_id" IS NULL) GROUP BY "main_sprayday"."id"
+  FROM "main_sprayday"
+  LEFT OUTER JOIN "main_spraypoint" ON ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE ("main_sprayday"."location_id" IS NULL) GROUP BY "main_sprayday"."id"
 ) AS "sub_query";
 """  # noqa
 
@@ -162,9 +164,41 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super(NoLocationSprayDayView,
                         self).get_context_data(**kwargs)
+        context.update(DEFINITIONS['ta'])
+
+        districts = Location.objects.filter(level='district').order_by('name')
+
+        cursor = connection.cursor()
+
+        # per district
+        district_data = {}
+        for district in districts:
+            district_cursor = connection.cursor()
+            district_sql = spray_area_indicator_sql.replace(
+                '"main_sprayday"."location_id" IS NULL',
+                '"main_sprayday"."location_id" IS NULL AND '
+                'ST_Within("main_sprayday"."geom", {})'.format(
+                    PostGISAdapter(district.geom).getquoted()))
+            district_cursor.execute(district_sql)
+            district_data[district] = dictfetchall(district_cursor)[0]
+
+        # totals
         cursor = connection.cursor()
         cursor.execute(spray_area_indicator_sql)
-        results = dictfetchall(cursor)
-        context.update(DEFINITIONS['ta'])
-        context['data'] = results[0]
+
+        total_results = dictfetchall(cursor)
+        context['district_data'] = district_data
+        context['total'] = total_results[0]
+
+        context['no_location'] = {
+            'found': total_results[0]['found'] - sum(
+                [v['found'] for k, v in district_data.items() if v['found']]),
+            'sprayed': total_results[0]['sprayed'] - sum(
+                [v['sprayed'] for k, v in district_data.items()
+                    if v['sprayed']]),
+            'new_structures': total_results[0]['new_structures'] - sum(
+                [v['new_structures'] for k, v in district_data.items()
+                    if v['new_structures']])
+        }
+
         return context
