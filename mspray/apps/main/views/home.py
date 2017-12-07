@@ -18,6 +18,7 @@ from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
 from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.definitions import DEFINITIONS
+from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
@@ -39,6 +40,9 @@ class DistrictView(SiteNameMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
+
+        not_targeted = None
+
         qs = context['object_list'].extra(select={
             "xmin": 'ST_xMin("main_location"."geom")',
             "ymin": 'ST_yMin("main_location"."geom")',
@@ -61,6 +65,16 @@ class DistrictView(SiteNameMixin, ListView):
                 serializer_class = TargetAreaQuerySerializer \
                     if settings.SITE_NAME == 'namibia' \
                     else TargetAreaSerializer
+            # no location structures
+            try:
+                obj = Location.objects.get(pk=pk)
+            except Location.DoesNotExist:
+                pass
+            else:
+                not_targeted = get_not_targeted_within_geom(obj.geom)
+                not_targeted = not_targeted[0]
+                context['no_location'] = not_targeted
+
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
@@ -72,6 +86,11 @@ class DistrictView(SiteNameMixin, ListView):
             for field in fields:
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
+
+        if not_targeted:
+            totals['visited_total'] += not_targeted['found']
+            totals['visited_sprayed'] += not_targeted['sprayed']
+
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
         context['district_totals'] = totals

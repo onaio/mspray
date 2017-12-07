@@ -35,7 +35,7 @@
                          {% calc_percentage val.sprayed val.found as spray_effectiveness_percentage %}
                          <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
                         {% else %}
-                            <td></td>
+                            <td class='numbers'></td>
                         {% endif %}
 
                     </tr>
@@ -49,9 +49,8 @@
                      {% calc_percentage no_location.sprayed no_location.found as spray_effectiveness_percentage %}
                      <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
                     {% else %}
-                        <td></td>
+                        <td class='numbers'></td>
                     {% endif %}
-
                 </tr>
             </tbody>
             <tfoot>
