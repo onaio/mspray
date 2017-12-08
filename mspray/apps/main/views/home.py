@@ -3,22 +3,19 @@ import json
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
-from django.views.generic import DetailView
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
+from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
-from mspray.apps.main.serializers.target_area import \
-    GeoTargetAreaSerializer, get_duplicates, count_duplicates
-from mspray.apps.main.serializers.target_area import DistrictSerializer
-from mspray.apps.main.serializers.target_area import TargetAreaSerializer
-from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
-from mspray.apps.main.views.target_area import TargetAreaViewSet
-from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
-from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.query import get_location_qs
-from mspray.apps.main.definitions import DEFINITIONS
+from mspray.apps.main.serializers.target_area import (
+    DistrictSerializer, GeoTargetAreaSerializer, TargetAreaQuerySerializer,
+    TargetAreaSerializer, count_duplicates, get_duplicates)
+from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
+from mspray.apps.main.views.target_area import (TargetAreaHouseholdsViewSet,
+                                                TargetAreaViewSet)
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
@@ -235,6 +232,10 @@ class SprayAreaView(SiteNameMixin, ListView):
     def render_to_response(self, context, **response_kwargs):
         if self.request.GET.get('format') == 'csv':
             def calc_percentage(numerator, denominator):
+                """
+                Returns the percentage of the given values, empty string on
+                exceptions.
+                """
                 try:
                     denominator = float(denominator)
                     numerator = float(numerator)
@@ -246,8 +247,14 @@ class SprayAreaView(SiteNameMixin, ListView):
 
                 return round((numerator * 100) / denominator)
 
-            class SprayArea(object):
+            class SprayAreaBuffer(object):
+                """
+                A file object like class that implements the write operation.
+                """
                 def write(self, value):
+                    """
+                    Returns the value passed to it.
+                    """
                     return value
 
             def _data():
@@ -262,10 +269,31 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Found Coverage",
                     "Sprayed Coverage"
                 ]
+                previous_rhc = None
                 for value in context.get('qs'):
                     district = TargetAreaSerializer(
                         value, context=context
                     ).data
+                    if previous_rhc is None:
+                        previous_rhc = district
+                    if previous_rhc.get('rhc') != district.get('rhc'):
+                        not_targeted = get_not_targeted_within_geom(
+                            Location.objects.get(
+                                pk=previous_rhc.get('rhc_pk')).geom
+                        )[0]
+                        yield [
+                            previous_rhc.get('district'),
+                            previous_rhc.get('rhc'),
+                            'Not in Target Area',
+                            '',
+                            not_targeted.get('found'),
+                            not_targeted.get('sprayed'),
+                            '',
+                            '',
+                            calc_percentage(not_targeted.get('sprayed'),
+                                            not_targeted.get('found'))
+                        ]
+                        previous_rhc = district
 
                     yield [
                         district.get('district'),
@@ -282,7 +310,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                                         district.get('found'))
                     ]
 
-            sprayarea_buffer = SprayArea()
+            sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
             response = StreamingHttpResponse(
                 (writer.writerow(row) for row in _data()),
