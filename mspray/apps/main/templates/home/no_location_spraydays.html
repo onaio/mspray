@@ -8,7 +8,7 @@
 {% block content %}
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
-        <h1 id="district-name">Structures not in Target Areas</h1>
+        <h1 id="district-name">Spray data Not in Targeted Areas</h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
@@ -16,7 +16,7 @@
                     <th>Found Structures</th>
                     <!-- <th>New Structures</th> -->
                     <th>Sprayed</th>
-                    <th>% of Total Sprayed</th>
+                    <th>% Spray Coverage Outside Targeted Areas</th>
                     <th>Spray Coverage</th>
                 </tr>
             </thead>
@@ -33,7 +33,7 @@
                         <!-- <td class='numbers'>{{ val.new_structures|default_if_none:" "|intcomma }}</td> -->
                         <td class='numbers'>{{ val.sprayed|default_if_none:" "|intcomma }}</td>
                         {% if val.sprayed and val.found %}
-                        {% calc_percentage val.found district_sprayed|key:district.district_name as cov %}
+                        {% calc_percentage val.sprayed district_sprayed|key:district.district_name as cov %}
                         <td class='numbers'>{{ cov }}</td>
                          {% calc_percentage val.sprayed val.found as spray_effectiveness_percentage %}
                          <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
