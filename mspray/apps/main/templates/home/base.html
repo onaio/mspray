@@ -51,6 +51,7 @@
                                 {% if view.request.session.show_csv %}
                                     <li class="dropdown-header"><a href="{% url 'sprayareas' %}">All Spray Areas</a></li>
                                     <li class="dropdown-header"><a href="{% url 'sprayareas' %}?format=csv"> CSV: All Spray Areas</a></li>
+                                    <li class="dropdown-header"><a href="{% url 'weeklyreports' %}"> CSV: Weekly Reports</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
