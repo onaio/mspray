@@ -1,9 +1,15 @@
+# -*- coding=utf-8 -*-
+"""
+Location model module.
+"""
 from django.contrib.gis.db import models
-
 from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Location(MPTTModel, models.Model):
+    """
+    Location model
+    """
     name = models.CharField(max_length=255, db_index=1)
     code = models.PositiveIntegerField()
     level = models.CharField(db_index=1, max_length=50)
@@ -33,12 +39,21 @@ class Location(MPTTModel, models.Model):
 
     @property
     def district_name(self):
+        """
+        Location name.
+        """
         return self.name
 
     @property
     def targetid(self):
+        """
+        Locaton code
+        """
         return self.code
 
     @property
     def houses(self):
+        """
+        Number of structures in location.
+        """
         return self.structures

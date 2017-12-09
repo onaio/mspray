@@ -3,6 +3,7 @@ from django.db.models import IntegerField
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
+from django.utils import timezone
 
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
@@ -29,7 +30,7 @@ HAS_UNIQUE_FIELD = getattr(settings, 'MSPRAY_UNIQUE_FIELD', None)
 LOCATION_SPRAYED_PERCENTAGE = getattr(
     settings, 'LOCATION_SPRAYED_PERCENTAGE', 90)
 
-spray_area_indicator_sql = """
+SPRAY_AREA_INDICATOR_SQL = """
 SELECT
 SUM(CASE WHEN "other" > 0 THEN 1 ELSE 0 END) AS "other",
 SUM(CASE WHEN "not_sprayable" > 0 THEN 1 ELSE 0 END) AS "not_sprayable",
@@ -51,7 +52,7 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
 ) AS "sub_query";
 """  # noqa
 
-spray_area_indicator_sql_date_filtered = """
+SPRAY_AREA_INDICATOR_SQL_DATE_FILTERED = """
 SELECT
 SUM(CASE WHEN "other" > 0 THEN 1 ELSE 0 END) AS "other",
 SUM(CASE WHEN "not_sprayable" > 0 THEN 1 ELSE 0 END) AS "not_sprayable",
@@ -70,6 +71,30 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "not_sprayed",
   SUM(CASE WHEN ("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "refused"
   FROM "main_sprayday" LEFT OUTER JOIN "main_spraypoint" ON ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE ("main_sprayday"."location_id" = %s AND "main_sprayday"."spray_date" <= %s::date) GROUP BY "main_sprayday"."id"
+) AS "sub_query";
+"""  # noqa
+
+SPRAY_AREA_INDICATOR_SQL_WEEK = """
+SELECT
+SUM(CASE WHEN "other" > 0 THEN 1 ELSE 0 END) AS "other",
+SUM(CASE WHEN "not_sprayable" > 0 THEN 1 ELSE 0 END) AS "not_sprayable",
+SUM(CASE WHEN "found" > 0 THEN 1 ELSE 0 END) AS "found",
+SUM(CASE WHEN "sprayed" > 0 THEN 1 ELSE 0 END) AS "sprayed",
+SUM(CASE WHEN "new_structures" > 0 THEN 1 ELSE 0 END) AS "new_structures",
+SUM(CASE WHEN "not_sprayed" > 0 THEN 1 ELSE 0 END) AS "not_sprayed",
+SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
+(
+  SELECT
+  SUM(CASE WHEN ("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = true) THEN 0 ELSE 1 END) AS "other",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 1 ELSE 0 END) AS "not_sprayable",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "found",
+  SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "sprayed",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:node:id' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:node:id' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "new_structures",
+  SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "not_sprayed",
+  SUM(CASE WHEN ("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "refused"
+  FROM "main_sprayday" LEFT OUTER JOIN "main_spraypoint" ON
+  ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE
+  ("main_sprayday"."location_id" = %s AND EXTRACT('week' FROM "main_sprayday"."spray_date") <= %s) GROUP BY "main_sprayday"."id"
 ) AS "sub_query";
 """  # noqa
 
@@ -105,6 +130,7 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
 def get_spray_data(obj, context):
     request = context.get('request')
     spray_date = parse_spray_date(request) if request else None
+    week_number = context.get('week_number')
 
     if type(obj) == dict:
         loc = Location.objects.get(pk=obj.get('pk'))
@@ -115,6 +141,8 @@ def get_spray_data(obj, context):
             kwargs = {'district': loc}
         else:
             kwargs = {'rhc': loc}
+        if week_number:
+            kwargs['spray_date__week__lte'] = week_number
         qs = SprayDay.objects.filter(**kwargs)
         if spray_date:
             qs = qs.filter(spray_date__lte=spray_date)
@@ -226,17 +254,27 @@ def get_spray_data(obj, context):
                 structures=F('location__structures')
             )
 
-    qs = loc.sprayday_set
+    kwargs = {}
+    if not week_number:
+        week_number = int(timezone.now().strftime('%W'))
+    if week_number:
+        kwargs['spray_date__week__lte'] = week_number
+    qs = loc.sprayday_set.filter(**kwargs)
+    # if qs.count():
+    #     __import__('ipdb').set_trace()
+
     if spray_date:
         qs = qs.filter(spray_date__lte=spray_date)
 
     cursor = connection.cursor()
 
     if spray_date:
-        cursor.execute(spray_area_indicator_sql_date_filtered,
+        cursor.execute(SPRAY_AREA_INDICATOR_SQL_DATE_FILTERED,
                        [loc.id, spray_date.strftime('%Y-%m-%d')])
+    elif week_number:
+        cursor.execute(SPRAY_AREA_INDICATOR_SQL_WEEK, [loc.id, week_number])
     else:
-        cursor.execute(spray_area_indicator_sql, [loc.id])
+        cursor.execute(SPRAY_AREA_INDICATOR_SQL, [loc.id])
     results = dictfetchall(cursor)
     return results[0]
 
