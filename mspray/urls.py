@@ -60,6 +60,8 @@ urlpatterns = [
         home.TargetAreaView.as_view(),
         name='target_area'),
     url(r'^sprayareas$', home.SprayAreaView.as_view(), name='sprayareas'),
+    url(r'^weekly-report$', home.WeeklyReportView.as_view(),
+        name='weeklyreports'),
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),

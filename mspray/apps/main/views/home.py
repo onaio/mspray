@@ -7,7 +7,7 @@ from django.views.generic import DetailView, ListView
 
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.serializers.target_area import (
     DistrictSerializer, GeoTargetAreaSerializer, TargetAreaQuerySerializer,
@@ -324,3 +324,88 @@ class SprayAreaView(SiteNameMixin, ListView):
         return super(SprayAreaView, self).render_to_response(
             context, **response_kwargs
         )
+
+
+class WeeklyReportView(SiteNameMixin, ListView):
+    template_name = 'home/sprayareas.html'
+    model = WeeklyReport
+    slug_field = 'pk'
+
+    def get_queryset(self):
+        queryset = super(WeeklyReportView, self).get_queryset()
+
+        return queryset.filter(location__level='district').prefetch_related()\
+            .order_by('week_number', 'location__name')
+
+    def get_context_data(self, **kwargs):
+        context = super(WeeklyReportView, self).get_context_data(**kwargs)
+        context['qs'] = context['object_list']
+        weeks = list(context['object_list'].values_list(
+            'week_number', flat=True).order_by('week_number').distinct())
+        context['weeks'] = dict(list(zip(
+            weeks, [i for i in range(1, len(weeks) + 1)])))
+
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        def calc_percentage(numerator, denominator):
+            """
+            Returns the percentage of the given values, empty string on
+            exceptions.
+            """
+            try:
+                denominator = float(denominator)
+                numerator = float(numerator)
+            except ValueError:
+                return ''
+
+            if denominator == 0:
+                return ''
+
+            return round((numerator * 100) / denominator)
+
+        class SprayAreaBuffer(object):
+            """
+            A file object like class that implements the write operation.
+            """
+            def write(self, value):
+                """
+                Returns the value passed to it.
+                """
+                return value
+
+        def _data():
+            yield [
+                "Week #",
+                "Calendar Week #",
+                "District",
+                "Eligible Spray Areas",
+                "Spray Areas Visited",
+                "Spray Areas Visited %",
+                "Spray Areas Sprayed Effectively",
+                "Spray Areas Sprayed Effectively %"
+            ]
+            for district in context.get('qs'):
+                yield [
+                    context['weeks'][district.week_number],
+                    district.week_number,
+                    district.location.name,
+                    district.location.num_of_spray_areas,
+                    district.visited,
+                    calc_percentage(district.visited,
+                                    district.location.num_of_spray_areas),
+                    district.sprayed,
+                    calc_percentage(district.sprayed,
+                                    district.location.visited)
+                ]
+
+        sprayarea_buffer = SprayAreaBuffer()
+        writer = csv.writer(sprayarea_buffer)
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in _data()),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = \
+            'attachment; filename="weeklyreport.csv"'
+
+        return response

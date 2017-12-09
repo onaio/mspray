@@ -245,17 +245,17 @@ def refresh_data_with_no_osm():
     return found
 
 
-def set_sprayed_visited_week(location, week_number, visited, sprayed):
+def set_sprayed_visited_week(location, week_number, visited, sprayed,
+                             structures):
     try:
         report = WeeklyReport.objects.get(location=location,
                                           week_number=week_number)
     except WeeklyReport.DoesNotExist:
-        report = WeeklyReport(location=location, week_number=week_number,
-                              visited=visited, sprayed=sprayed)
-    else:
-        report.visited = visited
-        report.sprayed = sprayed
+        report = WeeklyReport(location=location, week_number=week_number)
 
+    report.visited = visited
+    report.sprayed = sprayed
+    report.structures = structures
     report.save()
 
 
@@ -280,7 +280,8 @@ def set_sprayed_visited(location, week_number=None):
 
         if week_number:
             # print(week_number, location, week_number, visited, sprayed)
-            set_sprayed_visited_week(location, week_number, visited, sprayed)
+            set_sprayed_visited_week(location, week_number, visited, sprayed,
+                                     total_structures)
         else:
             location.visited = visited
             location.sprayed = sprayed
@@ -293,6 +294,7 @@ def set_sprayed_visited(location, week_number=None):
             else:
                 kwargs['location__parent__parent'] = location
             queryset = WeeklyReport.objects.filter(**kwargs).aggregate(
+                structures_sum=Sum('structures', distinct=True),
                 visited_sum=Sum('visited', distinct=True),
                 sprayed_sum=Sum('sprayed', distinct=True)
             )
@@ -300,7 +302,7 @@ def set_sprayed_visited(location, week_number=None):
             #       queryset.get('visited_sum'), queryset.get('sprayed_sum'))
             set_sprayed_visited_week(
                 location, week_number, queryset.get('visited_sum'),
-                queryset.get('sprayed_sum'))
+                queryset.get('sprayed_sum'), queryset.get('structures_sum'))
         else:
             queryset = location.location_set.values('id').aggregate(
                 visited_sum=Sum('visited', distinct=True),
