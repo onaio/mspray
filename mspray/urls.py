@@ -7,6 +7,7 @@ from mspray.apps.main.views import (
 from mspray.apps.main.views import home
 from mspray.apps.main.views import user
 from mspray.apps.main.views import performance
+from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
 from mspray.apps.alerts import urls as alerts_urls
 
@@ -50,6 +51,8 @@ urlpatterns = [
     url(r'^$', home.DistrictView.as_view(), name='index'),
     url(r'^login$', user.login, name='login'),
     url(r'^logout$', user.logout, name='logout'),
+    url(r'^not-in-target-area/$', NoLocationSprayDayView.as_view(),
+        name='no_location_spray_effectiveness'),
     url(r'^warehouse/', include(warehouse_urls, namespace='warehouse')),
     url(r'^(?P<pk>\d+)$', home.DistrictView.as_view(),
         name='district'),
@@ -57,6 +60,8 @@ urlpatterns = [
         home.TargetAreaView.as_view(),
         name='target_area'),
     url(r'^sprayareas$', home.SprayAreaView.as_view(), name='sprayareas'),
+    url(r'^weekly-report$', home.WeeklyReportView.as_view(),
+        name='weeklyreports'),
     url(r'indicators/number_of_households',
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name='number_of_housesholds'),

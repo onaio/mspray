@@ -21,3 +21,4 @@ from .spraypoint import Hhcsv  # noqa
 from .spraypoint import OsmData  # noqa
 from .spraypoint import MatchedData  # noqa
 from .performance_report import PerformanceReport  # noqa
+from .weekly_report import WeeklyReport  # noqa

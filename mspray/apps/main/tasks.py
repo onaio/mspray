@@ -16,6 +16,7 @@ from mspray.apps.main.models import Household
 from mspray.apps.main.models import Location
 from mspray.apps.main.models import SprayDay
 from mspray.apps.main.models import SprayOperatorDailySummary
+from mspray.apps.main.models import WeeklyReport
 from mspray.apps.main.models.spray_day import get_osmid
 from mspray.apps.main.ona import fetch_form_data
 from mspray.apps.main.osm import parse_osm
@@ -42,6 +43,7 @@ LOCATION_SPRAYED_PERCENTAGE = getattr(
 UPDATE_VISITED_MINUTES = getattr(settings, 'UPDATE_VISITED_MINUTES', 5)
 DIRECTLY_OBSERVED_FORM_ID = getattr(settings, 'DIRECTLY_OBSERVED_FORM_ID',
                                     None)
+FALLBACK_TO_ODK = settings.FALLBACK_TO_SUBMISSION_DATA_LOCATION
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -165,10 +167,14 @@ def link_spraypoint_with_osm(pk):
         location, geom, is_node = get_location_from_osm(sp.data)
         if location is None:
             location, geom = get_new_structure_location(sp.data, geom, is_node)
-            if location is None:
+            if location is None and FALLBACK_TO_ODK:
                 location = get_location_from_data(sp.data)
             else:
-                is_node = True
+                is_node = isinstance(geom, Point)
+
+        if location is None and FALLBACK_TO_ODK is False:
+            sp.location = None
+
         set_spraypoint_location(sp, location, geom, is_node)
 
         return sp.pk
@@ -239,12 +245,27 @@ def refresh_data_with_no_osm():
     return found
 
 
-def set_sprayed_visited(location):
+def set_sprayed_visited_week(location, week_number, visited, sprayed,
+                             structures):
+    try:
+        report = WeeklyReport.objects.get(location=location,
+                                          week_number=week_number)
+    except WeeklyReport.DoesNotExist:
+        report = WeeklyReport(location=location, week_number=week_number)
+
+    report.visited = visited
+    report.sprayed = sprayed
+    report.structures = structures
+    report.save()
+
+
+def set_sprayed_visited(location, week_number=None):
     from mspray.apps.main.serializers.target_area import get_spray_area_stats
     if location.level == 'ta':
         sprayed = 0
         visited = 0
-        data, total_structures = get_spray_area_stats(location)
+        context = {'week_number': week_number}
+        data, total_structures = get_spray_area_stats(location, context)
         found = data.get('found')
         visited_sprayed = data.get('sprayed')
         if found:
@@ -257,17 +278,39 @@ def set_sprayed_visited(location):
             if ratio >= LOCATION_SPRAYED_PERCENTAGE:
                 sprayed = 1
 
-        location.visited = visited
-        location.sprayed = sprayed
-        location.save()
+        if week_number:
+            # print(week_number, location, week_number, visited, sprayed)
+            set_sprayed_visited_week(location, week_number, visited, sprayed,
+                                     total_structures)
+        else:
+            location.visited = visited
+            location.sprayed = sprayed
+            location.save()
     else:
-        queryset = location.location_set.values('id').aggregate(
-            visited_sum=Sum('visited', distinct=True),
-            sprayed_sum=Sum('sprayed', distinct=True)
-        )
-        location.visited = queryset.get('visited_sum') or 0
-        location.sprayed = queryset.get('sprayed_sum') or 0
-        location.save()
+        if week_number:
+            kwargs = {'week_number': week_number}
+            if location.level == 'RHC':
+                kwargs['location__parent'] = location
+            else:
+                kwargs['location__parent__parent'] = location
+            queryset = WeeklyReport.objects.filter(**kwargs).aggregate(
+                structures_sum=Sum('structures', distinct=True),
+                visited_sum=Sum('visited', distinct=True),
+                sprayed_sum=Sum('sprayed', distinct=True)
+            )
+            # print(week_number, location, week_number,
+            #       queryset.get('visited_sum'), queryset.get('sprayed_sum'))
+            set_sprayed_visited_week(
+                location, week_number, queryset.get('visited_sum'),
+                queryset.get('sprayed_sum'), queryset.get('structures_sum'))
+        else:
+            queryset = location.location_set.values('id').aggregate(
+                visited_sum=Sum('visited', distinct=True),
+                sprayed_sum=Sum('sprayed', distinct=True)
+            )
+            location.visited = queryset.get('visited_sum') or 0
+            location.sprayed = queryset.get('sprayed_sum') or 0
+            location.save()
 
 
 @app.task
@@ -284,6 +327,35 @@ def update_sprayed_visited(time_within=UPDATE_VISITED_MINUTES):
     time_since = timezone.now() - timedelta(minutes=time_within + 1)
     submissions = SprayDay.objects.filter(created_on__gte=time_since)\
         .exclude(location__isnull=True)
+
+    # spray areas
+    _set_sprayed_visited('location')
+
+    # RHC
+    _set_sprayed_visited('location__parent')
+
+    # District
+    _set_sprayed_visited('location__parent__parent')
+
+
+@app.task
+def update_sprayed_visited_week(time_within=UPDATE_VISITED_MINUTES,
+                                week_number=None):
+    """
+    Sets 'sprayed' and 'visited' values for locations on submissions within
+    UPDATE_VISITED_MINUTES which defaults to every 5 minutes.
+    """
+    def _set_sprayed_visited(key):
+        for loc_id in submissions.values_list(key, flat=True).distinct():
+            location = Location.objects.get(pk=loc_id)
+            set_sprayed_visited(location, week_number=week_number)
+
+    # time_since = timezone.now() - timedelta(minutes=time_within + 1)
+    # submissions = SprayDay.objects.filter(created_on__gte=time_since)\
+    submissions = SprayDay.objects.filter()\
+        .exclude(location__isnull=True)
+    if not week_number:
+        week_number = int(timezone.now().strftime('%W'))
 
     # spray areas
     _set_sprayed_visited('location')
@@ -453,7 +525,7 @@ def check_missing_unique_link():
 @app.task
 def update_performance_reports(update_all=True):
     """
-    Update perfomance records updated in the last UPDATE_VISITED_MINUTES
+    Update performance records updated in the last UPDATE_VISITED_MINUTES
     minutes.
     """
     from mspray.apps.main.utils import performance_report

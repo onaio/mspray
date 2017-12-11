@@ -45,6 +45,8 @@ def login(request):
                 'error': "Wrong username or password. Please try again."
             }
     else:
+        if settings.DEBUG:
+            request.session['show_csv'] = True
         if request.session.get('show_csv'):
             return HttpResponseRedirect('/')
 

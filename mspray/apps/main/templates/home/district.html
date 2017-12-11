@@ -4,6 +4,7 @@
 {% load staticfiles %}
 {% load performance_extras %}
 {% load progress_extras %}
+{% load i18n %}
 
 {% block content %}
 <div class="container" id="district_table">
@@ -66,6 +67,13 @@
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                     </tr>
                 {% endfor %}
+
+                {% if district_name %}
+                {% else %}
+                    <tr>
+                        <td colspan="5"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "Not in Targeted Area" %}</a></td>
+                    </tr>
+                {% endif%}
             {% else %}
                 {% for district in district_list %}
                     <tr>
@@ -97,6 +105,20 @@
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td>{% trans "Not in Targeted Area" %}</td>
+                    <td class='numbers'></td>
+                    <td class='numbers'>{{ no_location.found|default_if_none:"0"|intcomma }}</td>
+                    <td class='numbers'>{{ no_location.sprayed|default_if_none:"0"|intcomma }}</td>
+                    {% if no_location.sprayed and no_location.found %}
+                     {% calc_percentage no_location.sprayed no_location.found as spray_effectiveness_percentage %}
+                     <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                    {% else %}
+                        <td class='numbers'></td>
+                    {% endif %}
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                </tr>
             {% endif%}
             </tbody>
             <tfoot>

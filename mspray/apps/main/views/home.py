@@ -3,21 +3,19 @@ import json
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
-from django.views.generic import DetailView
-from django.views.generic import ListView
+from django.views.generic import DetailView, ListView
 
-from mspray.apps.main.mixins import SiteNameMixin
-from mspray.apps.main.models import Location
-from mspray.apps.main.serializers.target_area import \
-    GeoTargetAreaSerializer, get_duplicates, count_duplicates
-from mspray.apps.main.serializers.target_area import DistrictSerializer
-from mspray.apps.main.serializers.target_area import TargetAreaSerializer
-from mspray.apps.main.serializers.target_area import TargetAreaQuerySerializer
-from mspray.apps.main.views.target_area import TargetAreaViewSet
-from mspray.apps.main.views.target_area import TargetAreaHouseholdsViewSet
-from mspray.apps.main.utils import get_location_dict, parse_spray_date
-from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.definitions import DEFINITIONS
+from mspray.apps.main.mixins import SiteNameMixin
+from mspray.apps.main.models import Location, WeeklyReport
+from mspray.apps.main.query import get_location_qs
+from mspray.apps.main.serializers.target_area import (
+    DistrictSerializer, GeoTargetAreaSerializer, TargetAreaQuerySerializer,
+    TargetAreaSerializer, count_duplicates, get_duplicates)
+from mspray.apps.main.utils import get_location_dict, parse_spray_date
+from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
+from mspray.apps.main.views.target_area import (TargetAreaHouseholdsViewSet,
+                                                TargetAreaViewSet)
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
@@ -39,6 +37,9 @@ class DistrictView(SiteNameMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
+
+        not_targeted = None
+
         qs = context['object_list'].extra(select={
             "xmin": 'ST_xMin("main_location"."geom")',
             "ymin": 'ST_yMin("main_location"."geom")',
@@ -61,6 +62,16 @@ class DistrictView(SiteNameMixin, ListView):
                 serializer_class = TargetAreaQuerySerializer \
                     if settings.SITE_NAME == 'namibia' \
                     else TargetAreaSerializer
+            # no location structures
+            try:
+                obj = Location.objects.get(pk=pk)
+            except Location.DoesNotExist:
+                pass
+            else:
+                not_targeted = get_not_targeted_within_geom(obj.geom)
+                not_targeted = not_targeted[0]
+                context['no_location'] = not_targeted
+
         serializer = serializer_class(qs, many=True,
                                       context={'request': self.request})
         context['district_list'] = serializer.data
@@ -72,6 +83,7 @@ class DistrictView(SiteNameMixin, ListView):
             for field in fields:
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
+
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
         context['district_totals'] = totals
@@ -216,6 +228,10 @@ class SprayAreaView(SiteNameMixin, ListView):
     def render_to_response(self, context, **response_kwargs):
         if self.request.GET.get('format') == 'csv':
             def calc_percentage(numerator, denominator):
+                """
+                Returns the percentage of the given values, empty string on
+                exceptions.
+                """
                 try:
                     denominator = float(denominator)
                     numerator = float(numerator)
@@ -227,8 +243,14 @@ class SprayAreaView(SiteNameMixin, ListView):
 
                 return round((numerator * 100) / denominator)
 
-            class SprayArea(object):
+            class SprayAreaBuffer(object):
+                """
+                A file object like class that implements the write operation.
+                """
                 def write(self, value):
+                    """
+                    Returns the value passed to it.
+                    """
                     return value
 
             def _data():
@@ -243,10 +265,31 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Found Coverage",
                     "Sprayed Coverage"
                 ]
+                previous_rhc = None
                 for value in context.get('qs'):
                     district = TargetAreaSerializer(
                         value, context=context
                     ).data
+                    if previous_rhc is None:
+                        previous_rhc = district
+                    if previous_rhc.get('rhc') != district.get('rhc'):
+                        not_targeted = get_not_targeted_within_geom(
+                            Location.objects.get(
+                                pk=previous_rhc.get('rhc_pk')).geom
+                        )[0]
+                        yield [
+                            previous_rhc.get('district'),
+                            previous_rhc.get('rhc'),
+                            'Not in Target Area',
+                            '',
+                            not_targeted.get('found'),
+                            not_targeted.get('sprayed'),
+                            '',
+                            '',
+                            calc_percentage(not_targeted.get('sprayed'),
+                                            not_targeted.get('found'))
+                        ]
+                        previous_rhc = district
 
                     yield [
                         district.get('district'),
@@ -263,7 +306,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                                         district.get('found'))
                     ]
 
-            sprayarea_buffer = SprayArea()
+            sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
             response = StreamingHttpResponse(
                 (writer.writerow(row) for row in _data()),
@@ -277,3 +320,88 @@ class SprayAreaView(SiteNameMixin, ListView):
         return super(SprayAreaView, self).render_to_response(
             context, **response_kwargs
         )
+
+
+class WeeklyReportView(SiteNameMixin, ListView):
+    template_name = 'home/sprayareas.html'
+    model = WeeklyReport
+    slug_field = 'pk'
+
+    def get_queryset(self):
+        queryset = super(WeeklyReportView, self).get_queryset()
+
+        return queryset.filter(location__level='district').prefetch_related()\
+            .order_by('week_number', 'location__name')
+
+    def get_context_data(self, **kwargs):
+        context = super(WeeklyReportView, self).get_context_data(**kwargs)
+        context['qs'] = context['object_list']
+        weeks = list(context['object_list'].values_list(
+            'week_number', flat=True).order_by('week_number').distinct())
+        context['weeks'] = dict(list(zip(
+            weeks, [i for i in range(1, len(weeks) + 1)])))
+
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        def calc_percentage(numerator, denominator):
+            """
+            Returns the percentage of the given values, empty string on
+            exceptions.
+            """
+            try:
+                denominator = float(denominator)
+                numerator = float(numerator)
+            except ValueError:
+                return ''
+
+            if denominator == 0:
+                return ''
+
+            return round((numerator * 100) / denominator)
+
+        class SprayAreaBuffer(object):
+            """
+            A file object like class that implements the write operation.
+            """
+            def write(self, value):
+                """
+                Returns the value passed to it.
+                """
+                return value
+
+        def _data():
+            yield [
+                "Week #",
+                "Calendar Week #",
+                "District",
+                "Eligible Spray Areas",
+                "Spray Areas Visited",
+                "Spray Areas Visited %",
+                "Spray Areas Sprayed Effectively",
+                "Spray Areas Sprayed Effectively %"
+            ]
+            for district in context.get('qs'):
+                yield [
+                    context['weeks'][district.week_number],
+                    district.week_number,
+                    district.location.name,
+                    district.location.num_of_spray_areas,
+                    district.visited,
+                    calc_percentage(district.visited,
+                                    district.location.num_of_spray_areas),
+                    district.sprayed,
+                    calc_percentage(district.sprayed,
+                                    district.location.visited)
+                ]
+
+        sprayarea_buffer = SprayAreaBuffer()
+        writer = csv.writer(sprayarea_buffer)
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in _data()),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = \
+            'attachment; filename="weeklyreport.csv"'
+
+        return response
