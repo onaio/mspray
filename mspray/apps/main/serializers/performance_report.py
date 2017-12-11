@@ -277,7 +277,8 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
                 spray_operator=sop).order_by('sprayformid').last()
-            quality_checks.append(last_record.data_quality_check)
+            if last_record:
+                quality_checks.append(last_record.data_quality_check)
 
         return all(quality_checks)
 
@@ -427,11 +428,16 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         operator.
         """
 
-        return all([
-            report.data_quality_check
-            for report in obj.performancereport_set.all().only(
-                'data_quality_check') if report.data_quality_check is not None
-        ])
+        quality_checks = []
+        sops = SprayOperator.objects.filter(
+            team_leader_assistant__location=obj)
+        for sop in sops:
+            last_record = PerformanceReport.objects.filter(
+                spray_operator=sop).order_by('sprayformid').last()
+            if last_record:
+                quality_checks.append(last_record.data_quality_check)
+
+        return all(quality_checks)
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """
@@ -466,19 +472,39 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns spray operator found - submitted found difference.
         """
-        if obj.reported_found is None or obj.found is None:
-            return 0
+        reported_found = 0
+        found = 0
 
-        return obj.reported_found - obj.found
+        sops = SprayOperator.objects.filter(
+            team_leader_assistant__location=obj)
+        for sop in sops:
+            last_record = PerformanceReport.objects.filter(
+                spray_operator=sop).order_by('sprayformid').last()
+            sop_reported_found = last_record.reported_found or 0
+            sop_found = last_record.found or 0
+            reported_found += sop_reported_found
+            found += sop_found
+
+        return reported_found - found
 
     def get_sprayed_difference(self, obj):  # pylint: disable=no-self-use
         """
         Returns spray operator sprayed - submitted sprayed difference.
         """
-        if obj.reported_sprayed is None or obj.sprayed is None:
-            return 0
+        reported_sprayed = 0
+        sprayed = 0
 
-        return obj.reported_sprayed - obj.sprayed
+        sops = SprayOperator.objects.filter(
+            team_leader_assistant__location=obj)
+        for sop in sops:
+            last_record = PerformanceReport.objects.filter(
+                spray_operator=sop).order_by('sprayformid').last()
+            sop_reported_sprayed = last_record.reported_sprayed or 0
+            sop_sprayed = last_record.sprayed or 0
+            reported_sprayed += sop_reported_sprayed
+            sprayed += sop_sprayed
+
+        return reported_sprayed - sprayed
 
     def get_success_rate(self, obj):  # pylint: disable=no-self-use
         """
