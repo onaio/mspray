@@ -140,7 +140,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
 
         last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('sprayformid').last()
+            spray_operator=obj).order_by('spray_date').last()
         if last_record:
             return last_record.data_quality_check
         else:
@@ -180,7 +180,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         reported_found = 0
         found = 0
         last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('sprayformid').last()
+            spray_operator=obj).order_by('spray_date').last()
         if last_record:
             reported_found = last_record.reported_found
             found = last_record.found
@@ -194,7 +194,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         reported_sprayed = 0
         sprayed = 0
         last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('sprayformid').last()
+            spray_operator=obj).order_by('spray_date').last()
         if last_record:
             reported_sprayed = last_record.reported_sprayed
             sprayed = last_record.sprayed
@@ -280,7 +280,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 quality_checks.append(last_record.data_quality_check)
 
@@ -323,7 +323,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 sop_reported_found = last_record.reported_found
                 sop_found = last_record.found
@@ -342,7 +342,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 sop_reported_sprayed = last_record.reported_sprayed
                 sop_sprayed = last_record.sprayed
@@ -439,7 +439,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
             team_leader_assistant__location=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 quality_checks.append(last_record.data_quality_check)
 
@@ -485,7 +485,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
             team_leader_assistant__location=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 sop_reported_found = last_record.reported_found
                 sop_found = last_record.found
@@ -505,7 +505,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
             team_leader_assistant__location=obj)
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('sprayformid').last()
+                spray_operator=sop).order_by('spray_date').last()
             if last_record:
                 sop_reported_sprayed = last_record.reported_sprayed
                 sop_sprayed = last_record.sprayed
