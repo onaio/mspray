@@ -139,11 +139,10 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         operator.
         """
 
-        return all([
-            report.data_quality_check
-            for report in obj.performancereport_set.all().only(
-                'data_quality_check')
-        ])
+        last_record = PerformanceReport.objects.filter(
+            spray_operator=obj).order_by('sprayformid').last()
+
+        return last_record.data_quality_check
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """
@@ -176,19 +175,27 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns spray operator found - submitted found difference.
         """
-        reported_found = obj.reported_found or 0
-        found = obj.found or 0
 
-        return reported_found + found
+        last_record = PerformanceReport.objects.filter(
+            spray_operator=obj).order_by('sprayformid').last()
+
+        reported_found = last_record.reported_found or 0
+        found = last_record.found or 0
+
+        return reported_found - found
 
     def get_sprayed_difference(self, obj):  # pylint: disable=no-self-use
         """
         Returns spray operator sprayed - submitted sprayed difference.
         """
-        reported_sprayed = obj.reported_sprayed or 0
-        sprayed = obj.sprayed or 0
 
-        return reported_sprayed + sprayed
+        last_record = PerformanceReport.objects.filter(
+            spray_operator=obj).order_by('sprayformid').last()
+
+        reported_sprayed = last_record.reported_sprayed or 0
+        sprayed = last_record.sprayed or 0
+
+        return reported_sprayed - sprayed
 
 
 class TLAPerformanceReportSerializer(serializers.ModelSerializer):
