@@ -175,12 +175,13 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns spray operator found - submitted found difference.
         """
-
+        reported_found = 0
+        found = 0
         last_record = PerformanceReport.objects.filter(
             spray_operator=obj).order_by('sprayformid').last()
-
-        reported_found = last_record.reported_found or 0
-        found = last_record.found or 0
+        if last_record:
+            reported_found = last_record.reported_found
+            found = last_record.found
 
         return reported_found - found
 
@@ -188,12 +189,13 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns spray operator sprayed - submitted sprayed difference.
         """
-
+        reported_sprayed = 0
+        sprayed = 0
         last_record = PerformanceReport.objects.filter(
             spray_operator=obj).order_by('sprayformid').last()
-
-        reported_sprayed = last_record.reported_sprayed or 0
-        sprayed = last_record.sprayed or 0
+        if last_record:
+            reported_sprayed = last_record.reported_sprayed
+            sprayed = last_record.sprayed
 
         return reported_sprayed - sprayed
 
@@ -320,10 +322,11 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
                 spray_operator=sop).order_by('sprayformid').last()
-            sop_reported_found = last_record.reported_found or 0
-            sop_found = last_record.found or 0
-            reported_found += sop_reported_found
-            found += sop_found
+            if last_record:
+                sop_reported_found = last_record.reported_found
+                sop_found = last_record.found
+                reported_found += sop_reported_found
+                found += sop_found
 
         return reported_found - found
 
@@ -338,10 +341,11 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
                 spray_operator=sop).order_by('sprayformid').last()
-            sop_reported_sprayed = last_record.reported_sprayed or 0
-            sop_sprayed = last_record.sprayed or 0
-            reported_sprayed += sop_reported_sprayed
-            sprayed += sop_sprayed
+            if last_record:
+                sop_reported_sprayed = last_record.reported_sprayed
+                sop_sprayed = last_record.sprayed
+                reported_sprayed += sop_reported_sprayed
+                sprayed += sop_sprayed
 
         return reported_sprayed - sprayed
 
@@ -480,10 +484,11 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
                 spray_operator=sop).order_by('sprayformid').last()
-            sop_reported_found = last_record.reported_found or 0
-            sop_found = last_record.found or 0
-            reported_found += sop_reported_found
-            found += sop_found
+            if last_record:
+                sop_reported_found = last_record.reported_found
+                sop_found = last_record.found
+                reported_found += sop_reported_found
+                found += sop_found
 
         return reported_found - found
 
@@ -499,10 +504,11 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         for sop in sops:
             last_record = PerformanceReport.objects.filter(
                 spray_operator=sop).order_by('sprayformid').last()
-            sop_reported_sprayed = last_record.reported_sprayed or 0
-            sop_sprayed = last_record.sprayed or 0
-            reported_sprayed += sop_reported_sprayed
-            sprayed += sop_sprayed
+            if last_record:
+                sop_reported_sprayed = last_record.reported_sprayed
+                sop_sprayed = last_record.sprayed
+                reported_sprayed += sop_reported_sprayed
+                sprayed += sop_sprayed
 
         return reported_sprayed - sprayed
 
