@@ -16,7 +16,9 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='performancereport',
             name='district',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='main.Location'),
+            field=models.ForeignKey(
+                default=1, on_delete=django.db.models.deletion.CASCADE,
+                to='main.Location'),
             preserve_default=False,
         ),
     ]
