@@ -84,10 +84,6 @@ class DistrictView(SiteNameMixin, ListView):
                 totals[field] = rec[field] + (totals[field]
                                               if field in totals else 0)
 
-        # if not_targeted:
-        #     totals['visited_total'] += not_targeted['found']
-        #     totals['visited_sprayed'] += not_targeted['sprayed']
-
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
         context['district_totals'] = totals

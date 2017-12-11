@@ -46,7 +46,6 @@
                 <tr>
                     <td>Not in Targeted Districts</td>
                     <td class='numbers'>{{ no_location.found|default_if_none:" "|intcomma }}</td>
-                    <!-- <td class='numbers'>{{ no_location.new_structures|default_if_none:" "|intcomma }}</td> -->
                     <td class='numbers'>{{ no_location.sprayed|default_if_none:" "|intcomma }}</td>
                         <td class='numbers'></td>
                     {% if no_location.sprayed and no_location.found %}
@@ -61,7 +60,6 @@
                 <tr>
                     <td>Total</td>
                     <td class='numbers'>{{ total.found|intcomma }}</td>
-                    <!-- <td class='numbers'>{{ total.new_structures|intcomma }}</td> -->
                     <td class='numbers'>{{ total.sprayed|intcomma }}</td>
                         <td class='numbers'></td>
                     {% if total.sprayed and total.found %}
