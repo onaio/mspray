@@ -141,8 +141,10 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
 
         last_record = PerformanceReport.objects.filter(
             spray_operator=obj).order_by('sprayformid').last()
-
-        return last_record.data_quality_check
+        if last_record:
+            return last_record.data_quality_check
+        else:
+            return True
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """
