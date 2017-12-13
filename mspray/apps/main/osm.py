@@ -3,6 +3,8 @@ from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import Polygon
 from lxml import etree
 
+from mspray.apps.main.models.household import Household
+
 
 def _get_xml_obj(xml):
     if not isinstance(xml, bytes):
@@ -99,3 +101,33 @@ def parse_osm(osm_xml, include_osm_id=False):
     result.extend(nodes)
 
     return result
+
+
+def clean_osm_file_with_db(osm_file, output_file):
+    """
+    Goes through the provided XML and removes any structures
+    that do not exist in the Database as Household objects
+    Writes the result in the output_file
+    """
+    with open(osm_file) as f:
+        osm_xml = f.read()
+    root = _get_xml_obj(osm_xml.strip())
+    removed = 0
+    if root is not None:
+        structures = root.findall('way')
+        for structure in structures:
+            try:
+                osmid = structure.attrib['id']
+            except KeyError:
+                # no OSM ID, remove this structure
+                structure.getparent().remove(structure)
+                removed += 1
+            else:
+                if not Household.objects.filter(hh_id=int(osmid)).exists():
+                    # remove this structure because it is not in our DB
+                    structure.getparent().remove(structure)
+                    removed += 1
+        # write to file
+        tree = etree.ElementTree(root)
+        tree.write(output_file, pretty_print=True, xml_declaration=True,
+                   encoding="utf-8")
