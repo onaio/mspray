@@ -18,7 +18,7 @@ class Command(BaseCommand):
         outputfolder = options.get('outputfolder')
 
         if outputfolder is None:
-            outputfolder = "/tmp"
+            outputfolder = "/tmp/"
 
         if osmfolder and os.path.isdir(osmfolder):
             entries = os.scandir(os.path.dirname(osmfolder))
