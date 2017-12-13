@@ -131,3 +131,4 @@ def clean_osm_file_with_db(osm_file, output_file):
         tree = etree.ElementTree(root)
         tree.write(output_file, pretty_print=True, xml_declaration=True,
                    encoding="utf-8")
+    return removed
