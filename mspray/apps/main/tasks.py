@@ -84,7 +84,8 @@ def get_location_from_osm(data):
     geom = None
     is_node = False
     location = None
-    osm_xml = fetch_osm_xml(data)
+    filename = data.get(HAS_UNIQUE_FIELD)
+    osm_xml = fetch_osm_xml(data, filename)
     if osm_xml is not None:
         geoms = []
         geoms = parse_osm_ways(osm_xml) or parse_osm_nodes(osm_xml)

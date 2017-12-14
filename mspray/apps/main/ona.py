@@ -26,13 +26,20 @@ def fetch_osm_xml_data(data):
     return None
 
 
-def fetch_osm_xml(data):
+def fetch_osm_xml(data, osm_filename=None):
     """
     Fetch OSM file for a given data from Ona API.
     """
     xml = None
     if ATTACHMENTS_KEY in data:
-        for attachment in data[ATTACHMENTS_KEY]:
+        attachments = data[ATTACHMENTS_KEY]
+        if osm_filename:
+            attachments = [a for a in attachments
+                           if a.get('filename').endswith(osm_filename)]
+            if not attachments:
+                # pick wherever we get
+                attachments = data[ATTACHMENTS_KEY]
+        for attachment in attachments:
             filename = attachment.get('filename')
             if attachment.get('mimetype') == 'text/xml' and \
                     filename.endswith('osm'):
