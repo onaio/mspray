@@ -1,4 +1,5 @@
 import os
+import gc
 
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
@@ -32,3 +33,4 @@ class Command(BaseCommand):
                 result = clean_osm_file_with_db(entry.path, output_file)
                 self.stdout.write('{} structures removed from {}.'.format(
                     result, entry.name))
+                gc.collect()
