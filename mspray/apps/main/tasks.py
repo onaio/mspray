@@ -154,7 +154,21 @@ def add_unique_record(pk, location_pk):
             get_updated_osm_from_ona(sp) or \
             sp.data.get('newstructure/gps')
         if osmid:
-            add_unique_data(sp, HAS_UNIQUE_FIELD, location)
+            if int(osmid) > 0:
+                # see if we have a matching household structure
+                try:
+                    Household.objects.get(hh_id=osmid)
+                except Household.DoesNotExist:
+                    try:
+                        household = Household.objects.get(bgeom=sp.bgeom)
+                    except Household.DoesNotExist:
+                        pass
+                    else:
+                        osmid = household.hh_id
+                        sp.osmid = osmid
+                        sp.save()
+                        sp.refresh_from_db()
+            add_unique_data(sp, HAS_UNIQUE_FIELD, location, osmid)
 
 
 @app.task
