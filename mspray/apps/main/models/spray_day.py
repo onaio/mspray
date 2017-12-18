@@ -109,7 +109,7 @@ class SprayDay(models.Model):
             })
         osmid = get_osmid(self.data)
         try:
-            if osmid and int(osmid) != self.osmid:
+            if osmid and int(osmid) != self.osmid and not self.location:
                 self.osmid = osmid
         except ValueError:
             pass

@@ -613,13 +613,16 @@ def get_spray_operator(code):
     return None
 
 
-def add_unique_data(sprayday, unique_field, location):
+def add_unique_data(sprayday, unique_field, location, osmid=None):
     sp = None
-    wayid = unique_field + ':way:id'
-    nodeid = unique_field + ':node:id'
-    data_id = sprayday.data.get(wayid) or \
-        sprayday.data.get(nodeid) or \
-        sprayday.data.get('newstructure/gps')
+    if osmid:
+        data_id = osmid
+    else:
+        wayid = unique_field + ':way:id'
+        nodeid = unique_field + ':node:id'
+        data_id = sprayday.data.get(wayid) or \
+            sprayday.data.get(nodeid) or \
+            sprayday.data.get('newstructure/gps')
     if data_id and location:
         if isinstance(data_id, str) and len(data_id) > 50:
             data_id = data_id[:50]
