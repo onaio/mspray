@@ -53,4 +53,4 @@ class Command(BaseCommand):
             location.save()
             self.stdout.write("%s of %s household duplicates in %s have been "
                               "succussfully deleted." % (total_deleted, total,
-                                                        location))
+                                                         location))
