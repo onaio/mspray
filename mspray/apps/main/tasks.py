@@ -512,7 +512,7 @@ def check_missing_data():
 @app.task
 def check_missing_sopdailysummary_data():
     """
-    Sync missing data from Ona.
+    Sync missing SOP daily summary form data from Ona.
     """
     from mspray.apps.main.utils import sync_missing_sopdailysummary
     sync_missing_sopdailysummary(DAILY_SUMMARY_FORM_PK, print)
