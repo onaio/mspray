@@ -25,7 +25,7 @@ class Command(BaseCommand):
                     if not is_osm_file or (is_osm_file and not is_file):
                         continue
                     count = Household.objects.count()
-                    process_osm_file(entry.path)
+                    process_osm_file.delay(entry.path)
                     after_count = Household.objects.count()
                     self.stdout.write('{} structures added from {}.'.format(
                         (after_count - count), entry.name))
