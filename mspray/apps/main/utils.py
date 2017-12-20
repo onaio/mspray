@@ -585,6 +585,12 @@ def add_spray_operator_daily(data):
         calculate_data_quality_check(
             spray_form_id, spray_operator_code
         )
+        if so is None:
+            sprayday = SprayDay.objects.filter(
+                data__sprayformid=spray_form_id).last()
+            if sprayday:
+                so = sprayday.spray_operator
+        performance_report(so)
 
 
 def get_team_leader(code):
@@ -891,8 +897,10 @@ def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
-    operator_qs = SprayDay.objects.filter(spray_operator=spray_operator,
-                                          sprayable=True)
+    operator_qs = SprayDay.objects.none()
+    if spray_operator is not None:
+        operator_qs = SprayDay.objects.filter(spray_operator=spray_operator,
+                                              sprayable=True)
     if queryset is None:
         queryset = operator_qs.annotate(
             sprayformid=RawSQL("data->'sprayformid'", ())
@@ -966,11 +974,26 @@ def create_performance_reports():
 
 def sync_missing_sprays(formid, log_writer):
     """
-    Sync missing data for the given formid from Ona.
+    Sync missing spray day data for the given formid from Ona.
+    """
+    sync_missing_data(formid, SprayDay, add_spray_data, log_writer)
+
+
+def sync_missing_sopdailysummary(formid, log_writer):
+    """
+    Sync missing SOP daily summary data for the given formid from Ona.
+    """
+    sync_missing_data(formid, SprayOperatorDailySummary,
+                      add_spray_operator_daily, log_writer)
+
+
+def sync_missing_data(formid, ModelClass, sync_func, log_writer):
+    """
+    Fetches missing data for a form
     """
     if not formid:
         raise ValueError("'formid' is required.")
-    old_data = SprayDay.objects.filter().order_by('-submission_id')\
+    old_data = ModelClass.objects.filter().order_by('-submission_id')\
         .values_list('submission_id', flat=True)
     raw_data = fetch_form_data(formid, dataids_only=True)
     if isinstance(raw_data, list):
@@ -987,7 +1010,7 @@ def sync_missing_sprays(formid, log_writer):
                 rec = fetch_form_data(formid, dataid=dataid)
                 if isinstance(rec, dict):
                     try:
-                        add_spray_data(rec)
+                        sync_func(rec)
                     except IntegrityError:
                         continue
                 if counter % 100 == 0:

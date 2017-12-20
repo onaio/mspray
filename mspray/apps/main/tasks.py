@@ -43,6 +43,7 @@ LOCATION_SPRAYED_PERCENTAGE = getattr(
 UPDATE_VISITED_MINUTES = getattr(settings, 'UPDATE_VISITED_MINUTES', 5)
 DIRECTLY_OBSERVED_FORM_ID = getattr(settings, 'DIRECTLY_OBSERVED_FORM_ID',
                                     None)
+DAILY_SUMMARY_FORM_PK = getattr(settings, 'SOP_DAILY_SUMMARY_FORM_PK', None)
 FALLBACK_TO_ODK = settings.FALLBACK_TO_SUBMISSION_DATA_LOCATION
 
 
@@ -517,10 +518,19 @@ def remove_deleted_dos_records():
 @app.task
 def check_missing_data():
     """
-    Sync missing data from Ona.
+    Sync missing spray data from Ona.
     """
     from mspray.apps.main.utils import sync_missing_sprays
     sync_missing_sprays(FORM_ID, print)
+
+
+@app.task
+def check_missing_sopdailysummary_data():
+    """
+    Sync missing SOP daily summary form data from Ona.
+    """
+    from mspray.apps.main.utils import sync_missing_sopdailysummary
+    sync_missing_sopdailysummary(DAILY_SUMMARY_FORM_PK, print)
 
 
 @app.task
