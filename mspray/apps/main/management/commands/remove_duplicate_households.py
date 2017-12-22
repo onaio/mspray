@@ -12,23 +12,23 @@ class Command(BaseCommand):
     """
     Remove Household duplicates.
     """
-    help = _("Remove duplicate Household objects based on 'geom' field")
+    help = _("Remove duplicate Household objects based on the supplied field")
 
     allowed_fields = ['geom', 'bgeom']
 
     def add_arguments(self, parser):
         parser.add_argument('--field', dest='field', default='bgeom',
-                            help='the field to use to get duplicates')
+                            help='The field to use to get duplicates.')
 
     def handle(self, *args, **options):
         try:
             field = options['field']
         except KeyError:
-            raise CommandError(_('Please specify field to use'))
+            raise CommandError(_('Please specify field to use.'))
         else:
             if field not in self.allowed_fields:
                 raise CommandError(_("Only 'geom' or 'bgeom' fields are "
-                                     "supported at this time"))
+                                     "supported at this time."))
 
         location_with_duplicates = Household.objects.filter().values(field)\
             .annotate(k=Count('id'))\
