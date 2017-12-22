@@ -48,7 +48,8 @@ class Command(BaseCommand):
                     osmids = Household.objects.filter(**filter_kwargs)\
                         .values('hh_id')
                     submissions = SprayDay.objects.filter(osmid__in=osmids)\
-                        .values_list('osmid', flat=True).order_by('spray_date')
+                        .values_list('osmid', flat=True).order_by(
+                            'spray_date', 'submission_id')
                     number_submitted = submissions.count()
                     if number_submitted == 0:
                         total_deleted += matching_hh.exclude(
@@ -60,7 +61,9 @@ class Command(BaseCommand):
                         matching_hh.exclude(hh_id=submissions.first()).delete()
             location = Location.objects.get(pk=location_id)
             submissions = location.sprayday_set.filter(osmid__gt=0)\
-                .exclude(osmid__in=location.household_set.values('hh_id'))
+                .exclude(
+                    osmid__in=location.household_set.values('hh_id')).order_by(
+                        'spray_date', 'submission_id')
 
             for submission in submissions:
                 submission.spraypoint_set.all().delete()
