@@ -72,11 +72,9 @@ class Command(BaseCommand):
                     else:
                         Household.objects.filter(id__in=to_delete).delete()
             except IntegrityError:
-                self.stdout.write(
-                    self.style.ERROR(
-                        "Error: %s of %s household duplicates in %s "
-                        "NOT succussfully deleted." % (
-                            total_deleted, total, location)))
+                self.stderr.write(
+                    "Error: %s of %s household duplicates in %s NOT "
+                    "succussfully deleted." % (total_deleted, total, location))
             else:
                 submissions = location.sprayday_set.all().filter(
                     osmid__gt=0).order_by('spray_date',
