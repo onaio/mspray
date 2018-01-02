@@ -257,6 +257,8 @@ def get_spray_data(obj, context):
             )
 
     kwargs = {}
+    # if not week_number:
+    #    week_number = int(timezone.now().strftime('%W'))
     if week_number:
         kwargs['spray_date__week__lte'] = week_number
     qs = loc.sprayday_set.filter(**kwargs)
