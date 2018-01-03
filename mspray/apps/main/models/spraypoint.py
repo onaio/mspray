@@ -1,6 +1,4 @@
 from django.contrib.gis.db import models
-from django.db import connection
-from django.db.models.signals import post_save
 
 
 class SprayPoint(models.Model):
