@@ -12,6 +12,7 @@ from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_operator import SprayOperatorDailySummary
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
@@ -827,6 +828,19 @@ class TargetAreaMixin(object):
                                                Value(0)))
         return sum_dict['unsprayed_children_u5_sum']
 
+    def get_total_nets(self, obj):
+        sprayed_nets = self.get_sprayed_nets(obj)
+        unsprayed_nets = self.get_unsprayed_nets(obj)
+        return sprayed_nets + unsprayed_nets
+
+    def get_total_uNet(self, obj):
+        """
+        Total people covered by nets
+        """
+        sprayed_uNet = self.get_sprayed_total_uNet(obj)
+        unsprayed_uNet = self.get_unsprayed_total_uNet(obj)
+        return sprayed_uNet + unsprayed_uNet
+
     def get_total_rooms(self, obj):
         sprayed_rooms = self.get_sprayed_roomsfound(obj)
         unsprayed_rooms = self.get_unsprayed_roomsfound(obj)
@@ -910,6 +924,64 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             return cached_queryset_count(key, queryset, query, params)
 
 
+class SprayOperatorDailySummaryMixin(object):
+    """
+    Adds data from SprayOperatorDailySummary
+    """
+
+    def get_sop_summary_queryset(self, obj):
+        sprayday_qs = self.get_queryset(obj)
+        formids = sprayday_qs.annotate(
+            sprayformid=KeyTextTransform('sprayformid', 'data')).values_list(
+                'sprayformid', flat=True)
+        formids = list(set([x for x in formids if x is not None]))
+        qs = SprayOperatorDailySummary.objects.filter(
+                spray_form_id__in=formids)
+        qs = qs.annotate(
+            bottles_accounted=Cast(
+                KeyTextTransform('bottles_accounted', 'data'),
+                IntegerField()
+            ),
+            bottles_empty=Cast(
+                KeyTextTransform('bottles_empty', 'data'),
+                IntegerField()
+            ),
+            bottles_full=Cast(
+                KeyTextTransform('bottles_full', 'data'),
+                IntegerField()
+            ),
+            bottles_start=Cast(
+                KeyTextTransform('bottles_start', 'data'),
+                IntegerField()
+            ),
+        )
+        return qs
+
+    def get_bottles_start(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_start_sum=Coalesce(Sum('bottles_start'), Value(0)))
+        return sum_dict['bottles_start_sum']
+
+    def get_bottles_full(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_full_sum=Coalesce(Sum('bottles_full'), Value(0)))
+        return sum_dict['bottles_full_sum']
+
+    def get_bottles_accounted(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_accounted_sum=Coalesce(Sum('bottles_accounted'), Value(0)))
+        return sum_dict['bottles_accounted_sum']
+
+    def get_bottles_empty(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_empty_sum=Coalesce(Sum('bottles_empty'), Value(0)))
+        return sum_dict['bottles_empty_sum']
+
+
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
@@ -972,7 +1044,8 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                 pass
 
 
-class TargetAreaRichSerializer(TargetAreaSerializer):
+class TargetAreaRichSerializer(SprayOperatorDailySummaryMixin,
+                               TargetAreaSerializer):
     """
     Just like TargetAreaSerializer but includes additional data
     """
@@ -993,6 +1066,12 @@ class TargetAreaRichSerializer(TargetAreaSerializer):
     unsprayed_males = serializers.SerializerMethodField()
     unsprayed_females = serializers.SerializerMethodField()
     unsprayed_children_u5 = serializers.SerializerMethodField()
+    bottles_start = serializers.SerializerMethodField()
+    bottles_empty = serializers.SerializerMethodField()
+    bottles_full = serializers.SerializerMethodField()
+    bottles_accounted = serializers.SerializerMethodField()
+    total_nets = serializers.SerializerMethodField()
+    total_uNet = serializers.SerializerMethodField()
     total_rooms = serializers.SerializerMethodField()
 
     class Meta:
@@ -1008,7 +1087,9 @@ class TargetAreaRichSerializer(TargetAreaSerializer):
                   'unsprayed_nets', 'unsprayed_total_uNet',
                   'unsprayed_roomsfound', 'unsprayed_pregnant_women',
                   'unsprayed_totalpop', 'unsprayed_males', 'unsprayed_females',
-                  'unsprayed_children_u5', 'total_rooms')
+                  'unsprayed_children_u5', 'total_rooms', 'total_nets',
+                  'bottles_accounted', 'bottles_full', 'bottles_empty',
+                  'bottles_start', 'total_uNet')
         model = Location
 
 
