@@ -11,7 +11,8 @@ from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.serializers.target_area import (
     DistrictSerializer, GeoTargetAreaSerializer, TargetAreaQuerySerializer,
-    TargetAreaSerializer, count_duplicates, get_duplicates)
+    TargetAreaSerializer, count_duplicates, get_duplicates,
+    TargetAreaRichSerializer)
 from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
 from mspray.apps.main.views.target_area import (TargetAreaHouseholdsViewSet,
@@ -320,6 +321,95 @@ class SprayAreaView(SiteNameMixin, ListView):
         return super(SprayAreaView, self).render_to_response(
             context, **response_kwargs
         )
+
+
+class DetailedCSVView(SiteNameMixin, ListView):
+    """
+    Downloads CSV with details target area information
+    provided by TargetAreaRichSerializer
+    """
+    template_name = 'home/sprayareas.html'
+    model = Location
+
+    def get_queryset(self):
+        queryset = super(DetailedCSVView, self).get_queryset()
+        return queryset.filter(level='ta').order_by('name')
+
+    def render_to_response(self, context, **response_kwargs):
+
+        class SprayAreaBuffer(object):
+            """
+            A file object like class that implements the write operation.
+            """
+            def write(self, value):
+                """
+                Returns the value passed to it.
+                """
+                return value
+
+        def _data():
+            yield [
+                "Target Area",
+                "Structures Found",
+                "Sprayed Structures",
+                "Sprayed Total Pop",
+                "Sprayed Males",
+                "Sprayed Females",
+                "Sprayed Pregnant Women",
+                "Sprayed Children",
+                "Not Sprayed Structures",
+                "Not Sprayed Total Pop",
+                "Not Sprayed Males",
+                "Not Sprayed Females",
+                "Not Sprayed Pregnant Women",
+                "Not Sprayed Children",
+                "Rooms Found",
+                "Rooms Sprayed ",
+                "Nets Total Available",
+                "Nets People Covered",
+                "Bottles Issued",
+                "Bottles Full",
+                "Bottles Empty",
+                "Bottles Not Returned"
+            ]
+            data = TargetAreaRichSerializer(
+                        self.get_queryset(), many=True).data
+            for item in data:
+                yield [
+                    item['name'],
+                    item['total_structures'],
+                    item['visited_sprayed'],
+                    item['sprayed_totalpop'],
+                    item['sprayed_males'],
+                    item['sprayed_females'],
+                    item['sprayed_pregwomen'],
+                    item['sprayed_childrenU5'],
+                    item['visited_not_sprayed'],
+                    item['unsprayed_totalpop'],
+                    item['unsprayed_males'],
+                    item['unsprayed_females'],
+                    item['unsprayed_pregnant_women'],
+                    item['unsprayed_children_u5'],
+                    item['total_rooms'],
+                    item['sprayed_rooms'],
+                    item['total_nets'],
+                    item['total_uNet'],
+                    item['bottles_start'],
+                    item['bottles_full'],
+                    item['bottles_empty'],
+                    item['bottles_accounted'],
+                ]
+
+        sprayarea_buffer = SprayAreaBuffer()
+        writer = csv.writer(sprayarea_buffer)
+        response = StreamingHttpResponse(
+            (writer.writerow(row) for row in _data()),
+            content_type='text/csv'
+        )
+        response['Content-Disposition'] = \
+            'attachment; filename="detailed_sprayareas.csv"'
+
+        return response
 
 
 class WeeklyReportView(SiteNameMixin, ListView):
