@@ -495,6 +495,7 @@ class TargetAreaMixin(object):
                         'sprayable/sprayed/sprayed_total_uNet', 'data'),
                     IntegerField())
             )
+
         # unsprayed
         qs = qs.annotate(
                 unsprayed_children_u5=Cast(
@@ -714,6 +715,123 @@ class TargetAreaMixin(object):
 
         return not_sprayable
 
+    def get_sprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_total_uNet_sum=Coalesce(Sum('sprayed_total_uNet'),
+                                            Value(0)))
+        return sum_dict['sprayed_total_uNet_sum']
+
+    def get_sprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_nets_sum=Coalesce(Sum('sprayed_nets'), Value(0)))
+        return sum_dict['sprayed_nets_sum']
+
+    def get_sprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_roomsfound_sum=Coalesce(Sum('sprayed_roomsfound'),
+                                            Value(0)))
+        return sum_dict['sprayed_roomsfound_sum']
+
+    def get_sprayed_rooms(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_rooms_sum=Coalesce(Sum('sprayed_rooms'), Value(0)))
+        return sum_dict['sprayed_rooms_sum']
+
+    def get_sprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_totalpop_sum=Coalesce(Sum('sprayed_totalpop'),
+                                          Value(0)))
+        return sum_dict['sprayed_totalpop_sum']
+
+    def get_sprayed_childrenU5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_childrenU5_sum=Coalesce(Sum('sprayed_childrenU5'),
+                                            Value(0)))
+        return sum_dict['sprayed_childrenU5_sum']
+
+    def get_sprayed_pregwomen(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_pregwomen_sum=Coalesce(Sum('sprayed_pregwomen'),
+                                           Value(0)))
+        return sum_dict['sprayed_pregwomen_sum']
+
+    def get_sprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_males_sum=Coalesce(Sum('sprayed_males'), Value(0)))
+        return sum_dict['sprayed_males_sum']
+
+    def get_sprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_females_sum=Coalesce(Sum('sprayed_females'), Value(0)))
+        return sum_dict['sprayed_females_sum']
+
+    def get_unsprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_nets_sum=Coalesce(Sum('unsprayed_nets'), Value(0)))
+        return sum_dict['unsprayed_nets_sum']
+
+    def get_unsprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_total_uNet_sum=Coalesce(Sum('unsprayed_total_uNet'),
+                                              Value(0)))
+        return sum_dict['unsprayed_total_uNet_sum']
+
+    def get_unsprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_roomsfound_sum=Coalesce(Sum('unsprayed_roomsfound'),
+                                              Value(0)))
+        return sum_dict['unsprayed_roomsfound_sum']
+
+    def get_unsprayed_pregnant_women(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_pg_women_sum=Coalesce(Sum('unsprayed_pregnant_women'),
+                                            Value(0)))
+        return sum_dict['unsprayed_pg_women_sum']
+
+    def get_unsprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_totalpop_sum=Coalesce(Sum('unsprayed_totalpop'),
+                                            Value(0)))
+        return sum_dict['unsprayed_totalpop_sum']
+
+    def get_unsprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_males_sum=Coalesce(Sum('unsprayed_males'), Value(0)))
+        return sum_dict['unsprayed_males_sum']
+
+    def get_unsprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_females_sum=Coalesce(Sum('unsprayed_females'), Value(0)))
+        return sum_dict['unsprayed_females_sum']
+
+    def get_unsprayed_children_u5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_children_u5_sum=Coalesce(Sum('unsprayed_children_u5'),
+                                               Value(0)))
+        return sum_dict['unsprayed_children_u5_sum']
+
+    def get_total_rooms(self, obj):
+        sprayed_rooms = self.get_sprayed_roomsfound(obj)
+        unsprayed_rooms = self.get_unsprayed_roomsfound(obj)
+        return sprayed_rooms + unsprayed_rooms
+
 
 class TargetAreaQueryMixin(TargetAreaMixin):
     def get_found(self, obj):
@@ -818,7 +936,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level',
                   'num_of_spray_areas', 'district', 'rhc', 'total_structures',
-                  'district_pk', 'rhc_pk')
+                  'district_pk', 'rhc_pk', 'new_structures')
         model = Location
 
     def get_district(self, obj):
@@ -852,6 +970,46 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                     if isinstance(obj, dict) else obj.parent.pk
             except:  # noqa
                 pass
+
+
+class TargetAreaRichSerializer(TargetAreaSerializer):
+    """
+    Just like TargetAreaSerializer but includes additional data
+    """
+    sprayed_total_uNet = serializers.SerializerMethodField()
+    sprayed_nets = serializers.SerializerMethodField()
+    sprayed_roomsfound = serializers.SerializerMethodField()
+    sprayed_rooms = serializers.SerializerMethodField()
+    sprayed_totalpop = serializers.SerializerMethodField()
+    sprayed_childrenU5 = serializers.SerializerMethodField()
+    sprayed_pregwomen = serializers.SerializerMethodField()
+    sprayed_males = serializers.SerializerMethodField()
+    sprayed_females = serializers.SerializerMethodField()
+    unsprayed_nets = serializers.SerializerMethodField()
+    unsprayed_total_uNet = serializers.SerializerMethodField()
+    unsprayed_roomsfound = serializers.SerializerMethodField()
+    unsprayed_pregnant_women = serializers.SerializerMethodField()
+    unsprayed_totalpop = serializers.SerializerMethodField()
+    unsprayed_males = serializers.SerializerMethodField()
+    unsprayed_females = serializers.SerializerMethodField()
+    unsprayed_children_u5 = serializers.SerializerMethodField()
+    total_rooms = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = ('targetid', 'district_name', 'found',
+                  'structures', 'visited_total', 'visited_sprayed',
+                  'visited_not_sprayed', 'visited_refused', 'visited_other',
+                  'not_visited', 'bounds', 'spray_dates', 'level',
+                  'num_of_spray_areas', 'district', 'rhc', 'total_structures',
+                  'district_pk', 'rhc_pk', 'new_structures',
+                  'sprayed_total_uNet', 'sprayed_nets', 'sprayed_roomsfound',
+                  'sprayed_rooms', 'sprayed_totalpop', 'sprayed_childrenU5',
+                  'sprayed_pregwomen', 'sprayed_males', 'sprayed_females',
+                  'unsprayed_nets', 'unsprayed_total_uNet',
+                  'unsprayed_roomsfound', 'unsprayed_pregnant_women',
+                  'unsprayed_totalpop', 'unsprayed_males', 'unsprayed_females',
+                  'unsprayed_children_u5', 'total_rooms')
+        model = Location
 
 
 class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
