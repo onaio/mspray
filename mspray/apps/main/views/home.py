@@ -350,6 +350,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
         def _data():
             yield [
                 "Target Area",
+                "District",
                 "Structures Found",
                 "Sprayed Structures",
                 "Sprayed Total Pop",
@@ -377,6 +378,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
             for item in data:
                 yield [
                     item['name'],
+                    item['district'],
                     item['total_structures'],
                     item['visited_sprayed'],
                     item['sprayed_totalpop'],

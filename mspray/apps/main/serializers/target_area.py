@@ -684,7 +684,7 @@ class TargetAreaMixin(object):
 
         return 0
 
-    def get_total_structures(self, obj):
+    def get_structures(self, obj):
         structures = obj.get('structures') \
             if isinstance(obj, dict) else obj.structures
         data = get_spray_data(obj, self.context)
@@ -704,6 +704,9 @@ class TargetAreaMixin(object):
             structures += new_structures
 
         return structures
+
+    def get_total_structures(self, obj):
+        return self.get_structures(obj)
 
     def get_not_sprayable(self, obj):
         data = get_spray_data(obj, self.context)
@@ -990,8 +993,9 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     rhc = serializers.SerializerMethodField()
     rhc_pk = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
-    total_structures = serializers.SerializerMethodField()
-    new_structures = serializers.SerializerMethodField()
+    structures = serializers.SerializerMethodField()
+    total_structures = serializers.IntegerField()
+    num_new_structures = serializers.IntegerField()
     found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -1007,8 +1011,9 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                   'structures', 'visited_total', 'visited_sprayed',
                   'visited_not_sprayed', 'visited_refused', 'visited_other',
                   'not_visited', 'bounds', 'spray_dates', 'level',
-                  'num_of_spray_areas', 'district', 'rhc', 'total_structures',
-                  'district_pk', 'rhc_pk', 'new_structures')
+                  'num_of_spray_areas', 'total_structures', 'district', 'rhc',
+                  'district_pk', 'rhc_pk',
+                  'num_new_structures')
         model = Location
 
     def get_district(self, obj):
@@ -1044,11 +1049,15 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                 pass
 
 
-class TargetAreaRichSerializer(SprayOperatorDailySummaryMixin,
-                               TargetAreaSerializer):
+class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
+                               serializers.ModelSerializer):
     """
-    Just like TargetAreaSerializer but includes additional data
+    Detailed spray data for target area
     """
+    district = serializers.SerializerMethodField()
+    total_structures = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
     sprayed_total_uNet = serializers.SerializerMethodField()
     sprayed_nets = serializers.SerializerMethodField()
     sprayed_roomsfound = serializers.SerializerMethodField()
@@ -1075,22 +1084,46 @@ class TargetAreaRichSerializer(SprayOperatorDailySummaryMixin,
     total_rooms = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('targetid', 'district_name', 'found', 'name',
-                  'structures', 'visited_total', 'visited_sprayed',
-                  'visited_not_sprayed', 'visited_refused', 'visited_other',
-                  'not_visited', 'bounds', 'spray_dates', 'level',
-                  'num_of_spray_areas', 'district', 'rhc', 'total_structures',
-                  'district_pk', 'rhc_pk', 'new_structures',
-                  'sprayed_total_uNet', 'sprayed_nets', 'sprayed_roomsfound',
-                  'sprayed_rooms', 'sprayed_totalpop', 'sprayed_childrenU5',
-                  'sprayed_pregwomen', 'sprayed_males', 'sprayed_females',
-                  'unsprayed_nets', 'unsprayed_total_uNet',
-                  'unsprayed_roomsfound', 'unsprayed_pregnant_women',
-                  'unsprayed_totalpop', 'unsprayed_males', 'unsprayed_females',
-                  'unsprayed_children_u5', 'total_rooms', 'total_nets',
-                  'bottles_accounted', 'bottles_full', 'bottles_empty',
-                  'bottles_start', 'total_uNet')
+        fields = [
+            'name',
+            'district',
+            'total_structures',
+            'visited_sprayed',
+            'visited_not_sprayed',
+            'sprayed_total_uNet',
+            'sprayed_nets',
+            'sprayed_roomsfound',
+            'sprayed_rooms',
+            'sprayed_totalpop',
+            'sprayed_childrenU5',
+            'sprayed_pregwomen',
+            'sprayed_males',
+            'sprayed_females',
+            'unsprayed_nets',
+            'unsprayed_total_uNet',
+            'unsprayed_roomsfound',
+            'unsprayed_pregnant_women',
+            'unsprayed_totalpop',
+            'unsprayed_males',
+            'unsprayed_females',
+            'unsprayed_children_u5',
+            'bottles_start',
+            'bottles_empty',
+            'bottles_full',
+            'bottles_accounted',
+            'total_nets',
+            'total_uNet',
+            'total_rooms',
+        ]
         model = Location
+
+    def get_district(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__parent__name') \
+                    if isinstance(obj, dict) else obj.parent.parent.name
+            except:  # noqa
+                pass
 
 
 class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
