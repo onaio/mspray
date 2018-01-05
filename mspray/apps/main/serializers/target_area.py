@@ -964,25 +964,33 @@ class SprayOperatorDailySummaryMixin(object):
         qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_start_sum=Coalesce(Sum('bottles_start'), Value(0)))
-        return sum_dict['bottles_start_sum']
+        if sum_dict['bottles_start_sum'] is not None:
+            return sum_dict['bottles_start_sum']
+        return 0
 
     def get_bottles_full(self, obj):
         qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_full_sum=Coalesce(Sum('bottles_full'), Value(0)))
-        return sum_dict['bottles_full_sum']
+        if sum_dict['bottles_full_sum'] is not None:
+            return sum_dict['bottles_full_sum']
+        return 0
 
     def get_bottles_accounted(self, obj):
         qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_accounted_sum=Coalesce(Sum('bottles_accounted'), Value(0)))
-        return sum_dict['bottles_accounted_sum']
+        if sum_dict['bottles_accounted_sum'] is not None:
+            return sum_dict['bottles_accounted_sum']
+        return 0
 
     def get_bottles_empty(self, obj):
         qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_empty_sum=Coalesce(Sum('bottles_empty'), Value(0)))
-        return sum_dict['bottles_empty_sum']
+        if sum_dict['bottles_empty_sum'] is not None:
+            return sum_dict['bottles_empty_sum']
+        return 0
 
 
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):

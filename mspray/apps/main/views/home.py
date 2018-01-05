@@ -373,9 +373,9 @@ class DetailedCSVView(SiteNameMixin, ListView):
                 "Bottles Empty",
                 "Bottles Not Returned"
             ]
-            data = TargetAreaRichSerializer(
-                        self.get_queryset(), many=True).data
-            for item in data:
+            target_areas = self.get_queryset()
+            for ta in target_areas:
+                item = TargetAreaRichSerializer(ta).data
                 yield [
                     item['name'],
                     item['district'],
