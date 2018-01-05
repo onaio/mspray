@@ -1,9 +1,10 @@
-from django.db.models import Case, Count, F, Sum, When
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models import Case, Count, F, Sum, When, Value
 from django.db.models import IntegerField
+from django.db.models.functions import Cast, Coalesce
 from django.conf import settings
 from django.core.cache import cache
 from django.db import connection
-from django.utils import timezone
 
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
@@ -11,6 +12,7 @@ from rest_framework_gis.fields import GeometryField
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models.spray_operator import SprayOperatorDailySummary
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
@@ -440,14 +442,101 @@ class DistrictMixin(object):
 
 
 class TargetAreaMixin(object):
-    def get_queryset(self, obj):
 
+    def get_queryset(self, obj):
         qs = SprayDay.objects.filter(
             location__pk__in=list(get_ta_in_location(obj))
         )
+
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values('sprayday'))
+        return qs
 
+    def get_rich_queryset(self, obj):
+        """
+        Adds various annotations to the queryset
+        """
+        qs = self.get_queryset(obj)
+        # sprayed
+        qs = qs.annotate(
+                sprayed_females=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_females', 'data'),
+                    IntegerField()),
+                sprayed_males=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_males', 'data'),
+                    IntegerField()),
+                sprayed_pregwomen=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_pregwomen', 'data'),
+                    IntegerField()),
+                sprayed_childrenU5=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_childrenU5', 'data'),
+                    IntegerField()),
+                sprayed_totalpop=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_totalpop', 'data'),
+                    IntegerField()),
+                sprayed_rooms=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_rooms', 'data'),
+                    IntegerField()),
+                sprayed_roomsfound=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_roomsfound', 'data'),
+                    IntegerField()),
+                sprayed_nets=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_nets', 'data'),
+                    IntegerField()),
+                sprayed_total_uNet=Cast(
+                    KeyTextTransform(
+                        'sprayable/sprayed/sprayed_total_uNet', 'data'),
+                    IntegerField())
+            )
+
+        # unsprayed
+        qs = qs.annotate(
+                unsprayed_children_u5=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/population/unsprayed_children_u5',
+                        'data'),
+                    IntegerField()),
+                unsprayed_females=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/unsprayed_females', 'data'),
+                    IntegerField()),
+                unsprayed_males=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/unsprayed_males', 'data'),
+                    IntegerField()),
+                unsprayed_totalpop=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/unsprayed_totalpop', 'data'),
+                    IntegerField()),
+                unsprayed_pregnant_women=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/population/unsprayed_pregnant_women',  # noqa
+                        'data'),
+                    IntegerField()),
+                unsprayed_roomsfound=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/population/unsprayed_roomsfound',
+                        'data'),
+                    IntegerField()),
+                unsprayed_nets=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/population/unsprayed_nets',
+                        'data'),
+                    IntegerField()),
+                unsprayed_total_uNet=Cast(
+                    KeyTextTransform(
+                        'sprayable/unsprayed/population/unsprayed_total_uNet',
+                        'data'),
+                    IntegerField())
+        )
         return qs
 
     def get_spray_queryset(self, obj):
@@ -616,6 +705,9 @@ class TargetAreaMixin(object):
 
         return structures
 
+    def get_total_structures(self, obj):
+        return self.get_structures(obj)
+
     def get_not_sprayable(self, obj):
         data = get_spray_data(obj, self.context)
         level = obj['level'] if isinstance(obj, dict) else obj.level
@@ -626,6 +718,136 @@ class TargetAreaMixin(object):
                 data.aggregate(r=Sum('not_sprayable')).get('r') or 0
 
         return not_sprayable
+
+    def get_sprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_total_uNet_sum=Coalesce(Sum('sprayed_total_uNet'),
+                                            Value(0)))
+        return sum_dict['sprayed_total_uNet_sum']
+
+    def get_sprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_nets_sum=Coalesce(Sum('sprayed_nets'), Value(0)))
+        return sum_dict['sprayed_nets_sum']
+
+    def get_sprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_roomsfound_sum=Coalesce(Sum('sprayed_roomsfound'),
+                                            Value(0)))
+        return sum_dict['sprayed_roomsfound_sum']
+
+    def get_sprayed_rooms(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_rooms_sum=Coalesce(Sum('sprayed_rooms'), Value(0)))
+        return sum_dict['sprayed_rooms_sum']
+
+    def get_sprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_totalpop_sum=Coalesce(Sum('sprayed_totalpop'),
+                                          Value(0)))
+        return sum_dict['sprayed_totalpop_sum']
+
+    def get_sprayed_childrenU5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_childrenU5_sum=Coalesce(Sum('sprayed_childrenU5'),
+                                            Value(0)))
+        return sum_dict['sprayed_childrenU5_sum']
+
+    def get_sprayed_pregwomen(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_pregwomen_sum=Coalesce(Sum('sprayed_pregwomen'),
+                                           Value(0)))
+        return sum_dict['sprayed_pregwomen_sum']
+
+    def get_sprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_males_sum=Coalesce(Sum('sprayed_males'), Value(0)))
+        return sum_dict['sprayed_males_sum']
+
+    def get_sprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_females_sum=Coalesce(Sum('sprayed_females'), Value(0)))
+        return sum_dict['sprayed_females_sum']
+
+    def get_unsprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_nets_sum=Coalesce(Sum('unsprayed_nets'), Value(0)))
+        return sum_dict['unsprayed_nets_sum']
+
+    def get_unsprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_total_uNet_sum=Coalesce(Sum('unsprayed_total_uNet'),
+                                              Value(0)))
+        return sum_dict['unsprayed_total_uNet_sum']
+
+    def get_unsprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_roomsfound_sum=Coalesce(Sum('unsprayed_roomsfound'),
+                                              Value(0)))
+        return sum_dict['unsprayed_roomsfound_sum']
+
+    def get_unsprayed_pregnant_women(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_pg_women_sum=Coalesce(Sum('unsprayed_pregnant_women'),
+                                            Value(0)))
+        return sum_dict['unsprayed_pg_women_sum']
+
+    def get_unsprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_totalpop_sum=Coalesce(Sum('unsprayed_totalpop'),
+                                            Value(0)))
+        return sum_dict['unsprayed_totalpop_sum']
+
+    def get_unsprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_males_sum=Coalesce(Sum('unsprayed_males'), Value(0)))
+        return sum_dict['unsprayed_males_sum']
+
+    def get_unsprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_females_sum=Coalesce(Sum('unsprayed_females'), Value(0)))
+        return sum_dict['unsprayed_females_sum']
+
+    def get_unsprayed_children_u5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_children_u5_sum=Coalesce(Sum('unsprayed_children_u5'),
+                                               Value(0)))
+        return sum_dict['unsprayed_children_u5_sum']
+
+    def get_total_nets(self, obj):
+        sprayed_nets = self.get_sprayed_nets(obj)
+        unsprayed_nets = self.get_unsprayed_nets(obj)
+        return sprayed_nets + unsprayed_nets
+
+    def get_total_uNet(self, obj):
+        """
+        Total people covered by nets
+        """
+        sprayed_uNet = self.get_sprayed_total_uNet(obj)
+        unsprayed_uNet = self.get_unsprayed_total_uNet(obj)
+        return sprayed_uNet + unsprayed_uNet
+
+    def get_total_rooms(self, obj):
+        sprayed_rooms = self.get_sprayed_roomsfound(obj)
+        unsprayed_rooms = self.get_unsprayed_roomsfound(obj)
+        return sprayed_rooms + unsprayed_rooms
 
 
 class TargetAreaQueryMixin(TargetAreaMixin):
@@ -705,6 +927,64 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             return cached_queryset_count(key, queryset, query, params)
 
 
+class SprayOperatorDailySummaryMixin(object):
+    """
+    Adds data from SprayOperatorDailySummary
+    """
+
+    def get_sop_summary_queryset(self, obj):
+        sprayday_qs = self.get_queryset(obj)
+        formids = sprayday_qs.annotate(
+            sprayformid=KeyTextTransform('sprayformid', 'data')).values_list(
+                'sprayformid', flat=True)
+        formids = list(set([x for x in formids if x is not None]))
+        qs = SprayOperatorDailySummary.objects.filter(
+                spray_form_id__in=formids)
+        qs = qs.annotate(
+            bottles_accounted=Cast(
+                KeyTextTransform('bottles_accounted', 'data'),
+                IntegerField()
+            ),
+            bottles_empty=Cast(
+                KeyTextTransform('bottles_empty', 'data'),
+                IntegerField()
+            ),
+            bottles_full=Cast(
+                KeyTextTransform('bottles_full', 'data'),
+                IntegerField()
+            ),
+            bottles_start=Cast(
+                KeyTextTransform('bottles_start', 'data'),
+                IntegerField()
+            ),
+        )
+        return qs
+
+    def get_bottles_start(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_start_sum=Coalesce(Sum('bottles_start'), Value(0)))
+        return sum_dict['bottles_start_sum']
+
+    def get_bottles_full(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_full_sum=Coalesce(Sum('bottles_full'), Value(0)))
+        return sum_dict['bottles_full_sum']
+
+    def get_bottles_accounted(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_accounted_sum=Coalesce(Sum('bottles_accounted'), Value(0)))
+        return sum_dict['bottles_accounted_sum']
+
+    def get_bottles_empty(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
+        sum_dict = qs.aggregate(
+            bottles_empty_sum=Coalesce(Sum('bottles_empty'), Value(0)))
+        return sum_dict['bottles_empty_sum']
+
+
 class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
@@ -741,7 +1021,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__parent__name') \
                     if isinstance(obj, dict) else obj.parent.parent.name
-            except:
+            except:  # noqa
                 pass
 
     def get_district_pk(self, obj):
@@ -749,7 +1029,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__parent__pk') \
                     if isinstance(obj, dict) else obj.parent.parent.pk
-            except:
+            except:  # noqa
                 pass
 
     def get_rhc(self, obj):
@@ -757,7 +1037,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__name') \
                     if isinstance(obj, dict) else obj.parent.name
-            except:
+            except:  # noqa
                 pass
 
     def get_rhc_pk(self, obj):
@@ -765,7 +1045,84 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__pk') \
                     if isinstance(obj, dict) else obj.parent.pk
-            except:
+            except:  # noqa
+                pass
+
+
+class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
+                               serializers.ModelSerializer):
+    """
+    Detailed spray data for target area
+    """
+    district = serializers.SerializerMethodField()
+    total_structures = serializers.SerializerMethodField()
+    visited_sprayed = serializers.SerializerMethodField()
+    visited_not_sprayed = serializers.SerializerMethodField()
+    sprayed_total_uNet = serializers.SerializerMethodField()
+    sprayed_nets = serializers.SerializerMethodField()
+    sprayed_roomsfound = serializers.SerializerMethodField()
+    sprayed_rooms = serializers.SerializerMethodField()
+    sprayed_totalpop = serializers.SerializerMethodField()
+    sprayed_childrenU5 = serializers.SerializerMethodField()
+    sprayed_pregwomen = serializers.SerializerMethodField()
+    sprayed_males = serializers.SerializerMethodField()
+    sprayed_females = serializers.SerializerMethodField()
+    unsprayed_nets = serializers.SerializerMethodField()
+    unsprayed_total_uNet = serializers.SerializerMethodField()
+    unsprayed_roomsfound = serializers.SerializerMethodField()
+    unsprayed_pregnant_women = serializers.SerializerMethodField()
+    unsprayed_totalpop = serializers.SerializerMethodField()
+    unsprayed_males = serializers.SerializerMethodField()
+    unsprayed_females = serializers.SerializerMethodField()
+    unsprayed_children_u5 = serializers.SerializerMethodField()
+    bottles_start = serializers.SerializerMethodField()
+    bottles_empty = serializers.SerializerMethodField()
+    bottles_full = serializers.SerializerMethodField()
+    bottles_accounted = serializers.SerializerMethodField()
+    total_nets = serializers.SerializerMethodField()
+    total_uNet = serializers.SerializerMethodField()
+    total_rooms = serializers.SerializerMethodField()
+
+    class Meta:
+        fields = [
+            'name',
+            'district',
+            'total_structures',
+            'visited_sprayed',
+            'visited_not_sprayed',
+            'sprayed_total_uNet',
+            'sprayed_nets',
+            'sprayed_roomsfound',
+            'sprayed_rooms',
+            'sprayed_totalpop',
+            'sprayed_childrenU5',
+            'sprayed_pregwomen',
+            'sprayed_males',
+            'sprayed_females',
+            'unsprayed_nets',
+            'unsprayed_total_uNet',
+            'unsprayed_roomsfound',
+            'unsprayed_pregnant_women',
+            'unsprayed_totalpop',
+            'unsprayed_males',
+            'unsprayed_females',
+            'unsprayed_children_u5',
+            'bottles_start',
+            'bottles_empty',
+            'bottles_full',
+            'bottles_accounted',
+            'total_nets',
+            'total_uNet',
+            'total_rooms',
+        ]
+        model = Location
+
+    def get_district(self, obj):
+        if obj:
+            try:
+                return obj.get('parent__parent__name') \
+                    if isinstance(obj, dict) else obj.parent.parent.name
+            except:  # noqa
                 pass
 
 
@@ -805,7 +1162,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__parent__name') \
                     if isinstance(obj, dict) else obj.parent.parent.name
-            except:
+            except:  # noqa
                 pass
 
     def get_district_pk(self, obj):
@@ -813,7 +1170,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__parent__pk') \
                     if isinstance(obj, dict) else obj.parent.parent.pk
-            except:
+            except:  # noqa
                 pass
 
     def get_rhc(self, obj):
@@ -821,7 +1178,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__name') \
                     if isinstance(obj, dict) else obj.parent.name
-            except:
+            except:  # noqa
                 pass
 
     def get_rhc_pk(self, obj):
@@ -829,7 +1186,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
             try:
                 return obj.get('parent__pk') \
                     if isinstance(obj, dict) else obj.parent.pk
-            except:
+            except:  # noqa
                 pass
 
 
