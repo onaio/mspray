@@ -275,6 +275,7 @@ def set_sprayed_visited_week(location, week_number, visited, sprayed,
     report.save()
 
 
+@app.task
 def set_sprayed_visited(location, week_number=None):
     from mspray.apps.main.serializers.target_area import get_spray_area_stats
     if location.level == 'ta':
