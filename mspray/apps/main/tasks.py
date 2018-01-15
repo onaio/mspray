@@ -276,6 +276,15 @@ def set_sprayed_visited_week(location, week_number, visited, sprayed,
 
 
 @app.task
+def task_set_sprayed_visited(location_id, week_number=None):
+    try:
+        location = Location.objects.get(pk=location_id)
+    except Location.DoesNotExist:
+        pass
+    else:
+        set_sprayed_visited(location, week_number=week_number)
+
+
 def set_sprayed_visited(location, week_number=None):
     from mspray.apps.main.serializers.target_area import get_spray_area_stats
     if location.level == 'ta':
