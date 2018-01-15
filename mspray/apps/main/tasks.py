@@ -6,7 +6,8 @@ import os
 from datetime import timedelta
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Value
+from django.db.models.functions import Coalesce
 from django.db.utils import IntegrityError
 from django.utils import timezone
 from django.contrib.gis.geos.polygon import Polygon
@@ -320,9 +321,10 @@ def set_sprayed_visited(location, week_number=None):
             else:
                 kwargs['location__parent__parent'] = location
             queryset = WeeklyReport.objects.filter(**kwargs).aggregate(
-                structures_sum=Sum('structures', distinct=True),
-                visited_sum=Sum('visited', distinct=True),
-                sprayed_sum=Sum('sprayed', distinct=True)
+                structures_sum=Coalesce(Sum('structures', distinct=True),
+                                        Value(0)),
+                visited_sum=Coalesce(Sum('visited', distinct=True), Value(0)),
+                sprayed_sum=Coalesce(Sum('sprayed', distinct=True), Value(0))
             )
             # print(week_number, location, week_number,
             #       queryset.get('visited_sum'), queryset.get('sprayed_sum'))
@@ -331,8 +333,8 @@ def set_sprayed_visited(location, week_number=None):
                 queryset.get('sprayed_sum'), queryset.get('structures_sum'))
         else:
             queryset = location.location_set.values('id').aggregate(
-                visited_sum=Sum('visited', distinct=True),
-                sprayed_sum=Sum('sprayed', distinct=True)
+                visited_sum=Coalesce(Sum('visited', distinct=True), Value(0)),
+                sprayed_sum=Coalesce(Sum('sprayed', distinct=True), Value(0))
             )
             location.visited = queryset.get('visited_sum') or 0
             location.sprayed = queryset.get('sprayed_sum') or 0
