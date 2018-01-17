@@ -1,5 +1,6 @@
 import csv
 import json
+import gc
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
@@ -9,6 +10,7 @@ from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
+from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.main.serializers.target_area import (
     DistrictSerializer, GeoTargetAreaSerializer, TargetAreaQuerySerializer,
     TargetAreaSerializer, count_duplicates, get_duplicates,
@@ -267,7 +269,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Sprayed Coverage"
                 ]
                 previous_rhc = None
-                for value in context.get('qs'):
+                for value in queryset_iterator(context.get('qs')):
                     district = TargetAreaSerializer(
                         value, context=context
                     ).data
@@ -306,6 +308,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                         calc_percentage(district.get('visited_sprayed'),
                                         district.get('found'))
                     ]
+                    gc.collect()
 
             sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
@@ -374,7 +377,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
                 "Bottles Not Returned"
             ]
             target_areas = self.get_queryset()
-            for ta in target_areas:
+            for ta in queryset_iterator(target_areas):
                 item = TargetAreaRichSerializer(ta).data
                 yield [
                     item['name'],
@@ -401,6 +404,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
                     item['bottles_empty'],
                     item['bottles_accounted'],
                 ]
+                gc.collect()
 
         sprayarea_buffer = SprayAreaBuffer()
         writer = csv.writer(sprayarea_buffer)
