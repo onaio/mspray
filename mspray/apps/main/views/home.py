@@ -382,7 +382,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
                 yield [
                     item['name'],
                     item['district'],
-                    item['total_structures'],
+                    item['found'],
                     item['visited_sprayed'],
                     item['sprayed_totalpop'],
                     item['sprayed_males'],
