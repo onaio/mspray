@@ -1,8 +1,10 @@
 .coverage
 static
 *.pyc
+.venv
 __pycache__
 local_settings.py
+.vscode/
 *.bak
 data
 .project
