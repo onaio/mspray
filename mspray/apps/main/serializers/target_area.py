@@ -257,6 +257,8 @@ def get_spray_data(obj, context):
             )
 
     kwargs = {}
+    # if not week_number:
+    #    week_number = int(timezone.now().strftime('%W'))
     if week_number:
         kwargs['spray_date__week__lte'] = week_number
     qs = loc.sprayday_set.filter(**kwargs)
@@ -1063,7 +1065,7 @@ class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
     Detailed spray data for target area
     """
     district = serializers.SerializerMethodField()
-    total_structures = serializers.SerializerMethodField()
+    found = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
     visited_not_sprayed = serializers.SerializerMethodField()
     sprayed_total_uNet = serializers.SerializerMethodField()
@@ -1095,7 +1097,7 @@ class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
         fields = [
             'name',
             'district',
-            'total_structures',
+            'found',
             'visited_sprayed',
             'visited_not_sprayed',
             'sprayed_total_uNet',
