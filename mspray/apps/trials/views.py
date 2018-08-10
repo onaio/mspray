@@ -57,9 +57,9 @@ def index(request):
                     for rec in hh_per_district
                 }.items(),
                 key=lambda t: t[0]))
-        aspirators = get_samples_for_method(queryset, Sample.PROKOPACK,
-                                            'aspirator')
-        row = _merge_results_by_district(row, aspirators, 'aspirator')
+        prokopacks = get_samples_for_method(queryset, Sample.PROKOPACK,
+                                            'prokopack')
+        row = _merge_results_by_district(row, prokopacks, 'prokopack')
         light_traps = get_samples_for_method(queryset, Sample.CDC_LIGHT_TRAP,
                                              'light_trap')
         row = _merge_results_by_district(row, light_traps, 'light_trap')
@@ -69,7 +69,7 @@ def index(request):
             'totals': [
                 hh_per_district.aggregate(
                     total_houses_reached=Sum('houses_reached')),
-                aspirators.aggregate(total_aspirators=Sum('aspirator')),
+                prokopacks.aggregate(total_prokopacks=Sum('prokopack')),
                 light_traps.aggregate(total_light_traps=Sum('light_trap')),
             ]
         }  # yapf: disable
