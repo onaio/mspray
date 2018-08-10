@@ -39,6 +39,11 @@
             {% for key, result in results.items %}
                 <tr>
                     <td>
+                        {% if level.lower == 'site' %}
+                        <a href="{% url 'trials:site-map' result.1.location_id %}">
+                            <i class="fa fa-map"></i>
+                        </a>
+                        {% endif %}
                         {% if level.lower == 'household' %}
                         House {{ key }}
                         {% else %}
