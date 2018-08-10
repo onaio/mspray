@@ -15,8 +15,10 @@ def get_samples_for_method(queryset, collection_method, key):
     """Return the queryset with the sam of tot_mosq for a given
     collection_method.
     """
-    params = {key: Sum(Cast(KeyTextTransform('tot_mosq', 'data'),
-                            models.IntegerField()))}
+    params = {
+        key: Sum(
+            Cast(KeyTextTransform('tot_mosq', 'data'), models.IntegerField()))
+    }
     return queryset.filter(collection_method=collection_method)\
         .values('district__name').distinct().order_by('district__name')\
         .annotate(**params)
@@ -46,17 +48,21 @@ def index(request):
             .values('district__name').distinct()\
             .annotate(houses_reached=Count('household_id', distinct=True))\
             .order_by('district__name')
-        row = OrderedDict(sorted({
-            rec['district__name']: {'houses_reached': rec['houses_reached']}
-            for rec in hh_per_district
-        }.items(), key=lambda t: t[0]))
+        row = OrderedDict(
+            sorted(
+                {
+                    rec['district__name']: {
+                        'houses_reached': rec['houses_reached']
+                    }
+                    for rec in hh_per_district
+                }.items(),
+                key=lambda t: t[0]))
         aspirators = get_samples_for_method(queryset, Sample.PROKOPACK,
                                             'aspirator')
         row = _merge_results_by_district(row, aspirators, 'aspirator')
         light_traps = get_samples_for_method(queryset, Sample.CDC_LIGHT_TRAP,
                                              'light_trap')
         row = _merge_results_by_district(row, light_traps, 'light_trap')
-
 
         results[survey] = {
             'rows': row,
@@ -68,9 +74,17 @@ def index(request):
             ]
         }  # yapf: disable
 
-    print(results)
+    response = {}
+    for i, j in results.items():
+        for a, b in j['rows'].items():  # pylint: disable=invalid-name
+            try:
+                response[a].update({i: b})
+            except KeyError:
+                response[a] = {i: b}
+            response[a][i].update({'totals': j['totals']})
+
     return render(request, 'trials/index.html', {
-        'results': results,
+        'results': response,
         'surveys': surveys,
         'trials': True
     })

@@ -5,53 +5,88 @@
     <div class="container">
         <h2>Trial Survey</h2>
 
-        {% for survey in surveys %}
         <table class='table table-stripe'>
             <thead>
                 <tr>
                     <th rowspan=3>District</th>
+                    {% for survey in surveys %}
                     <th colspan=4>Survey {{ survey }}</th>
+                    {% endfor %}
                 </tr>
                 <tr>
+                    {% for survey in surveys %}
                     <th rowspan=2>Houses Reached</th>
                     <th colspan=3>Samples Collected</th>
+                    {% endfor %}
                 </tr>
                 <tr>
+                    {% for survey in surveys %}
                     <th>Aspirator</th>
                     <th>Light Trap</th>
                     <th>Total</th>
+                    {% endfor %}
                 </tr>
             </thead>
 
-            {% for key, result in results.items %}
-                {% if key == survey %}
             <tbody>
-                {% for key, item in result.rows.items %}
+            {% for key, result in results.items %}
                 <tr>
                     <td><a href=>{{ key }}</a></td>
-                    <td>{{ item.houses_reached }}</td>
-                    <td>{{ item.aspirator }}</td>
-                    <td>{{ item.light_trap }}</td>
-                    <td>{{ item.aspirator|add:item.light_trap }}</td>
+                    <td>{{ result.1.houses_reached }}</td>
+                    <td>{{ result.1.aspirator }}</td>
+                    <td>{{ result.1.light_trap }}</td>
+                    <td>{{ result.1.aspirator|add:result.1.light_trap }}</td>
+                    <td>{{ result.2.houses_reached }}</td>
+                    <td>{{ result.2.aspirator }}</td>
+                    <td>{{ result.2.light_trap }}</td>
+                    <td>{{ result.2.aspirator|add:result.2.light_trap }}</td>
+                    <td>{{ result.3.houses_reached }}</td>
+                    <td>{{ result.3.aspirator }}</td>
+                    <td>{{ result.3.light_trap }}</td>
+                    <td>{{ result.3.aspirator|add:result.3.light_trap }}</td>
+                    <td>{{ result.4.houses_reached }}</td>
+                    <td>{{ result.4.aspirator }}</td>
+                    <td>{{ result.4.light_trap }}</td>
+                    <td>{{ result.4.aspirator|add:result.4.light_trap }}</td>
+                    <td>{{ result.5.houses_reached }}</td>
+                    <td>{{ result.5.aspirator }}</td>
+                    <td>{{ result.5.light_trap }}</td>
+                    <td>{{ result.5.aspirator|add:result.5.light_trap }}</td>
                 </tr>
-                {% endfor %}
+            {% endfor %}
             </tbody>
 
             <tfoot>
+            {% for key, result in results.items %}
+                {% if forloop.first %}
                 <tr>
                     <td>Total</td>
-                    <td>{{ result.totals.0.total_houses_reached }}</td>
-                    <td>{{ result.totals.1.total_aspirators }}</td>
-                    <td>{{ result.totals.2.total_light_traps }}</td>
-                    <td>{{ result.totals.1.total_aspirators|add:result.totals.2.total_light_traps }}</td>
-
+                    <td>{{ result.1.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.1.totals.1.total_aspirators }}</td>
+                    <td>{{ result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.1.totals.1.total_aspirators|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.2.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.2.totals.1.total_aspirators }}</td>
+                    <td>{{ result.2.totals.2.total_light_traps }}</td>
+                    <td>{{ result.2.totals.1.total_aspirators|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.3.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.3.totals.1.total_aspirators }}</td>
+                    <td>{{ result.3.totals.2.total_light_traps }}</td>
+                    <td>{{ result.3.totals.1.total_aspirators|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.4.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.4.totals.1.total_aspirators }}</td>
+                    <td>{{ result.4.totals.2.total_light_traps }}</td>
+                    <td>{{ result.4.totals.1.total_aspirators|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.5.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.5.totals.1.total_aspirators }}</td>
+                    <td>{{ result.5.totals.2.total_light_traps }}</td>
+                    <td>{{ result.5.totals.1.total_aspirators|add:result.1.totals.2.total_light_traps }}</td>
                 </tr>
-            </tfoot>
                 {% endif %}
             {% endfor %}
+            </tfoot>
 
         </table>
-        {% endfor %}
     </div>
 </section>
 
