@@ -1,0 +1,59 @@
+{% extends 'home/base.html' %}
+{% block content %}
+
+<section>
+    <div class="container">
+        <h2>Trial Survey</h2>
+
+        {% for survey in surveys %}
+        <table class='table table-stripe'>
+            <thead>
+                <tr>
+                    <th rowspan=3>District</th>
+                    <th colspan=4>Survey {{ survey }}</th>
+                </tr>
+                <tr>
+                    <th rowspan=2>Houses Reached</th>
+                    <th colspan=3>Samples Collected</th>
+                </tr>
+                <tr>
+                    <th>Aspirator</th>
+                    <th>Light Trap</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+
+            {% for key, result in results.items %}
+                {% if key == survey %}
+            <tbody>
+                {% for key, item in result.rows.items %}
+                <tr>
+                    <td><a href=>{{ key }}</a></td>
+                    <td>{{ item.houses_reached }}</td>
+                    <td>{{ item.aspirator }}</td>
+                    <td>{{ item.light_trap }}</td>
+                    <td>{{ item.aspirator|add:item.light_trap }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td>Total</td>
+                    <td>{{ result.totals.0.total_houses_reached }}</td>
+                    <td>{{ result.totals.1.total_aspirators }}</td>
+                    <td>{{ result.totals.2.total_light_traps }}</td>
+                    <td>{{ result.totals.1.total_aspirators|add:result.totals.2.total_light_traps }}</td>
+
+                </tr>
+            </tfoot>
+                {% endif %}
+            {% endfor %}
+
+        </table>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock %}
+

@@ -40,6 +40,8 @@
                                         Performance
                                     {% elif directly_observed_spraying %}
                                         Directly Observed Spraying
+                                    {% elif trials %}
+                                       Trial Survey
                                     {% else %}
                                         Spray Effectiveness
                                     {% endif %}</span>
@@ -58,6 +60,8 @@
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'trials:index' %}">Trial Survey</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}

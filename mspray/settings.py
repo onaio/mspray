@@ -80,6 +80,7 @@ INSTALLED_APPS = (
     'mspray.apps.main',
     'mspray.apps.warehouse',
     'mspray.apps.alerts',
+    'mspray.apps.trials',
 )
 
 MIDDLEWARE = (
