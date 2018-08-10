@@ -83,6 +83,8 @@ def index(request):
                 response[a] = {i: b}
             response[a][i].update({'totals': j['totals']})
 
+    response = OrderedDict(sorted(response.items(), key=lambda t: t[0]))
+
     return render(request, 'trials/index.html', {
         'results': response,
         'surveys': surveys,
