@@ -3,19 +3,26 @@
 
 <section>
     <div class="container">
-        <h2>Trial Survey</h2>
+        <h1>Trial Survey</h1>
+        <h2>{{ title }}</h2>
 
         <table class='table table-stripe'>
             <thead>
                 <tr>
-                    <th rowspan=3>District</th>
+                    <th rowspan=3>{{ level }}</th>
                     {% for survey in surveys %}
+                    {% if level.lower != 'household' %}
                     <th colspan=4>Survey {{ survey }}</th>
+                    {% else %}
+                    <th colspan=3>Survey {{ survey }}</th>
+                    {% endif %}
                     {% endfor %}
                 </tr>
                 <tr>
                     {% for survey in surveys %}
+                    {% if level.lower != 'household' %}
                     <th rowspan=2>Houses Reached</th>
+                    {% endif %}
                     <th colspan=3>Mosquitoes Collected</th>
                     {% endfor %}
                 </tr>
@@ -31,24 +38,40 @@
             <tbody>
             {% for key, result in results.items %}
                 <tr>
-                    <td><a href=>{{ key }}</a></td>
+                    <td>
+                        {% if level.lower == 'household' %}
+                        House {{ key }}
+                        {% else %}
+                        <a href="{% url 'trials:site' result.1.location_id %}">{{ key }}</a>
+                        {% endif %}
+                    </td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.1.houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.1.prokopack }}</td>
                     <td>{{ result.1.light_trap }}</td>
                     <td>{{ result.1.prokopack|add:result.1.light_trap }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.2.houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.2.prokopack }}</td>
                     <td>{{ result.2.light_trap }}</td>
                     <td>{{ result.2.prokopack|add:result.2.light_trap }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.3.houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.3.prokopack }}</td>
                     <td>{{ result.3.light_trap }}</td>
                     <td>{{ result.3.prokopack|add:result.3.light_trap }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.4.houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.4.prokopack }}</td>
                     <td>{{ result.4.light_trap }}</td>
                     <td>{{ result.4.prokopack|add:result.4.light_trap }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.5.houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.5.prokopack }}</td>
                     <td>{{ result.5.light_trap }}</td>
                     <td>{{ result.5.prokopack|add:result.5.light_trap }}</td>
@@ -61,23 +84,33 @@
                 {% if forloop.first %}
                 <tr>
                     <td>Total</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.1.totals.0.total_houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.1.totals.1.total_prokopacks }}</td>
                     <td>{{ result.1.totals.2.total_light_traps }}</td>
                     <td>{{ result.1.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.2.totals.0.total_houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.2.totals.1.total_prokopacks }}</td>
                     <td>{{ result.2.totals.2.total_light_traps }}</td>
                     <td>{{ result.2.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.3.totals.0.total_houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.3.totals.1.total_prokopacks }}</td>
                     <td>{{ result.3.totals.2.total_light_traps }}</td>
                     <td>{{ result.3.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.4.totals.0.total_houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.4.totals.1.total_prokopacks }}</td>
                     <td>{{ result.4.totals.2.total_light_traps }}</td>
                     <td>{{ result.4.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
                     <td>{{ result.5.totals.0.total_houses_reached }}</td>
+                    {% endif %}
                     <td>{{ result.5.totals.1.total_prokopacks }}</td>
                     <td>{{ result.5.totals.2.total_light_traps }}</td>
                     <td>{{ result.5.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
