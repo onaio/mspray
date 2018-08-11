@@ -13,9 +13,11 @@ class GeoSamplesSerializer(GeoFeatureModelSerializer):
     """
     geom = GeometryField()
     samples = serializers.SerializerMethodField()
+    parent_id = serializers.IntegerField(source='spray_area.parent.id')
 
     class Meta:
-        fields = ('id', 'household_id', 'samples')
+        fields = ('id', 'household_id', 'samples', 'parent_id',
+                  'spray_area_id')
         model = Sample
         geo_field = 'geom'
 

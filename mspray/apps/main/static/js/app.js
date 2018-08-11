@@ -514,7 +514,6 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
             },
             onEachFeature: function(feature, layer){
                 var props = feature.properties;
-                console.log(props);
                 var content = "<strong>HHID: " + props.household_id + "</strong>";
                 var sample, i, prokopack, light_trap;
                 content += '<table class="table samples-popup">'
@@ -533,8 +532,9 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                     content += '</tr>';
 
                 }
-                content += '</tbody>'
-                content += '</table>'
+                content += '</tbody>';
+                content += '</table>';
+                content += `<div><a href="/${props.parent_id}/${props.spray_area_id}">Spray Effectiveness Map</a></div>`;
                 layer.bindPopup(content, {closeButton: true});
             }
         });
