@@ -1,7 +1,7 @@
 # -*- coding -*-
 """Trials models."""
+from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
-from django.db import models
 
 
 class Sample(models.Model):
@@ -29,6 +29,7 @@ class Sample(models.Model):
     visit = models.PositiveSmallIntegerField()
     data = JSONField()
     submission_id = models.PositiveIntegerField(unique=True)
+    geom = models.GeometryField(srid=4326, db_index=True, null=True)
 
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)

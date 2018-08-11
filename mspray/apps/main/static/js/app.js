@@ -1,5 +1,5 @@
 /* global L, $, Circles */
-var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
+var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData) {
     "use strict";
     this.targetOptions = {
         fillColor: "#999999",
@@ -204,7 +204,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                         content += "<strong>Spray Operator Code</strong>: " + feature.properties.spray_operator_code + "<br/>";
                         layer.bindPopup(content);
                     }
-                }).addTo(app.map);
+                }); //.addTo(app.map);
 
                 app.sprayLayerFilter = function(reason) {
                     app.sprayLayer.setFilter(function(feature) {
@@ -448,7 +448,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
                 } else {
                     app.hhOptions.fillColor = '#FFDC00';
                 }
-                app.hhOptions.fillOpacity = 0.4;
+                app.hhOptions.fillOpacity = 0.6;
                 return app.hhOptions;
             },
             onEachFeature: function(feature, layer){
@@ -496,10 +496,56 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue) {
         app.hhLayer.addTo(app.map);
     };
 
+
+    this.loadSamples = function(data) {
+        var app = this,
+            geojson = data;
+        app.samplesLayer = L.geoJson(geojson, {
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, app.hhOptions);
+            },
+            style: function(feature) {
+                app.hhOptions.fillColor = '#02d0f9';
+                app.hhOptions.fillOpacity = 1;
+                return app.hhOptions;
+            },
+            onEachFeature: function(feature, layer){
+                var props = feature.properties;
+                console.log(props);
+                var content = "<strong>HHID: " + props.household_id + "</strong>";
+                var sample, i, prokopack, light_trap;
+                content += '<table class="table samples-popup">'
+                content += '<thead><tr><th>Survey</Survey</th><th>Date</th><th>Prokopack</th><th>Light Trap</th><th>Total</th></tr></thead>'
+                content += '<tbody>'
+                for (i in props.samples) {
+                    sample = props.samples[i];
+                    prokopack = sample.collection_method == "Prokopack" ? sample.tot_mosq : "n/a";
+                    light_trap = sample.collection_method != "Prokopack" ? sample.tot_mosq : "n/a";
+                    content += '<tr>';
+                    content += '<td class="text-center">Survey ' + sample.visit + '</td>'
+                    content += '<td class="text-center">' + sample.date + '</td>';
+                    content += '<td class="text-center">' + prokopack + '</td>';
+                    content += '<td class="text-center">' + light_trap + '</td>';
+                    content += '<td class="text-center">' + sample.tot_mosq + '</td>';
+                    content += '</tr>';
+
+                }
+                content += '</tbody>'
+                content += '</table>'
+                layer.bindPopup(content, {closeButton: true});
+            }
+        });
+        app.samplesLayer.addTo(app.map);
+    };
+
     if ( targetAreaData !== undefined ) {
         this.loadTargetArea(targetAreaData);
     }
     if ( hhData !== undefined ) {
         this.loadHouseholds(hhData);
+    }
+
+    if (samplesData !== undefined ) {
+        this.loadSamples(samplesData);
     }
 };

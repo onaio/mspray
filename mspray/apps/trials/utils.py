@@ -4,17 +4,66 @@
 from django.conf import settings
 from django.db.utils import IntegrityError
 
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Household, Location
 from mspray.apps.trials.models import Sample
-from mspray.libs.ona import fetch_form_data
+from mspray.libs.ona import fetch_form_data, fetch_osm_xml
+from mspray.libs.osm import parse_osm_nodes, parse_osm_ways
 
 
-def load_samples_from_ona(form_id=None):
+def download_osm_geom(data, osm_field):
+    """Downloads the OSM data from Ona and creates a geom object.
+    """
+    filename = data.get(osm_field)
+    osm_xml = fetch_osm_xml(data, filename)
+    if osm_xml is not None:
+        geoms = parse_osm_ways(osm_xml) or parse_osm_nodes(osm_xml)
+
+        if geoms:
+            return geoms[0]['geom']
+
+    return None
+
+
+def get_sample_geom(spray_area, household_id, form_id):
+    """Downloads OSM information for a household from the collections form.
+    """
+    osm_field = 'osmstructure'
+    query = {'spray_area': spray_area, 'HHID': household_id}
+    form_data = fetch_form_data(form_id, query=query)
+    for row in form_data:
+        osmid = row.get('%s:way:id' % osm_field)
+        if osmid:
+            try:
+                household = Household.objects.get(hh_id=osmid)
+            except Household.DoesNotExist:
+                pass
+            else:
+                return household.bgeom
+
+            # We already have a sample with the geom
+            sample = Sample.objects.filter(
+                spray_area__name=spray_area,
+                household_id=household_id,
+                geom__isnull=False).first()
+            if sample:
+                return sample.geom
+
+        # download OSM file
+        geom = download_osm_geom(row, osm_field)
+        if geom:
+            return geom
+
+    return None
+
+
+def load_samples_from_ona(form_id=None, collections_form_id=None):
     """Loads the Ento Counts form into the Sample model."""
     if not form_id:
         form_id = getattr(settings, 'SAMPLE_FORM_ID', None)
     if not form_id:
         return None
+    if not collections_form_id:
+        collections_form_id = getattr(settings, 'COLLECTIONS_FORM_ID', None)
 
     data = fetch_form_data(form_id) or []
 
@@ -53,7 +102,7 @@ def load_samples_from_ona(form_id=None):
             row['visit'] = 1
 
         try:
-            Sample.objects.create(
+            sample = Sample.objects.create(
                 collection_method=row['collection_method'],
                 district=district,
                 household_id=row['HHID'],
@@ -63,4 +112,22 @@ def load_samples_from_ona(form_id=None):
                 visit=row['visit'],
                 data=row)
         except IntegrityError:
+            sample = Sample.objects.get(submission_id=submission_id)
+            if not sample.geom:
+                set_sample_geom(sample, collections_form_id)
             continue
+        else:
+            set_sample_geom(sample, collections_form_id)
+
+
+def set_sample_geom(sample, collections_form_id):
+    """Downloads the household geom and saves it with the sample.
+    """
+    if not collections_form_id:
+        return
+
+    geom = get_sample_geom(sample.spray_area.name, sample.household_id,
+                           collections_form_id)
+    if geom:
+        sample.geom = geom
+        sample.save()
