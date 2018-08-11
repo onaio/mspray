@@ -200,7 +200,8 @@ def site(request, site_id):
             'surveys': surveys,
             'trials': True,
             'level': get_level(level),
-            'title': "%s: %s" % (level, location.name)
+            'title': "%s: %s" % (level, location.name),
+            'location': location,
         })
 
 

@@ -4,7 +4,15 @@
 <section>
     <div class="container">
         <h1>Trial Survey</h1>
-        <h2>{{ title }}</h2>
+        <h2>
+            {{ title }}
+
+            {% if level.lower == 'household' %}
+            <a href="{% url 'trials:site-map' location.id %}">
+                <i class="fa fa-map"></i>
+            </a>
+            {% endif %}
+        </h2>
 
         <table class='table table-stripe'>
             <thead>
