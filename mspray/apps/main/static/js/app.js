@@ -204,7 +204,10 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                         content += "<strong>Spray Operator Code</strong>: " + feature.properties.spray_operator_code + "<br/>";
                         layer.bindPopup(content);
                     }
-                }); //.addTo(app.map);
+                });
+                if (samplesData === undefined) {
+                    app.sprayLayer.addTo(app.map);
+                }
 
                 app.sprayLayerFilter = function(reason) {
                     app.sprayLayer.setFilter(function(feature) {
