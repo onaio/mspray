@@ -184,6 +184,7 @@ class Command(BaseCommand):
                                           feature.get(name_field))
                         skipped += 1
                         continue
+                    target = feature.get('TARGET') in [1, 2]
                     try:
                         location = Location.objects.get(
                             name=name, level=level, parent=parent
@@ -192,7 +193,8 @@ class Command(BaseCommand):
                         try:
                             Location.objects.create(
                                 name=name, code=code, structures=structures,
-                                level=level, parent=parent, geom=geom.wkt
+                                level=level, parent=parent, geom=geom.wkt,
+                                target=target
                             )
                         except IntegrityError:
                             failed += 1
@@ -201,6 +203,7 @@ class Command(BaseCommand):
                         else:
                             count += 1
                     else:
+                        location.target = target
                         location.geom = geom.wkt
                         location.save()
                         updated += 1

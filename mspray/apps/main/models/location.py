@@ -26,6 +26,7 @@ class Location(MPTTModel, models.Model):
     visited = models.PositiveIntegerField(default=0)
     # sprayed - 20% of the structures have been sprayed in the spray area
     sprayed = models.PositiveIntegerField(default=0)
+    target = models.BooleanField(default=True)
 
     class Meta:
         app_label = 'main'

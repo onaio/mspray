@@ -59,6 +59,7 @@ def get_new_structure_location(data, geom, is_node=False):
     if geom is not None:
         locations = Location.objects.filter(
             geom__contains=geom,
+            target=True,
             level=settings.MSPRAY_TA_LEVEL
         )
         if locations:
@@ -73,6 +74,7 @@ def get_location_from_data(data):
     location = None
     try:
         location = Location.objects.get(name=target_area,
+                                        target=True,
                                         parent__parent__code=district)
     except Location.DoesNotExist:
         pass
@@ -97,6 +99,7 @@ def get_location_from_osm(data):
             is_node = isinstance(geom, Point)
             locations = Location.objects.filter(
                 geom__covers=geom,
+                target=True,
                 level=settings.MSPRAY_TA_LEVEL
             )
             if locations:
@@ -400,7 +403,7 @@ def set_district_sprayed_visited():
     """
     Update sprayed and visited numbers on all objects.
     """
-    for location in Location.objects.filter(level='ta').iterator():
+    for location in Location.objects.filter(level='ta', target=True).iterator():
         set_sprayed_visited(location)
 
     for location in Location.objects.filter(level='RHC'):
