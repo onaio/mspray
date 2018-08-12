@@ -36,7 +36,7 @@
                 </tr>
                 <tr>
                     {% for survey in surveys %}
-                    <th>Prokopack</th>
+                    <th>Prokopack*</th>
                     <th>Light Trap</th>
                     <th>Total</th>
                     {% endfor %}
@@ -61,31 +61,31 @@
                     {% if level.lower != 'household' %}
                     <td>{{ result.1.houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.1.prokopack }}</td>
+                    <td>{% if result.1.prokopack == 0 %}n/a{% else %}{{ result.1.prokopack }}{% endif %}</td>
                     <td>{{ result.1.light_trap }}</td>
                     <td>{{ result.1.prokopack|add:result.1.light_trap }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.2.houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.2.prokopack }}</td>
+                    <td>{% if result.2.prokopack == 0 %}n/a{% else %}{{ result.2.prokopack }}{% endif %}</td>
                     <td>{{ result.2.light_trap }}</td>
                     <td>{{ result.2.prokopack|add:result.2.light_trap }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.3.houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.3.prokopack }}</td>
+                    <td>{% if result.3.prokopack == 0 %}n/a{% else %}{{ result.3.prokopack }}{% endif %}</td>
                     <td>{{ result.3.light_trap }}</td>
                     <td>{{ result.3.prokopack|add:result.3.light_trap }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.4.houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.4.prokopack }}</td>
+                    <td>{% if result.4.prokopack == 0 %}n/a{% else %}{{ result.4.prokopack }}{% endif %}</td>
                     <td>{{ result.4.light_trap }}</td>
                     <td>{{ result.4.prokopack|add:result.4.light_trap }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.5.houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.5.prokopack }}</td>
+                    <td>{% if result.5.prokopack == 0 %}n/a{% else %}{{ result.5.prokopack }}{% endif %}</td>
                     <td>{{ result.5.light_trap }}</td>
                     <td>{{ result.5.prokopack|add:result.5.light_trap }}</td>
                 </tr>
@@ -100,31 +100,31 @@
                     {% if level.lower != 'household' %}
                     <td>{{ result.1.totals.0.total_houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.1.totals.1.total_prokopacks }}</td>
+                    <td>{% if result.1.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.1.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.1.totals.2.total_light_traps }}</td>
                     <td>{{ result.1.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.2.totals.0.total_houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.2.totals.1.total_prokopacks }}</td>
+                    <td>{% if result.2.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.2.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.2.totals.2.total_light_traps }}</td>
                     <td>{{ result.2.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.3.totals.0.total_houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.3.totals.1.total_prokopacks }}</td>
+                    <td>{% if result.3.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.3.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.3.totals.2.total_light_traps }}</td>
                     <td>{{ result.3.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.4.totals.0.total_houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.4.totals.1.total_prokopacks }}</td>
+                    <td>{% if result.4.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.4.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.4.totals.2.total_light_traps }}</td>
                     <td>{{ result.4.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.5.totals.0.total_houses_reached }}</td>
                     {% endif %}
-                    <td>{{ result.5.totals.1.total_prokopacks }}</td>
+                    <td>{% if result.5.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.5.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.5.totals.2.total_light_traps }}</td>
                     <td>{{ result.5.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
                 </tr>
@@ -133,6 +133,8 @@
             </tfoot>
 
         </table>
+
+        <p>* Prokopack collections were done in only 2 houses in each site, which is 10 houses per district, so only 50 houses in the entire dataset had prokopack collections done</p>
     </div>
 </section>
 
