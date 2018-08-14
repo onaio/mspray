@@ -535,7 +535,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                 content += '</tbody>';
                 content += '</table>';
                 content += `<div><a href="/${props.parent_id}/${props.spray_area_id}">Spray Effectiveness Map</a></div>`;
-                layer.bindPopup(content, {closeButton: true});
+                layer.bindPopup(content, {closeButton: true, maxWidth: 460, minWidth: 320});
             }
         });
         app.samplesLayer.addTo(app.map);
