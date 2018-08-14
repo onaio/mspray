@@ -108,25 +108,25 @@
                     {% endif %}
                     <td>{% if result.2.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.2.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.2.totals.2.total_light_traps }}</td>
-                    <td>{{ result.2.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.2.totals.1.total_prokopacks|add:result.2.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.3.totals.0.total_houses_reached }}</td>
                     {% endif %}
                     <td>{% if result.3.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.3.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.3.totals.2.total_light_traps }}</td>
-                    <td>{{ result.3.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.3.totals.1.total_prokopacks|add:result.3.totals.2.total_light_traps }}</td>
                     {% if level.lower != 'household' %}
                     <td>{% if 4 in result %}{{ result.4.totals.0.total_houses_reached }}{% else %}n/a{% endif %}</td>
                     {% endif %}
                     <td>{% if 4 in result %}{% if result.4.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.4.totals.1.total_prokopacks }}{% endif %}{% else %}n/a{% endif %}</td>
                     <td>{% if 4 in result %}{{ result.4.totals.2.total_light_traps }}{% else %}n/a{% endif %}</td>
-                    <td>{% if 4 in result %}{{ result.4.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 4 in result %}{{ result.4.totals.1.total_prokopacks|add:result.4.totals.2.total_light_traps }}{% else %}n/a{% endif %}</td>
                     {% if level.lower != 'household' %}
                     <td>{{ result.5.totals.0.total_houses_reached }}</td>
                     {% endif %}
                     <td>{% if result.5.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.5.totals.1.total_prokopacks }}{% endif %}</td>
                     <td>{{ result.5.totals.2.total_light_traps }}</td>
-                    <td>{{ result.5.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.5.totals.1.total_prokopacks|add:result.5.totals.2.total_light_traps }}</td>
                 </tr>
                 {% endif %}
             {% endfor %}
