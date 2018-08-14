@@ -15,11 +15,9 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, Household
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.serializers.household import HouseholdBSerializer
-from mspray.apps.main.serializers.target_area import (GeoTargetAreaSerializer,
-                                                      TargetAreaQuerySerializer,
-                                                      TargetAreaSerializer,
-                                                      count_duplicates,
-                                                      get_duplicates)
+from mspray.apps.main.serializers.target_area import (
+    GeoTargetAreaSerializer, TargetAreaQuerySerializer, TargetAreaSerializer,
+    count_duplicates, get_duplicates)
 from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.views.target_area import (TargetAreaHouseholdsViewSet,
                                                 TargetAreaViewSet)
@@ -139,8 +137,7 @@ def site(request, site_id):
     }
     results = {}
     for survey in surveys:
-        queryset = Sample.objects.filter(
-            visit=survey, **site_kwargs).exclude(household_id='0101466')
+        queryset = Sample.objects.filter(visit=survey, **site_kwargs)
         if location.level == 'district':
             fields = ('spray_area__name', 'spray_area_id')
         else:
@@ -225,9 +222,7 @@ class SiteMapView(SiteNameMixin, DetailView):  # pylint: disable=R0901
             location = get_location_qs(
                 Location.objects.filter(pk=location.pk), 'RHC').first()
         serializer = serializer_class(
-            location, context={
-                'request': self.request
-            })
+            location, context={'request': self.request})
         context['target_data'] = serializer.data
         spray_date = parse_spray_date(self.request)
         if spray_date:
@@ -264,8 +259,11 @@ class SiteMapView(SiteNameMixin, DetailView):  # pylint: disable=R0901
                     format='geojson')
                 response.render()
                 hh_data = HouseholdBSerializer(
-                    Household.objects.filter(location=loc), many=True,
-                    context={'request': self.request}).data
+                    Household.objects.filter(location=loc),
+                    many=True,
+                    context={
+                        'request': self.request
+                    }).data
                 context['hh_geojson'] = json.dumps(hh_data)
                 sprayed_duplicates = list(
                     get_duplicates(loc, True, spray_date))
@@ -282,7 +280,10 @@ class SiteMapView(SiteNameMixin, DetailView):  # pylint: disable=R0901
                 samples_data = GeoSamplesSerializer(
                     Sample.objects.filter(spray_area=location)
                     .distinct('household_id'),
-                    many=True, context={'request': self.request}).data
+                    many=True,
+                    context={
+                        'request': self.request
+                    }).data
                 context['samples_geojson'] = json.dumps(samples_data)
 
         context['districts'] = Location.objects.filter(parent=None)\
