@@ -750,7 +750,7 @@ def get_ta_in_location(location):
         qs = Location.objects.filter(parent__pk=pk) \
             if isinstance(location, dict) else location.location_set.all()
 
-        locations = Location.objects.filter(level=TA_LEVEL)\
+        locations = Location.objects.filter(level=TA_LEVEL, target=True)\
             .filter(Q(parent__pk=pk) | Q(parent__in=qs))\
             .values_list('pk', flat=True)
 

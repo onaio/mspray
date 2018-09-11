@@ -29,7 +29,7 @@ class DistrictView(SiteNameMixin, ListView):
     slug_field = 'pk'
 
     def get_queryset(self):
-        qs = super(DistrictView, self).get_queryset()
+        qs = super(DistrictView, self).get_queryset().filter(target=True)
         pk = self.kwargs.get(self.slug_field)
         if pk is not None:
             qs = qs.filter(parent__pk=pk)
@@ -191,7 +191,7 @@ class SprayAreaView(SiteNameMixin, ListView):
 
     def get_queryset(self):
         qs = super(SprayAreaView, self).get_queryset()
-        qs = qs.filter(level='ta')
+        qs = qs.filter(level='ta', target=True)
 
         return get_location_qs(qs)
 
@@ -336,7 +336,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
 
     def get_queryset(self):
         queryset = super(DetailedCSVView, self).get_queryset()
-        return queryset.filter(level='ta').order_by('name')
+        return queryset.filter(level='ta', target=True).order_by('name')
 
     def render_to_response(self, context, **response_kwargs):
 

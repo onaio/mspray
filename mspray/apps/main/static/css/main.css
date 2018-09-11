@@ -617,3 +617,14 @@ td.numbers {
 .tablesaw tfoot > tr > td {
     font-weight: bold;
 }
+.samples-popup tr th, .samples-popup tr td {
+    font-size: smaller;
+}
+
+.samples-popup tr td {
+    font-weight: 600;
+}
+
+.samples-popup > thead > tr > th, .samples-popup > tbody > tr > th, .samples-popup > tfoot > tr > th, .samples-popup > thead > tr > td, .samples-popup > tbody > tr > td, .samples-popup > tfoot > tr > td {
+    padding: 2px;
+}

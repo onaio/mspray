@@ -7,6 +7,7 @@ import os
 from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import SpatialReference
+from django.contrib.gis.gdal.error import OGRIndexError
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
@@ -185,6 +186,10 @@ class Command(BaseCommand):
                         skipped += 1
                         continue
                     try:
+                        target = feature.get('TARGET') in [1, 2]
+                    except OGRIndexError:
+                        target = True
+                    try:
                         location = Location.objects.get(
                             name=name, level=level, parent=parent
                         )
@@ -192,18 +197,26 @@ class Command(BaseCommand):
                         try:
                             Location.objects.create(
                                 name=name, code=code, structures=structures,
-                                level=level, parent=parent, geom=geom.wkt
+                                level=level, parent=parent, geom=geom.wkt,
+                                target=target
                             )
-                        except IntegrityError:
+                        except IntegrityError as e:
                             failed += 1
                         except Exception:  # pylint: disable=broad-except
                             exception_raised += 1
                         else:
                             count += 1
                     else:
+                        if level == 'RHC' and code != location.code:
+                            location.code = code
+                        location.target = target
                         location.geom = geom.wkt
-                        location.save()
-                        updated += 1
+                        try:
+                            location.save()
+                        except IntegrityError:
+                            pass
+                        else:
+                            updated += 1
 
                 self.stdout.write(
                     "Created %s locations, %s updated, failed %s, skipped %s, "

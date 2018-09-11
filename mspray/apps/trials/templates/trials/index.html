@@ -1,0 +1,142 @@
+{% extends 'home/base.html' %}
+{% block content %}
+
+<section>
+    <div class="container">
+        <h1>Trial Survey</h1>
+        <h2>
+            {{ title }}
+
+            {% if level.lower == 'household' %}
+            <a href="{% url 'trials:site-map' location.id %}">
+                <i class="fa fa-map"></i>
+            </a>
+            {% endif %}
+        </h2>
+
+        <table class='table table-stripe'>
+            <thead>
+                <tr>
+                    <th rowspan=3>{{ level }}</th>
+                    {% for survey in surveys %}
+                    {% if level.lower != 'household' %}
+                    <th colspan=4>Survey {{ survey }}</th>
+                    {% else %}
+                    <th colspan=3>Survey {{ survey }}</th>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for survey in surveys %}
+                    {% if level.lower != 'household' %}
+                    <th rowspan=2>Houses Reached</th>
+                    {% endif %}
+                    <th colspan=3>Mosquitoes Collected</th>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    {% for survey in surveys %}
+                    <th>Prokopack*</th>
+                    <th>Light Trap</th>
+                    <th>Total</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for key, result in results.items %}
+                <tr>
+                    <td>
+                        {% if level.lower == 'site' %}
+                        <a href="{% url 'trials:site-map' result.1.location_id %}">
+                            <i class="fa fa-map"></i>
+                        </a>
+                        {% endif %}
+                        {% if level.lower == 'household' %}
+                        House {{ key }}
+                        {% else %}
+                        <a href="{% url 'trials:site' result.1.location_id %}">{{ key }}</a>
+                        {% endif %}
+                    </td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 1 in result %}{{ result.1.houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 1 in result %}{% if result.1.prokopack == 0 %}n/a{% else %}{{ result.1.prokopack }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 1 in result %}{{ result.1.light_trap }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 1 in result %}{{ result.1.prokopack|add:result.1.light_trap }}{% else %}n/a{% endif %}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 2 in result %}{{ result.2.houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 2 in result %}{% if result.2.prokopack == 0 %}n/a{% else %}{{ result.2.prokopack }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 2 in result %}{{ result.2.light_trap }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 2 in result %}{{ result.2.prokopack|add:result.2.light_trap }}{% else %}n/a{% endif %}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 3 in result %}{{ result.3.houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 3 in result %}{% if result.3.prokopack == 0 %}n/a{% else %}{{ result.3.prokopack }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 3 in result %}{{ result.3.light_trap }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 3 in result %}{{ result.3.prokopack|add:result.3.light_trap }}{% else %}n/a{% endif %}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 4 in result %}{{ result.4.houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 4 in result %}{% if result.4.prokopack == 0 %}n/a{% else %}{{ result.4.prokopack }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 4 in result %}{{ result.4.light_trap }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 4 in result %}{{ result.4.prokopack|add:result.4.light_trap }}{% else %}n/a{% endif %}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 5 in result %}{{ result.5.houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 5 in result %}{% if result.5.prokopack == 0 %}n/a{% else %}{{ result.5.prokopack }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 5 in result %}{{ result.5.light_trap }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 5 in result %}{{ result.5.prokopack|add:result.5.light_trap }}{% else %}n/a{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+            <tfoot>
+            {% for key, result in results.items %}
+                {% if forloop.first %}
+                <tr>
+                    <td>Total</td>
+                    {% if level.lower != 'household' %}
+                    <td>{{ result.1.totals.0.total_houses_reached }}</td>
+                    {% endif %}
+                    <td>{% if result.1.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.1.totals.1.total_prokopacks }}{% endif %}</td>
+                    <td>{{ result.1.totals.2.total_light_traps }}</td>
+                    <td>{{ result.1.totals.1.total_prokopacks|add:result.1.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{{ result.2.totals.0.total_houses_reached }}</td>
+                    {% endif %}
+                    <td>{% if result.2.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.2.totals.1.total_prokopacks }}{% endif %}</td>
+                    <td>{{ result.2.totals.2.total_light_traps }}</td>
+                    <td>{{ result.2.totals.1.total_prokopacks|add:result.2.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{{ result.3.totals.0.total_houses_reached }}</td>
+                    {% endif %}
+                    <td>{% if result.3.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.3.totals.1.total_prokopacks }}{% endif %}</td>
+                    <td>{{ result.3.totals.2.total_light_traps }}</td>
+                    <td>{{ result.3.totals.1.total_prokopacks|add:result.3.totals.2.total_light_traps }}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{% if 4 in result %}{{ result.4.totals.0.total_houses_reached }}{% else %}n/a{% endif %}</td>
+                    {% endif %}
+                    <td>{% if 4 in result %}{% if result.4.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.4.totals.1.total_prokopacks }}{% endif %}{% else %}n/a{% endif %}</td>
+                    <td>{% if 4 in result %}{{ result.4.totals.2.total_light_traps }}{% else %}n/a{% endif %}</td>
+                    <td>{% if 4 in result %}{{ result.4.totals.1.total_prokopacks|add:result.4.totals.2.total_light_traps }}{% else %}n/a{% endif %}</td>
+                    {% if level.lower != 'household' %}
+                    <td>{{ result.5.totals.0.total_houses_reached }}</td>
+                    {% endif %}
+                    <td>{% if result.5.totals.1.total_prokopacks == 0 %}n/a{% else %}{{ result.5.totals.1.total_prokopacks }}{% endif %}</td>
+                    <td>{{ result.5.totals.2.total_light_traps }}</td>
+                    <td>{{ result.5.totals.1.total_prokopacks|add:result.5.totals.2.total_light_traps }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tfoot>
+
+        </table>
+
+        <p>* Prokopack collections were done in only 2 houses in each site, which is 10 houses per district, so only 50 houses in the entire dataset had prokopack collections done</p>
+    </div>
+</section>
+
+{% endblock %}
+

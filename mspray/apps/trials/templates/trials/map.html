@@ -133,7 +133,8 @@
         var targetAreaData = {% if ta_geojson %} {{ ta_geojson|safe }} {% else %} undefined {% endif %};
         var hhData = {% if hh_geojson %} {{ hh_geojson|safe }} {% else %} undefined {% endif %};
         var notSprayableValue = {% if not_sprayable_value %} '{{ not_sprayable_value }}' {% else %} null {% endif %};
-        var app = new App(undefined, targetAreaData, hhData, notSprayableValue);
+        var samplesData = {% if samples_geojson %} {{ samples_geojson|safe }} {% else %} undefined {% endif %};
+        var app = new App(undefined, targetAreaData, hhData, notSprayableValue, samplesData);
         app.fitBounds(bounds);
 
         app.housesCount = {% if target_data.level != 'ta' %} {{target_data.num_of_spray_areas }} {% else %}{{ target_data.structures }} {% endif %};

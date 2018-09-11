@@ -46,6 +46,7 @@ performance_urls = [
 ]
 
 urlpatterns = [
+    url('^trials/', include('mspray.apps.trials.urls', namespace='trials')),
     url(r'^api/alerts/', include(alerts_urls, namespace='alerts')),
     url(r'^api/', include(router.urls)),
     url(r'^$', home.DistrictView.as_view(), name='index'),
