@@ -7,7 +7,7 @@ import os
 from django.contrib.gis.gdal import geometries
 from django.contrib.gis.gdal import DataSource
 from django.contrib.gis.gdal import SpatialReference
-from django.contrib.gis.gdal.error import OGRIndexError
+from django.contrib.gis.gdal.error import OGRIndexError, GDALException
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
@@ -146,7 +146,14 @@ class Command(BaseCommand):
                                               feature.get(name_field))
                             continue
 
-                    if isinstance(feature.geom, geometries.Polygon):
+                    try:
+                        is_polygon = isinstance(feature.geom,
+                                                geometries.Polygon)
+                    except GDALException as error:
+                        self.stderr.write("Error: %s" % error)
+                        continue
+
+                    if is_polygon:
                         geom = geometries.MultiPolygon('MULTIPOLYGON', srs=srs)
                         geom.add(feature.geom.transform(srs, True))
                     else:
