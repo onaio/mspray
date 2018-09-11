@@ -84,7 +84,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
 
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
-
+        num_of_districts = round(districts.count())
+        num_of_succes_rates = round(len([i for i in serializer.data]))
         totals = {
             'other': sum([i['other'] for i in serializer.data]),
             'refused': sum([i['refused'] for i in serializer.data]),
@@ -107,7 +108,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 i['no_of_days_worked'] for i in serializer.data]),
             'avg_structures_per_so': (
                 sum([i['avg_structures_per_so'] for i in serializer.data]) /
-                round(districts.count())),
+                num_of_districts) if num_of_districts else 0,
             'avg_start_time': average_time(
                 [i['avg_start_time'] for i in serializer.data
                  if i['avg_start_time'] != '']),
@@ -116,7 +117,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
                 if i['avg_start_time'] != '']),
             'success_rate': (
                 sum([i['success_rate'] for i in serializer.data]) /
-                round(len([i for i in serializer.data]))),
+                num_of_succes_rates) if num_of_succes_rates else 0,
         }
         context.update({
             'data': serializer.data, 'totals': totals
