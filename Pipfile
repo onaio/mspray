@@ -1,0 +1,37 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+"psycopg2" = "*"
+django-cors-headers = "*"
+django-nose = "*"
+djangorestframework = "*"
+djangorestframework-gis = "*"
+django-storages = "*"
+django-mptt = "*"
+python-dateutil = "*"
+requests = "*"
+lxml = "*"
+celery = "*"
+pydruid = "*"
+rapidpro-python = "*"
+django-filter = "*"
+"python3-memcached" = "*"
+lock = "*"
+
+[dev-packages]
+black = "*"
+"flake8" = "*"
+pylint = "*"
+pylint-django = "*"
+"pep8" = "*"
+pylint-celery = "*"
+
+[pipenv]
+allow_prereleases = true
+
+[requires]
+python_version = "3.6"

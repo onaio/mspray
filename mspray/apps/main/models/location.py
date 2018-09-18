@@ -19,7 +19,6 @@ class Location(MPTTModel, models.Model):
     # total number of spray areas, will be zero for spray area location
     num_of_spray_areas = models.PositiveIntegerField(default=0)
     geom = models.MultiPolygonField(srid=4326, null=True)
-    objects = models.GeoManager()
     data_quality_check = models.BooleanField(default=False)
     average_spray_quality_score = models.FloatField(default=0.0)
     # visited - 20% of the structures have been sprayed in the spray area

@@ -10,7 +10,7 @@ class WeeklyReport(models.Model):
     Weekly report model
     """
     week_number = models.PositiveIntegerField()
-    location = models.ForeignKey('Location')
+    location = models.ForeignKey('Location', on_delete=models.CASCADE)
     structures = models.IntegerField(default=0)
     # visited - 20% of the structures have been sprayed in the spray area
     visited = models.PositiveIntegerField(default=0)

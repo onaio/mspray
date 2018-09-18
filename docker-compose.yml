@@ -11,7 +11,9 @@ services:
     image: mspray:master
     volumes:
       - .:/srv/mspray
-      - ../../data/mspray:/srv/data
+      - .data:/srv/data
+      - .bash_history:/home/mspray/.bash_history
+      - .inputrc:/home/mspray/.inputrc
     ports:
       - "8000:8000"
     depends_on:

@@ -2,7 +2,6 @@
 """
 SprayDay viewset module - viewset for IRS HH submissions.
 """
-import django_filters
 from django.conf import settings
 from django.contrib.gis.db.backends.postgis.adapter import PostGISAdapter
 from django.core.exceptions import ValidationError
@@ -13,6 +12,9 @@ from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic.base import TemplateView
+
+from django_filters import filterset
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.response import Response
 
@@ -65,7 +67,9 @@ def get_not_targeted_within_geom(geom):
         '"main_sprayday"."location_id" IS NULL',
         '"main_sprayday"."location_id" IS NULL AND '
         'ST_Within("main_sprayday"."geom", {})'.format(
-            PostGISAdapter(geom).getquoted()))
+            PostGISAdapter(geom).getquoted()
+        ),
+    )
     cursor.execute(sql)
     return dictfetchall(cursor)
 
@@ -74,29 +78,26 @@ def get_num_sprayed_for_districts():
     """
     Returns a dict with the number of unique sprayed structures per district.
     """
-    return dict(list(
-        SprayPoint.objects.filter(
-            sprayday__location__isnull=False,
-            sprayday__was_sprayed=True
-        ).values(
-            'sprayday__location__parent__parent__name'
-        ).annotate(
-            sprayed=Count('id')
-        ).values_list(
-            'sprayday__location__parent__parent__name',
-            'sprayed'
+    return dict(
+        list(
+            SprayPoint.objects.filter(
+                sprayday__location__isnull=False, sprayday__was_sprayed=True
+            )
+            .values("sprayday__location__parent__parent__name")
+            .annotate(sprayed=Count("id"))
+            .values_list("sprayday__location__parent__parent__name", "sprayed")
         )
-    ))
+    )
 
 
-class SprayDateFilter(django_filters.FilterSet):
+class SprayDateFilter(filterset.FilterSet):
     """
     Spray date filter.
     """
 
     class Meta:
         model = SprayDay
-        fields = {'spray_date': ['exact', 'lte']}
+        fields = {"spray_date": ["exact", "lte"]}
 
 
 # pylint: disable=too-many-ancestors
@@ -110,25 +111,26 @@ class SprayDayViewSet(viewsets.ModelViewSet):
     - `ordering` - you can order by day field e.g `ordering=day` or \
     `ordering=-day`
     """
+
     queryset = SprayDay.objects.filter()
     serializer_class = SprayDaySerializer
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter)
-    filter_fields = ('spray_date', )
-    ordering_fields = ('spray_date', )
-    ordering = ('spray_date', )
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
+    filter_fields = ("spray_date",)
+    ordering_fields = ("spray_date",)
+    ordering = ("spray_date",)
     filter_class = SprayDateFilter
 
     def get_serializer_class(self):
         if settings.OSM_SUBMISSIONS:
             return SprayDayShapeSerializer
 
-        if settings.SITE_NAME == 'namibia':
+        if settings.SITE_NAME == "namibia":
             return SprayDayNamibiaSerializer
 
         return super(SprayDayViewSet, self).get_serializer_class()
 
     def filter_queryset(self, queryset):
-        targetid = self.request.query_params.get('target_area')
+        targetid = self.request.query_params.get("target_area")
 
         if targetid:
             target = get_object_or_404(Location, pk=targetid)
@@ -140,9 +142,10 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                 else:
                     queryset = queryset.filter(location=target)
 
-        if getattr(settings, 'MSPRAY_UNIQUE_FIELD', None):
+        if getattr(settings, "MSPRAY_UNIQUE_FIELD", None):
             queryset = queryset.filter(
-                pk__in=SprayPoint.objects.values('sprayday'))
+                pk__in=SprayPoint.objects.values("sprayday")
+            )
 
         return super(SprayDayViewSet, self).filter_queryset(queryset)
 
@@ -152,9 +155,10 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if not has_id or not spray_date:
             data = {
-                "error":
-                _("Not a valid submission: _id - %s, date - %s" % (has_id,
-                                                                   spray_date))
+                "error": _(
+                    "Not a valid submission: _id - %s, date - %s"
+                    % (has_id, spray_date)
+                )
             }
             status_code = status.HTTP_400_BAD_REQUEST
         else:
@@ -172,10 +176,11 @@ class SprayDayViewSet(viewsets.ModelViewSet):
                 status_code = status.HTTP_400_BAD_REQUEST
             else:
                 data = {
-                    "success":
-                    _("Successfully imported submission with"
-                      " submission id %(submission_id)s." %
-                      {'submission_id': has_id})
+                    "success": _(
+                        "Successfully imported submission with"
+                        " submission id %(submission_id)s."
+                        % {"submission_id": has_id}
+                    )
                 }
                 status_code = status.HTTP_201_CREATED
                 delete_cached_target_area_keys(sprayday)
@@ -183,11 +188,12 @@ class SprayDayViewSet(viewsets.ModelViewSet):
         return Response(data, status=status_code)
 
     def list(self, request, *args, **kwargs):
-        if request.query_params.get('dates_only') == 'true':
+        if request.query_params.get("dates_only") == "true":
             # pylint: disable=attribute-defined-outside-init
             self.object_list = self.filter_queryset(self.get_queryset())
-            data = self.object_list\
-                .values_list('spray_date', flat=True).distinct()
+            data = self.object_list.values_list(
+                "spray_date", flat=True
+            ).distinct()
 
             return Response(data)
 
@@ -198,14 +204,16 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
     """
     Found structures not in a target area.
     """
-    template_name = 'home/no_location_spraydays.html'
+
+    template_name = "home/no_location_spraydays.html"
 
     def get_context_data(self, **kwargs):
-        context = super(NoLocationSprayDayView,
-                        self).get_context_data(**kwargs)
-        context.update(DEFINITIONS['ta'])
+        context = super(NoLocationSprayDayView, self).get_context_data(
+            **kwargs
+        )
+        context.update(DEFINITIONS["ta"])
 
-        districts = Location.objects.filter(level='district').order_by('name')
+        districts = Location.objects.filter(level="district").order_by("name")
 
         cursor = connection.cursor()
 
@@ -220,19 +228,31 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
         cursor.execute(SPRAY_AREA_INDICATOR_SQL)
 
         total_results = dictfetchall(cursor)
-        context['district_data'] = district_data
-        context['total'] = total_results[0]
-        context['district_sprayed'] = get_num_sprayed_for_districts()
+        context["district_data"] = district_data
+        context["total"] = total_results[0]
+        context["district_sprayed"] = get_num_sprayed_for_districts()
 
-        context['no_location'] = {
-            'found': total_results[0]['found'] - sum(
-                [v['found'] for k, v in district_data.items() if v['found']]),
-            'sprayed': total_results[0]['sprayed'] - sum(
-                [v['sprayed'] for k, v in district_data.items()
-                 if v['sprayed']]),
-            'new_structures': total_results[0]['new_structures'] - sum(
-                [v['new_structures'] for k, v in district_data.items()
-                 if v['new_structures']])
+        context["no_location"] = {
+            "found": total_results[0]["found"]
+            - sum(
+                [v["found"] for k, v in district_data.items() if v["found"]]
+            ),
+            "sprayed": total_results[0]["sprayed"]
+            - sum(
+                [
+                    v["sprayed"]
+                    for k, v in district_data.items()
+                    if v["sprayed"]
+                ]
+            ),
+            "new_structures": total_results[0]["new_structures"]
+            - sum(
+                [
+                    v["new_structures"]
+                    for k, v in district_data.items()
+                    if v["new_structures"]
+                ]
+            ),
         }
 
         return context

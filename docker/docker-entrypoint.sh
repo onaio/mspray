@@ -18,9 +18,7 @@ then
     mv /srv/data/initial.data.sql /srv/data/initial.data.sql.`date +%Y-%m-%d_%s`
 fi
 
-. /srv/.virtualenv/bin/activate
-
-cd /srv/mspray
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
-python manage.py runserver 0.0.0.0:8000
+pipenv install
+pipenv run python manage.py migrate --noinput
+pipenv run python manage.py collectstatic --noinput
+pipenv run python manage.py runserver 0.0.0.0:8000
