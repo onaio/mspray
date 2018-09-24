@@ -10,10 +10,11 @@ class Location(MPTTModel, models.Model):
     """
     Location model
     """
+
     name = models.CharField(max_length=255, db_index=1)
     code = models.PositiveIntegerField()
     level = models.CharField(db_index=1, max_length=50)
-    parent = TreeForeignKey('self', null=True, on_delete=models.CASCADE)
+    parent = TreeForeignKey("self", null=True, on_delete=models.CASCADE)
     structures = models.PositiveIntegerField(default=0)
     pre_season_target = models.PositiveIntegerField(default=0)
     # total number of spray areas, will be zero for spray area location
@@ -28,11 +29,11 @@ class Location(MPTTModel, models.Model):
     target = models.BooleanField(default=True)
 
     class Meta:
-        app_label = 'main'
-        unique_together = ('code', 'level', 'parent')
+        app_label = "main"
+        unique_together = ("code", "level", "parent")
 
     class MPTTMeta:
-        level_attr = 'mptt_level'
+        level_attr = "mptt_level"
 
     def __str__(self):
         return self.name
@@ -57,3 +58,13 @@ class Location(MPTTModel, models.Model):
         Number of structures in location.
         """
         return self.structures
+
+    @classmethod
+    def get_district_by_code_or_name(cls, name_or_code):
+        """
+        Returns a District Location object for given name or code.
+        """
+        try:
+            return cls.objects.get(code=name_or_code, level="district")
+        except ValueError:
+            return cls.objects.get(name__iexact=name_or_code, level="district")

@@ -16,39 +16,40 @@ class Command(BaseCommand):
     """
     Load TeamLeaderAssistant from a CSV File.
     """
-    help = _('Load team leaders')
+
+    help = _("Load team leaders")
 
     def add_arguments(self, parser):
-        parser.add_argument('csv_file', metavar="FILE")
+        parser.add_argument("csv_file", metavar="FILE")
 
     def handle(self, *args, **options):
-        if 'csv_file' not in options:
-            raise CommandError(_('Missing team leaders csv file path'))
+        if "csv_file" not in options:
+            raise CommandError(_("Missing team leaders csv file path"))
         else:
             try:
-                path = os.path.abspath(options['csv_file'])
+                path = os.path.abspath(options["csv_file"])
             except FileNotFoundError as error:
-                raise CommandError(_('Error: %(msg)s' % {"msg": error}))
+                raise CommandError(_("Error: %(msg)s" % {"msg": error}))
             else:
-                with codecs.open(path, encoding='utf-8') as csv_file:
+                with codecs.open(path, encoding="utf-8") as csv_file:
                     csv_reader = csv.DictReader(csv_file)
                     for row in csv_reader:
-                        team_leader_assistant, created = \
-                            TeamLeaderAssistant.objects.get_or_create(
-                                code=row['code'].strip(),
-                                name=row['name']
-                            )
+                        team_leader_assistant, created = TeamLeaderAssistant.objects.get_or_create(  # noqa pylint: disable=line-too-long
+                            code=row["code"].strip(), name=row["name"]
+                        )
                         if created:
                             print(row)
-                        district = row['district'].strip()
+                        district = row["district"].strip()
                         if district:
-                            location = Location.objects.get(
-                                code=district, level='district')
+                            location = Location.get_district_by_code_or_name(
+                                district
+                            )
                             team_leader_assistant.location = location
                             team_leader_assistant.save()
-                        team_code = row['team_leader'].strip()
+                        team_code = row["team_leader"].strip()
                         if team_code:
                             team_leader = TeamLeader.objects.get(
-                                code=team_code)
+                                code=team_code
+                            )
                             team_leader_assistant.team_leader = team_leader
                             team_leader_assistant.save()
