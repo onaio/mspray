@@ -146,10 +146,11 @@ def run_tasks_after_spray_data(sprayday):
     """
     Additional tasks to be run after receive new spray data submission.
     """
-    # no gps alert
-    no_gps.delay(sprayday.id)
-    # user distance alert
-    user_distance.delay(sprayday.id)
+    if getattr(settings, "ENABLE_ALERTS", False):
+        # no gps alert
+        no_gps.delay(sprayday.id)
+        # user distance alert
+        user_distance.delay(sprayday.id)
 
     # stream to druid
     if getattr(settings, "STREAM_TO_DRUID", False):
