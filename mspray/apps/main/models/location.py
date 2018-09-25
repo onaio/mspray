@@ -12,7 +12,7 @@ class Location(MPTTModel, models.Model):
     """
 
     name = models.CharField(max_length=255, db_index=1)
-    code = models.PositiveIntegerField()
+    code = models.CharField(max_length=10, db_index=1)
     level = models.CharField(db_index=1, max_length=50)
     parent = TreeForeignKey("self", null=True, on_delete=models.CASCADE)
     structures = models.PositiveIntegerField(default=0)
@@ -66,5 +66,5 @@ class Location(MPTTModel, models.Model):
         """
         try:
             return cls.objects.get(code=name_or_code, level="district")
-        except ValueError:
+        except cls.DoesNotExist:
             return cls.objects.get(name__iexact=name_or_code, level="district")
