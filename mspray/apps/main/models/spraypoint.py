@@ -1,14 +1,22 @@
+# -*- coding: utf-8 -*-
+"""
+SprayPoint model.
+"""
 from django.contrib.gis.db import models
 
 
 class SprayPoint(models.Model):
+    """
+    SprayPoint model.
+    """
+
     data_id = models.CharField(max_length=50)
-    sprayday = models.ForeignKey('SprayDay')
-    location = models.ForeignKey('Location')
+    sprayday = models.ForeignKey("SprayDay", on_delete=models.CASCADE)
+    location = models.ForeignKey("Location", on_delete=models.CASCADE)
 
     class Meta:
-        app_label = 'main'
-        unique_together = (('data_id', 'location'))
+        app_label = "main"
+        unique_together = ("data_id", "location")
 
     def __str__(self):
         return self.data_id
@@ -47,6 +55,9 @@ WHERE "main_sprayday"."id" IN
 
 
 class SprayPointView(models.Model):
+    """
+    SprayPointView materialized view model.
+    """
     sprayable_structure = models.CharField(max_length=10)
     was_sprayed = models.CharField(max_length=10)
     irs_card_num = models.CharField(max_length=10)
@@ -64,11 +75,15 @@ class SprayPointView(models.Model):
     start_time = models.DateTimeField()
     sprayformid = models.CharField(max_length=50)
     end_time = models.DateTimeField()
-    district = models.ForeignKey('Location', related_name='districts')
-    location = models.ForeignKey('Location', related_name='target_areas')
+    district = models.ForeignKey(
+        "Location", related_name="districts", on_delete=models.CASCADE
+    )
+    location = models.ForeignKey(
+        "Location", related_name="target_areas", on_delete=models.CASCADE
+    )
 
     class Meta:
-        db_table = 'main_spray_point_view'
+        db_table = "main_spray_point_view"
         managed = False
 
     @classmethod
@@ -80,25 +95,37 @@ class SprayPointView(models.Model):
         pass
 
 
-def refresh_materialized_view(sender, **kwargs):
+def refresh_materialized_view(sender, **kwargs):  # pylint: disable=W0613
+    """
+    Refresh the materialized view SprayPointView.
+    """
     SprayPointView.refresh_view()
+
 
 # post_save.connect(refresh_materialized_view, sender=SprayPoint)
 
 
 class Hhcsv(models.Model):
+    """
+    Household CSV model.
+    """
+
     osmid = models.IntegerField()
-    y = models.FloatField()
-    x3 = models.FloatField()
+    y = models.FloatField()  # pylint: disable=invalid-name
+    x3 = models.FloatField()  # pylint: disable=invalid-name
     shape_area = models.FloatField()
     shape_length = models.FloatField()
 
     class Meta:
-        db_table = 'households'
+        db_table = "households"
         managed = False
 
 
 class OsmData(models.Model):
+    """
+    OsmData model.
+    """
+
     osmid = models.IntegerField()
     target_area = models.CharField(max_length=100)
     district = models.CharField(max_length=20)
@@ -107,11 +134,15 @@ class OsmData(models.Model):
     shape_length = models.FloatField()
 
     class Meta:
-        db_table = 'osm_data'
+        db_table = "osm_data"
         managed = False
 
 
 class MatchedData(models.Model):
+    """
+    MatchedData model.
+    """
+
     osmpk = models.IntegerField(unique=True)
     osmid = models.IntegerField()
     target_area = models.CharField(max_length=100)
@@ -119,5 +150,5 @@ class MatchedData(models.Model):
     building = models.CharField(max_length=3)
     shape_area = models.FloatField()
     shape_length = models.FloatField()
-    y = models.FloatField()
-    x3 = models.FloatField()
+    y = models.FloatField()  # pylint: disable=invalid-name
+    x3 = models.FloatField()  # pylint: disable-invalid-name

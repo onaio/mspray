@@ -13,3 +13,5 @@ ui/bower_components
 ui/*.xlsx
 node_modules
 celerybeat-schedule
+.inputrc
+.bash_history

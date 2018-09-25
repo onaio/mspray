@@ -4,10 +4,9 @@ load_location_shapefile command - loads districts, health facility catchment
 area and spray area shapefiles.
 """
 import os
-from django.contrib.gis.gdal import geometries
-from django.contrib.gis.gdal import DataSource
-from django.contrib.gis.gdal import SpatialReference
-from django.contrib.gis.gdal.error import OGRIndexError, GDALException
+
+from django.contrib.gis.gdal import DataSource, SpatialReference, geometries
+from django.contrib.gis.gdal.error import GDALException
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
@@ -50,90 +49,89 @@ class Command(BaseCommand):
     """
     Uploads location information from a shapefile.
     """
-    help = _('Load locations')
+
+    help = _("Load locations")
 
     def add_arguments(self, parser):
-        parser.add_argument('shape_file', metavar="FILE")
+        parser.add_argument("shape_file", metavar="FILE")
         parser.add_argument(
-            'name_field',
-            help="name field to use in the shape file"
+            "name_field", help="name field to use in the shape file"
+        )
+        parser.add_argument("level")
+        parser.add_argument(
+            "--structures",
+            dest="structures_field",
+            default="structures",
+            help="# of structure field to use in the shape file",
         )
         parser.add_argument(
-            'level',
+            "--parent",
+            dest="parent_field",
+            default="parent",
+            help="parent name field to use in the shape file",
         )
         parser.add_argument(
-            '--structures',
-            dest='structures_field',
-            default='structures',
-            help="# of structure field to use in the shape file"
+            "--parent-level",
+            dest="parent_level",
+            default="parent_level",
+            help="parent name field to use in the shape file",
         )
         parser.add_argument(
-            '--parent',
-            dest='parent_field',
-            default='parent',
-            help="parent name field to use in the shape file"
+            "--parent-skip",
+            dest="skip_parent",
+            default="no",
+            help="skip parent if not found",
         )
         parser.add_argument(
-            '--parent-level',
-            dest='parent_level',
-            default='parent_level',
-            help="parent name field to use in the shape file"
+            "--parent-code",
+            dest="parent_code",
+            help="parent name field to use in the shape file",
         )
         parser.add_argument(
-            '--parent-skip',
-            dest='skip_parent',
-            default='no',
-            help="skip parent if not found"
+            "--code",
+            dest="code_field",
+            default="fid",
+            help="code field to use in the shape file",
         )
         parser.add_argument(
-            '--parent-code',
-            dest='parent_code',
-            help="parent name field to use in the shape file"
+            "--skip",
+            dest="skip_field",
+            help="skip field to use in the shape file",
         )
         parser.add_argument(
-            '--code',
-            dest='code_field',
-            default='fid',
-            help="code field to use in the shape file"
-        )
-        parser.add_argument(
-            '--skip',
-            dest='skip_field',
-            help="skip field to use in the shape file"
-        )
-        parser.add_argument(
-            '--skipif',
-            dest='skip_value',
-            help="skip value to use to skip records in the shape file"
+            "--skipif",
+            dest="skip_value",
+            help="skip value to use to skip records in the shape file",
         )
 
     def handle(self, *args, **options):  # pylint: disable=R0912,R0914,R0915
-        if 'shape_file' not in options:
-            raise CommandError(_('Missing locations shape file path'))
+        if "shape_file" not in options:
+            raise CommandError(_("Missing locations shape file path"))
         else:
             try:
-                path = os.path.abspath(options['shape_file'])
+                path = os.path.abspath(options["shape_file"])
             except Exception as error:
-                raise CommandError(_('Error: %(msg)s' % {"msg": error}))
+                raise CommandError(_("Error: %(msg)s" % {"msg": error}))
             else:
-                code_field = options['code_field']
-                level = options['level']
-                name_field = options['name_field']
-                parent_field = options['parent_field']
-                parent_level = options['parent_level']
-                skip_parent = options.get('skip_parent')
-                parent_code_field = options.get('parent_code')
-                structures_field = options['structures_field']
+                code_field = options["code_field"]
+                level = options["level"]
+                name_field = options["name_field"]
+                parent_field = options["parent_field"]
+                parent_level = options["parent_level"]
+                skip_parent = options.get("skip_parent")
+                parent_code_field = options.get("parent_code")
+                structures_field = options["structures_field"]
 
-                skip_field = options.get('skip_field')
-                skip_value = options.get('skip_value')
+                skip_field = options.get("skip_field")
+                skip_value = options.get("skip_value")
                 if skip_field and not skip_value:
-                    raise CommandError(_('Error: please provide skip value'))
-                skip_value = int(skip_value) \
-                    if skip_value is not None else None
+                    raise CommandError(_("Error: please provide skip value"))
+                skip_value = (
+                    int(skip_value) if skip_value is not None else None
+                )
 
                 count = exception_raised = failed = skipped = updated = 0
-                srs = SpatialReference('+proj=longlat +datum=WGS84 +no_defs')
+                srs = SpatialReference("+proj=longlat +datum=WGS84 +no_defs")
                 data_source = DataSource(path)
                 layer = data_source[0]
 
@@ -142,39 +140,48 @@ class Command(BaseCommand):
                     if skip_field and skip_value is not None:
                         if feature.get(skip_field) == skip_value:
                             skipped += 1
-                            self.stdout.write('Skipping %s - skip.' %
-                                              feature.get(name_field))
+                            self.stdout.write(
+                                "Skipping %s - skip." % feature.get(name_field)
+                            )
                             continue
 
                     try:
-                        is_polygon = isinstance(feature.geom,
-                                                geometries.Polygon)
+                        is_polygon = isinstance(
+                            feature.geom, geometries.Polygon
+                        )
                     except GDALException as error:
                         self.stderr.write("Error: %s" % error)
                         continue
 
                     if is_polygon:
-                        geom = geometries.MultiPolygon('MULTIPOLYGON', srs=srs)
+                        geom = geometries.MultiPolygon("MULTIPOLYGON", srs=srs)
                         geom.add(feature.geom.transform(srs, True))
                     else:
                         geom = feature.geom.transform(srs, True)
                     name = feature.get(name_field)
-                    if code_field == 'fid':
+                    if code_field == "fid":
                         code = feature.fid + 1
                     else:
                         code = int(feature.get(code_field))
                         if code == 0:
                             skipped += 1
-                            self.stdout.write('Skipping %s - code.' %
-                                              feature.get(name_field))
+                            self.stdout.write(
+                                "Skipping %s - code." % feature.get(name_field)
+                            )
                             continue
-                    if bytearray(structures_field.encode('utf8')) in \
-                            feature.fields:
+                    if (
+                        bytearray(structures_field.encode("utf8"))
+                        in feature.fields
+                    ):
                         structures = int(feature.get(structures_field))
                     else:
                         structures = 0
-                    if bytearray(parent_field.encode('utf8')) in \
-                            feature.fields:
+                    if (
+                        bytearray(parent_field.encode("utf8"))
+                        in feature.fields
+                    ):
+                        parent_name = feature.get(parent_field)
+                    elif parent_field in feature.fields:
                         parent_name = feature.get(parent_field)
                     else:
                         parent_name = name
@@ -187,14 +194,15 @@ class Command(BaseCommand):
                     else:
                         parent = get_parent(geom, parent_level, parent_name)
 
-                    if skip_parent != 'yes' and not parent:
-                        self.stdout.write('Skipping %s - parent.' %
-                                          feature.get(name_field))
+                    if skip_parent != "yes" and not parent:
+                        self.stdout.write(
+                            "Skipping %s - parent." % feature.get(name_field)
+                        )
                         skipped += 1
                         continue
                     try:
-                        target = feature.get('TARGET') in [1, 2]
-                    except OGRIndexError:
+                        target = feature.get("TARGET") in [1, 2]
+                    except IndexError:
                         target = True
                     try:
                         location = Location.objects.get(
@@ -203,9 +211,13 @@ class Command(BaseCommand):
                     except Location.DoesNotExist:
                         try:
                             Location.objects.create(
-                                name=name, code=code, structures=structures,
-                                level=level, parent=parent, geom=geom.wkt,
-                                target=target
+                                name=name,
+                                code=code,
+                                structures=structures,
+                                level=level,
+                                parent=parent,
+                                geom=geom.wkt,
+                                target=target,
                             )
                         except IntegrityError as e:
                             failed += 1
@@ -214,7 +226,7 @@ class Command(BaseCommand):
                         else:
                             count += 1
                     else:
-                        if level == 'RHC' and code != location.code:
+                        if level == "RHC" and code != location.code:
                             location.code = code
                         location.target = target
                         location.geom = geom.wkt
@@ -227,7 +239,6 @@ class Command(BaseCommand):
 
                 self.stdout.write(
                     "Created %s locations, %s updated, failed %s, skipped %s, "
-                    "error %s" % (
-                        count, updated, failed, skipped, exception_raised
-                    )
+                    "error %s"
+                    % (count, updated, failed, skipped, exception_raised)
                 )
