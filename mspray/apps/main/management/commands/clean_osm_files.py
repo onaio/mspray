@@ -4,7 +4,7 @@ import gc
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
 
-from mspray.apps.main.osm import clean_osm_file_with_db
+from mspray.libs.osm import clean_osm_file_with_db
 
 
 class Command(BaseCommand):

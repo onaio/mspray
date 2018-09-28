@@ -33,6 +33,7 @@ pylint-celery = "*"
 ipdb = "*"
 ipython = "==6.5.0"
 coverage = "*"
+httmock = "*"
 
 [pipenv]
 allow_prereleases = true

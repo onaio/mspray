@@ -2,34 +2,35 @@ from __future__ import absolute_import
 
 import gc
 import os
-
 from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.gis.geos import Point
-from django.db.models import Sum, Q, Value
+from django.contrib.gis.geos.polygon import Polygon
+from django.db.models import Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from django.contrib.gis.geos.polygon import Polygon
 
-from mspray.apps.main.models import DirectlyObservedSprayingForm
-from mspray.apps.main.models import Household
-from mspray.apps.main.models import Location
-from mspray.apps.main.models import SprayDay
-from mspray.apps.main.models import SprayOperatorDailySummary
-from mspray.apps.main.models import WeeklyReport
-from mspray.apps.main.models.spray_day import get_osmid
-from mspray.apps.main.ona import fetch_form_data
-from mspray.apps.main.osm import parse_osm
-from mspray.apps.main.ona import fetch_osm_xml
-from mspray.apps.main.osm import parse_osm_ways
-from mspray.apps.main.osm import parse_osm_nodes
-from mspray.apps.main.models.spray_day import STRUCTURE_GPS_FIELD
-from mspray.apps.main.models.spray_day import NON_STRUCTURE_GPS_FIELD
+from mspray.apps.alerts.tasks import no_gps, user_distance
+from mspray.apps.main.models import (
+    DirectlyObservedSprayingForm,
+    Household,
+    Location,
+    SprayDay,
+    SprayOperatorDailySummary,
+    WeeklyReport,
+)
+from mspray.apps.main.models.spray_day import (
+    NON_STRUCTURE_GPS_FIELD,
+    STRUCTURE_GPS_FIELD,
+    get_osmid,
+)
+from mspray.apps.main.ona import fetch_form_data, fetch_osm_xml
+from mspray.libs.osm import parse_osm, parse_osm_nodes, parse_osm_ways
+from mspray.apps.warehouse.tasks import stream_to_druid
 from mspray.celery import app
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.alerts.tasks import user_distance, no_gps
-from mspray.apps.warehouse.tasks import stream_to_druid
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)  # default to 4m
 HAS_UNIQUE_FIELD = getattr(settings, "MSPRAY_UNIQUE_FIELD", None)

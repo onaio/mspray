@@ -42,11 +42,11 @@ def parse_osm_ways(osm_xml, include_osm_id=False):
             points.append(_get_node(nd.get('ref'), root))
         try:
             geom = Polygon(points)
-        except:
+        except Exception:
             try:
                 geom = LineString(points)
             except Exception as e:
-                print(way.values())
+                print(way.values(), e)
                 pass
 
         if geom:

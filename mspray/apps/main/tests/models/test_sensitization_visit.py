@@ -4,8 +4,10 @@ Test sensitization_visit module.
 """
 from django.test import TestCase
 
-from mspray.apps.main.models.sensitization_visit import (SensitizationVisit,
-                                                         create_sensitization_visit)
+from mspray.apps.main.models.sensitization_visit import (
+    SensitizationVisit,
+    create_sensitization_visit,
+)
 from mspray.apps.main.tests.utils import SENSITIZATION_VISIT_DATA, data_setup
 
 

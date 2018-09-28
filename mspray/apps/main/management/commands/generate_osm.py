@@ -7,7 +7,7 @@ from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import Location, SprayDay
 from mspray.apps.main.ona import fetch_osm_xml_data
-from mspray.apps.main.osm import _get_xml_obj, etree
+from mspray.libs.osm import _get_xml_obj, etree
 
 
 class Command(BaseCommand):

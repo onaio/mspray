@@ -56,10 +56,15 @@ def get_s3_url(path):
     """
     Constructs and returns the s3 url for the given path
     """
-    if settings.DRUID_USE_INDEX_HADOOP:
+    if settings.DRUID_USE_INDEX_HADOOP and hasattr(settings,
+                                                   'AWS_S3_HADOOP_BASE_URL'):
         return settings.AWS_S3_HADOOP_BASE_URL + path
-    else:
+    elif hasattr(settings, 'AWS_S3_BASE_URL'):
         return settings.AWS_S3_BASE_URL + path
+
+    raise Exception("S3 is not configured properly, please check that "
+                    "AWS_S3_HADOOP_BASE_URL or AWS_S3_BASE_URL have been "
+                    "configured in settings module.")
 
 
 def get_data(minutes=settings.DRUID_BATCH_PROCESS_TIME_INTERVAL):
