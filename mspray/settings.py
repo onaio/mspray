@@ -131,7 +131,13 @@ STATIC_URL = "/static/"
 # nose
 TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
 
-NOSE_ARGS = ["--with-coverage", "--cover-package=mspray"]
+NOSE_ARGS = [
+    "--with-coverage",
+    "--cover-package=mspray",
+    "--with-fixture-bundling",
+    "--nologcapture",
+    "--nocapture",
+]
 
 CORS_ORIGIN_ALLOW_ALL = True
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "static"))
@@ -178,8 +184,10 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": ("%(levelname)s %(asctime)s %(module)s"
-                       " %(process)d %(thread)d %(message)s")
+            "format": (
+                "%(levelname)s %(asctime)s %(module)s"
+                " %(process)d %(thread)d %(message)s"
+            )
         },
         "simple": {"format": "%(levelname)s %(message)s"},
     },
