@@ -53,9 +53,10 @@ class Command(BaseCommand):
     help = _("Load locations")
 
     def add_arguments(self, parser):
-        parser.add_argument("shape_file", metavar="FILE")
+        parser.add_argument("shape_file", metavar="FILE",
+                            help="The file path to the shapefile")
         parser.add_argument(
-            "name_field", help="name field to use in the shape file"
+            "name_field", help="name field to use in the shapefile"
         )
         parser.add_argument("level")
         parser.add_argument(
