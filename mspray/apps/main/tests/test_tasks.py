@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
+"""Test mspray.apps.main.tasks module.
+"""
 from unittest.mock import patch
 
-from mspray.apps.main.models import SprayDay
+from mspray.apps.main.models import SensitizationVisit, SprayDay
 from mspray.apps.main.tasks import (
+    fetch_sensitization_visits,
     link_spraypoint_with_osm,
     run_tasks_after_spray_data,
 )
 from mspray.apps.main.tests.test_base import TestBase
+from mspray.apps.main.tests.utils import SENSITIZATION_VISIT_DATA, data_setup
 from mspray.apps.main.utils import add_spray_data
 from mspray.celery import app
 
@@ -46,7 +51,6 @@ SUBMISSION_DATA = {
     "tla_leader": "99101",
     "_tags": [],
     "_media_count": 1,
-    "_id": 3563261,
     "sprayable/unsprayed/population/unsprayed_pregnant_women": "0",
     "today": "2017-10-04",
     "imei": "353750066007314",
@@ -84,11 +88,8 @@ SUBMISSION_DATA = {
     "_id": 3563261,
     "_attachments": [
         {
-            "filename": "akros_health/attachments/"
-            "1410dd5377f692456ab1a1515786f1045189ca8e.osm",
-            "download_url": "/api/v1/files/5551567?filename=akros_health"
-            "/attachments/"
-            "1410dd5377f692456ab1a1515786f1045189ca8e.osm",
+            "filename": "akros_health/attachments/1410dd5377f692456ab1a1515786f1045189ca8e.osm",  # noqa  pylint: disable=line-too-long
+            "download_url": "/api/v1/files/5551567?filename=akros_health/attachments/1410dd5377f692456ab1a1515786f1045189ca8e.osm",  # noqa  pylint: disable=line-too-long
             "id": 5551567,
             "mimetype": "text/xml",
         }
@@ -97,6 +98,8 @@ SUBMISSION_DATA = {
 
 
 class TestTasks(TestBase):
+    """Test tasks module."""
+
     def setUp(self):
         TestBase.setUp(self)
         app.conf.update(CELERY_ALWAYS_EAGER=True)
@@ -108,16 +111,19 @@ class TestTasks(TestBase):
         """
         self._load_fixtures()
         mock.return_value = OSMXML.strip()
-        sp = add_spray_data(SUBMISSION_DATA)
-        link_spraypoint_with_osm(sp.pk)
-        sp = SprayDay.objects.get(pk=sp.pk)
-        self.assertTrue(sp.location is not None)
+        spray_day = add_spray_data(SUBMISSION_DATA)
+        link_spraypoint_with_osm(spray_day.pk)
+        spray_day = SprayDay.objects.get(pk=spray_day.pk)
+        self.assertTrue(spray_day.location is not None)
 
     @patch("mspray.apps.main.tasks.user_distance")
     @patch("mspray.apps.main.tasks.no_gps")
     @patch("mspray.apps.main.tasks.stream_to_druid")
     def test_run_tasks_after_spray_data(
-        self, druid_mock, gps_mock, distance_mock
+        self,  # pylint:disable=bad-continuation
+        druid_mock,  # pylint:disable=bad-continuation
+        gps_mock,  # pylint:disable=bad-continuation
+        distance_mock,  # pylint:disable=bad-continuation
     ):
         """
         Test that when run_tasks_after_spray_data is called, it starts all the
@@ -142,3 +148,16 @@ class TestTasks(TestBase):
         self.assertTrue(distance_mock.delay.called)
         distance_args, _kwargs = distance_mock.delay.call_args_list[0]
         self.assertEqual(distance_args[0], sprayday.id)
+
+    @patch("mspray.apps.main.tasks.fetch_form_data")
+    def test_fetch_sensitization_visits(self, fetch_form_data):
+        """Test fetching sensitization visit submissions."""
+        data_setup()
+        fetch_form_data.side_effect = [
+            [{"_id": 343725}],
+            SENSITIZATION_VISIT_DATA,
+        ]
+        count = SensitizationVisit.objects.count()
+        with self.settings(SENSITIZATION_VISIT_FORM_ID=343725):
+            fetch_sensitization_visits()
+            self.assertEqual(SensitizationVisit.objects.count(), count + 1)
