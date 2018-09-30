@@ -6,9 +6,9 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from mspray.apps.main import ona
+from mspray.libs import ona
 
-FORM_ID = getattr(settings, 'ONA_FORM_PK', None)
+FORM_ID = getattr(settings, "ONA_FORM_PK", None)
 
 
 def get_form_owners(formid):
@@ -17,11 +17,11 @@ def get_form_owners(formid):
     """
     form = ona.fetch_form(formid)
     owners = []
-    role = 'owner'
+    role = "owner"
     if form:
-        users = form.get('users')
+        users = form.get("users")
         if users:
-            owners = [user['user'] for user in users if user['role'] == role]
+            owners = [user["user"] for user in users if user["role"] == role]
     return owners
 
 
@@ -30,27 +30,27 @@ def login(request):
     User login view.
     """
     context = {}
-    if request.method == 'POST':
-        username = request.POST.get('username1')
-        password = request.POST.get('password1')
+    if request.method == "POST":
+        username = request.POST.get("username1")
+        password = request.POST.get("password1")
         if username and password:
             auth = ona.login(username, password)
             if auth:
                 owners = get_form_owners(FORM_ID)
                 if username in owners:
-                    request.session['show_csv'] = True
+                    request.session["show_csv"] = True
 
-                    return HttpResponseRedirect('/')
+                    return HttpResponseRedirect("/")
             context = {
-                'error': "Wrong username or password. Please try again."
+                "error": "Wrong username or password. Please try again."
             }
     else:
         if settings.DEBUG:
-            request.session['show_csv'] = True
-        if request.session.get('show_csv'):
-            return HttpResponseRedirect('/')
+            request.session["show_csv"] = True
+        if request.session.get("show_csv"):
+            return HttpResponseRedirect("/")
 
-    return render(request, 'home/login.html', context)
+    return render(request, "home/login.html", context)
 
 
 def logout(request):
@@ -59,4 +59,4 @@ def logout(request):
     """
     request.session.flush()
 
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect("/")

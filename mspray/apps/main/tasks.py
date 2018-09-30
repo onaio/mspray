@@ -26,7 +26,7 @@ from mspray.apps.main.models.spray_day import (
     STRUCTURE_GPS_FIELD,
     get_osmid,
 )
-from mspray.apps.main.ona import fetch_form_data, fetch_osm_xml
+from mspray.libs.ona import fetch_form_data, fetch_osm_xml
 from mspray.libs.osm import parse_osm, parse_osm_nodes, parse_osm_ways
 from mspray.apps.warehouse.tasks import stream_to_druid
 from mspray.celery import app
