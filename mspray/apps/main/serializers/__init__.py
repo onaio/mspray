@@ -2,22 +2,20 @@
 """
 main.serializers
 """
+from mspray.apps.main.serializers.district_serializer import DistrictSerializer
 from mspray.apps.main.serializers.performance_report import (
-    DistrictPerformanceReportSerializer
-)  # noqa
-from mspray.apps.main.serializers.performance_report import (
-    PerformanceReportSerializer  # noqa
+    PerformanceReportSerializer
 )
 from mspray.apps.main.serializers.performance_report import (
-    SprayOperatorPerformanceReportSerializer
-)  # noqa
-from mspray.apps.main.serializers.performance_report import (
-    TLAPerformanceReportSerializer
-)  # noqa
+    DistrictPerformanceReportSerializer,
+    SprayOperatorPerformanceReportSerializer,
+    TLAPerformanceReportSerializer,
+)
 
 __all__ = [
     "DistrictPerformanceReportSerializer",
     "PerformanceReportSerializer",
     "SprayOperatorPerformanceReportSerializer",
     "TLAPerformanceReportSerializer",
+    "DistrictSerializer",
 ]

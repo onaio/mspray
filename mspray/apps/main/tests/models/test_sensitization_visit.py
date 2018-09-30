@@ -22,3 +22,4 @@ class TestSensitizationVisit(TestCase):
         )
         self.assertIsInstance(sensitization_visit, SensitizationVisit)
         self.assertTrue(sensitization_visit.is_sensitized)
+        self.assertTrue(sensitization_visit.spray_area.is_sensitized)

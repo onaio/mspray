@@ -5,6 +5,7 @@ SensitizationVisit model.
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.db.models.signals import post_save
 
 from mspray.apps.main.models.household import Household
 from mspray.libs.common_tags import (
@@ -47,6 +48,20 @@ class SensitizationVisit(models.Model):
 
     class Meta:
         app_label = "main"
+
+
+def update_location_sensitization(sender, instance=None, **kwargs):
+    """Update is_sensitized value on location objects"""
+    if kwargs.get("created") and instance and sender == SensitizationVisit:
+        instance.spray_area.is_sensitized = instance.is_sensitized
+        instance.spray_area.save()
+
+
+post_save.connect(
+    update_location_sensitization,
+    sender=SensitizationVisit,
+    dispatch_uid="update_location_sensitization_visit",
+)
 
 
 def create_sensitization_visit(data):

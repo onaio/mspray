@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.utils.translation import gettext as _
 
-from mspray.apps.main.ona import fetch_form_data
+from mspray.libs.ona import fetch_form_data
 from mspray.apps.main.utils import add_directly_observed_spraying_data
 from mspray.apps.main.models import DirectlyObservedSprayingForm
 

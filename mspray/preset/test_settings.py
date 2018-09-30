@@ -8,10 +8,11 @@ import os
 from mspray.settings import *  # noqa
 
 NOSE_ARGS = [
-    "--with-coverage",
     "--cover-package=mspray",
     "--cover-erase",
     "--cover-inclusive",
+    "--with-coverage",
+    "--verbosity=2",
     "--with-fixture-bundling",
 ]
 NOSE_PLUGINS = ["mspray.libs.utils.nose_plugins.SilenceSouth"]
