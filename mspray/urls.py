@@ -20,11 +20,13 @@ from mspray.apps.main.views import (
     household_buffer,
     indicators,
     performance,
-    sensitization_visit,
     spray_operator_daily,
     sprayday,
     target_area,
     user,
+)
+from mspray.apps.main.views.sensitization_visit import (
+    SensitizationVisitViewSet
 )
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
@@ -141,8 +143,11 @@ urlpatterns = [  # pylint: disable=C0103
         dos_form.DirectlyObservedSprayingView.as_view(),
         name="dos-spray-operator",
     ),
-    path('sensitization-visit', sensitization_visit.index,
-         name='sensitization-visit')
+    path(
+        "sensitization-visit",
+        SensitizationVisitViewSet.as_view({"post": "create"}),
+        name="sensitization-visit",
+    ),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
