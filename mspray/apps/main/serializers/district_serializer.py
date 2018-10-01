@@ -129,6 +129,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
     bounds = serializers.SerializerMethodField()
     spray_dates = serializers.SerializerMethodField()
     sensitized = serializers.SerializerMethodField()
+    mobilised = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
@@ -153,6 +154,7 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
             "rhc_pk",
             "num_new_structures",
             "sensitized",
+            "mobilised",
         )
         model = Location
 
@@ -209,6 +211,24 @@ class DistrictSerializer(DistrictMixin, serializers.ModelSerializer):
 
         return (
             queryset.filter(is_sensitized=True)
+            .values("spray_area")
+            .distinct()
+            .count()
+        )
+
+    def get_mobilised(self, obj):  # pylint: disable=no-self-use
+        """Return number of spray areas that have been mobilised."""
+        location = obj
+        if isinstance(obj, dict):
+            location = Location.objects.get(pk=obj["pk"])
+        queryset = (
+            location.mb_health_facilities
+            if location.level == "RHC"
+            else location.mb_districts
+        )
+
+        return (
+            queryset.filter(is_mobilised=True)
             .values("spray_area")
             .distinct()
             .count()

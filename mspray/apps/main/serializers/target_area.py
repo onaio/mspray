@@ -1040,6 +1040,8 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     spray_dates = serializers.SerializerMethodField()
     is_sensitized = serializers.NullBooleanField()
     sensitized = serializers.SerializerMethodField()
+    is_mobilised = serializers.NullBooleanField()
+    mobilised = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
@@ -1064,7 +1066,9 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             "rhc_pk",
             "num_new_structures",
             "is_sensitized",
-            "sensitized"
+            "sensitized",
+            "is_mobilised",
+            "mobilised"
         )
         model = Location
 
@@ -1121,6 +1125,20 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
 
         return (
             queryset.filter(is_sensitized=True)
+            .values("spray_area")
+            .distinct()
+            .count()
+        )
+
+    def get_mobilised(self, obj):  # pylint: disable=no-self-use
+        """Return number of spray areas that have been mobilised."""
+        location = obj
+        if isinstance(obj, dict):
+            location = Location.objects.get(pk=obj["pk"])
+        queryset = location.mb_spray_areas
+
+        return (
+            queryset.filter(is_mobilised=True)
             .values("spray_area")
             .distinct()
             .count()
