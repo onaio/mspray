@@ -28,6 +28,7 @@ class Location(MPTTModel, models.Model):
     sprayed = models.PositiveIntegerField(default=0)
     target = models.BooleanField(default=True)
     is_sensitized = models.BooleanField(null=True)
+    is_mobilised = models.BooleanField(null=True)
 
     class Meta:
         app_label = "main"

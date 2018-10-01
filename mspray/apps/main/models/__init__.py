@@ -23,3 +23,4 @@ from .spraypoint import MatchedData  # noqa
 from .performance_report import PerformanceReport  # noqa
 from .weekly_report import WeeklyReport  # noqa
 from .sensitization_visit import SensitizationVisit  # noqa
+from .mobilisation import Mobilisation  # noqa
