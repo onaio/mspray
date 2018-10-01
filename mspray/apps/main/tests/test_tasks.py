@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
+"""Test mspray.apps.main.tasks module.
+"""
 from unittest.mock import patch
 
+from mspray.apps.main.models import SensitizationVisit, SprayDay
+from mspray.apps.main.tasks import (
+    fetch_sensitization_visits,
+    link_spraypoint_with_osm,
+    run_tasks_after_spray_data,
+)
 from mspray.apps.main.tests.test_base import TestBase
-from mspray.apps.main.models import SprayDay
-from mspray.apps.main.tasks import link_spraypoint_with_osm
-from mspray.apps.main.tasks import run_tasks_after_spray_data
+from mspray.apps.main.tests.utils import SENSITIZATION_VISIT_DATA, data_setup
 from mspray.apps.main.utils import add_spray_data
 from mspray.celery import app
-
 
 OSMXML = """
     <?xml version='1.0' encoding='UTF-8' ?>
@@ -42,67 +48,83 @@ OSMXML = """
 """
 
 SUBMISSION_DATA = {
-    'tla_leader': '99101', '_tags': [], '_media_count': 1, '_id': 3563261,
-    'sprayable/unsprayed/population/unsprayed_pregnant_women': '0',
-    'today': '2017-10-04', 'imei': '353750066007314',
-    'sprayable/unsprayed/population/unsprayed_children_u5': '0',
-    'sprayable/sprayop_name': '99209', 'osmstructure:way:id': '-41367',
-    'start': '2017-10-04T22:03:13.238+02', '_status': 'submitted_via_web',
-    'spray_area': 'test5.99', '_edited': False, '_version': '20170927',
-    'meta/instanceID': 'uuid:30d11f1e-39f2-40b2-b3b0-201b6e043bc2',
-    'deviceid': '353750066007314', '_geolocation': [None, None],
-    '_uuid': '30d11f1e-39f2-40b2-b3b0-201b6e043bc2',
-    'formhub/uuid': 'fbe6a176b1494b608c683ca27f3599db',
-    'sprayable/unsprayed/population/unsprayed_nets': '0',
-    '_submission_time': '2017-10-04T20:06:35',
-    'sprayable/unsprayed/unsprayed_totalpop': '4',
-    'sprayformid': '04.10.99209', 'health_facility': '202',
-    'sprayable/unsprayed/unsprayed_females': 2,
-    '_notes': [], 'sprayable/unsprayed/population/unsprayed_roomsfound': 2,
-    '_xform_id_string': 'Zambia_2017IRS_HH', '_xform_id': 244266,
-    'sprayable/sprayop_code': '99209',
-    'sprayable/structure_head_name': 'H3', '_submitted_by': 'msprayzambia2017',
-    'sprayable/unsprayed/reason': 'L',
-    'values_from_omk/spray_status': 'notsprayed', 'supervisor_name': '99402',
-    'sprayable/irs_card_num': '12345678', '_total_media': 0,
+    "tla_leader": "99101",
+    "_tags": [],
+    "_media_count": 1,
+    "sprayable/unsprayed/population/unsprayed_pregnant_women": "0",
+    "today": "2017-10-04",
+    "imei": "353750066007314",
+    "sprayable/unsprayed/population/unsprayed_children_u5": "0",
+    "sprayable/sprayop_name": "99209",
+    "osmstructure:way:id": "-41367",
+    "start": "2017-10-04T22:03:13.238+02",
+    "_status": "submitted_via_web",
+    "spray_area": "test5.99",
+    "_edited": False,
+    "_version": "20170927",
+    "meta/instanceID": "uuid:30d11f1e-39f2-40b2-b3b0-201b6e043bc2",
+    "deviceid": "353750066007314",
+    "_geolocation": [None, None],
+    "_uuid": "30d11f1e-39f2-40b2-b3b0-201b6e043bc2",
+    "formhub/uuid": "fbe6a176b1494b608c683ca27f3599db",
+    "sprayable/unsprayed/population/unsprayed_nets": "0",
+    "_submission_time": "2017-10-04T20:06:35",
+    "sprayable/unsprayed/unsprayed_totalpop": "4",
+    "sprayformid": "04.10.99209",
+    "health_facility": "202",
+    "sprayable/unsprayed/unsprayed_females": 2,
+    "_notes": [],
+    "sprayable/unsprayed/population/unsprayed_roomsfound": 2,
+    "_xform_id_string": "Zambia_2017IRS_HH",
+    "_xform_id": 244266,
+    "sprayable/sprayop_code": "99209",
+    "sprayable/structure_head_name": "H3",
+    "_submitted_by": "msprayzambia2017",
+    "sprayable/unsprayed/reason": "L",
+    "values_from_omk/spray_status": "notsprayed",
+    "supervisor_name": "99402",
+    "sprayable/irs_card_num": "12345678",
+    "_total_media": 0,
     "_id": 3563261,
-    '_attachments': [
+    "_attachments": [
         {
-            'filename': 'akros_health/attachments/'
-                        '1410dd5377f692456ab1a1515786f1045189ca8e.osm',
-            'download_url': '/api/v1/files/5551567?filename=akros_health'
-                            '/attachments/'
-                            '1410dd5377f692456ab1a1515786f1045189ca8e.osm',
-            'id': 5551567, "mimetype": "text/xml",
+            "filename": "akros_health/attachments/1410dd5377f692456ab1a1515786f1045189ca8e.osm",  # noqa  pylint: disable=line-too-long
+            "download_url": "/api/v1/files/5551567?filename=akros_health/attachments/1410dd5377f692456ab1a1515786f1045189ca8e.osm",  # noqa  pylint: disable=line-too-long
+            "id": 5551567,
+            "mimetype": "text/xml",
         }
     ],
-
 }
 
 
 class TestTasks(TestBase):
+    """Test tasks module."""
 
     def setUp(self):
         TestBase.setUp(self)
         app.conf.update(CELERY_ALWAYS_EAGER=True)
 
-    @patch('mspray.apps.main.tasks.fetch_osm_xml')
+    @patch("mspray.apps.main.tasks.fetch_osm_xml")
     def test_link_spraypoint_with_osm(self, mock):
         """
         Test that we can successfully link spraypoint wiht osm
         """
         self._load_fixtures()
         mock.return_value = OSMXML.strip()
-        sp = add_spray_data(SUBMISSION_DATA)
-        link_spraypoint_with_osm(sp.pk)
-        sp = SprayDay.objects.get(pk=sp.pk)
-        self.assertTrue(sp.location is not None)
+        spray_day = add_spray_data(SUBMISSION_DATA)
+        link_spraypoint_with_osm(spray_day.pk)
+        spray_day = SprayDay.objects.get(pk=spray_day.pk)
+        self.assertTrue(spray_day.location is not None)
 
-    @patch('mspray.apps.main.tasks.user_distance')
-    @patch('mspray.apps.main.tasks.no_gps')
-    @patch('mspray.apps.main.tasks.stream_to_druid')
-    def test_run_tasks_after_spray_data(self, druid_mock, gps_mock,
-                                        distance_mock):
+    @patch("mspray.apps.main.tasks.user_distance")
+    @patch("mspray.apps.main.tasks.no_gps")
+    @patch("mspray.apps.main.tasks.stream_to_druid")
+    def test_run_tasks_after_spray_data(
+        self,  # pylint:disable=bad-continuation
+        druid_mock,  # pylint:disable=bad-continuation
+        gps_mock,  # pylint:disable=bad-continuation
+        distance_mock,  # pylint:disable=bad-continuation
+    ):
         """
         Test that when run_tasks_after_spray_data is called, it starts all the
         tasks within:
@@ -112,13 +134,30 @@ class TestTasks(TestBase):
         """
         self._load_fixtures()
         sprayday = SprayDay.objects.first()
-        run_tasks_after_spray_data(sprayday)
+        with self.settings(STREAM_TO_DRUID=True, ENABLE_ALERTS=True):
+            run_tasks_after_spray_data(sprayday)
+
         self.assertTrue(druid_mock.delay.called)
-        self.assertTrue(gps_mock.delay.called)
-        self.assertTrue(distance_mock.delay.called)
-        druid_args, druid_kwargs = druid_mock.delay.call_args_list[0]
-        gps_args, gps_kwargs = gps_mock.delay.call_args_list[0]
-        distance_args, distance_kwargs = distance_mock.delay.call_args_list[0]
+        druid_args, _kwargs = druid_mock.delay.call_args_list[0]
         self.assertEqual(druid_args[0], sprayday.id)
+
+        self.assertTrue(gps_mock.delay.called)
+        gps_args, _kwargs = gps_mock.delay.call_args_list[0]
         self.assertEqual(gps_args[0], sprayday.id)
+
+        self.assertTrue(distance_mock.delay.called)
+        distance_args, _kwargs = distance_mock.delay.call_args_list[0]
         self.assertEqual(distance_args[0], sprayday.id)
+
+    @patch("mspray.apps.main.tasks.fetch_form_data")
+    def test_fetch_sensitization_visits(self, fetch_form_data):
+        """Test fetching sensitization visit submissions."""
+        data_setup()
+        fetch_form_data.side_effect = [
+            [{"_id": 343725}],
+            SENSITIZATION_VISIT_DATA,
+        ]
+        count = SensitizationVisit.objects.count()
+        with self.settings(SENSITIZATION_VISIT_FORM_ID=343725):
+            fetch_sensitization_visits()
+            self.assertEqual(SensitizationVisit.objects.count(), count + 1)

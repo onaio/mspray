@@ -1,7 +1,17 @@
-image: bradrydzewski/python:3.4
+pipeline:
+    build:
+        image: python:3.6
+        commands:
+            - apt-get update && apt-get install -y libgdal-dev
+            - pip install -r requirements.pip
+            - pip install -r requirements-dev.pip
+            - python manage.py test
+        environment:
+            - DB_HOST=db
+            - DJANGO_SETTINGS_MODULE=mspray.preset.test_settings
 services:
-    - onaio/postgis
-script:
-    - scripts/install_postgis mspray mspray postgres 127.0.0.1 DUMMY SUPERUSER
-    - pip install -r requirements.pip
-    - python manage.py test
+    db:
+        image: onaio/postgis:9.5
+        environment:
+            - POSTGRES_USER=mspray
+            - POSTGRES_PASSWORD=mspray

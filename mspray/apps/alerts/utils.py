@@ -6,7 +6,7 @@ def get_district_summary_data():
     """
     Gets a queryset of Districts and serializes it
     """
-    from mspray.apps.main.serializers.target_area import DistrictSerializer
+    from mspray.apps.main.serializers import DistrictSerializer
     queryset = Location.objects.filter(level='district')
     queryset = get_location_qs(queryset).extra(select={
             "xmin": 'ST_xMin("main_location"."geom")',

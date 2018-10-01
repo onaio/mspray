@@ -11,8 +11,8 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import queryset_iterator
+from mspray.apps.main.serializers import DistrictSerializer
 from mspray.apps.main.serializers.target_area import (
-    DistrictSerializer,
     GeoTargetAreaSerializer,
     TargetAreaQuerySerializer,
     TargetAreaSerializer,
@@ -76,6 +76,7 @@ class DistrictView(SiteNameMixin, ListView):
                 "total_structures",
                 "visited",
                 "sprayed",
+                "is_sensitized",
             )
         )
         pk = self.kwargs.get(self.slug_field)
@@ -119,13 +120,17 @@ class DistrictView(SiteNameMixin, ListView):
             "not_visited",
             "found",
             "num_of_spray_areas",
+            "sensitized",
         ]
         totals = {}
         for rec in serializer.data:
             for field in fields:
-                totals[field] = rec[field] + (
-                    totals[field] if field in totals else 0
-                )
+                try:
+                    totals[field] = rec[field] + (
+                        totals[field] if field in totals else 0
+                    )
+                except KeyError:
+                    pass
 
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
@@ -280,6 +285,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                 "parent__parent__name",
                 "parent__parent__pk",
                 "parent__pk",
+                "is_sensitized",
             )
             .order_by("parent__parent__name", "parent__name", "name")
         )

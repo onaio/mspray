@@ -69,4 +69,3 @@ class TestEmails(TestBase):
             self.assertEqual(email.subject, subject)
             self.assertEqual(email.body, text_content)
             self.assertEqual(email.alternatives[0][0], html_content)
-

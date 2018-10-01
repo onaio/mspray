@@ -18,6 +18,7 @@
                     <th rowspan="2">Eligible Spray Areas</th>
                     <th colspan="2">Spray Areas Visited <sup title="A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them.">(a)</sup></th>
                     <th colspan="2">Spray Areas Sprayed Effectively<sup title="A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed.">(b)</sup></th>
+                    <th rowspan="2">Sensitized</th>
                 </tr>
                 <tr>
                     <th>Number</th>
@@ -34,6 +35,7 @@
                     <th>Spray Effectiveness</th>
                     <th>Found coverage</th>
                     <th>Spray coverage</th>
+                    <th>Sensitized?</th>
                 </tr>
                 {% endif%}
             </thead>
@@ -65,13 +67,14 @@
                         <td class='numbers'>{{ district.visited_sprayed|intcomma }}</td>
                         {% calc_percentage district.visited_sprayed district.visited_total as calculated_percentage %}
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
+                        <td class='numbers' >{{ district.sensitized }}</td>
                     </tr>
                 {% endfor %}
 
                 {% if district_name %}
                 {% else %}
                     <tr>
-                        <td colspan="5"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "Not in Targeted Area" %}</a></td>
+                        <td colspan="7"><a href="{% url 'no_location_spray_effectiveness' %}">{% trans "Not in Targeted Area" %}</a></td>
                     </tr>
                 {% endif%}
             {% else %}
@@ -103,6 +106,7 @@
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                        <td class=''>{{ district.is_sensitized }}</td>
                     </tr>
                 {% endfor %}
                 <tr>
@@ -118,6 +122,7 @@
                     {% endif %}
                     <td class='numbers'></td>
                     <td class='numbers'></td>
+                    <td class=''>&nbsp;</td>
                 </tr>
             {% endif%}
             </tbody>
@@ -131,6 +136,7 @@
                         <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }}</td>
                         {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as total_calculated_percentage %}
                         <td class='numbers {{ total_calculated_percentage|sprayed_effectively_color }}'>{{ total_calculated_percentage }}</td>
+                        <td class='numbers'>{{ district_totals.sensitized }}</td>
                     {% else %}
                         <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
@@ -141,6 +147,7 @@
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                        <td class=''>{{ district_totals.sensitized }}</td>
                     {% endif%}
                 </tr>
             </tfoot>

@@ -12,8 +12,8 @@ from django.urls import path
 from rest_framework import routers
 
 from mspray.apps.alerts import urls as alerts_urls
+from mspray.apps.main.views import directly_observed_spraying_form as dos_form
 from mspray.apps.main.views import (
-    directly_observed_spraying_form as dos_form,
     districts,
     home,
     household,
@@ -24,6 +24,9 @@ from mspray.apps.main.views import (
     sprayday,
     target_area,
     user,
+)
+from mspray.apps.main.views.sensitization_visit import (
+    SensitizationVisitViewSet
 )
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
@@ -139,6 +142,11 @@ urlpatterns = [  # pylint: disable=C0103
         "<int:spray_operator>",
         dos_form.DirectlyObservedSprayingView.as_view(),
         name="dos-spray-operator",
+    ),
+    path(
+        "sensitization-visit",
+        SensitizationVisitViewSet.as_view({"post": "create"}),
+        name="sensitization-visit",
     ),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

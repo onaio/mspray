@@ -40,7 +40,7 @@ class Command(BaseCommand):
                     csv_reader = csv.DictReader(csv_file)
                     for row in csv_reader:
                         try:
-                            spray_operator, created = SprayOperator.objects.get_or_create(
+                            spray_operator, created = SprayOperator.objects.get_or_create(  # noqa pylint: disable=line-too-long
                                 code=row["code"].strip(), name=row["name"]
                             )
                         except IntegrityError:
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                             team_code = row["team_leader_assistant"].strip()
                             if team_code:
                                 try:
-                                    team_leader = TeamLeaderAssistant.objects.get(
+                                    team_leader = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
                                         code=team_code
                                     )
                                 except TeamLeaderAssistant.DoesNotExist:

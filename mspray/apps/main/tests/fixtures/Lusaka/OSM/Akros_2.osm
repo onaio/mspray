@@ -1,0 +1,321 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version="0.6" generator="osmconvert 0.8.8">
+	<bounds minlat="-15.4191299" minlon="28.35221" maxlat="-15.4172099" maxlon="28.35467"/>
+	<node id="5135868681" lat="-15.4177691" lon="28.353031" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868682" lat="-15.4177389" lon="28.353025" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868683" lat="-15.4177729" lon="28.3530002" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868684" lat="-15.4177423" lon="28.3529962" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868685" lat="-15.4177219" lon="28.3531693" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868686" lat="-15.4178516" lon="28.3531862" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868687" lat="-15.4178688" lon="28.353044" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135868688" lat="-15.4177394" lon="28.3530251" version="1" timestamp="2017-09-28T17:45:37Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872357" lat="-15.4188273" lon="28.3537675" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872358" lat="-15.4189591" lon="28.3537729" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872359" lat="-15.4189628" lon="28.3536771" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872360" lat="-15.4188309" lon="28.3536717" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872361" lat="-15.4187138" lon="28.3533738" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872362" lat="-15.418722" lon="28.3534621" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872363" lat="-15.4186732" lon="28.3534652" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872364" lat="-15.418668" lon="28.3533767" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872365" lat="-15.4187331" lon="28.3535813" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872366" lat="-15.4188133" lon="28.3535733" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872367" lat="-15.4187869" lon="28.3532909" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872368" lat="-15.4187068" lon="28.3532989" version="1" timestamp="2017-09-28T17:45:39Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872544" lat="-15.418631" lon="28.3542236" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872545" lat="-15.4187478" lon="28.354283" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872546" lat="-15.4186664" lon="28.3543412" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872547" lat="-15.4186139" lon="28.3543678" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872548" lat="-15.4186172" lon="28.3541941" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872549" lat="-15.4185486" lon="28.3542288" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872550" lat="-15.418815" lon="28.3544261" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872551" lat="-15.4187272" lon="28.3544705" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872552" lat="-15.4187989" lon="28.3542572" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872553" lat="-15.4187539" lon="28.3541615" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872554" lat="-15.4178936" lon="28.3538008" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872555" lat="-15.417852" lon="28.3538653" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872556" lat="-15.4179583" lon="28.35385" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872557" lat="-15.4179141" lon="28.3539125" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872558" lat="-15.4179144" lon="28.3537714" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872559" lat="-15.417789" lon="28.3539544" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872560" lat="-15.4176268" lon="28.353831" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872561" lat="-15.4177548" lon="28.35365" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872562" lat="-15.4182848" lon="28.3533511" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872563" lat="-15.418274" lon="28.3534534" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872564" lat="-15.4185372" lon="28.353409" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872565" lat="-15.418511" lon="28.3534767" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872566" lat="-15.4186452" lon="28.3531174" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872567" lat="-15.4186743" lon="28.3530037" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872568" lat="-15.41871" lon="28.3530004" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872569" lat="-15.4186733" lon="28.3531283" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872570" lat="-15.4187829" lon="28.3529673" version="1" timestamp="2017-09-28T17:45:40Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872571" lat="-15.41871" lon="28.3531652" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872572" lat="-15.4189089" lon="28.3530683" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872573" lat="-15.4188545" lon="28.3532151" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872574" lat="-15.418979" lon="28.3531027" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872575" lat="-15.4189586" lon="28.3531487" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872576" lat="-15.4190247" lon="28.3531415" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872577" lat="-15.4189827" lon="28.3531041" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872578" lat="-15.4185488" lon="28.3530783" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872579" lat="-15.4186457" lon="28.353116" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872580" lat="-15.4185879" lon="28.3529701" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872581" lat="-15.4186797" lon="28.3529886" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872582" lat="-15.4186662" lon="28.3531482" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872583" lat="-15.4187294" lon="28.3529465" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872584" lat="-15.419022" lon="28.3531404" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872585" lat="-15.4190434" lon="28.3530811" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872586" lat="-15.4189975" lon="28.3530633" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872587" lat="-15.4190143" lon="28.3531704" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872588" lat="-15.4189061" lon="28.3533028" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872589" lat="-15.4189848" lon="28.3533265" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872590" lat="-15.4190015" lon="28.3532667" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872591" lat="-15.4189247" lon="28.3532424" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872592" lat="-15.4189812" lon="28.3530964" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872593" lat="-15.4187066" lon="28.3531744" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872594" lat="-15.4188492" lon="28.3532299" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872595" lat="-15.4189343" lon="28.352998" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872596" lat="-15.4187919" lon="28.3529426" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872597" lat="-15.4185512" lon="28.3534977" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872598" lat="-15.4185828" lon="28.3534329" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872599" lat="-15.4183885" lon="28.3535519" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872600" lat="-15.4184569" lon="28.3535878" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872601" lat="-15.4185729" lon="28.3533356" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872602" lat="-15.41851" lon="28.3533026" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872603" lat="-15.4183075" lon="28.3534573" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872604" lat="-15.4183186" lon="28.3533551" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872605" lat="-15.4181708" lon="28.3535345" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872606" lat="-15.418264" lon="28.3535454" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872607" lat="-15.4182931" lon="28.3532749" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872608" lat="-15.4182002" lon="28.353264" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872609" lat="-15.4185215" lon="28.3527985" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872610" lat="-15.4185144" lon="28.3528631" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872611" lat="-15.4184744" lon="28.3526393" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872612" lat="-15.418413" lon="28.3526276" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872613" lat="-15.4185327" lon="28.3526504" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872614" lat="-15.4185941" lon="28.3526725" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872615" lat="-15.4184535" lon="28.3527858" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872616" lat="-15.4184421" lon="28.3528496" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872617" lat="-15.4185879" lon="28.3527791" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872618" lat="-15.4185653" lon="28.3529097" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872619" lat="-15.4185082" lon="28.352899" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872620" lat="-15.4185269" lon="28.3527678" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872621" lat="-15.4184582" lon="28.3527587" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872622" lat="-15.4184354" lon="28.3528884" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872623" lat="-15.4183841" lon="28.3528789" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872624" lat="-15.4184066" lon="28.3527491" version="1" timestamp="2017-09-28T17:45:41Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872625" lat="-15.4185989" lon="28.3526735" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872626" lat="-15.4186059" lon="28.3526337" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872627" lat="-15.418538" lon="28.3526208" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872628" lat="-15.4185801" lon="28.3527517" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872629" lat="-15.4183729" lon="28.3527123" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872630" lat="-15.4183887" lon="28.352623" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872631" lat="-15.4184837" lon="28.3525864" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872632" lat="-15.4184223" lon="28.3525747" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872633" lat="-15.4179248" lon="28.3525734" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872634" lat="-15.4179126" lon="28.3526426" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872635" lat="-15.4179817" lon="28.3526421" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872636" lat="-15.4179725" lon="28.3526946" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872637" lat="-15.4180283" lon="28.3526509" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872638" lat="-15.418019" lon="28.3527034" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872639" lat="-15.4179028" lon="28.3526982" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872640" lat="-15.4178641" lon="28.3527497" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872641" lat="-15.4178742" lon="28.3526927" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872642" lat="-15.417849" lon="28.3526305" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872643" lat="-15.4178613" lon="28.3525613" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872644" lat="-15.4180056" lon="28.3525069" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872645" lat="-15.4179595" lon="28.3527678" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872646" lat="-15.4178927" lon="28.3527551" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5135872647" lat="-15.4179388" lon="28.3524942" version="1" timestamp="2017-09-28T17:45:42Z" changeset="52453134" uid="3794153" user="Frazzy"/>
+	<node id="5876820870" lat="-15.4174536" lon="28.3534558" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie"/>
+	<node id="5876820871" lat="-15.4172938" lon="28.3542159" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie"/>
+	<node id="5876820872" lat="-15.4180426" lon="28.3543883" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie"/>
+	<node id="5876820873" lat="-15.4181007" lon="28.3541205" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie"/>
+	<node id="5876820874" lat="-15.4182089" lon="28.3536015" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie"/>
+	<node id="5876820875" lat="-15.4176682" lon="28.3543021" version="1" timestamp="2018-09-02T21:01:13Z" changeset="62229390" uid="8707591" user="jsie">
+		<tag k="access" v="private"/>
+		<tag k="entrance" v="yes"/>
+	</node>
+	<way id="528511950" version="1" timestamp="2017-09-28T17:45:43Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135868688"/>
+		<nd ref="5135868685"/>
+		<nd ref="5135868686"/>
+		<nd ref="5135868687"/>
+		<nd ref="5135868681"/>
+		<nd ref="5135868683"/>
+		<nd ref="5135868684"/>
+		<nd ref="5135868682"/>
+		<nd ref="5135868688"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511963" version="1" timestamp="2017-09-28T17:45:43Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872360"/>
+		<nd ref="5135872357"/>
+		<nd ref="5135872358"/>
+		<nd ref="5135872359"/>
+		<nd ref="5135872360"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511964" version="1" timestamp="2017-09-28T17:45:43Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872364"/>
+		<nd ref="5135872363"/>
+		<nd ref="5135872362"/>
+		<nd ref="5135872365"/>
+		<nd ref="5135872366"/>
+		<nd ref="5135872367"/>
+		<nd ref="5135872368"/>
+		<nd ref="5135872361"/>
+		<nd ref="5135872364"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511979" version="1" timestamp="2017-09-28T17:45:44Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872544"/>
+		<nd ref="5135872548"/>
+		<nd ref="5135872549"/>
+		<nd ref="5135872547"/>
+		<nd ref="5135872546"/>
+		<nd ref="5135872551"/>
+		<nd ref="5135872550"/>
+		<nd ref="5135872545"/>
+		<nd ref="5135872552"/>
+		<nd ref="5135872553"/>
+		<nd ref="5135872544"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511980" version="1" timestamp="2017-09-28T17:45:44Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872554"/>
+		<nd ref="5135872558"/>
+		<nd ref="5135872561"/>
+		<nd ref="5135872560"/>
+		<nd ref="5135872559"/>
+		<nd ref="5135872555"/>
+		<nd ref="5135872557"/>
+		<nd ref="5135872556"/>
+		<nd ref="5135872554"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511982" version="1" timestamp="2017-09-28T17:45:44Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872562"/>
+		<nd ref="5135872607"/>
+		<nd ref="5135872608"/>
+		<nd ref="5135872605"/>
+		<nd ref="5135872606"/>
+		<nd ref="5135872563"/>
+		<nd ref="5135872603"/>
+		<nd ref="5135872604"/>
+		<nd ref="5135872562"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511983" version="1" timestamp="2017-09-28T17:45:44Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872596"/>
+		<nd ref="5135872570"/>
+		<nd ref="5135872583"/>
+		<nd ref="5135872568"/>
+		<nd ref="5135872581"/>
+		<nd ref="5135872567"/>
+		<nd ref="5135872580"/>
+		<nd ref="5135872578"/>
+		<nd ref="5135872579"/>
+		<nd ref="5135872566"/>
+		<nd ref="5135872569"/>
+		<nd ref="5135872582"/>
+		<nd ref="5135872571"/>
+		<nd ref="5135872593"/>
+		<nd ref="5135872594"/>
+		<nd ref="5135872573"/>
+		<nd ref="5135872591"/>
+		<nd ref="5135872575"/>
+		<nd ref="5135872587"/>
+		<nd ref="5135872576"/>
+		<nd ref="5135872584"/>
+		<nd ref="5135872585"/>
+		<nd ref="5135872586"/>
+		<nd ref="5135872577"/>
+		<nd ref="5135872574"/>
+		<nd ref="5135872592"/>
+		<nd ref="5135872572"/>
+		<nd ref="5135872595"/>
+		<nd ref="5135872596"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511985" version="1" timestamp="2017-09-28T17:45:45Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872591"/>
+		<nd ref="5135872588"/>
+		<nd ref="5135872589"/>
+		<nd ref="5135872590"/>
+		<nd ref="5135872591"/>
+		<tag k="building" v="yes"/>
+	</way>
+	<way id="528511986" version="1" timestamp="2017-09-28T17:45:45Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872565"/>
+		<nd ref="5135872597"/>
+		<nd ref="5135872598"/>
+		<nd ref="5135872564"/>
+		<nd ref="5135872601"/>
+		<nd ref="5135872602"/>
+		<nd ref="5135872599"/>
+		<nd ref="5135872600"/>
+		<nd ref="5135872565"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511987" version="1" timestamp="2017-09-28T17:45:45Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872613"/>
+		<nd ref="5135872611"/>
+		<nd ref="5135872631"/>
+		<nd ref="5135872632"/>
+		<nd ref="5135872612"/>
+		<nd ref="5135872630"/>
+		<nd ref="5135872629"/>
+		<nd ref="5135872628"/>
+		<nd ref="5135872614"/>
+		<nd ref="5135872625"/>
+		<nd ref="5135872626"/>
+		<nd ref="5135872627"/>
+		<nd ref="5135872613"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511989" version="1" timestamp="2017-09-28T17:45:45Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872610"/>
+		<nd ref="5135872619"/>
+		<nd ref="5135872618"/>
+		<nd ref="5135872617"/>
+		<nd ref="5135872620"/>
+		<nd ref="5135872609"/>
+		<nd ref="5135872615"/>
+		<nd ref="5135872621"/>
+		<nd ref="5135872624"/>
+		<nd ref="5135872623"/>
+		<nd ref="5135872622"/>
+		<nd ref="5135872616"/>
+		<nd ref="5135872610"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="528511990" version="1" timestamp="2017-09-28T17:45:45Z" changeset="52453134" uid="3794153" user="Frazzy">
+		<nd ref="5135872646"/>
+		<nd ref="5135872645"/>
+		<nd ref="5135872636"/>
+		<nd ref="5135872638"/>
+		<nd ref="5135872637"/>
+		<nd ref="5135872635"/>
+		<nd ref="5135872644"/>
+		<nd ref="5135872647"/>
+		<nd ref="5135872633"/>
+		<nd ref="5135872643"/>
+		<nd ref="5135872642"/>
+		<nd ref="5135872634"/>
+		<nd ref="5135872639"/>
+		<nd ref="5135872641"/>
+		<nd ref="5135872640"/>
+		<nd ref="5135872646"/>
+		<tag k="building" v="residential"/>
+	</way>
+	<way id="622121634" version="1" timestamp="2018-09-02T21:01:15Z" changeset="62229390" uid="8707591" user="jsie">
+		<nd ref="5876820870"/>
+		<nd ref="5876820871"/>
+		<nd ref="5876820875"/>
+		<nd ref="5876820872"/>
+		<nd ref="5876820873"/>
+		<nd ref="5876820874"/>
+		<nd ref="5876820870"/>
+		<tag k="amenity" v="embassy"/>
+		<tag k="building" v="yes"/>
+	</way>
+</osm>

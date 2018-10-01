@@ -1,10 +1,13 @@
-from django.contrib.gis.geos import GEOSGeometry
+# -*- codingg: utf-8 -*-
+"""
+Test osm module.
+"""
+from django.contrib.gis.geos import Point, Polygon
 from django.test import TestCase
 
-from mspray.apps.main.osm import parse_osm_ways
-from mspray.apps.main.osm import parse_osm_nodes
+from mspray.libs.osm import parse_osm_nodes, parse_osm_ways
 
-OSMWay = """
+OSMWAY = """
 <?xml version="1.0" encoding="UTF-8"?>
 <osm version="0.6" generator="OpenMapKit 0.7" user="theoutpost">
     <node id="-1943" lat="-11.202901601" lon="28.883830387" />
@@ -34,7 +37,7 @@ OSMWay = """
     </way>
 </osm>
 """
-OSMNode = """
+OSMNODE = """
 <?xml version="1.0" encoding="UTF-8"?>
 <osm version="0.6" generator="OpenMapKit 0.12" user="theoutpost">
   <node id="-1" action="modify" lat="-9.24311382416424" lon="28.805980682373047">
@@ -42,31 +45,23 @@ OSMNode = """
   </node>
 </osm>
 """  # noqa
-OSMNodeFaulty = """
-<?xml version="1.0" encoding="UTF-8"?>
-<osm version="0.6" generator="OpenMapKit 0.12" user="theoutpost">
-  <node id="-1" action="modify" lat="-9.24311382416424" lon="28.805980682373047" action="modify">
-    <tag k="spray_status" v="sprayed" />
-  </node>
-</osm>
-"""  # noqa
 
 
 class TestOsm(TestCase):
+    """
+    Test osm module functions.
+    """
+
     def test_parse_osm_ways(self):
-        ways = parse_osm_ways(OSMWay.strip())
+        """Test parse_osm_ways()"""
+        ways = parse_osm_ways(OSMWAY.strip())
         self.assertTrue(len(ways) > 0)
         way = ways[0]
-        self.assertIsInstance(way, GEOSGeometry)
+        self.assertIsInstance(way["geom"], Polygon)
 
     def test_parse_osm_node(self):
-        nodes = parse_osm_nodes(OSMNode.strip())
+        """Test parse_osm_nodes()"""
+        nodes = parse_osm_nodes(OSMNODE.strip())
         self.assertTrue(len(nodes) > 0)
         node = nodes[0]
-        self.assertIsInstance(node, GEOSGeometry)
-
-    def test_parse_osm_node_faulty(self):
-        nodes = parse_osm_nodes(OSMNodeFaulty.strip())
-        self.assertTrue(len(nodes) > 0)
-        node = nodes[0]
-        self.assertIsInstance(node, GEOSGeometry)
+        self.assertIsInstance(node["geom"], Point)

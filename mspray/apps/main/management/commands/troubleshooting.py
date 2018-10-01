@@ -179,7 +179,7 @@ class Command(BaseCommand):
         dir_path = '/tmp/troubleshooting'
         try:
             os.mkdir(dir_path)
-        except:
+        except Exception:
             pass
         for rhc in Location.objects.filter(level='RHC'):
             qs = rhc.location_set.all().order_by('name')

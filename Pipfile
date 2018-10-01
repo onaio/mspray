@@ -21,6 +21,7 @@ rapidpro-python = "*"
 django-filter = "*"
 "python3-memcached" = "*"
 lock = "*"
+ipython = "==6.5.0"
 
 [dev-packages]
 black = "*"
@@ -29,6 +30,10 @@ pylint = "*"
 pylint-django = "*"
 "pep8" = "*"
 pylint-celery = "*"
+ipdb = "*"
+ipython = "==6.5.0"
+coverage = "*"
+httmock = "*"
 
 [pipenv]
 allow_prereleases = true
