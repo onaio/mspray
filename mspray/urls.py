@@ -28,6 +28,7 @@ from mspray.apps.main.views import (
 from mspray.apps.main.views.sensitization_visit import (
     SensitizationVisitViewSet
 )
+from mspray.apps.main.views.mobilisation import MobilisationViewSet
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
 
@@ -147,6 +148,11 @@ urlpatterns = [  # pylint: disable=C0103
         "sensitization-visit",
         SensitizationVisitViewSet.as_view({"post": "create"}),
         name="sensitization-visit",
+    ),
+    path(
+        "mobilisation-visit",
+        MobilisationViewSet.as_view({"post": "create"}),
+        name="mobilisation-visit",
     ),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 

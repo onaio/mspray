@@ -121,6 +121,7 @@ class DistrictView(SiteNameMixin, ListView):
             "found",
             "num_of_spray_areas",
             "sensitized",
+            "mobilised",
         ]
         totals = {}
         for rec in serializer.data:
