@@ -1039,6 +1039,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     bounds = serializers.SerializerMethodField()
     spray_dates = serializers.SerializerMethodField()
     is_sensitized = serializers.NullBooleanField()
+    sensitized = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
@@ -1063,6 +1064,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             "rhc_pk",
             "num_new_structures",
             "is_sensitized",
+            "sensitized"
         )
         model = Location
 
@@ -1109,6 +1111,20 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
                 )
             except:  # noqa
                 pass
+
+    def get_sensitized(self, obj):  # pylint: disable=no-self-use
+        """Return number of spray areas that have been sensitized."""
+        location = obj
+        if isinstance(obj, dict):
+            location = Location.objects.get(pk=obj["pk"])
+        queryset = location.sv_spray_areas
+
+        return (
+            queryset.filter(is_sensitized=True)
+            .values("spray_area")
+            .distinct()
+            .count()
+        )
 
 
 class TargetAreaRichSerializer(
