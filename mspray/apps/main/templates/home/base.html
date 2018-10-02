@@ -63,6 +63,8 @@
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'trials:index' %}">Trial Survey</a></li>
                                 <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mop-up' %}">Mop-up</a></li>
+                                <li role="separator" class="divider"></li>
                                 <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>

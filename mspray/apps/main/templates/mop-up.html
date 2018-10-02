@@ -1,0 +1,65 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">Mop-up</h1>
+        <table class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th># Health Centers to Mop-up</th>
+                    <th># Spray Areas to Mop-up</th>
+                    <th>Structures to spray or areas to reach 90%*</th>
+                    <th>TLA days needed for areas needed to reach 90%</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for district in district_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                        </td>
+                        <td class='numbers'></td>
+                        <td class='numbers'></td>
+                        <td class='numbers'></td>
+                        <td class='numbers'></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                </tr>
+            </tfoot>
+        </table>
+        <p>* These estimates are based on only those catchments that have
+        already been visited.</p>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
