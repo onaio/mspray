@@ -21,15 +21,23 @@
                 </tr>
             </thead>
             <tbody>
-                {% for district in district_list %}
+                {% for location in mopup_locations %}
                     <tr>
                         <td>
-                            <a href="{% url 'district' district.targetid %}">{{ district.district_name }}</a>
+                            <a href="{% url 'district' location.pk %}">{{ location.name }}</a>
                         </td>
-                        <td class='numbers'></td>
-                        <td class='numbers'></td>
-                        <td class='numbers'></td>
-                        <td class='numbers'></td>
+                        <td class='numbers'>
+                            {{ location.health_centers_to_mopup }}
+                        </td>
+                        <td class='numbers'>
+                            {{ location.spray_areas_to_mopup }}
+                        </td>
+                        <td class='numbers'>
+                            {{ location.structures_to_mopup }}
+                        </td>
+                        <td class='numbers'>
+                            {{ location.mopup_days_needed }}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>

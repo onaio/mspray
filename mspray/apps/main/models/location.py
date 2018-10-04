@@ -65,8 +65,30 @@ class Location(MPTTModel, models.Model):
     def get_district_by_code_or_name(cls, name_or_code):
         """
         Returns a District Location object for given name or code.
+
+        Arguments
+        ---------
+        name_or_code: name or code for the district.
         """
         try:
             return cls.objects.get(code=name_or_code, level="district")
         except cls.DoesNotExist:
             return cls.objects.get(name__iexact=name_or_code, level="district")
+
+    @property
+    def health_centers_to_mopup(self):
+        """Return the number of Health Centers to Mop-up
+        """
+        return self.get_children().filter(level="RHC").count()
+
+    @property
+    def spray_areas_to_mopup(self):
+        """Return the number of Spray Areas to Mop-up
+        """
+        return self.get_descendants().filter(level="ta").count()
+
+    @property
+    def structures_to_mopup(self):
+        """Return the number of structures to mopup
+        """
+        return self.household_set.filter(visited=False).count()

@@ -19,6 +19,7 @@ class Household(models.Model):
         "Location", default=1, on_delete=models.CASCADE
     )
     data = JSONField(default=dict)
+    visited = models.BooleanField(null=True)
 
     class Meta:
         app_label = "main"
