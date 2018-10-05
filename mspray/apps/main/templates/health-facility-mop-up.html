@@ -13,24 +13,33 @@
         <table class="table table-stripe">
             <thead>
                 <tr>
-                    <th>District</th>
-                    <th># Health Centers to Mop-up</th>
-                    <th># Spray Areas to Mop-up</th>
-                    <th>Structures to spray or areas to reach 90%*</th>
-                    <th>TLA days needed for areas needed to reach 90%</th>
+                    <th>Health Facility</th>
+                    <th>Spray Area</th>
+                    <th>Structures on the Ground</th>
+                    <th>Visited Sprayed</th>
+                    <th>Structures remaining to spray to reach 90% SE</th>
+                    <th>TLA days</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found Coverage</th>
+                    <th>Spray Coverage</th>
+                    <th>Date of Last Visit</th>
+                    <th>Date of Last Decision Form</th>
                 </tr>
             </thead>
             <tbody>
                 {% for location in mopup_locations %}
                     <tr>
                         <td>
-                            <a href="{% url 'mop-up' location.pk %}">{{ location.name }}</a>
+                            {{ location.parent.name }}
+                        </td>
+                        <td>
+                            {{ location.name }}
                         </td>
                         <td class='numbers'>
-                            {{ location.health_centers_to_mopup }}
+                            {{ location.structures }}
                         </td>
                         <td class='numbers'>
-                            {{ location.spray_areas_to_mopup }}
+                            {{ location.visited_sprayed }}
                         </td>
                         <td class='numbers'>
                             {{ location.structures_to_mopup }}
@@ -38,12 +47,33 @@
                         <td class='numbers'>
                             {{ location.mopup_days_needed }}
                         </td>
+                        <td>
+                            {{ location.spray_effectiveness }}
+                        </td>
+                        <td>
+                            {{ location.found_coverage }}
+                        </td>
+                        <td>
+                            {{ location.spray_coverage }}
+                        </td>
+                        <td>
+                            {{ location.last_visit }}
+                        </td>
+                        <td>
+                            {{ location.last_decision_form }}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
                 <tr>
                     <td>Total</a></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
                     <td class='numbers'></td>
                     <td class='numbers'></td>
                     <td class='numbers'></td>

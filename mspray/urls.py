@@ -12,7 +12,7 @@ from django.urls import path
 from rest_framework import routers
 
 from mspray.apps.alerts import urls as alerts_urls
-from mspray.apps.main.views.mopup import MopUpView
+from mspray.apps.main.views.mopup import MopUpView, HealthFacilityMopUpView
 from mspray.apps.main.views import directly_observed_spraying_form as dos_form
 from mspray.apps.main.views import (
     districts,
@@ -156,6 +156,11 @@ urlpatterns = [  # pylint: disable=C0103
         name="mobilisation-visit",
     ),
     path("mop-up", MopUpView.as_view(), name="mop-up"),
+    path(
+        "mop-up/<int:district>",
+        HealthFacilityMopUpView.as_view(),
+        name="mop-up",
+    ),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
