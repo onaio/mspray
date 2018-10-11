@@ -26,5 +26,8 @@ class TestLocation(TestCase):
     def test_structures_to_mopup(self):
         """Test calculating number of structures that need mopup."""
         data_setup()
+        akros_1 = Location.objects.get(name="Akros_1", level="ta")
+        self.assertEqual(akros_1.structures_to_mopup, 13)
+
         lusaka = Location.objects.get(name="Lusaka", level="district")
         self.assertEqual(lusaka.structures_to_mopup, 2)

@@ -3,6 +3,8 @@
 Location model module.
 """
 from django.contrib.gis.db import models
+from django.db.models import Q
+
 from mptt.models import MPTTModel, TreeForeignKey
 
 
@@ -91,4 +93,9 @@ class Location(MPTTModel, models.Model):
     def structures_to_mopup(self):
         """Return the number of structures to mopup
         """
-        return self.household_set.filter(visited=False).count()
+        if self.level != 'ta':
+            return self.spray_areas_to_mopup
+
+        return self.household_set.filter(
+            Q(visited=False) | Q(visited__isnull=True)
+        ).count()
