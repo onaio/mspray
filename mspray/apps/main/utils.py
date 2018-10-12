@@ -260,7 +260,10 @@ def add_spray_data(data):
         )
         if locations:
             location = locations[0]
-
+    osmid = data.get("{}:way:id".format(HAS_UNIQUE_FIELD))
+    household = None
+    if HAS_UNIQUE_FIELD and osmid:
+        household = Household.by_osmid(osmid)
     sprayday, created = SprayDay.objects.get_or_create(
         submission_id=submission_id, spray_date=spray_date
     )
@@ -270,6 +273,11 @@ def add_spray_data(data):
             sprayday.geom = geom
         if location is not None:
             sprayday.location = location
+    if household and sprayday.household != household:
+        sprayday.household = household
+        sprayday.geom = household.geom
+        sprayday.bgeom = household.bgeom
+        location = sprayday.location = household.location
 
     sprayday.data = data
 
@@ -279,12 +287,11 @@ def add_spray_data(data):
 
     link_sprayday_to_actors(sprayday=sprayday, data=data)
 
-    if settings.OSM_SUBMISSIONS:
+    if settings.OSM_SUBMISSIONS and not household:
         link_spraypoint_with_osm.delay(sprayday.pk)
 
-    unique_field = HAS_UNIQUE_FIELD
-    if unique_field and location:
-        add_unique_data(sprayday, unique_field, location)
+    if HAS_UNIQUE_FIELD and location:
+        add_unique_data(sprayday, HAS_UNIQUE_FIELD, location)
 
     # run tasks after creating SprayDay obj
     if sprayday.has_osm_data():

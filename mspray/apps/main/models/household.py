@@ -27,6 +27,14 @@ class Household(models.Model):
     def __str__(self):
         return str(self.hh_id)
 
+    @classmethod
+    def by_osmid(cls, osmid):
+        """Return a houshold object with the matching osmid for hh_id."""
+        try:
+            return cls.objects.get(hh_id=osmid)
+        except cls.DoesNotExist:
+            return None
+
 
 # Auto-generated `LayerMapping` dictionary for Household model
 household_mapping = {  # pylint: disable=C0103
