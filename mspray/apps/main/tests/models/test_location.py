@@ -5,7 +5,7 @@ Test Location model module.
 from django.test import TestCase
 
 from mspray.apps.main.models.location import Location
-from mspray.apps.main.tests.utils import data_setup
+from mspray.apps.main.tests.utils import data_setup, load_spray_data
 
 
 class TestLocation(TestCase):
@@ -31,3 +31,10 @@ class TestLocation(TestCase):
 
         lusaka = Location.objects.get(name="Lusaka", level="district")
         self.assertEqual(lusaka.structures_to_mopup, 2)
+
+    def test_visited_sprayed(self):
+        """Test return number of structures visited that were sprayed."""
+        data_setup()
+        load_spray_data()
+        akros_1 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_1.visited_sprayed, 5)

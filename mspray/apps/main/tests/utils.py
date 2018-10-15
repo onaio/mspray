@@ -2,9 +2,13 @@
 """
 Reusable test util constants and functions.
 """
+import codecs
+import json
 import os
 
 from django.core.management import call_command
+
+from mspray.apps.main.utils import add_spray_data
 
 SENSITIZATION_VISIT_DATA = {
     "osmstructure:way:id": "528511960",
@@ -160,3 +164,12 @@ def data_setup():
     load_health_facility_shapefile()
     load_spray_area_shapefile()
     load_osm_structures()
+
+
+def load_spray_data():
+    """Loads up test spray data submissions into the database."""
+    path = os.path.join(FIXTURES_DIR, "spray_data.json")
+    with codecs.open(path, encoding="utf-8") as spray_data_file:
+        data = json.load(spray_data_file)
+        for row in data:
+            add_spray_data(row)

@@ -93,9 +93,16 @@ class Location(MPTTModel, models.Model):
     def structures_to_mopup(self):
         """Return the number of structures to mopup
         """
-        if self.level != 'ta':
+        if self.level != "ta":
             return self.spray_areas_to_mopup
 
         return self.household_set.filter(
             Q(visited=False) | Q(visited__isnull=True)
+        ).count()
+
+    @property
+    def visited_sprayed(self):
+        """Return the number of structures sprayed."""
+        return self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True
         ).count()
