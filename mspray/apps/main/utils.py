@@ -278,6 +278,9 @@ def add_spray_data(data):
         sprayday.geom = household.geom
         sprayday.bgeom = household.bgeom
         location = sprayday.location = household.location
+        if not household.visited:
+            household.visited = True
+            household.save()
 
     sprayday.data = data
 

@@ -359,3 +359,4 @@ class TestUtils(TestBase):
             spray = add_spray_data(data)
             self.assertTrue(spray.location is not None)
             self.assertTrue(spray.household is not None)
+            self.assertTrue(spray.household.visited)

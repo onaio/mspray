@@ -26,8 +26,9 @@ class TestLocation(TestCase):
     def test_structures_to_mopup(self):
         """Test calculating number of structures that need mopup."""
         data_setup()
-        akros_1 = Location.objects.get(name="Akros_1", level="ta")
-        self.assertEqual(akros_1.structures_to_mopup, 13)
+        load_spray_data()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.structures_to_mopup, 1)
 
         lusaka = Location.objects.get(name="Lusaka", level="district")
         self.assertEqual(lusaka.structures_to_mopup, 2)
@@ -36,5 +37,5 @@ class TestLocation(TestCase):
         """Test return number of structures visited that were sprayed."""
         data_setup()
         load_spray_data()
-        akros_1 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_1.visited_sprayed, 5)
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.visited_sprayed, 5)
