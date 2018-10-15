@@ -2,7 +2,6 @@
 """
 Household model.
 """
-# This is an auto-generated Django model module created by ogrinspect.
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
 
@@ -20,6 +19,8 @@ class Household(models.Model):
     )
     data = JSONField(default=dict)
     visited = models.BooleanField(null=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
 
     class Meta:
         app_label = "main"
