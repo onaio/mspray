@@ -18,7 +18,7 @@ class Household(models.Model):
         "Location", default=1, on_delete=models.CASCADE
     )
     data = JSONField(default=dict)
-    visited = models.BooleanField(null=True)
+    visited = models.NullBooleanField(null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
 
