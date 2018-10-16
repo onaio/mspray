@@ -38,7 +38,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_code %}">{{ row.name }}</a></td>
+                                    <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
                                     <td class='numbers'>{{ row.sprayed|intcomma  }}</td>

@@ -5,16 +5,22 @@ PerformanceReportSerializer
 from rest_framework import serializers
 
 from mspray.apps.main.datetime_tools import average_time
-from mspray.apps.main.models import (Location, PerformanceReport, SprayDay,
-                                     SprayOperator, TeamLeaderAssistant)
+from mspray.apps.main.models import (
+    Location,
+    PerformanceReport,
+    SprayDay,
+    SprayOperator,
+    TeamLeaderAssistant,
+)
 
 
 class PerformanceReportSerializer(serializers.ModelSerializer):
     """
     PerformanceReportSerializer
     """
+
     date = serializers.SerializerMethodField()
-    sprayable = serializers.IntegerField(source='found')
+    sprayable = serializers.IntegerField(source="found")
     sprayed = serializers.IntegerField()
     refused = serializers.IntegerField()
     other = serializers.IntegerField()
@@ -26,12 +32,26 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
     sprayed_difference = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('spray_date', 'found', 'sprayed', 'refused', 'other',
-                  'start_time', 'end_time', 'data_quality_check',
-                  'reported_found', 'reported_sprayed', 'sprayable',
-                  'found_difference', 'sprayed_difference', 'date',
-                  'avg_start_time', 'avg_end_time', 'not_sprayed_total',
-                  'sprayformid')
+        fields = (
+            "spray_date",
+            "found",
+            "sprayed",
+            "refused",
+            "other",
+            "start_time",
+            "end_time",
+            "data_quality_check",
+            "reported_found",
+            "reported_sprayed",
+            "sprayable",
+            "found_difference",
+            "sprayed_difference",
+            "date",
+            "avg_start_time",
+            "avg_end_time",
+            "not_sprayed_total",
+            "sprayformid",
+        )
         model = PerformanceReport
 
     def get_date(self, obj):  # pylint: disable=no-self-use
@@ -75,6 +95,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     """
     PerformanceReportSerializer
     """
+
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
     refused = serializers.SerializerMethodField()
@@ -86,18 +107,34 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
     team_leader_assistant_name = serializers.CharField(
-        source='team_leader_assistant.name')
-    spray_operator_code = serializers.CharField(source='code')
+        source="team_leader_assistant.name"
+    )
+    spray_operator_code = serializers.CharField(source="code")
+    spray_operator_id = serializers.CharField(source="id")
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('name', 'no_of_days_worked', 'spray_operator_code',
-                  'team_leader', 'team_leader_assistant_name', 'sprayed',
-                  'refused', 'other', 'data_quality_check', 'sprayable',
-                  'found_difference', 'sprayed_difference', 'avg_start_time',
-                  'avg_end_time', 'not_sprayed_total', 'avg_structures_per_so')
+        fields = (
+            "name",
+            "no_of_days_worked",
+            "spray_operator_code",
+            "spray_operator_id",
+            "team_leader",
+            "team_leader_assistant_name",
+            "sprayed",
+            "refused",
+            "other",
+            "data_quality_check",
+            "sprayable",
+            "found_difference",
+            "sprayed_difference",
+            "avg_start_time",
+            "avg_end_time",
+            "not_sprayed_total",
+            "avg_structures_per_so",
+        )
         model = SprayOperator
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
@@ -139,30 +176,39 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         operator.
         """
 
-        last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('spray_date').last()
+        last_record = (
+            PerformanceReport.objects.filter(spray_operator=obj)
+            .order_by("spray_date")
+            .last()
+        )
         if last_record:
             return last_record.data_quality_check
-        else:
-            return True
+
+        return True
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """
         Returns start_time as time object.
         """
-        return average_time([
-            report.start_time
-            for report in obj.performancereport_set.all().only('start_time')
-        ])
+        return average_time(
+            [
+                report.start_time
+                for report in obj.performancereport_set.all().only(
+                    "start_time"
+                )
+            ]
+        )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
         """
         Returns end_time as time object.
         """
-        return average_time([
-            report.end_time
-            for report in obj.performancereport_set.all().only('end_time')
-        ])
+        return average_time(
+            [
+                report.end_time
+                for report in obj.performancereport_set.all().only("end_time")
+            ]
+        )
 
     def get_not_sprayed_total(self, obj):  # pylint: disable=no-self-use
         """
@@ -179,8 +225,11 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
         reported_found = 0
         found = 0
-        last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('spray_date').last()
+        last_record = (
+            PerformanceReport.objects.filter(spray_operator=obj)
+            .order_by("spray_date")
+            .last()
+        )
         if last_record:
             reported_found = last_record.reported_found
             found = last_record.found
@@ -193,8 +242,11 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
         """
         reported_sprayed = 0
         sprayed = 0
-        last_record = PerformanceReport.objects.filter(
-            spray_operator=obj).order_by('spray_date').last()
+        last_record = (
+            PerformanceReport.objects.filter(spray_operator=obj)
+            .order_by("spray_date")
+            .last()
+        )
         if last_record:
             reported_sprayed = last_record.reported_sprayed
             sprayed = last_record.sprayed
@@ -206,6 +258,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
     """
     PerformanceReportSerializer
     """
+
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
     refused = serializers.SerializerMethodField()
@@ -216,19 +269,34 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.SerializerMethodField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
-    team_leader_name = serializers.CharField(source='name')
-    team_leader_code = serializers.CharField(source='code')
+    team_leader_name = serializers.CharField(source="name")
+    team_leader_code = serializers.CharField(source="code")
+    team_leader_id = serializers.CharField(source="id")
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
     not_eligible = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('name', 'no_of_days_worked', 'team_leader_code',
-                  'team_leader_name', 'sprayed', 'not_eligible',
-                  'refused', 'other', 'data_quality_check', 'sprayable',
-                  'found_difference', 'sprayed_difference', 'avg_start_time',
-                  'avg_end_time', 'not_sprayed_total', 'avg_structures_per_so')
+        fields = (
+            "name",
+            "no_of_days_worked",
+            "team_leader_code",
+            "team_leader_name",
+            "team_leader_id",
+            "sprayed",
+            "not_eligible",
+            "refused",
+            "other",
+            "data_quality_check",
+            "sprayable",
+            "found_difference",
+            "sprayed_difference",
+            "avg_start_time",
+            "avg_end_time",
+            "not_sprayed_total",
+            "avg_structures_per_so",
+        )
         model = TeamLeaderAssistant
 
     def get_sprayed(self, obj):  # pylint: disable=no-self-use
@@ -253,8 +321,15 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns number of sprayable structures not eligible reason.
         """
-        return SprayDay.objects.filter(
-            sprayable=False, team_leader_assistant=obj).count()
+        return (
+            SprayDay.objects.filter(sprayable=False, team_leader_assistant=obj)
+            .exclude(
+                osmid__in=SprayDay.objects.filter(sprayable=True)
+                .values("osmid")
+                .distinct()
+            )
+            .count()
+        )
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
         """
@@ -279,8 +354,11 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         quality_checks = []
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 quality_checks.append(last_record.data_quality_check)
 
@@ -290,19 +368,25 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns start_time as time object.
         """
-        return average_time([
-            report.start_time
-            for report in obj.performancereport_set.all().only('start_time')
-        ])
+        return average_time(
+            [
+                report.start_time
+                for report in obj.performancereport_set.all().only(
+                    "start_time"
+                )
+            ]
+        )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
         """
         Returns end_time as time object.
         """
-        return average_time([
-            report.end_time
-            for report in obj.performancereport_set.all().only('end_time')
-        ])
+        return average_time(
+            [
+                report.end_time
+                for report in obj.performancereport_set.all().only("end_time")
+            ]
+        )
 
     def get_not_sprayed_total(self, obj):  # pylint: disable=no-self-use
         """
@@ -322,8 +406,11 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
 
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 sop_reported_found = last_record.reported_found
                 sop_found = last_record.found
@@ -341,8 +428,11 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
 
         sops = SprayOperator.objects.filter(team_leader_assistant=obj)
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 sop_reported_sprayed = last_record.reported_sprayed
                 sop_sprayed = last_record.sprayed
@@ -356,6 +446,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
     """
     District PerformanceReportSerializer
     """
+
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
     refused = serializers.SerializerMethodField()
@@ -366,7 +457,8 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.SerializerMethodField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
-    spray_operator_code = serializers.CharField(source='code')
+    spray_operator_code = serializers.CharField(source="code")
+    spray_operator_id = serializers.CharField(source="id")
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
@@ -375,11 +467,26 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
     success_rate = serializers.SerializerMethodField()
 
     class Meta:
-        fields = ('name', 'no_of_days_worked', 'spray_operator_code',
-                  'sprayed', 'not_eligible', 'location', 'refused', 'other',
-                  'data_quality_check', 'sprayable', 'found_difference',
-                  'sprayed_difference', 'avg_start_time', 'avg_end_time',
-                  'not_sprayed_total', 'avg_structures_per_so', 'success_rate')
+        fields = (
+            "name",
+            "no_of_days_worked",
+            "spray_operator_code",
+            "spray_operator_id",
+            "sprayed",
+            "not_eligible",
+            "location",
+            "refused",
+            "other",
+            "data_quality_check",
+            "sprayable",
+            "found_difference",
+            "sprayed_difference",
+            "avg_start_time",
+            "avg_end_time",
+            "not_sprayed_total",
+            "avg_structures_per_so",
+            "success_rate",
+        )
         model = Location
 
     def get_location(self, obj):  # pylint: disable=no-self-use
@@ -413,8 +520,17 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns number of sprayable structures not eligible reason.
         """
-        return SprayDay.objects.filter(
-            sprayable=False, location__parent__parent=obj).count()
+        return (
+            SprayDay.objects.filter(
+                sprayable=False, location__parent__parent=obj
+            )
+            .exclude(
+                osmid__in=SprayDay.objects.filter(
+                    sprayable=True, location__parent__parent=obj
+                ).values("osmid")
+            )
+            .count()
+        )
 
     def get_sprayed(self, obj):  # pylint: disable=no-self-use
         """
@@ -436,10 +552,14 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
 
         quality_checks = []
         sops = SprayOperator.objects.filter(
-            team_leader_assistant__location=obj)
+            team_leader_assistant__location=obj
+        )
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 quality_checks.append(last_record.data_quality_check)
 
@@ -449,21 +569,27 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns start_time as time object.
         """
-        return average_time([
-            report.start_time
-            for report in obj.performancereport_set.all().only('start_time')
-            if report.start_time is not None
-        ])
+        return average_time(
+            [
+                report.start_time
+                for report in obj.performancereport_set.all().only(
+                    "start_time"
+                )
+                if report.start_time is not None
+            ]
+        )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
         """
         Returns end_time as time object.
         """
-        return average_time([
-            report.end_time
-            for report in obj.performancereport_set.all().only('end_time')
-            if report.end_time is not None
-        ])
+        return average_time(
+            [
+                report.end_time
+                for report in obj.performancereport_set.all().only("end_time")
+                if report.end_time is not None
+            ]
+        )
 
     def get_not_sprayed_total(self, obj):  # pylint: disable=no-self-use
         """
@@ -482,10 +608,14 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         found = 0
 
         sops = SprayOperator.objects.filter(
-            team_leader_assistant__location=obj)
+            team_leader_assistant__location=obj
+        )
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 sop_reported_found = last_record.reported_found
                 sop_found = last_record.found
@@ -502,10 +632,14 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         sprayed = 0
 
         sops = SprayOperator.objects.filter(
-            team_leader_assistant__location=obj)
+            team_leader_assistant__location=obj
+        )
         for sop in sops:
-            last_record = PerformanceReport.objects.filter(
-                spray_operator=sop).order_by('spray_date').last()
+            last_record = (
+                PerformanceReport.objects.filter(spray_operator=sop)
+                .order_by("spray_date")
+                .last()
+            )
             if last_record:
                 sop_reported_sprayed = last_record.reported_sprayed
                 sop_sprayed = last_record.sprayed
