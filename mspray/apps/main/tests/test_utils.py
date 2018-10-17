@@ -194,7 +194,6 @@ class TestUtils(TestBase):
                 x.id for x in objects.exclude(id=objects.first().id)
             ]
 
-        # import ipdb; ipdb.set_trace()
         remove_duplicate_sprayoperatordailysummary()
         # check that we removed what we needed to remove and kept what we
         # needed to keep

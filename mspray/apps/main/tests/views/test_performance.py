@@ -18,5 +18,4 @@ class TestPerformanceView(TestCase):
         request = factory.get("/")
         view = DistrictPerfomanceView.as_view()
         response = view(request)
-        __import__('ipdb').set_trace()
         self.assertEqual(response.status_code, 200)
