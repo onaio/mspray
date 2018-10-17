@@ -441,8 +441,6 @@ def add_directly_observed_spraying_data(data):
     try:
         update_directly_observed(data, submission_id, spray_operator_code)
     except DirectlyObservedSprayingForm.DoesNotExist:
-        pass
-    else:
         try:
             DirectlyObservedSprayingForm.objects.create(
                 submission_id=submission_id,
