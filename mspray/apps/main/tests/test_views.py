@@ -57,7 +57,7 @@ class TestViews(TestBase):
         self.assertFalse(tasks_mock.called)
         self.assertTrue(osm_mock.called)
 
-        # then send with OSm
+        # then send with OSM
         request_osm = self.factory.post("/api/spraydays", data_osm)
         response_osm = view(request_osm)
         self.assertEqual(response_osm.status_code, 201)
