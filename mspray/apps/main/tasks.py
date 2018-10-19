@@ -691,4 +691,9 @@ def fetch_mobilisation():
             for data_id in data_ids:
                 data = fetch_form_data(formid, dataid=data_id)
                 if data:
-                    create_mobilisation_visit(data)
+                    try:
+                        create_mobilisation_visit(data)
+                    except IntegrityError:
+                        # Fail silently, likely we did not find the household
+                        # matching the osm id.
+                        pass
