@@ -3,20 +3,19 @@
 Sensitization Visit view.
 """
 
-from rest_framework import mixins, status, viewsets
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mspray.apps.main.models.sensitization_visit import (
     create_sensitization_visit
 )
 
 
-class SensitizationVisitViewSet(
-    mixins.CreateModelMixin,  # pylint: disable=bad-continuation
-    viewsets.GenericViewSet,  # pylint: disable=bad-continuation
-):
+class SensitizationVisitView(APIView):
     """Sensitization visit viewset."""
 
-    def create(self, request, *args, **kwargs):
+    def post(self, request):
+        """Handle Sensitization visit submissions."""
         create_sensitization_visit(request.data)
         return Response(status=status.HTTP_201_CREATED)

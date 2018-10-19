@@ -18,7 +18,7 @@
                     <th rowspan="2">Eligible Spray Areas</th>
                     <th colspan="2">Spray Areas Visited <sup title="A spray area is defined as 'Visited' if at least 20% of the structures on the ground within that area have been found and have data recorded against them.">(a)</sup></th>
                     <th colspan="2">Spray Areas Sprayed Effectively<sup title="A spray area is defined as 'Sprayed Effectively' if at least 90% of the structures on the ground within that area have been sprayed.">(b)</sup></th>
-                    <th rowspan="2">Sensitised</th>
+                    <th rowspan="2">Community Readiness</th>
                     <th rowspan="2">Mobilised</th>
                 </tr>
                 <tr>
@@ -36,7 +36,7 @@
                     <th>Spray Effectiveness</th>
                     <th>Found coverage</th>
                     <th>Spray coverage</th>
-                    <th>Sensitised?</th>
+                    <th>Community Ready?</th>
                     <th>Mobilised?</th>
                 </tr>
                 {% endif%}
@@ -109,7 +109,7 @@
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage district.visited_sprayed district.found as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
-                        <td class=''>{{ district.is_sensitized }}</td>
+                        <td class=''>{{ district.sensitized }}</td>
                         <td class=''>{{ district.mobilised }}</td>
                     </tr>
                 {% endfor %}
@@ -153,7 +153,7 @@
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
-                        <td class=''>{{ district_totals.sensitized }}</td>
+                        <td class=''>&nbsp;</td>
                         <td class=''>&nbsp;</td>
                     {% endif%}
                 </tr>

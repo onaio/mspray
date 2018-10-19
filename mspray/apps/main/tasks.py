@@ -18,6 +18,7 @@ from mspray.apps.main.models import (
     Household,
     Location,
     Mobilisation,
+    SensitizationVisit,
     SprayDay,
     SprayOperatorDailySummary,
     WeeklyReport,
@@ -661,16 +662,38 @@ def sync_performance_reports():
         performance_report(record.spray_operator)
 
 
+def get_missing_ids(formid, target_class):
+    """Return submission ids not yet synchronised."""
+    data_ids = fetch_form_data(formid, dataids_only=True)
+    if data_ids:
+        data_ids = set(i["_id"] for i in data_ids)
+        existing = set(
+            i
+            for i in target_class.objects.values_list(
+                "submission_id", flat=True
+            )
+        )
+
+        return data_ids - existing
+
+    return []
+
+
 @app.task
 def fetch_sensitization_visits():
     """Fetch sensitization visit submissions."""
     formid = getattr(settings, "SENSITIZATION_VISIT_FORM_ID", None)
     if formid:
-        data_ids = fetch_form_data(formid, dataids_only=True)
+        data_ids = get_missing_ids(formid, SensitizationVisit)
         for data_id in data_ids:
-            data = fetch_form_data(formid, dataid=data_id["_id"])
+            data = fetch_form_data(formid, dataid=data_id)
             if data:
-                create_sensitization_visit(data)
+                try:
+                    create_sensitization_visit(data)
+                except IntegrityError:
+                    # Fail silently, likely we did not find the household
+                    # matching the osm id.
+                    pass
 
 
 @app.task
@@ -678,22 +701,13 @@ def fetch_mobilisation():
     """Fetch mobilisation submissions."""
     formid = getattr(settings, "MOBILISATION_FORM_ID", None)
     if formid:
-        data_ids = fetch_form_data(formid, dataids_only=True)
-        if data_ids:
-            data_ids = set(i["_id"] for i in data_ids)
-            existing = set(
-                i
-                for i in Mobilisation.objects.values_list(
-                    "submission_id", flat=True
-                )
-            )
-            data_ids = data_ids - existing
-            for data_id in data_ids:
-                data = fetch_form_data(formid, dataid=data_id)
-                if data:
-                    try:
-                        create_mobilisation_visit(data)
-                    except IntegrityError:
-                        # Fail silently, likely we did not find the household
-                        # matching the osm id.
-                        pass
+        data_ids = get_missing_ids(formid, Mobilisation)
+        for data_id in data_ids:
+            data = fetch_form_data(formid, dataid=data_id)
+            if data:
+                try:
+                    create_mobilisation_visit(data)
+                except IntegrityError:
+                    # Fail silently, likely we did not find the household
+                    # matching the osm id.
+                    pass

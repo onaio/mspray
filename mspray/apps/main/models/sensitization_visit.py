@@ -68,7 +68,7 @@ def create_sensitization_visit(data):
     """Creates a SensitizationVisit object from a Sensitization Visit form.
     """
     district = health_facility = household = spray_area = None
-    is_sensitized = data.get(SENSITIZED_FIELD) in ["Yes"]
+    is_sensitized = data.get(SENSITIZED_FIELD) in ["Yes", "yes"]
     submission_id = data.get(DATA_ID_FIELD)
     osmid = data.get(OSM_ID_FIELD)
     try:

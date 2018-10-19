@@ -1,24 +1,28 @@
-from django.contrib.postgres.fields.jsonb import KeyTextTransform
-from django.db.models import Case, Count, F, Sum, When, Value
-from django.db.models import IntegerField
-from django.db.models.functions import Cast, Coalesce
+# -*- coding: utf-8 -*-
+"""TargetArea serializer module.
+"""
 from django.conf import settings
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.core.cache import cache
 from django.db import connection
+from django.db.models import Case, Count, F, IntegerField, Sum, Value, When
+from django.db.models.functions import Cast, Coalesce
 
 from rest_framework import serializers
-from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from rest_framework_gis.fields import GeometryField
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.spray_day import SprayDay
 from mspray.apps.main.models.spray_operator import SprayOperatorDailySummary
 from mspray.apps.main.models.spraypoint import SprayPoint
 from mspray.apps.main.models.target_area import TargetArea
-from mspray.apps.main.utils import get_ta_in_location
-from mspray.apps.main.utils import sprayable_queryset
-from mspray.apps.main.utils import parse_spray_date
-from mspray.libs.common_tags import MOBILISED_FIELD
+from mspray.apps.main.utils import (
+    get_ta_in_location,
+    parse_spray_date,
+    sprayable_queryset,
+)
+from mspray.libs.common_tags import MOBILISED_FIELD, SENSITIZED_FIELD
 
 FUNCTION_TEMPLATE = "%(function)s(%(expressions)s AS FLOAT)"
 
@@ -1123,13 +1127,11 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
         if isinstance(obj, dict):
             location = Location.objects.get(pk=obj["pk"])
         queryset = location.sv_spray_areas
+        sensitized = queryset.first()
+        if sensitized:
+            return sensitized.data.get(SENSITIZED_FIELD)
 
-        return (
-            queryset.filter(is_sensitized=True)
-            .values("spray_area")
-            .distinct()
-            .count()
-        )
+        return ""
 
     def get_mobilised(self, obj):  # pylint: disable=no-self-use
         """Return number of spray areas that have been mobilised."""
@@ -1142,7 +1144,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
         if mobilisation:
             return mobilisation.data.get(MOBILISED_FIELD)
 
-        return ''
+        return ""
 
 
 class TargetAreaRichSerializer(
