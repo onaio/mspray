@@ -3,14 +3,19 @@
 """
 from unittest.mock import patch
 
-from mspray.apps.main.models import SensitizationVisit, SprayDay
+from mspray.apps.main.models import Mobilisation, SensitizationVisit, SprayDay
 from mspray.apps.main.tasks import (
+    fetch_mobilisation,
     fetch_sensitization_visits,
     link_spraypoint_with_osm,
     run_tasks_after_spray_data,
 )
 from mspray.apps.main.tests.test_base import TestBase
-from mspray.apps.main.tests.utils import SENSITIZATION_VISIT_DATA, data_setup
+from mspray.apps.main.tests.utils import (
+    MOBILISATION_VISIT_DATA,
+    SENSITIZATION_VISIT_DATA,
+    data_setup,
+)
 from mspray.apps.main.utils import add_spray_data
 from mspray.celery import app
 
@@ -161,3 +166,16 @@ class TestTasks(TestBase):
         with self.settings(SENSITIZATION_VISIT_FORM_ID=343725):
             fetch_sensitization_visits()
             self.assertEqual(SensitizationVisit.objects.count(), count + 1)
+
+    @patch("mspray.apps.main.tasks.fetch_form_data")
+    def test_fetch_mobilisation(self, fetch_form_data):
+        """Test fetching mobilisation submissions."""
+        data_setup()
+        fetch_form_data.side_effect = [
+            [{"_id": 343725}],
+            MOBILISATION_VISIT_DATA,
+        ]
+        count = Mobilisation.objects.count()
+        with self.settings(MOBILISATION_FORM_ID=343725):
+            fetch_mobilisation()
+            self.assertEqual(Mobilisation.objects.count(), count + 1)

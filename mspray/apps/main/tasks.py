@@ -21,19 +21,20 @@ from mspray.apps.main.models import (
     SprayOperatorDailySummary,
     WeeklyReport,
 )
+from mspray.apps.main.models.mobilisation import create_mobilisation_visit
+from mspray.apps.main.models.sensitization_visit import (
+    create_sensitization_visit
+)
 from mspray.apps.main.models.spray_day import (
     NON_STRUCTURE_GPS_FIELD,
     STRUCTURE_GPS_FIELD,
     get_osmid,
 )
-from mspray.libs.ona import fetch_form_data, fetch_osm_xml
-from mspray.libs.osm import parse_osm, parse_osm_nodes, parse_osm_ways
 from mspray.apps.warehouse.tasks import stream_to_druid
 from mspray.celery import app
+from mspray.libs.ona import fetch_form_data, fetch_osm_xml
+from mspray.libs.osm import parse_osm, parse_osm_nodes, parse_osm_ways
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.main.models.sensitization_visit import (
-    create_sensitization_visit
-)
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)  # default to 4m
 HAS_UNIQUE_FIELD = getattr(settings, "MSPRAY_UNIQUE_FIELD", None)
@@ -661,7 +662,7 @@ def sync_performance_reports():
 
 @app.task
 def fetch_sensitization_visits():
-    """Fetch sensitization visit submissions from Ona data platform."""
+    """Fetch sensitization visit submissions."""
     formid = getattr(settings, "SENSITIZATION_VISIT_FORM_ID", None)
     if formid:
         data_ids = fetch_form_data(formid, dataids_only=True)
@@ -669,3 +670,15 @@ def fetch_sensitization_visits():
             data = fetch_form_data(formid, dataid=data_id["_id"])
             if data:
                 create_sensitization_visit(data)
+
+
+@app.task
+def fetch_mobilisation():
+    """Fetch mobilisation submissions."""
+    formid = getattr(settings, "MOBILISATION_FORM_ID", None)
+    if formid:
+        data_ids = fetch_form_data(formid, dataids_only=True)
+        for data_id in data_ids:
+            data = fetch_form_data(formid, dataid=data_id["_id"])
+            if data:
+                create_mobilisation_visit(data)
