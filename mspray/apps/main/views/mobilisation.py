@@ -3,18 +3,17 @@
 Mobilisation view.
 """
 
-from rest_framework import mixins, status, viewsets
+from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from mspray.apps.main.models.mobilisation import create_mobilisation_visit
 
 
-class MobilisationViewSet(
-    mixins.CreateModelMixin,  # pylint: disable=bad-continuation
-    viewsets.GenericViewSet,  # pylint: disable=bad-continuation
-):
+class MobilisationView(APIView):
     """Mobilisation viewset."""
 
-    def create(self, request, *args, **kwargs):
+    def post(self, request):
+        """Handle a Mobilisation submission."""
         create_mobilisation_visit(request.data)
         return Response(status=status.HTTP_201_CREATED)

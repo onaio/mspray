@@ -26,7 +26,7 @@ from mspray.apps.main.views import (
     target_area,
     user,
 )
-from mspray.apps.main.views.mobilisation import MobilisationViewSet
+from mspray.apps.main.views.mobilisation import MobilisationView
 from mspray.apps.main.views.sensitization_visit import (
     SensitizationVisitViewSet
 )
@@ -152,7 +152,7 @@ urlpatterns = [  # pylint: disable=C0103
     ),
     path(
         "mobilisation-visit",
-        MobilisationViewSet.as_view({"post": "create"}),
+        MobilisationView.as_view(),
         name="mobilisation-visit",
     ),
     path("mop-up", MopUpView.as_view(), name="mop-up"),
