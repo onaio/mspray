@@ -434,9 +434,8 @@ def set_district_sprayed_visited():
     """
     Update sprayed and visited numbers on all objects.
     """
-    for location in Location.objects.filter(
-        level="ta", target=True
-    ).iterator():
+    queryset = Location.objects.filter(level="ta", target=True)
+    for location in queryset.iterator():
         set_sprayed_visited(location)
 
     for location in Location.objects.filter(level="RHC"):
@@ -448,9 +447,13 @@ def set_district_sprayed_visited():
 
 @app.task
 def remove_deleted_records():
+    """Remove deleted records."""
     count = 0
     if FORM_ID:
         data = fetch_form_data(FORM_ID, dataids_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         deleted_submissions = SprayDay.objects.exclude(submission_id__in=pks)
         count = deleted_submissions.count()
@@ -467,6 +470,9 @@ def update_edited_records():
     count = 0
     if FORM_ID:
         data = fetch_form_data(FORM_ID, dataids_only=True, edited_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         edited_submissions = SprayDay.objects.filter(submission_id__in=pks)
         for rec in edited_submissions:
@@ -490,6 +496,9 @@ def remove_deleted_daily_summary_records():
     formid = summary and summary.data.get("_xform_id")
     if formid:
         data = fetch_form_data(formid, dataids_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         records = SprayOperatorDailySummary.objects.exclude(
             submission_id__in=pks
@@ -510,6 +519,9 @@ def fetch_directly_observed():
     formid = dos.data.get("_xform_id") if dos else DIRECTLY_OBSERVED_FORM_ID
     if formid:
         data = fetch_form_data(formid, dataids_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         received = DirectlyObservedSprayingForm.objects.values_list(
             "submission_id", flat=True
@@ -539,6 +551,9 @@ def fetch_updated_directly_observed():
     formid = dos.data.get("_xform_id") if dos else DIRECTLY_OBSERVED_FORM_ID
     if formid:
         data = fetch_form_data(formid, dataids_only=True, edited_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         for rec in pks:
             data = fetch_form_data(formid, dataid=rec)
@@ -563,6 +578,9 @@ def remove_deleted_dos_records():
     formid = dos.data.get("_xform_id") if dos else DIRECTLY_OBSERVED_FORM_ID
     if formid:
         data = fetch_form_data(formid, dataids_only=True)
+        if not data:
+            return count
+
         pks = [i["_id"] for i in data]
         deleted_submissions = DirectlyObservedSprayingForm.objects.exclude(
             submission_id__in=pks
