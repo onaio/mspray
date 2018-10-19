@@ -2,6 +2,7 @@
 """
 Location model module.
 """
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.models import Q
 
@@ -106,3 +107,22 @@ class Location(MPTTModel, models.Model):
         return self.sprayday_set.filter(
             sprayable=True, was_sprayed=True
         ).count()
+
+    @property
+    def mopup_days_needed(self):
+        """Return the number of structures to reach 90% divide by 45"""
+        denominator = getattr(settings, "MOPUP_DAYS_DENOMINATOR", 45)
+        if self.level != "ta":
+            return sum(
+                [
+                    l.mopup_days_needed
+                    for l in self.get_descendants().filter(level="ta")
+                ]
+            )
+
+        return round(
+            self.household_set.filter(
+                Q(visited=False) | Q(visited__isnull=True)
+            ).count()
+            / denominator
+        )

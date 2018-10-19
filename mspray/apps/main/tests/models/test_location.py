@@ -39,3 +39,21 @@ class TestLocation(TestCase):
         load_spray_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.visited_sprayed, 5)
+
+    def test_mopup_days_needed(self):
+        """Test return number of mopup days needed."""
+        data_setup()
+        with self.settings(MOPUP_DAYS_DENOMINATOR=5):
+            akros_2 = Location.objects.get(name="Akros_2", level="ta")
+            self.assertEqual(akros_2.mopup_days_needed, 3)
+
+            lusaka = Location.objects.get(name="Lusaka", level="district")
+            self.assertEqual(lusaka.mopup_days_needed, 6)
+
+            # load some spray data
+            load_spray_data()
+
+            akros_2.refresh_from_db()
+            self.assertEqual(akros_2.mopup_days_needed, 0)
+
+            self.assertEqual(lusaka.mopup_days_needed, 3)
