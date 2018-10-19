@@ -7,9 +7,7 @@ from django.urls import reverse
 
 from mspray.apps.main.models import SensitizationVisit
 from mspray.apps.main.tests.utils import SENSITIZATION_VISIT_DATA, data_setup
-from mspray.apps.main.views.sensitization_visit import (
-    SensitizationVisitView
-)
+from mspray.apps.main.views.sensitization_visit import SensitizationVisitView
 
 
 class TestSensitizationVisit(TestCase):

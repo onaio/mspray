@@ -8,10 +8,12 @@ from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
 
 from mspray.apps.main.models.household import Household
+from mspray.apps.main.models.location import Location
 from mspray.libs.common_tags import (
     DATA_ID_FIELD,
     SENSITIZATION_OSM_FIELD,
     SENSITIZED_FIELD,
+    SPRAY_AREA_FIELD,
 )
 
 OSM_ID_FIELD = "{}:way:id".format(SENSITIZATION_OSM_FIELD)
@@ -71,15 +73,29 @@ def create_sensitization_visit(data):
     is_sensitized = data.get(SENSITIZED_FIELD) in ["Yes", "yes"]
     submission_id = data.get(DATA_ID_FIELD)
     osmid = data.get(OSM_ID_FIELD)
-    try:
-        household = Household.objects.get(hh_id=osmid)
-    except Household.DoesNotExist:
-        pass
+
+    # get household by osmid
+    if osmid:
+        try:
+            household = Household.objects.get(hh_id=osmid)
+        except Household.DoesNotExist:
+            pass
 
     if household:
         district = household.location.parent.parent
         health_facility = household.location.parent
         spray_area = household.location
+    else:
+        spray_area = data.get(SPRAY_AREA_FIELD)
+        if spray_area:
+            # get location by spray_area
+            try:
+                spray_area = Location.objects.get(name=spray_area, level="ta")
+            except Location.DoesNotExist:
+                spray_area = None
+            else:
+                district = spray_area.parent.parent
+                health_facility = spray_area.parent
 
     return SensitizationVisit.objects.create(
         data=data,

@@ -58,6 +58,31 @@ SENSITIZATION_VISIT_DATA = {
     "subscriberid": "645017733573627",
 }
 
+SENSITIZATION_VISIT_DATA_NO_OSM = {
+    "osmstructure:sensitized": "No",
+    "values_from_omk/sensitized": "Yes",
+    "date": "2018-09-25",
+    "coordinator_name": "1",
+    "tla_name": "1",
+    "spray_area": "Akros_2",
+    "end": "2018-09-25T13:06:05.254+02",
+    "district": "1",
+    "health_facility": "1",
+    "start": "2018-09-25T13:04:04.015+02",
+    "sensitized1/Villagename": "Kabulonga",
+    "today": "2018-09-25",
+    "meta/instanceID": "uuid:02d92c3a-83a1-49a3-8a67-a2a22b54833a",
+    "_uuid": "02d92c3a-83a1-49a3-8a67-a2a22b54833a",
+    "meta/instanceName": "2018-09-25 - SEN - 1 -Yes -Kabulonga",
+    "imei": "357770076803649",
+    "sensitized1/hh_pop": 10,
+    "_xform_id": 343725,
+    "_submission_time": "2018-09-25T11:06:15",
+    "deviceid": "357770076803649",
+    "_id": 34857737,
+    "subscriberid": "645017733573627",
+}
+
 MOBILISATION_VISIT_DATA = {
     "osmstructure:way:id": "528511960",
     "osmstructure:mobilized": "Yes",
