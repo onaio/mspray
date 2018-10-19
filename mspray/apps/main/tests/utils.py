@@ -60,8 +60,8 @@ SENSITIZATION_VISIT_DATA = {
 
 MOBILISATION_VISIT_DATA = {
     "osmstructure:way:id": "528511960",
-    "osmstructure:mobilised": "Yes",
-    "values_from_omk/mobilised": "Yes",
+    "osmstructure:mobilized": "Yes",
+    "values_from_omk/mobilized": "Yes",
     "date": "2018-09-25",
     "coordinator_name": "1",
     "tla_name": "1",
