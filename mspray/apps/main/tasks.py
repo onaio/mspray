@@ -17,6 +17,7 @@ from mspray.apps.main.models import (
     DirectlyObservedSprayingForm,
     Household,
     Location,
+    Mobilisation,
     SprayDay,
     SprayOperatorDailySummary,
     WeeklyReport,
@@ -678,7 +679,16 @@ def fetch_mobilisation():
     formid = getattr(settings, "MOBILISATION_FORM_ID", None)
     if formid:
         data_ids = fetch_form_data(formid, dataids_only=True)
-        for data_id in data_ids:
-            data = fetch_form_data(formid, dataid=data_id["_id"])
-            if data:
-                create_mobilisation_visit(data)
+        if data_ids:
+            data_ids = set(i["_id"] for i in data_ids)
+            existing = set(
+                i
+                for i in Mobilisation.objects.values_list(
+                    "submission_id", flat=True
+                )
+            )
+            data_ids = data_ids - existing
+            for data_id in data_ids:
+                data = fetch_form_data(formid, dataid=data_id)
+                if data:
+                    create_mobilisation_visit(data)
