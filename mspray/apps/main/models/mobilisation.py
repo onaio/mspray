@@ -68,7 +68,7 @@ def create_mobilisation_visit(data):
     """Creates a Mobilisation object from a Mobilisation Visit form.
     """
     district = health_facility = household = spray_area = None
-    is_mobilised = data.get(MOBILISED_FIELD) in ["Yes"]
+    is_mobilised = data.get(MOBILISED_FIELD) in ["Yes", "paper"]
     submission_id = data.get(DATA_ID_FIELD)
     osmid = data.get(OSM_ID_FIELD)
     try:

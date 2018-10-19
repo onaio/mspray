@@ -18,6 +18,7 @@ from mspray.apps.main.models.target_area import TargetArea
 from mspray.apps.main.utils import get_ta_in_location
 from mspray.apps.main.utils import sprayable_queryset
 from mspray.apps.main.utils import parse_spray_date
+from mspray.libs.common_tags import MOBILISED_FIELD
 
 FUNCTION_TEMPLATE = "%(function)s(%(expressions)s AS FLOAT)"
 
@@ -1068,7 +1069,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             "is_sensitized",
             "sensitized",
             "is_mobilised",
-            "mobilised"
+            "mobilised",
         )
         model = Location
 
@@ -1137,12 +1138,11 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             location = Location.objects.get(pk=obj["pk"])
         queryset = location.mb_spray_areas
 
-        return (
-            queryset.filter(is_mobilised=True)
-            .values("spray_area")
-            .distinct()
-            .count()
-        )
+        mobilisation = queryset.first()
+        if mobilisation:
+            return mobilisation.data.get(MOBILISED_FIELD)
+
+        return ''
 
 
 class TargetAreaRichSerializer(

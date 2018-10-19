@@ -13,7 +13,7 @@ SENSITIZATION_OSM_FIELD = getattr(
     settings, "SENSITIZATION_OSM_FIELD", "osmstructure"
 )
 MOBILISED_FIELD = getattr(
-    settings, "MOBILISED_FIELD", "osmstructure:mobilised"
+    settings, "MOBILISED_FIELD", "osmstructure:mobilized"
 )
 MOBILISATION_OSM_FIELD = getattr(
     settings, "MOBILISATION_OSM_FIELD", "osmstructure"
