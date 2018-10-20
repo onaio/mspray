@@ -165,9 +165,10 @@ def run_tasks_after_spray_data(sprayday):
 
 
 @app.task
-def add_unique_record(pk, location_pk):
+def add_unique_record(sprayday_pk, location_pk):
+    """Add a spraypoint for the submission."""
     try:
-        sp = SprayDay.objects.get(pk=pk)
+        sprayday = SprayDay.objects.get(pk=sprayday_pk)
         location = Location.objects.get(pk=location_pk)
     except (SprayDay.DoesNotExist, Location.DoesNotExist):
         pass
@@ -175,26 +176,33 @@ def add_unique_record(pk, location_pk):
         from mspray.apps.main.utils import add_unique_data
 
         osmid = (
-            get_osmid(sp.data)
-            or get_updated_osm_from_ona(sp)
-            or sp.data.get("newstructure/gps")
+            get_osmid(sprayday.data)
+            or get_updated_osm_from_ona(sprayday)
+            or sprayday.data.get("newstructure/gps")
         )
         if osmid:
-            if int(osmid) > 0:
-                # see if we have a matching household structure
-                try:
-                    Household.objects.get(hh_id=osmid)
-                except Household.DoesNotExist:
+            try:
+                osmid = int(osmid)
+            except ValueError:
+                pass
+            else:
+                if osmid > 0:
+                    # see if we have a matching household structure
                     try:
-                        household = Household.objects.get(bgeom=sp.bgeom)
+                        Household.objects.get(hh_id=osmid)
                     except Household.DoesNotExist:
-                        pass
-                    else:
-                        osmid = household.hh_id
-                        sp.osmid = osmid
-                        sp.save()
-                        sp.refresh_from_db()
-            add_unique_data(sp, HAS_UNIQUE_FIELD, location, osmid)
+                        try:
+                            household = Household.objects.get(
+                                bgeom=sprayday.bgeom
+                            )
+                        except Household.DoesNotExist:
+                            pass
+                        else:
+                            osmid = household.hh_id
+                            sprayday.osmid = osmid
+                            sprayday.save()
+                            sprayday.refresh_from_db()
+            add_unique_data(sprayday, HAS_UNIQUE_FIELD, location, osmid)
 
 
 @app.task
