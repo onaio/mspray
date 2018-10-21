@@ -150,7 +150,7 @@ class Location(MPTTModel, models.Model):
         )
 
     @property
-    def found(self):
+    def visited_found(self):
         """Return the number of structures found on the ground
 
         The number of households visited

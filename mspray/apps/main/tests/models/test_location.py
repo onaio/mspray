@@ -67,12 +67,12 @@ class TestLocation(TestCase):
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.structures_on_ground, 9)
 
-    def test_found(self):
+    def test_visited_found(self):
         """Test found"""
         data_setup()
         load_spray_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_2.found, 8)
+        self.assertEqual(akros_2.visited_found, 8)
 
     def test_last_visit(self):
         """Test last_visit"""

@@ -52,11 +52,11 @@
                             {{ spray_effectiveness }}
                         </td>
                         <td>
-                            {% calc_percentage location.found location.structures_on_ground as found_coverage %}
+                            {% calc_percentage location.visited_found location.structures_on_ground as found_coverage %}
                             {{ found_coverage }}
                         </td>
                         <td>
-                            {% calc_percentage location.visited_sprayed location.found as spray_coverage %}
+                            {% calc_percentage location.visited_sprayed location.visited_found as spray_coverage %}
                             {{ spray_coverage }}
                         </td>
                         <td>
