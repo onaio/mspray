@@ -48,7 +48,8 @@
                             {{ location.mopup_days_needed }}
                         </td>
                         <td>
-                            {{ location.spray_effectiveness }}
+                            {% calc_percentage location.visited_sprayed location.structures_on_ground as spray_effectiveness %}
+                            {{ spray_effectiveness }}
                         </td>
                         <td>
                             {{ location.found_coverage }}
