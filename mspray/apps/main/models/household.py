@@ -21,6 +21,7 @@ class Household(models.Model):
     visited = models.NullBooleanField(null=True)
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
+    sprayable = models.NullBooleanField(null=True)
 
     class Meta:
         app_label = "main"

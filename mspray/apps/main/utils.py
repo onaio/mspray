@@ -267,6 +267,8 @@ def add_spray_data(data):
     sprayday, created = SprayDay.objects.get_or_create(
         submission_id=submission_id, spray_date=spray_date
     )
+    sprayday.data = data
+    sprayday.save()
 
     if created:
         if geom is not None:
@@ -280,9 +282,10 @@ def add_spray_data(data):
         location = sprayday.location = household.location
         if not household.visited:
             household.visited = True
+        if not household.sprayable:
+            household.sprayable = sprayday.sprayable
+        if not household.visited or not household.sprayable:
             household.save()
-
-    sprayday.data = data
 
     if settings.OSM_SUBMISSIONS and geom is not None:
         sprayday.geom = geom
