@@ -126,3 +126,59 @@ class Location(MPTTModel, models.Model):
             ).count()
             / denominator
         )
+
+    @property
+    def not_sprayable(self):
+        """Return number of structures that are not sprayable."""
+        return self.household_set.filter(sprayable=False).count()
+
+    @property
+    def structures_on_ground(self):
+        """Return the number of structures on the ground.
+
+        The number of enumerated households (Households count).
+        Subtract the number of structures not sprayable.
+        Add new structures .
+        """
+        new_structures = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+        return (
+            self.household_set.exclude(sprayable=False).count()
+            + new_structures
+        )
+
+    @property
+    def visited_found(self):
+        """Return the number of structures found on the ground
+
+        The number of households visited
+        Add number of new structures sprayed.
+        """
+        new_structures = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+        return (
+            self.household_set.filter(sprayable=True, visited=True).count()
+            + new_structures
+        )
+
+    @property
+    def last_visit(self):
+        """Return the date of last submission."""
+        last_sprayday = self.sprayday_set.last()
+        if last_sprayday:
+            return last_sprayday.spray_date
+
+        return ""
+
+    @property
+    def last_decision_date(self):
+        """Return the date of last decision report."""
+        decision = self.decision_spray_areas.last()
+        if decision:
+            return decision.data.get("today")
+
+        return ""

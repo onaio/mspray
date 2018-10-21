@@ -94,7 +94,6 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         districts = Location.objects.filter(parent=None).order_by("name")
 
         queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
-
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
         num_of_districts = round(districts.count())
         num_of_succes_rates = round(len([i for i in serializer.data]))

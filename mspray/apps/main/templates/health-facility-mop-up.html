@@ -36,7 +36,7 @@
                             {{ location.name }}
                         </td>
                         <td class='numbers'>
-                            {{ location.structures }}
+                            {{ location.structures_on_ground }}
                         </td>
                         <td class='numbers'>
                             {{ location.visited_sprayed }}
@@ -48,19 +48,22 @@
                             {{ location.mopup_days_needed }}
                         </td>
                         <td>
-                            {{ location.spray_effectiveness }}
+                            {% calc_percentage location.visited_sprayed location.structures_on_ground as spray_effectiveness %}
+                            {{ spray_effectiveness }}
                         </td>
                         <td>
-                            {{ location.found_coverage }}
+                            {% calc_percentage location.visited_found location.structures_on_ground as found_coverage %}
+                            {{ found_coverage }}
                         </td>
                         <td>
-                            {{ location.spray_coverage }}
+                            {% calc_percentage location.visited_sprayed location.visited_found as spray_coverage %}
+                            {{ spray_coverage }}
                         </td>
                         <td>
                             {{ location.last_visit }}
                         </td>
                         <td>
-                            {{ location.last_decision_form }}
+                            {{ location.last_decision_date }}
                         </td>
                     </tr>
                 {% endfor %}

@@ -12,7 +12,6 @@ from django.urls import path
 from rest_framework import routers
 
 from mspray.apps.alerts import urls as alerts_urls
-from mspray.apps.main.views.mopup import MopUpView, HealthFacilityMopUpView
 from mspray.apps.main.views import directly_observed_spraying_form as dos_form
 from mspray.apps.main.views import (
     districts,
@@ -26,10 +25,10 @@ from mspray.apps.main.views import (
     target_area,
     user,
 )
+from mspray.apps.main.views.decision import DecisionView
 from mspray.apps.main.views.mobilisation import MobilisationView
-from mspray.apps.main.views.sensitization_visit import (
-    SensitizationVisitView
-)
+from mspray.apps.main.views.mopup import HealthFacilityMopUpView, MopUpView
+from mspray.apps.main.views.sensitization_visit import SensitizationVisitView
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
 
@@ -155,6 +154,7 @@ urlpatterns = [  # pylint: disable=C0103
         MobilisationView.as_view(),
         name="mobilisation-visit",
     ),
+    path("decision-visit", DecisionView.as_view(), name="decision-visit"),
     path("mop-up", MopUpView.as_view(), name="mop-up"),
     path(
         "mop-up/<int:district>",
