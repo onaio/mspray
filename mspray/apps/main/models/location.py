@@ -126,3 +126,8 @@ class Location(MPTTModel, models.Model):
             ).count()
             / denominator
         )
+
+    @property
+    def not_sprayable(self):
+        """Return number of structures that are not sprayable."""
+        return self.household_set.filter(sprayable=False).count()
