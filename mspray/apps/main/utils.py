@@ -284,7 +284,7 @@ def add_spray_data(data):
             household.visited = True
         if not household.sprayable:
             household.sprayable = sprayday.sprayable
-        if not household.visited or not household.sprayable:
+        if household.visited or household.sprayable:
             household.save()
 
     if settings.OSM_SUBMISSIONS and geom is not None:

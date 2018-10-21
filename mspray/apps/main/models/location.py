@@ -131,3 +131,20 @@ class Location(MPTTModel, models.Model):
     def not_sprayable(self):
         """Return number of structures that are not sprayable."""
         return self.household_set.filter(sprayable=False).count()
+
+    @property
+    def structures_on_ground(self):
+        """Return the number of structures on the ground.
+
+        The number of enumerated households (Households count).
+        Subtract the number of structures not sprayable.
+        Add new structures .
+        """
+        new_structures = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+        return (
+            self.household_set.exclude(sprayable=False).count()
+            + new_structures
+        )

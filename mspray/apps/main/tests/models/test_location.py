@@ -57,3 +57,10 @@ class TestLocation(TestCase):
             self.assertEqual(akros_2.mopup_days_needed, 0)
 
             self.assertEqual(lusaka.mopup_days_needed, 3)
+
+    def test_structures_on_ground(self):
+        """Test structures_on_ground"""
+        data_setup()
+        load_spray_data()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.structures_on_ground, 9)
