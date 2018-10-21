@@ -173,3 +173,12 @@ class Location(MPTTModel, models.Model):
             return last_sprayday.spray_date
 
         return ""
+
+    @property
+    def last_decision_date(self):
+        """Return the date of last decision report."""
+        decision = self.decision_spray_areas.last()
+        if decision:
+            return decision.data.get("today")
+
+        return ""
