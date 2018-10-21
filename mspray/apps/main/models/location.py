@@ -148,3 +148,19 @@ class Location(MPTTModel, models.Model):
             self.household_set.exclude(sprayable=False).count()
             + new_structures
         )
+
+    @property
+    def found(self):
+        """Return the number of structures found on the ground
+
+        The number of households visited
+        Add number of new structures sprayed.
+        """
+        new_structures = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+        return (
+            self.household_set.filter(sprayable=True, visited=True).count()
+            + new_structures
+        )
