@@ -2,6 +2,8 @@
 """
 Test Location model module.
 """
+import datetime
+
 from django.test import TestCase
 
 from mspray.apps.main.models.location import Location
@@ -71,3 +73,10 @@ class TestLocation(TestCase):
         load_spray_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.found, 8)
+
+    def test_last_visit(self):
+        """Test last_visit"""
+        data_setup()
+        load_spray_data()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.last_visit, datetime.date(2018, 9, 20))

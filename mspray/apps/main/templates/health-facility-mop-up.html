@@ -56,7 +56,8 @@
                             {{ found_coverage }}
                         </td>
                         <td>
-                            {{ location.spray_coverage }}
+                            {% calc_percentage location.visited_sprayed location.found as spray_coverage %}
+                            {{ spray_coverage }}
                         </td>
                         <td>
                             {{ location.last_visit }}

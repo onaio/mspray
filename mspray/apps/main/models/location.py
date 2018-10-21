@@ -164,3 +164,12 @@ class Location(MPTTModel, models.Model):
             self.household_set.filter(sprayable=True, visited=True).count()
             + new_structures
         )
+
+    @property
+    def last_visit(self):
+        """Return the date of last submission."""
+        last_sprayday = self.sprayday_set.last()
+        if last_sprayday:
+            return last_sprayday.spray_date
+
+        return ""
