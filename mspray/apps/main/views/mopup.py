@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Mop-up view module.
 """
+from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
 from mspray.apps.main.models import Location
@@ -32,6 +33,9 @@ class HealthFacilityMopUpView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["site_name"] = "Mop-up"
+        context["district"] = get_object_or_404(
+            Location, pk=self.kwargs["district"]
+        )
 
         return context
 

@@ -71,14 +71,23 @@
             <tfoot>
                 <tr>
                     <td>Total</a></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
+                    <td class='numbers'>{{ district.name }}</td>
+                    <td class='numbers'>{{ district.structures_on_ground }}</td>
+                    <td class='numbers'>{{ district.visited_sprayed }}</td>
+                    <td class='numbers'>{{ district.structures_to_mopup }}</td>
+                    <td class='numbers'>{{ district.mopup_days_needed }}</td>
+                    <td class='numbers'>
+                        {% calc_percentage district.visited_sprayed district.structures_on_ground as spray_effectiveness %}
+                        {{ spray_effectiveness }}
+                    </td>
+                    <td class='numbers'>
+                        {% calc_percentage district.visited_found district.structures_on_ground as found_coverage %}
+                        {{ found_coverage }}
+                    </td>
+                    <td class='numbers'>
+                        {% calc_percentage district.visited_sprayed district.visited_found as spray_coverage %}
+                        {{ spray_coverage }}
+                    </td>
                     <td class='numbers'></td>
                     <td class='numbers'></td>
                 </tr>
