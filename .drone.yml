@@ -1,8 +1,9 @@
 pipeline:
     build:
-        image: python:3.6
+        image: python:3.6-stretch
         commands:
-            - apt-get update && apt-get install -y libgdal-dev
+            - apt-get update
+            - apt-get install -y libgdal-dev
             - pip install -r requirements.pip
             - pip install -r requirements-dev.pip
             - python manage.py test
