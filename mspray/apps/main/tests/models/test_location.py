@@ -28,12 +28,17 @@ class TestLocation(TestCase):
     def test_structures_to_mopup(self):
         """Test calculating number of structures that need mopup."""
         data_setup()
-        load_spray_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_2.structures_to_mopup, 1)
+        self.assertEqual(akros_2.structures_to_mopup, 12)
+
+        load_spray_data()
+        akros_2.refresh_from_db()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        # 90th percentile is 8 , sprayed is 5, difference is 3
+        self.assertEqual(akros_2.structures_to_mopup, 3)
 
         lusaka = Location.objects.get(name="Lusaka", level="district")
-        self.assertEqual(lusaka.structures_to_mopup, 2)
+        self.assertEqual(lusaka.structures_to_mopup, 15)
 
     def test_visited_sprayed(self):
         """Test return number of structures visited that were sprayed."""
@@ -55,9 +60,10 @@ class TestLocation(TestCase):
             # load some spray data
             load_spray_data()
 
-            akros_2.refresh_from_db()
+            akros_2 = Location.objects.get(name="Akros_2", level="ta")
             self.assertEqual(akros_2.mopup_days_needed, 0)
 
+            lusaka = Location.objects.get(name="Lusaka", level="district")
             self.assertEqual(lusaka.mopup_days_needed, 3)
 
     def test_structures_on_ground(self):

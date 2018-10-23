@@ -5,6 +5,7 @@ Location model module.
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.db.models import Q
+from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
 
@@ -43,21 +44,21 @@ class Location(MPTTModel, models.Model):
     def __str__(self):
         return self.name
 
-    @property
+    @cached_property
     def district_name(self):
         """
         Location name.
         """
         return self.name
 
-    @property
+    @cached_property
     def targetid(self):
         """
         Locaton code
         """
         return self.code
 
-    @property
+    @cached_property
     def houses(self):
         """
         Number of structures in location.
@@ -78,37 +79,57 @@ class Location(MPTTModel, models.Model):
         except cls.DoesNotExist:
             return cls.objects.get(name__iexact=name_or_code, level="district")
 
-    @property
+    @cached_property
     def health_centers_to_mopup(self):
         """Return the number of Health Centers to Mop-up
         """
         return self.get_children().filter(level="RHC").count()
 
-    @property
+    @cached_property
     def spray_areas_to_mopup(self):
         """Return the number of Spray Areas to Mop-up
         """
-        return self.get_descendants().filter(level="ta").count()
+        return sum(
+            1
+            for l in self.get_descendants().filter(level="ta")
+            if l.structures_to_mopup > 0
+        )
 
-    @property
+    @cached_property
     def structures_to_mopup(self):
         """Return the number of structures to mopup
+
+        Number of structures remaining to be sprayed to reach 90% spray
+        effectiveness.
         """
         if self.level != "ta":
-            return self.spray_areas_to_mopup
+            return sum(
+                l.structures_to_mopup
+                for l in self.get_descendants().filter(level="ta")
+            )
 
-        return self.household_set.filter(
-            Q(visited=False) | Q(visited__isnull=True)
-        ).count()
+        mopup_percentage = getattr(settings, "MOPUP_PERCENTAGE", 90)
+        ninetieth_percentile = round(
+            (mopup_percentage / 100) * self.structures_on_ground
+        )
+        if self.visited_sprayed >= ninetieth_percentile:
+            return 0
 
-    @property
+        return ninetieth_percentile - self.visited_sprayed
+
+    @cached_property
     def visited_sprayed(self):
         """Return the number of structures sprayed."""
+        if self.level != "ta":
+            return sum(
+                l.visited_sprayed
+                for l in self.get_descendants().filter(level="ta")
+            )
         return self.sprayday_set.filter(
             sprayable=True, was_sprayed=True
         ).count()
 
-    @property
+    @cached_property
     def mopup_days_needed(self):
         """Return the number of structures to reach 90% divide by 45"""
         denominator = getattr(settings, "MOPUP_DAYS_DENOMINATOR", 45)
@@ -127,12 +148,12 @@ class Location(MPTTModel, models.Model):
             / denominator
         )
 
-    @property
+    @cached_property
     def not_sprayable(self):
         """Return number of structures that are not sprayable."""
         return self.household_set.filter(sprayable=False).count()
 
-    @property
+    @cached_property
     def structures_on_ground(self):
         """Return the number of structures on the ground.
 
@@ -140,6 +161,11 @@ class Location(MPTTModel, models.Model):
         Subtract the number of structures not sprayable.
         Add new structures .
         """
+        if self.level != "ta":
+            return sum(
+                l.structures_on_ground
+                for l in self.get_descendants().filter(level="ta")
+            )
         new_structures = self.sprayday_set.filter(
             sprayable=True, was_sprayed=True, household__isnull=True
         ).count()
@@ -149,13 +175,18 @@ class Location(MPTTModel, models.Model):
             + new_structures
         )
 
-    @property
+    @cached_property
     def visited_found(self):
         """Return the number of structures found on the ground
 
         The number of households visited
         Add number of new structures sprayed.
         """
+        if self.level != "ta":
+            return sum(
+                l.visited_found
+                for l in self.get_descendants().filter(level="ta")
+            )
         new_structures = self.sprayday_set.filter(
             sprayable=True, was_sprayed=True, household__isnull=True
         ).count()
@@ -165,7 +196,7 @@ class Location(MPTTModel, models.Model):
             + new_structures
         )
 
-    @property
+    @cached_property
     def last_visit(self):
         """Return the date of last submission."""
         last_sprayday = self.sprayday_set.last()
@@ -174,7 +205,7 @@ class Location(MPTTModel, models.Model):
 
         return ""
 
-    @property
+    @cached_property
     def last_decision_date(self):
         """Return the date of last decision report."""
         decision = self.decision_spray_areas.last()
