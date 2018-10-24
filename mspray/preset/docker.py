@@ -7,22 +7,16 @@ import os
 # pylint: disable=wildcard-import,unused-wildcard-import
 from mspray.settings import *  # noqa
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'mspray',
-        'USER': 'mspray',
-        'PASSWORD': 'mspray',
-        'HOST': 'db',
-    }
-}
 NOSE_ARGS = [
     "--with-coverage",
     "--cover-package=mspray",
+    "--cover-erase",
+    "--cover-inclusive",
     "--with-fixture-bundling",
     "--nologcapture",
     "--nocapture",
     "--stop",
+    "--verbosity=2",
 ]
 NOSE_PLUGINS = ["mspray.libs.utils.nose_plugins.SilenceSouth"]
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "static"))  # noqa
@@ -37,9 +31,9 @@ CACHE_MIDDLEWARE_SECONDS = 300
 
 CORS_ORIGIN_ALLOW_ALL = False
 
-SITE_NAME = "mspray-docker"
+SITE_NAME = "mspray"
 
-ALLOWED_HOSTS = ("localhost", "127.0.0.1")
+ALLOWED_HOSTS = ["*"]
 DEBUG = True
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -84,6 +78,16 @@ NOT_SPRAYABLE_VALUE = "noteligible"
 
 GOOGLE_API_KEY = ""
 
-ONA_API_TOKEN = ""
-SAMPLE_FORM_ID = 266165
-COLLECTIONS_FORM_ID = 266158
+REPLACE_ME = None
+
+ONA_API_TOKEN = REPLACE_ME
+SAMPLE_FORM_ID = REPLACE_ME
+COLLECTIONS_FORM_ID = REPLACE_ME
+SENSITIZATION_VISIT_FORM_ID = REPLACE_ME
+DIRECTLY_OBSERVED_FORM_ID = REPLACE_ME
+MOBILISATION_FORM_ID = REPLACE_ME
+
+try:
+    from mspray.preset.local_settings import *  # noqa
+except ImportError:
+    pass

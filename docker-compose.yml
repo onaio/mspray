@@ -4,6 +4,10 @@ services:
   db:
     build: ./docker/postgis
     image: postgis:9.6
+    volumes:
+        - .db:/var/lib/postgresql/data
+    environment:
+        - PGDATA=var/lib/postgresql/data/pgdata
   queue:
     image: rabbitmq
   web:
@@ -19,4 +23,8 @@ services:
     depends_on:
       - db
       - queue
-
+    environment:
+       - DB_USER=mspray
+       - DB_NAME=mspray
+       - DB_PASS=mspray
+       - DB_HOST=db
