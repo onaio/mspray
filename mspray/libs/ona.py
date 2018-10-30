@@ -11,7 +11,7 @@ import requests
 from requests.auth import HTTPDigestAuth
 
 ATTACHMENTS_KEY = "_attachments"
-ONA_URI = getattr(settings, "ONA_URI", "https://ona.io")
+ONA_URI = getattr(settings, "ONA_URI", "https://api.ona.io")
 ONA_TOKEN = getattr(settings, "ONA_API_TOKEN", "")
 
 
@@ -50,9 +50,12 @@ def fetch_osm_xml(data, osm_filename=None):
                 attachments = data[ATTACHMENTS_KEY]
         for attachment in attachments:
             filename = attachment.get("filename")
-            if attachment.get("mimetype") == "text/xml" and filename.endswith(
-                "osm"
-            ):
+            is_osm_file = (
+                attachment.get("mimetype") == "text/xml"
+                and filename
+                and filename.endswith("osm")
+            )
+            if is_osm_file:
                 url = urljoin(ONA_URI, attachment.get("download_url"))
                 response = requests.get(url)
                 if response.status_code == 200:
@@ -62,7 +65,7 @@ def fetch_osm_xml(data, osm_filename=None):
     return xml
 
 
-def fetch_form_data(
+def fetch_form_data(  # pylint: disable=too-many-arguments
     formid,  # pylint: disable=bad-continuation
     latest=None,  # pylint: disable=bad-continuation
     dataid=None,  # pylint: disable=bad-continuation
