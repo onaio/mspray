@@ -4,7 +4,7 @@ Location model module.
 """
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.db.models import Q
+from django.db.models import Count, Q, Sum
 from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
@@ -154,6 +154,35 @@ class Location(MPTTModel, models.Model):
         return self.household_set.filter(sprayable=False).count()
 
     @cached_property
+    def new_structures(self):
+        """Return number of new structures that have been sprayed."""
+        if self.level != "ta":
+            return sum(
+                l.new_structures
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        return self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+    @cached_property
+    def duplicates(self):
+        """Return number of duplicates structures that have been sprayed."""
+        agg = (
+            self.sprayday_set.filter(was_sprayed=True)
+            .exclude(household__isnull=True)
+            .values("household")
+            .distinct()
+            .annotate(duplicates=Count("household") - 1)
+            .aggregate(total_duplicates=Sum("duplicates"))
+        )
+
+        return (
+            agg.get("total_duplicates") if agg.get("total_duplicates") else 0
+        )
+
+    @cached_property
     def structures_on_ground(self):
         """Return the number of structures on the ground.
 
@@ -166,13 +195,11 @@ class Location(MPTTModel, models.Model):
                 l.structures_on_ground
                 for l in self.get_descendants().filter(level="ta")
             )
-        new_structures = self.sprayday_set.filter(
-            sprayable=True, was_sprayed=True, household__isnull=True
-        ).count()
 
         return (
             self.household_set.exclude(sprayable=False).count()
-            + new_structures
+            + self.new_structures
+            + self.duplicates
         )
 
     @cached_property
@@ -194,6 +221,7 @@ class Location(MPTTModel, models.Model):
         return (
             self.household_set.filter(sprayable=True, visited=True).count()
             + new_structures
+            + self.duplicates
         )
 
     @cached_property
@@ -208,7 +236,7 @@ class Location(MPTTModel, models.Model):
     @cached_property
     def last_decision_date(self):
         """Return the date of last decision report."""
-        decision = self.decision_spray_areas.last()
+        decision = self.decision_spray_areas.last()  # pylint: disable=E1101
         if decision:
             return decision.data.get("today")
 
