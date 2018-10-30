@@ -15,8 +15,8 @@ class MopUpView(ListView):
     template_name = "mop-up.html"
     queryset = Location.objects.filter(level="district")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
         context["site_name"] = "Mop-up"
 
         return context
@@ -30,12 +30,17 @@ class HealthFacilityMopUpView(ListView):
     template_name = "health-facility-mop-up.html"
     queryset = Location.objects.filter(level="ta")
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
         context["site_name"] = "Mop-up"
         context["district"] = get_object_or_404(
             Location, pk=self.kwargs["district"]
         )
+        context[self.context_object_name] = [
+            location
+            for location in context[self.context_object_name]
+            if location.structures_to_mopup > 0
+        ]
 
         return context
 
