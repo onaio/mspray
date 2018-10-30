@@ -1,4 +1,5 @@
 .coverage
+*.db
 .env
 static
 *.pyc
