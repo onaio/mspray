@@ -6,8 +6,13 @@ import datetime
 
 from django.test import TestCase
 
+from mspray.apps.main.models.decision import Decision, create_decision_visit
 from mspray.apps.main.models.location import Location
-from mspray.apps.main.tests.utils import data_setup, load_spray_data
+from mspray.apps.main.tests.utils import (
+    DECISION_VISIT_DATA,
+    data_setup,
+    load_spray_data,
+)
 
 
 class TestLocation(TestCase):
@@ -86,3 +91,13 @@ class TestLocation(TestCase):
         load_spray_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.last_visit, datetime.date(2018, 9, 20))
+
+    def test_last_decision_date(self):
+        """Test last_decision_date"""
+        data_setup()
+        load_spray_data()
+        decision_visit = create_decision_visit(DECISION_VISIT_DATA)
+        self.assertIsInstance(decision_visit, Decision)
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.last_visit, datetime.date(2018, 9, 20))
+        self.assertEqual(akros_2.last_decision_date, "2018-09-25")
