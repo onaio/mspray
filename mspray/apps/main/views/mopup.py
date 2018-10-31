@@ -4,6 +4,7 @@
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 
+from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.models import Location
 
 
@@ -41,6 +42,7 @@ class HealthFacilityMopUpView(ListView):
             for location in context[self.context_object_name]
             if location.structures_to_mopup > 0
         ]
+        context.update(DEFINITIONS.get("mopup", {}))
 
         return context
 

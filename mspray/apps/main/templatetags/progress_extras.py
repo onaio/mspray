@@ -6,6 +6,11 @@ from django import template
 
 register = template.Library()  # pylint: disable=invalid-name
 
+GREEN = "green"
+ORANGE = "orange"
+RED = "red"
+YELLOW = "yellow"
+
 
 @register.filter
 def sprayed_effectively_color(value):
@@ -26,14 +31,14 @@ def sprayed_effectively_color(value):
     except ValueError:
         return ""
 
-    color = "green"
+    color = GREEN
 
     if 75 < value < 90:
-        color = "orange"
+        color = ORANGE
     elif 20 < value <= 75:
-        color = "red"
+        color = RED
     elif value <= 20:
-        color = "yellow"
+        color = YELLOW
 
     return color
 
@@ -63,3 +68,28 @@ def key(data, key_name):
     Returns the value in the given key_name of a dict.
     """
     return data.get(key_name)
+
+
+@register.filter
+def structures_mopup_colour(value):
+    """Returns a colour string dependent on structures remaining to reach 90%.
+
+    green - when value is fewer than 10
+    orange - when value is between 10 and 20
+    red - when value is greater than 20
+    no colour otherwise i.e empty string.
+    """
+    try:
+        if value < 10:
+            return GREEN
+
+        if value in range(10, 20):
+            return ORANGE
+
+        if value > 20:
+            return RED
+    except TypeError:
+        # ignore if we got a string instead
+        pass
+
+    return ""
