@@ -62,8 +62,8 @@
                         <td>
                             {{ location.last_visit }}
                         </td>
-                        <td>
-                            {{ location.last_decision_date }}
+                        <td class="{{ location.last_decision_date|decision_date_colour:location.last_visit }}">
+                            {{ location.last_decision_date|decision_date:location.last_visit }}
                         </td>
                     </tr>
                 {% endfor %}
