@@ -36,6 +36,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "mspray.libs.context_processors.google_settings",
                 "mspray.libs.context_processors.mspray_settings",
+                "mspray.libs.context_processors.show_directly_observed",
+                "mspray.libs.context_processors.show_trial_survey",
             ],
             "debug": False,
             "loaders": [
