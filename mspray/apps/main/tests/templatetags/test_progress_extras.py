@@ -9,6 +9,7 @@ from mspray.apps.main.templatetags.progress_extras import (
     GREEN,
     ORANGE,
     RED,
+    YELLOW,
     decision_date,
     decision_date_colour,
     sprayed_effectively_color,
@@ -25,8 +26,13 @@ class TestProgressExtras(TestCase):
         """
         Test sprayed_effectively_color
         """
-        value = 90
-        self.assertEqual(sprayed_effectively_color(value), "green")
+        self.assertEqual(sprayed_effectively_color(90), GREEN)
+        self.assertEqual(sprayed_effectively_color(89), ORANGE)
+        self.assertEqual(sprayed_effectively_color(89.9), ORANGE)
+        self.assertEqual(sprayed_effectively_color(75), RED)
+        self.assertEqual(sprayed_effectively_color(45), RED)
+        self.assertEqual(sprayed_effectively_color(20), YELLOW)
+        self.assertEqual(sprayed_effectively_color(13), YELLOW)
 
     def test_structures_mopup_colour(self):
         """Test structures_mopup_colour filter."""

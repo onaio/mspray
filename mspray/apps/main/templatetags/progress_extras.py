@@ -86,7 +86,7 @@ def structures_mopup_colour(value):
         if value < 10:
             return GREEN
 
-        if value in range(10, 20):
+        if 10 <= value < 20:
             return ORANGE
 
         if value > 20:
@@ -105,7 +105,7 @@ def decision_date(value, arg):
         the_date = parser.parse(value).date()
         days = (the_date - arg).days
 
-        if days in range(0, 3):
+        if 0 <= days <= 2:
             return value
 
     return NO_DECISION_FORM
