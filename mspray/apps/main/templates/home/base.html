@@ -58,13 +58,16 @@
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
+                                {% if SHOW_DIRECTLY_OBSERVED %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
+                                {% endif %}
+                                {% if SHOW_TRIAL_SURVEY %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'trials:index' %}">Trial Survey</a></li>
+                                {% endif %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'mop-up' %}">Mop-up</a></li>
-                                <li role="separator" class="divider"></li>
                                 <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>
