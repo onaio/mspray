@@ -34,6 +34,7 @@ ipdb = "*"
 ipython = "==6.5.0"
 coverage = "*"
 httmock = "*"
+django-debug-toolbar = "*"
 
 [pipenv]
 allow_prereleases = true
