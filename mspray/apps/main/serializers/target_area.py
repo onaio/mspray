@@ -50,10 +50,10 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
 (
   SELECT
   SUM(CASE WHEN (("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' OR "main_sprayday"."data" @> '{"newstructure/gps_osm_file:notsprayed_reason": "refused"}') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = true) THEN 0 ELSE 1 END) AS "other",
-  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 1 ELSE 0 END) AS "not_sprayable",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."household_id" IS NOT NULL) THEN 1 ELSE 0 END) AS "not_sprayable",
   SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "found",
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "sprayed",
-  SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "new_structures",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = true AND "main_sprayday"."household_id" IS NULL) THEN 1 ELSE 0 END) AS "new_structures",
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "not_sprayed",
   SUM(CASE WHEN (("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' OR "main_sprayday"."data" @> '{"newstructure/gps_osm_file:notsprayed_reason": "refused"}') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "refused"
   FROM "main_sprayday" LEFT OUTER JOIN "main_spraypoint" ON ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE ("main_sprayday"."location_id" = %s) GROUP BY "main_sprayday"."id"
@@ -72,10 +72,10 @@ SUM(CASE WHEN "refused" >0 THEN 1 ELSE 0 END) AS "refused" FROM
 (
   SELECT
   SUM(CASE WHEN (("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' OR "main_sprayday"."data" @> '{"newstructure/gps_osm_file:notsprayed_reason": "refused"}') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = true) THEN 0 ELSE 1 END) AS "other",
-  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 1 ELSE 0 END) AS "not_sprayable",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."household_id" IS NOT NULL) THEN 1 ELSE 0 END) AS "not_sprayable",
   SUM(CASE WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = false AND "main_spraypoint"."id" IS NOT NULL) THEN 0 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "found",
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "sprayed",
-  SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 ELSE 0 END) AS "new_structures",
+  SUM(CASE WHEN ("main_sprayday"."data" ? 'newstructure/gps' AND "main_sprayday"."sprayable" = true) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL) THEN 1 WHEN (("main_sprayday"."data" ? 'osmstructure:node:id' OR "main_sprayday"."data" ? 'newstructure/gps_osm_file:node:id') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NULL AND "main_sprayday"."was_sprayed" = true) THEN 1 WHEN ("main_sprayday"."data" ? 'osmstructure:way:id' AND "main_sprayday"."sprayable" = true AND "main_sprayday"."household_id" IS NULL) THEN 1 ELSE 0 END) AS "new_structures",
   SUM(CASE WHEN ("main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "not_sprayed",
   SUM(CASE WHEN (("main_sprayday"."data" @> '{"osmstructure:notsprayed_reASon": "refused"}' OR "main_sprayday"."data" @> '{"newstructure/gps_osm_file:notsprayed_reason": "refused"}') AND "main_sprayday"."sprayable" = true AND "main_spraypoint"."id" IS NOT NULL AND "main_sprayday"."was_sprayed" = false) THEN 1 ELSE 0 END) AS "refused"
   FROM "main_sprayday" LEFT OUTER JOIN "main_spraypoint" ON ("main_sprayday"."id" = "main_spraypoint"."sprayday_id") WHERE ("main_sprayday"."location_id" = %s AND "main_sprayday"."spray_date" <= %s::date) GROUP BY "main_sprayday"."id"
@@ -184,6 +184,7 @@ def get_spray_data(obj, context):
                         was_sprayed=False,
                         spraypoint__isnull=False,
                         sprayable=True,
+                        household__isnull=False,
                         then=1,
                     ),
                     default=0,
@@ -214,6 +215,12 @@ def get_spray_data(obj, context):
                         sprayable=True,
                         spraypoint__isnull=False,
                         data__has_key="osmstructure:node:id",
+                        then=1,
+                    ),
+                    When(
+                        sprayable=True,
+                        spraypoint__isnull=False,
+                        household__isnull=True,
                         then=1,
                     ),
                     default=0,
