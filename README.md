@@ -1,5 +1,7 @@
 [![Build Status](http://drone.onalabs.org/api/badge/github.com/onaio/mspray/status.svg?branch=master)](http://drone.onalabs.org/github.com/onaio/mspray)
 
+mSpray is a mobile based IRS tool developed by Akros with Ona
+
 mSpray projects
 ===============
 
