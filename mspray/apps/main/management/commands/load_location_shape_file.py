@@ -220,7 +220,7 @@ class Command(BaseCommand):
                                 geom=geom.wkt,
                                 target=target,
                             )
-                        except IntegrityError as e:
+                        except IntegrityError:
                             failed += 1
                         except Exception:  # pylint: disable=broad-except
                             exception_raised += 1

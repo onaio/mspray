@@ -21,7 +21,7 @@ class Indicator(object):
         self.value = value
 
     def calculate(self):
-        raise NotImplemented("calculate method has not been implemented")
+        raise NotImplementedError("calculate method has not been implemented")
 
 
 class NumberOfHouseholdsInTargetArea(Indicator):

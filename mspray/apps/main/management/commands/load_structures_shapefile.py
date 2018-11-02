@@ -61,7 +61,7 @@ class Command(BaseCommand):
                                 location=location
                             )
                             count += 1
-                    except Location.DoesNotExist as e:
+                    except Location.DoesNotExist:
                         failed += 1
                         continue
 
