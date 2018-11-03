@@ -1,16 +1,24 @@
+# -*- coding: utf-8 -*-
+"""Test alerts.views module."""
 from unittest.mock import patch
 
 from django.urls import reverse
+from django.utils.timezone import now
 
-from mspray.apps.alerts.views import (start_health_facility_catchment,
-                                      start_send_weekly_update_email,
-                                      start_so_daily_form_completion)
+from mspray.apps.alerts.views import (
+    daily_spray_effectiveness,
+    start_health_facility_catchment,
+    start_send_weekly_update_email,
+    start_so_daily_form_completion,
+)
 from mspray.apps.main.models import Location, TeamLeader
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.celery import app
 
 
 class TestViews(TestBase):
+    """Test alerts.views module."""
+
     def setUp(self):
         TestBase.setUp(self)
         app.conf.update(CELERY_ALWAYS_EAGER=True)
@@ -62,3 +70,29 @@ class TestViews(TestBase):
         self.assertEqual(args[0], str(district.code))
         self.assertEqual(args[1], str(tla.code))
         self.assertEqual(args[2], "No")
+
+    @patch("mspray.apps.alerts.views.daily_spray_effectiveness_task")
+    def test_daily_spray_effectiveness(self, mock_task):
+        """Test trigger daily spray area spray effectiveness notifications."""
+        request = self.factory.get("/daily-spray-effectiveness")
+        response = daily_spray_effectiveness(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_task.delay.called)
+        args, _ = mock_task.delay.call_args_list[0]
+        self.assertEqual(args[0], "")
+        self.assertEqual(args[1], now().date())
+
+        request = self.factory.get(
+            "/daily-spray-effectiveness", {"spray_date": "2018-11-01"}
+        )
+        response = daily_spray_effectiveness(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_task.delay.called)
+        args, _ = mock_task.delay.call_args_list[1]
+        self.assertEqual(args[0], "")
+        self.assertEqual(args[1], "2018-11-01")
+
+        self.assertEqual(
+            reverse("alerts:daily_spray_effectiveness"),
+            "/api/alerts/daily-spray-effectiveness",
+        )

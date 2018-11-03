@@ -1,19 +1,27 @@
+# -*- coding: utf-8 -*-
+"""Tasks."""
 import operator
 from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
 
-from mspray.apps.warehouse.druid import get_druid_data, process_druid_data
-from mspray.apps.warehouse.druid import process_location_data
-from mspray.apps.alerts.rapidpro import start_flow
-from mspray.apps.alerts.serializers import UserDistanceSerializer
-from mspray.apps.alerts.serializers import RapidProBaseSerializer
-from mspray.apps.alerts.serializers import FoundCoverageSerializer
-from mspray.apps.alerts.serializers import GPSSerializer
+from mspray.apps.alerts.alerts import daily_spray_effectiveness
 from mspray.apps.alerts.emails import send_weekly_update_email
-from mspray.celery import app
+from mspray.apps.alerts.rapidpro import start_flow
+from mspray.apps.alerts.serializers import (
+    FoundCoverageSerializer,
+    GPSSerializer,
+    RapidProBaseSerializer,
+    UserDistanceSerializer,
+)
 from mspray.apps.main.models import Location, SprayDay, TeamLeader
+from mspray.apps.warehouse.druid import (
+    get_druid_data,
+    process_druid_data,
+    process_location_data,
+)
+from mspray.celery import app
 
 
 @app.task
@@ -33,11 +41,19 @@ def daily_spray_success_by_spray_area(district_id, spray_date):
 
     spray_date format == 2016-10-15
     """
-    dimensions = ['target_area_id', 'target_area_name',
-                  'target_area_structures', 'rhc_id', 'rhc_name',
-                  'district_id', 'district_name']
-    filters = [['district_id', operator.eq, district_id],
-               ['spray_date', operator.eq, spray_date]]
+    dimensions = [
+        "target_area_id",
+        "target_area_name",
+        "target_area_structures",
+        "rhc_id",
+        "rhc_name",
+        "district_id",
+        "district_name",
+    ]
+    filters = [
+        ["district_id", operator.eq, district_id],
+        ["spray_date", operator.eq, spray_date],
+    ]
     druid_result = get_druid_data(dimensions, filters)
     data, _ = process_druid_data(druid_result)
     if data:
@@ -63,28 +79,42 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
         pass
     else:
         flow_uuid = settings.RAPIDPRO_DAILY_FOUND_COVERAGE_FLOW_ID
-        target_areas = this_district.get_descendants().filter(level='ta')
+        target_areas = this_district.get_descendants().filter(level="ta")
         for target_area in target_areas:
-            dimensions = ['target_area_id', 'target_area_name',
-                          'target_area_structures', 'rhc_id', 'rhc_name',
-                          'district_id', 'district_name']
+            dimensions = [
+                "target_area_id",
+                "target_area_name",
+                "target_area_structures",
+                "rhc_id",
+                "rhc_name",
+                "district_id",
+                "district_name",
+            ]
 
-            filters = [['target_area_id', operator.eq, target_area.id],
-                       ['spray_date', operator.eq, spray_date]]
+            filters = [
+                ["target_area_id", operator.eq, target_area.id],
+                ["spray_date", operator.eq, spray_date],
+            ]
             # get today's data for this spray area
             druid_result1 = get_druid_data(dimensions, filters)
             today_data, _ = process_druid_data(druid_result1)
             # get today's data for all other spray areas
             druid_result2 = get_druid_data(
                 dimensions=dimensions,
-                filter_list=[['target_area_id', operator.ne, target_area.id],
-                             ['spray_date', operator.eq, spray_date]])
+                filter_list=[
+                    ["target_area_id", operator.ne, target_area.id],
+                    ["spray_date", operator.eq, spray_date],
+                ],
+            )
             other_data, _ = process_druid_data(druid_result2)
             # get all data for this area for other dates
             druid_result3 = get_druid_data(
                 dimensions=dimensions,
-                filter_list=[['target_area_id', operator.eq, target_area.id],
-                             ['spray_date', operator.ne, spray_date]])
+                filter_list=[
+                    ["target_area_id", operator.eq, target_area.id],
+                    ["spray_date", operator.ne, spray_date],
+                ],
+            )
             all_data, _ = process_druid_data(druid_result3)
             # prepare payload
             payload_source_data = {}
@@ -92,18 +122,18 @@ def daily_found_coverage_by_spray_area(district_id, spray_date):
                 payload_source_data = all_data[0]
 
             if today_data:
-                payload_source_data['has_submissions_today'] = 1
+                payload_source_data["has_submissions_today"] = 1
             else:
-                payload_source_data['has_submissions_today'] = 0
+                payload_source_data["has_submissions_today"] = 0
 
             if other_data:
-                payload_source_data['today_is_working_day'] = 1
+                payload_source_data["today_is_working_day"] = 1
             else:
-                payload_source_data['today_is_working_day'] = 0
+                payload_source_data["today_is_working_day"] = 0
 
-            payload = FoundCoverageSerializer(payload_source_data,
-                                              date=spray_date,
-                                              target_area=target_area)
+            payload = FoundCoverageSerializer(
+                payload_source_data, date=spray_date, target_area=target_area
+            )
 
             return start_flow(flow_uuid, payload.data)
 
@@ -150,7 +180,7 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
     """
 
     try:
-        district = Location.objects.get(code=district_code, level='district')
+        district = Location.objects.get(code=district_code, level="district")
     except Location.DoesNotExist:
         pass
     else:
@@ -159,9 +189,11 @@ def so_daily_form_completion(district_code, so_code, confrimdecisionform):
         except TeamLeader.DoesNotExist:
             pass
         else:
-            payload = dict(so_name=team_leader.name,
-                           district_name=district.name,
-                           confrimdecisionform=confrimdecisionform)
+            payload = dict(
+                so_name=team_leader.name,
+                district_name=district.name,
+                confrimdecisionform=confrimdecisionform,
+            )
             flow_uuid = settings.RAPIDPRO_SO_DAILY_COMPLETION_FLOW_ID
             return start_flow(flow_uuid, payload)
 
@@ -173,14 +205,20 @@ def no_revisit(target_area_code, no_revisit_reason):
     then package for sending to RapidPro
     """
     try:
-        target_area = Location.objects.get(code=target_area_code, level='ta')
+        target_area = Location.objects.get(code=target_area_code, level="ta")
     except Location.DoesNotExist:
         pass
     else:
-        dimensions = ['target_area_id', 'target_area_name',
-                      'target_area_structures', 'rhc_id', 'rhc_name',
-                      'district_id', 'district_name']
-        filters = [['target_area_id', operator.eq, target_area.id]]
+        dimensions = [
+            "target_area_id",
+            "target_area_name",
+            "target_area_structures",
+            "rhc_id",
+            "rhc_name",
+            "district_id",
+            "district_name",
+        ]
+        filters = [["target_area_id", operator.eq, target_area.id]]
         # get today's data for this spray area
         druid_result = get_druid_data(dimensions, filters)
         data, _ = process_druid_data(druid_result)
@@ -189,7 +227,7 @@ def no_revisit(target_area_code, no_revisit_reason):
         else:
             payload = FoundCoverageSerializer({}, target_area=target_area)
         payload = payload.data
-        payload['no_revisit_reason'] = no_revisit_reason
+        payload["no_revisit_reason"] = no_revisit_reason
         flow_uuid = settings.RAPIDPRO_NO_REVISIT_FLOW_ID
         return start_flow(flow_uuid, payload)
 
@@ -232,41 +270,66 @@ def health_facility_catchment(spray_day_obj_id, force=False):
                 upper_threshold = threshold * 2
                 # count number of records for this RHC
                 current_rhc_records = SprayDay.objects.filter(
-                    location__parent=current_rhc).count()
+                    location__parent=current_rhc
+                ).count()
                 if upper_threshold >= current_rhc_records >= threshold:
                     should_continue = True
 
             if should_continue:
                 # get previous RHC by looking for RHC with records from a
                 # previous date
-                previous_record = SprayDay.objects.exclude(
-                    location__parent__id=current_rhc.id).filter(
-                    location__parent__parent__id=current_rhc.parent.id).filter(
-                    spray_date__lt=spray_day_obj.spray_date).order_by(
-                    '-spray_date').first()
+                previous_record = (
+                    SprayDay.objects.exclude(
+                        location__parent__id=current_rhc.id
+                    )
+                    .filter(location__parent__parent__id=current_rhc.parent.id)
+                    .filter(spray_date__lt=spray_day_obj.spray_date)
+                    .order_by("-spray_date")
+                    .first()
+                )
                 previous_rhc = None
                 if previous_record:
                     previous_rhc = previous_record.location.parent
                 if previous_rhc:
                     # get summary data and send to flow
-                    dimensions = ['target_area_id', 'target_area_name',
-                                  'target_area_structures', 'rhc_id',
-                                  'rhc_name', 'district_id', 'district_name']
-                    filters = [['rhc_id', operator.eq, previous_rhc.id]]
-                    druid_result = get_druid_data(dimensions, filters)
+                    dimensions = [
+                        "target_area_id",
+                        "target_area_name",
+                        "target_area_structures",
+                        "rhc_id",
+                        "rhc_name",
+                        "district_id",
+                        "district_name",
+                    ]
+                    druid_result = get_druid_data(
+                        dimensions, [["rhc_id", operator.eq, previous_rhc.id]]
+                    )
                     data, _ = process_druid_data(druid_result)
-                    payload = process_location_data(previous_rhc.__dict__,
-                                                    data)
-                    payload['rhc_id'] = previous_rhc.id
-                    payload['rhc_name'] = previous_rhc.name
-                    payload['sprayed_coverage'] = int(
-                        payload['sprayed_coverage'])
-                    payload['sprayed_percentage'] = int(
-                        payload['sprayed_percentage'])
-                    payload['visited_percentage'] = int(
-                        payload['visited_percentage'])
+                    payload = process_location_data(
+                        previous_rhc.__dict__, data
+                    )
+                    payload["rhc_id"] = previous_rhc.id
+                    payload["rhc_name"] = previous_rhc.name
+                    payload["sprayed_coverage"] = int(
+                        payload["sprayed_coverage"]
+                    )
+                    payload["sprayed_percentage"] = int(
+                        payload["sprayed_percentage"]
+                    )
+                    payload["visited_percentage"] = int(
+                        payload["visited_percentage"]
+                    )
                     if previous_rhc.parent:
-                        payload['district_id'] = previous_rhc.parent.id
-                        payload['district_name'] = previous_rhc.parent.name
-                    flow_uuid = settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID
-                    return start_flow(flow_uuid, payload)
+                        payload["district_id"] = previous_rhc.parent.id
+                        payload["district_name"] = previous_rhc.parent.name
+
+                    return start_flow(
+                        settings.RAPIDPRO_HF_CATCHMENT_FLOW_ID, payload
+                    )
+    return None
+
+
+@app.task
+def daily_spray_effectiveness_task(flow_uuid, spray_date):
+    """Trigger the spray areas notification."""
+    daily_spray_effectiveness(flow_uuid, spray_date)
