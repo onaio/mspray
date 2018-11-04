@@ -63,12 +63,15 @@ REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 
 
-def get_formid(spray_operator, spray_date):
+def get_formid(spray_operator, spray_date, spray_operator_code=None):
     """
     Returns a string with 'DAY.MONTH.SPRAY_OPERATOR_CODE' from a spray_operator
     and spray_date.
     """
-    return "%s.%s" % (spray_date.strftime("%d.%m"), spray_operator.code)
+    return "%s.%s" % (
+        spray_date.strftime("%d.%m"),
+        spray_operator.code if spray_operator else spray_operator_code,
+    )
 
 
 def formid_date(sprayformid):
@@ -575,9 +578,12 @@ def add_spray_operator_daily(data):
     sprayed = data.get("sprayed", 0)
     found = data.get("found", 0)
     spray_operator_code = data.get("sprayop_code")
-    so = get_spray_operator(spray_operator_code)
+    spray_operator = get_spray_operator(spray_operator_code)
     spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
-    spray_form_id = data.get("sprayformid", get_formid(so, spray_date))
+    spray_form_id = data.get(
+        "sprayformid",
+        get_formid(spray_operator, spray_date, spray_operator_code),
+    )
     data["sprayformid"] = spray_form_id
 
     try:
@@ -595,13 +601,13 @@ def add_spray_operator_daily(data):
         pass
     else:
         calculate_data_quality_check(spray_form_id, spray_operator_code)
-        if so is None:
+        if spray_operator is None:
             sprayday = SprayDay.objects.filter(
                 data__sprayformid=spray_form_id
             ).last()
             if sprayday:
-                so = sprayday.spray_operator
-        performance_report(so)
+                spray_operator = sprayday.spray_operator
+        performance_report(spray_operator)
 
 
 def get_team_leader(code):
@@ -946,6 +952,8 @@ def performance_report(spray_operator, queryset=None):
         operator_qs = SprayDay.objects.filter(
             spray_operator=spray_operator, sprayable=True
         )
+    else:
+        return None
     if queryset is None:
         queryset = operator_qs.annotate(
             sprayformid=RawSQL("data->'sprayformid'", ())
@@ -1019,6 +1027,8 @@ def performance_report(spray_operator, queryset=None):
         ).count()
         report.district = spray_operator.team_leader_assistant.location
         report.save()
+
+        return report
 
 
 def create_performance_reports():
