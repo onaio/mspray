@@ -38,12 +38,18 @@ class Command(BaseCommand):
             else:
                 with codecs.open(path, encoding="utf-8") as csv_file:
                     csv_reader = csv.DictReader(csv_file)
+                    codes = []
                     for row in csv_reader:
                         try:
                             spray_operator, created = SprayOperator.objects.get_or_create(  # noqa pylint: disable=line-too-long
                                 code=row["code"].strip(), name=row["name"]
                             )
                         except IntegrityError:
+                            spray_operator = SprayOperator.objects.get(
+                                code=row["code"]
+                            )
+                            spray_operator.name = row["name"]
+                            spray_operator.save()
                             self.stdout.write(
                                 "{} spray operator code already "
                                 "exists.".format(row["code"].strip())
@@ -51,30 +57,36 @@ class Command(BaseCommand):
                         else:
                             if created:
                                 print(row)
-                            team_code = row["team_leader_assistant"].strip()
-                            if team_code:
-                                try:
-                                    team_leader = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
-                                        code=team_code
-                                    )
-                                except TeamLeaderAssistant.DoesNotExist:
-                                    self.stderr.write("TLA {} does not exist"
-                                                      .format(team_code))
-                                else:
-                                    spray_operator.team_leader_assistant = (
-                                        team_leader
-                                    )
-                                    spray_operator.save()
-                            team_code = row["team_leader"].strip()
-                            if team_code:
-                                try:
-                                    team_leader = TeamLeader.objects.get(
-                                        code=team_code
-                                    )
-                                except TeamLeader.DoesNotExist:
-                                    self.stderr.write("TL {} does not exist"
-                                                      .format(team_code))
-                                    pass
-                                else:
-                                    spray_operator.team_leader = team_leader
-                                    spray_operator.save()
+                        codes.append(row["code"])
+                        team_code = row["team_leader_assistant"].strip()
+                        if team_code:
+                            try:
+                                team_leader = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
+                                    code=team_code
+                                )
+                            except TeamLeaderAssistant.DoesNotExist:
+                                self.stderr.write(
+                                    "TLA {} does not exist".format(team_code)
+                                )
+                            else:
+                                spray_operator.team_leader_assistant = (
+                                    team_leader
+                                )
+                                spray_operator.save()
+                        team_code = row["team_leader"].strip()
+                        if team_code:
+                            try:
+                                team_leader = TeamLeader.objects.get(
+                                    code=team_code
+                                )
+                            except TeamLeader.DoesNotExist:
+                                self.stderr.write(
+                                    "TL {} does not exist".format(team_code)
+                                )
+                                pass
+                            else:
+                                spray_operator.team_leader = team_leader
+                                spray_operator.save()
+                    print(
+                        SprayOperator.objects.exclude(code__in=codes).delete()
+                    )

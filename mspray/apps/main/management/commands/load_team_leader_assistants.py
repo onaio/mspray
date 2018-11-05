@@ -7,6 +7,7 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import Location, TeamLeader, TeamLeaderAssistant
@@ -33,12 +34,22 @@ class Command(BaseCommand):
             else:
                 with codecs.open(path, encoding="utf-8") as csv_file:
                     csv_reader = csv.DictReader(csv_file)
+                    codes = []
                     for row in csv_reader:
-                        team_leader_assistant, created = TeamLeaderAssistant.objects.get_or_create(  # noqa pylint: disable=line-too-long
-                            code=row["code"].strip(), name=row["name"]
-                        )
-                        if created:
-                            print(row)
+                        try:
+                            team_leader_assistant, created = TeamLeaderAssistant.objects.get_or_create(  # noqa pylint: disable=line-too-long
+                                code=row["code"].strip(), name=row["name"]
+                            )
+                        except IntegrityError:
+                            team_leader_assistant = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
+                                code=row["code"]
+                            )
+                            team_leader_assistant.name = row["name"]
+                            team_leader_assistant.save()
+                        else:
+                            if created:
+                                print(row)
+                        codes.append(row["code"])
                         district = row["district"].strip()
                         if district:
                             location = Location.get_district_by_code_or_name(
@@ -53,3 +64,8 @@ class Command(BaseCommand):
                             )
                             team_leader_assistant.team_leader = team_leader
                             team_leader_assistant.save()
+                    print(
+                        TeamLeaderAssistant.objects.exclude(
+                            code__in=codes
+                        ).delete()
+                    )

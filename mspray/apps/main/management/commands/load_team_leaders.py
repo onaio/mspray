@@ -7,6 +7,7 @@ import csv
 import os
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import IntegrityError
 from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import Location, TeamLeader
@@ -34,12 +35,20 @@ class Command(BaseCommand):
             else:
                 with codecs.open(path, encoding="utf-8") as csv_file:
                     csv_reader = csv.DictReader(csv_file)
+                    codes = []
                     for row in csv_reader:
-                        leader, created = TeamLeader.objects.get_or_create(
-                            code=row["code"].strip(), name=row["name"]
-                        )
-                        if created:
-                            print(row)
+                        try:
+                            leader, created = TeamLeader.objects.get_or_create(
+                                code=row["code"].strip(), name=row["name"]
+                            )
+                        except IntegrityError:
+                            leader = TeamLeader.objects.get(code=row["code"])
+                            leader.name = row["name"].strip()
+                            leader.save()
+                        else:
+                            if created:
+                                print(row)
+                        codes.append(row["code"])
                         district = row["district"].strip()
                         if district:
                             location = Location.get_district_by_code_or_name(
@@ -47,3 +56,4 @@ class Command(BaseCommand):
                             )
                             leader.location = location
                             leader.save()
+                    print(TeamLeader.objects.exclude(code__in=codes).delete())
