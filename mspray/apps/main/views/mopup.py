@@ -20,6 +20,9 @@ class MopUpView(ListView):
         context = super().get_context_data(object_list=object_list, **kwargs)
         context["site_name"] = "Mop-up"
 
+        # show definitions legend for mopup
+        context.update(DEFINITIONS.get("mopup", {}))
+
         return context
 
 
@@ -42,6 +45,8 @@ class HealthFacilityMopUpView(ListView):
             for location in context[self.context_object_name]
             if location.structures_to_mopup > 0
         ]
+
+        # show definitions legend for mopup
         context.update(DEFINITIONS.get("mopup", {}))
 
         return context

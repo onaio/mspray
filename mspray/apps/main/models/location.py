@@ -4,6 +4,7 @@ Location model module.
 """
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.core.cache import cache
 from django.db.models import Count, Q, Sum
 from django.utils.functional import cached_property
 
@@ -108,14 +109,23 @@ class Location(MPTTModel, models.Model):
                 for l in self.get_descendants().filter(level="ta")
             )
 
+        key = "structures-to-mopup-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
         mopup_percentage = getattr(settings, "MOPUP_PERCENTAGE", 90)
         ninetieth_percentile = round(
             (mopup_percentage / 100) * self.structures_on_ground
         )
         if self.visited_sprayed >= ninetieth_percentile:
-            return 0
+            val = 0
+        else:
+            val = ninetieth_percentile - self.visited_sprayed
 
-        return ninetieth_percentile - self.visited_sprayed
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def visited_sprayed(self):
@@ -125,9 +135,18 @@ class Location(MPTTModel, models.Model):
                 l.visited_sprayed
                 for l in self.get_descendants().filter(level="ta")
             )
-        return self.sprayday_set.filter(
+
+        key = "visited-sprayed-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.sprayday_set.filter(
             sprayable=True, was_sprayed=True
         ).count()
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def mopup_days_needed(self):
@@ -141,17 +160,34 @@ class Location(MPTTModel, models.Model):
                 ]
             )
 
-        return (
+        key = "mopup-days-needed-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = (
             self.household_set.filter(
                 Q(visited=False) | Q(visited__isnull=True)
             ).count()
             / denominator
         )
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def not_sprayable(self):
         """Return number of structures that are not sprayable."""
-        return self.household_set.filter(sprayable=False).count()
+
+        key = "not-sprayable-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.household_set.filter(sprayable=False).count()
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def new_structures(self):
@@ -161,14 +197,26 @@ class Location(MPTTModel, models.Model):
                 l.new_structures
                 for l in self.get_descendants().filter(level="ta")
             )
+        key = "new-structures-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
 
-        return self.sprayday_set.filter(
+        val = self.sprayday_set.filter(
             sprayable=True, was_sprayed=True, household__isnull=True
         ).count()
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def duplicates(self):
         """Return number of duplicates structures that have been sprayed."""
+        key = "duplicates-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
         agg = (
             self.sprayday_set.filter(was_sprayed=True)
             .exclude(household__isnull=True)
@@ -178,9 +226,10 @@ class Location(MPTTModel, models.Model):
             .aggregate(total_duplicates=Sum("duplicates"))
         )
 
-        return (
-            agg.get("total_duplicates") if agg.get("total_duplicates") else 0
-        )
+        val = agg.get("total_duplicates") if agg.get("total_duplicates") else 0
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def structures_on_ground(self):
@@ -196,11 +245,19 @@ class Location(MPTTModel, models.Model):
                 for l in self.get_descendants().filter(level="ta")
             )
 
-        return (
+        key = "structures-on-ground-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = (
             self.household_set.exclude(sprayable=False).count()
             + self.new_structures
             + self.duplicates
         )
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def visited_found(self):
@@ -214,30 +271,55 @@ class Location(MPTTModel, models.Model):
                 l.visited_found
                 for l in self.get_descendants().filter(level="ta")
             )
+
+        key = "visited-found-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
         new_structures = self.sprayday_set.filter(
             sprayable=True, was_sprayed=True, household__isnull=True
         ).count()
 
-        return (
+        val = (
             self.household_set.filter(sprayable=True, visited=True).count()
             + new_structures
             + self.duplicates
         )
+        cache.set(key, val)
+
+        return val
 
     @cached_property
     def last_visit(self):
         """Return the date of last submission."""
+        key = "last-visit-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
         last_sprayday = self.sprayday_set.last()
         if last_sprayday:
-            return last_sprayday.spray_date
+            val = last_sprayday.spray_date
+            cache.set(key, val)
+
+            return val
 
         return ""
 
     @cached_property
     def last_decision_date(self):
         """Return the date of last decision report."""
+        key = "last-decision-date-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
         decision = self.decision_spray_areas.last()  # pylint: disable=E1101
         if decision:
-            return decision.data.get("today")
+            val = decision.data.get("today")
+            cache.set(key, val)
+
+            return val
 
         return ""
