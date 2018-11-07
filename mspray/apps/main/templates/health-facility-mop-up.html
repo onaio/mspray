@@ -47,7 +47,7 @@
                             {{ location.structures_to_mopup }}
                         </td>
                         <td class='numbers'>
-                            {{ location.mopup_days_needed }}
+                            {{ location.mopup_days_needed|mopup_days_needed }}
                         </td>
                         <td>
                             {% calc_percentage location.visited_sprayed location.structures_on_ground as spray_effectiveness %}
@@ -77,7 +77,7 @@
                     <td class='numbers'>{{ district.structures_on_ground }}</td>
                     <td class='numbers'>{{ district.visited_sprayed }}</td>
                     <td class='numbers {{ district.structures_to_mopup|structures_mopup_colour }}'>{{ district.structures_to_mopup }}</td>
-                    <td class='numbers'>{{ district.mopup_days_needed }}</td>
+                    <td class='numbers'>{{ district.mopup_days_needed|mopup_days_needed }}</td>
                     <td class='numbers'>
                         {% calc_percentage district.visited_sprayed district.structures_on_ground as spray_effectiveness %}
                         {{ spray_effectiveness }}

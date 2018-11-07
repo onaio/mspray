@@ -118,3 +118,13 @@ def decision_date_colour(value, arg):
         return RED
 
     return ""
+
+
+@register.filter
+def mopup_days_needed(value):
+    """Rounds mopup_days_needed or returns the string '<1' when value is < 1.
+    """
+    if value and 0 < value < 1:
+        return "<1"
+
+    return round(value)

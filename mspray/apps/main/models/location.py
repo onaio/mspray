@@ -141,7 +141,7 @@ class Location(MPTTModel, models.Model):
                 ]
             )
 
-        return round(
+        return (
             self.household_set.filter(
                 Q(visited=False) | Q(visited__isnull=True)
             ).count()

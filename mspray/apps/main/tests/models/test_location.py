@@ -57,19 +57,19 @@ class TestLocation(TestCase):
         data_setup()
         with self.settings(MOPUP_DAYS_DENOMINATOR=5):
             akros_2 = Location.objects.get(name="Akros_2", level="ta")
-            self.assertEqual(akros_2.mopup_days_needed, 3)
+            self.assertEqual(akros_2.mopup_days_needed, 2.6)
 
             lusaka = Location.objects.get(name="Lusaka", level="district")
-            self.assertEqual(lusaka.mopup_days_needed, 6)
+            self.assertEqual(lusaka.mopup_days_needed, 5.2)
 
             # load some spray data
             load_spray_data()
 
             akros_2 = Location.objects.get(name="Akros_2", level="ta")
-            self.assertEqual(akros_2.mopup_days_needed, 0)
+            self.assertEqual(akros_2.mopup_days_needed, 0.2)
 
             lusaka = Location.objects.get(name="Lusaka", level="district")
-            self.assertEqual(lusaka.mopup_days_needed, 3)
+            self.assertEqual(lusaka.mopup_days_needed, 2.8000000000000003)
 
     def test_structures_on_ground(self):
         """Test structures_on_ground"""

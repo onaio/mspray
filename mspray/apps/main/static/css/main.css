@@ -65,6 +65,13 @@ i.green {
     padding-top:1em;
 }
 
+table.dataTable thead th, table.dataTable thead td {
+    padding: 5px 9px;
+}
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 4px 6px;
+}
+
 /* Table color-coding */
 .table > tbody > tr > td.red,
 .table > tbody > tr > td.green,

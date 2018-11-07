@@ -12,6 +12,7 @@ from mspray.apps.main.templatetags.progress_extras import (
     YELLOW,
     decision_date,
     decision_date_colour,
+    mopup_days_needed,
     sprayed_effectively_color,
     structures_mopup_colour,
 )
@@ -72,3 +73,8 @@ class TestProgressExtras(TestCase):
         self.assertEqual(
             decision_date_colour("2018-09-15", datetime.date(2018, 9, 20)), RED
         )
+
+    def test_mopup_days_needed(self):
+        """Test mopup_days_needed filter."""
+        self.assertEqual(mopup_days_needed(2.6), 3)
+        self.assertEqual(mopup_days_needed(0.3), "<1")
