@@ -33,7 +33,9 @@
                             {{ location.parent.name }}
                         </td>
                         <td>
-                            {{ location.name }}
+                            <a href="{% url 'target_area' location.parent_id location.pk  %}">
+                                <i class="fa fa-map"></i> {{ location.name }}
+                            </a>
                         </td>
                         <td class='numbers'>
                             {{ location.structures_on_ground }}
