@@ -27,6 +27,7 @@ from mspray.apps.main.utils import (
     avg_time_tuple,
     find_mismatched_spraydays,
     get_formid,
+    get_spray_operator,
     get_spraydays_with_mismatched_locations,
     link_sprayday_to_actors,
     remove_duplicate_sprayoperatordailysummary,
@@ -359,3 +360,13 @@ class TestUtils(TestBase):
             self.assertTrue(spray.location is not None)
             self.assertTrue(spray.household is not None)
             self.assertTrue(spray.household.visited)
+
+    def test_get_spray_operator(self):
+        """Test get_spray_operator function."""
+        operator = SprayOperator.objects.create(
+            name="Test", code="01234"
+        )
+        self.assertIsInstance(operator, SprayOperator)
+        self.assertEqual(get_spray_operator("01234").pk, operator.pk)
+        self.assertEqual(get_spray_operator("1234").pk, operator.pk)
+        self.assertIsNone(get_spray_operator("01234X"))

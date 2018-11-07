@@ -628,10 +628,16 @@ def get_team_leader_assistant(code):
 
 
 def get_spray_operator(code):
-    try:
-        return SprayOperator.objects.get(code=code)
-    except SprayOperator.DoesNotExist:
-        pass
+    """Return a SprayOperator object with the code or ends with the given code.
+    """
+    if code:
+        try:
+            return SprayOperator.objects.get(code=code)
+        except SprayOperator.DoesNotExist:
+            try:
+                return SprayOperator.objects.get(code__iendswith=code)
+            except SprayOperator.DoesNotExist:
+                pass
 
     return None
 
