@@ -10,6 +10,8 @@ from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
 
+from mspray.libs.common_tags import MOBILISED_FIELD, SENSITIZED_FIELD
+
 
 class Location(MPTTModel, models.Model):
     """
@@ -327,3 +329,91 @@ class Location(MPTTModel, models.Model):
             return val
 
         return ""
+
+    @cached_property
+    def mobilised(self):
+        """Return mobilisation status"""
+        sensitized = self.mb_spray_areas.first()  # pylint: disable=no-member
+        if sensitized:
+            return sensitized.data.get(MOBILISED_FIELD)
+        return ""
+
+    @cached_property
+    def sensitized(self):
+        """Return sensitization status"""
+        sensitized = self.sv_spray_areas.first()  # pylint: disable=no-member
+        if sensitized:
+            return sensitized.data.get(SENSITIZED_FIELD)
+        return ""
+
+    @cached_property
+    def mda_structures(self):
+        """Return the number of MDA structures on the ground."""
+        if self.level != "ta":
+            return sum(
+                l.mda_structures
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-structures-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.household_set.exclude(sprayable=False).count()
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_found(self):
+        """Return the number of MDA structures found on the ground.i
+
+        ('mda_status'='all_received' + 'mda_status'=some_received' +
+        'mda_status'=none_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_found for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-found-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        new_structures = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True, household__isnull=True
+        ).count()
+
+        val = (
+            self.household_set.filter(sprayable=True, visited=True).count()
+            + new_structures
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_received(self):
+        """Return the number of MDA structures received.
+
+        ('mda_status'='all_received' +'mda_status'=some_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_received
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True
+        ).count()
+        cache.set(key, val)
+
+        return val

@@ -104,10 +104,19 @@ class SprayDay(models.Model):
 
     def _set_sprayed_status(self):
         # pylint: disable=no-member
-        if self.data.get(WAS_SPRAYED_FIELD):
-            self.was_sprayed = (
-                self.data.get(WAS_SPRAYED_FIELD) == SPRAYED_VALUE
-            )
+        was_sprayed_field = getattr(
+            settings, "MSPRAY_WAS_SPRAYED_FIELD", WAS_SPRAYED_FIELD
+        )
+        sprayed_values = getattr(settings, "SPRAYED_VALUES", [])
+        if self.data.get(was_sprayed_field):
+            if sprayed_values:
+                self.was_sprayed = (
+                    self.data.get(was_sprayed_field) in sprayed_values
+                )
+            else:
+                self.was_sprayed = (
+                    self.data.get(was_sprayed_field) == SPRAYED_VALUE
+                )
         elif self.data.get(NEW_WAS_SPRAYED_FIELD):
             self.was_sprayed = (
                 self.data.get(NEW_WAS_SPRAYED_FIELD) == SPRAYED_VALUE
@@ -115,9 +124,10 @@ class SprayDay(models.Model):
 
     def _set_sprayable_status(self):
         # pylint: disable=no-member
-        if self.data.get(SPRAYABLE_FIELD):
+        sprayable_field = getattr(settings, "SPRAYABLE_FIELD", SPRAYABLE_FIELD)
+        if self.data.get(sprayable_field):
             self.sprayable = (
-                self.data.get(SPRAYABLE_FIELD) != NOT_SPRAYABLE_VALUE
+                self.data.get(sprayable_field) != NOT_SPRAYABLE_VALUE
             )
         elif self.data.get(NEW_STRUCTURE_SPRAYABLE_FIELD):
             self.sprayable = (

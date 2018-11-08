@@ -281,6 +281,15 @@ def add_spray_data(data):
             sprayday.geom = geom
         if location is not None:
             sprayday.location = location
+        else:
+            lat = data.get("{}:ctr:lat".format(HAS_UNIQUE_FIELD))
+            lon = data.get("{}:ctr:lon".format(HAS_UNIQUE_FIELD))
+            if "{}:node:id".format(HAS_UNIQUE_FIELD) in data and lat and lon:
+                location = Location.objects.filter(
+                    level="ta", geom__covers=Point(lon, lat)
+                ).first()
+                if location:
+                    sprayday.location = location
     if household and sprayday.household != household:
         sprayday.household = household
         sprayday.geom = household.geom

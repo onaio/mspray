@@ -11,12 +11,13 @@ from mspray.apps.main.models import Location
 class MDAView(ListView):
     """MDA view."""
 
-    template_name = "mda.html"
+    template_name = "mda-location.html"
     queryset = Location.objects.filter(level="district")
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         context["site_name"] = "MDA"
+        context["ENABLE_MDA"] = True
 
         # show definitions legend for mda
         context.update(DEFINITIONS.get("mda", {}))
@@ -36,6 +37,7 @@ class MDALocationView(ListView):
         context["mda_location"] = get_object_or_404(
             Location, pk=self.kwargs["location"]
         )
+        context["ENABLE_MDA"] = True
 
         # show definitions legend for mda
         context.update(DEFINITIONS.get("mda", {}))
