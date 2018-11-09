@@ -31,8 +31,10 @@
                 <tr>
                     <th rowspan="2">{% if mda_location %} Health Facility {% else %} District {% endif%}</th>
                     <th rowspan="2">Eligible Spray Areas</th>
-                    <th colspan="2">MDA Recieved Structures<sup title="">(a)</sup></th>
-                    <th colspan="2">MDA Coverage (Sprayed Effectively)<sup title="">(b)</sup></th>
+                    <th colspan="2">MDA Areas Reached<sup title=""></sup></th>
+                    <th colspan="2">MDA Areas Covered Effectively<sup title=""></sup></th>
+                    <th rowspan="2">Community Readiness</th>
+                    <th rowspan="2">Mobilised</th>
                 </tr>
                 <tr>
                     <th>Number</th>
@@ -82,6 +84,8 @@
                         <td class='numbers'>{{ location.mda_received|intcomma }}</td>
                         {% calc_percentage district.mda_received district.mda_found as calculated_percentage %}
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
+                        <td class=''>{{ location.sensitized }}</td>
+                        <td class=''>{{ location.mobilised }}</td>
                     </tr>
                 {% endfor %}
             {% else %}
@@ -132,6 +136,25 @@
                 </tr>
             {% endif%}
             </tbody>
+            {% if not mda_location or mda_location.level != 'RHC' %}
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'>{{ mda_location.mda_structures|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_found|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_received|intcomma }} </td>
+                    {% calc_percentage mda_location.mda_received mda_location.mda_structures as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                        {{ spray_effectiveness_percentage }}
+                    </td>
+                    {% calc_percentage mda_location.mda_found mda_location.mda_structures as found_coverage_percentage %}
+                    <td class='numbers'>{{ found_coverage_percentage }}</td>
+                    {% calc_percentage mda_location.mda_received mda_location.mda_found as spray_coverage_percentage %}
+                    <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    <td class='numbers'></td>
+                </tr>
+            </tfoot>
+            {% else %}
             <tfoot>
                 <tr>
                     <td>Total</a></td>
@@ -151,6 +174,7 @@
                     <td class=''></td>
                 </tr>
             </tfoot>
+            {% endif%}
         </table>
         <p>* To sort a column, click on the column name</p>
 
