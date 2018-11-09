@@ -419,6 +419,30 @@ class Location(MPTTModel, models.Model):
         return val
 
     @cached_property
+    def mda_none_received(self):
+        """Return the number of MDA structures none received.
+
+        ('mda_status'='none_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_none_received
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=False
+        ).values('osmid').distinct().count()
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
     def mda_spray_areas(self):
         """Return the number of MDA Spray Areas
         """

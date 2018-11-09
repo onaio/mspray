@@ -92,7 +92,7 @@
                 {% for location in object_list %}
                     <tr>
                         <td>
-                            <a href="{% url 'mda:index' %}">
+                            <a href="{% url 'mda:spray-area' location.parent_id location.pk %}">
                                 <i class="fa fa-map"></i>
                             </a>
                             <a href="{% url 'mda:location' location.parent_id  %}">
