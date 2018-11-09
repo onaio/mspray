@@ -360,7 +360,11 @@ class Location(MPTTModel, models.Model):
         if val is not None:
             return val
 
-        val = self.household_set.exclude(sprayable=False).count()
+        val = (
+            self.household_set.exclude(sprayable=False).count()
+            + self.new_structures
+            + self.duplicates
+        )
         cache.set(key, val)
 
         return val
@@ -382,13 +386,10 @@ class Location(MPTTModel, models.Model):
         if val is not None:
             return val
 
-        new_structures = self.sprayday_set.filter(
-            sprayable=True, was_sprayed=True, household__isnull=True
-        ).count()
-
         val = (
             self.household_set.filter(sprayable=True, visited=True).count()
-            + new_structures
+            + self.new_structures
+            + self.duplicates
         )
         cache.set(key, val)
 
@@ -435,9 +436,12 @@ class Location(MPTTModel, models.Model):
         if val is not None:
             return val
 
-        val = self.sprayday_set.filter(
-            sprayable=True, was_sprayed=False
-        ).values('osmid').distinct().count()
+        val = (
+            self.sprayday_set.filter(sprayable=True, was_sprayed=False)
+            .values("osmid")
+            .distinct()
+            .count()
+        )
         cache.set(key, val)
 
         return val

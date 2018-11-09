@@ -278,7 +278,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
             $("#target-area-stats-structures").empty().append(
                 "<dt class='reason structures'>" + ((app.housesCount === undefined) ? 0 : app.housesCount) + "</dt><dd>Structures</dd>"
             );
-            target_area_stats += "<dt class='reason reason-sprayed'>" + ((app.visitedSprayed === undefined) ? 0 : app.visitedSprayed) + "</dt><dd>Sprayed</dd>";
+            target_area_stats += "<dt class='reason reason-sprayed'>" + ((app.visitedSprayed === undefined) ? 0 : app.visitedSprayed) + "</dt><dd>Received</dd>";
             target_area_stats += "<dt class='reason reason-not-sprayed'>" + ((app.visitedNotSprayed === undefined) ? 0 : app.visitedNotSprayed) + "</dt><dd>None Received</dd>";
             $("#target-area-stats").empty().append(target_area_stats);
 
