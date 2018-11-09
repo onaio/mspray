@@ -1,38 +1,154 @@
-[![Build Status](http://drone.onalabs.org/api/badge/github.com/onaio/mspray/status.svg?branch=master)](http://drone.onalabs.org/github.com/onaio/mspray)
+mSpray
+=======
 
 mSpray is a mobile based IRS tool developed by Akros with Ona
-
-mSpray projects
-===============
 
 Setup
 -----
 
-Install required packages and create database.
+**INSTALLATION**
 
-    fab system_setup:default,dbname=dbname,dbuser=dbusername,dbpass=dbpassword
+------------------------------------------------------------------------
 
-Setup codebase and initial server configuration
-    fab server_setup:default,branch=gitbranch,dbuser=dbusername,dbpass=dbpassword,dbname=dbname,port=uwsgiport,project=countryname
+**Get the Code**
 
-Deploying
----------
+------------------------------------------------------------------------
 
-Applying changes to deployed project
-    fab deploy:default,branch=gitbranch,dbuser=dbusername,dbpass=dbpassword,dbname=dbname,port=uwsgiport,project=countryname
+```
+git clone git\@github.com:onaio/mspray.git
 
-Project
--------
+```
 
-- 2014 Zambia, port=8008, branch=mspray2014
-- 2015 Zambia, port=8013, branch=district-perfomace
-- 2015 Madagascar, port=8012, branch=madagascar
-- 2015 Namibia, port=8011, branch=master
+**Docker**
 
-Load team leaders
-----------------
+------------------------------------------------------------------------
 
-    $ python manage.py load_team_leaders data/zambia/team_leaders_2014.csv
+Install Docker and Docker Compose. Run the following command to start
+the containers in the background and leave them running. The option -d
+runs in detach mode. Detached mode: Run containers in the background and
+prints new container names.
+
+```
+
+docker-compose up -d
+
+```
+
+```
+
+docker-compose logs -f
+
+```
+
+Running docker-compose logs -f, could be useful when you need to follow the 
+log output from services.
+
+
+
+It should now be accessible via http://localhost:8000.
+
+
+**Running the docker container**
+
+The following command can be used to interact with the docker container on the command line.  -it specifies that we will be interacting with that container through the bash or any other shell preferable to you.  
+
+```
+
+docker exec -it mspray_queue_1 bash
+
+
+```
+
+**set up a virtual envirenment**
+
+------------------------------------------------------------------------
+
+For you to run the following command, you mast have pipenv installed:
+
+```
+
+pipenv shell
+
+```
+
+
+**Run tests**
+
+Consequently, we could use the following commands to run tests associatted with the project.
+
+```
+
+python manage.py test
+
+```
+
+**Obtaining sufficient privileges**
+
+Get your psql utility running by running the following command. The following command connects to a database under a specific user 'postgres', who is able to grant priviledges to the mspray user
+
+```
+
+psql -h db -U postgres
+
+```
+
+Depending on your configuration, this section describes several methods to configure the database user with sufficient privileges to run tests for the mspray application on PostgreSQL. Your testing database user needs to have the ability to create databases. In other configurations, you may be required to use a database superuser as only superusers can create the extension or update it to a new version. If it is set to false, just the privileges required to execute the commands in the installation or update script are required.
+
+```
+
+ALTER USER mspray WITH SUPERUSER;
+
+```
+
+
+**For Development Use-cases** 
+
+The following packages need to be installed to run tests. 
+Note, this is unnecessary for those who do not need to run tests while setting up.
+
+```
+
+pipenv install --dev
+
+```
+
+
+Afterwards run the following management commands to load relevant data into the application.
+
+```
+
+python manage.py load_location_shape_file mspray/apps/main/tests/fixtures/Lusaka/districts/Lusaka.shp NAME district --parent-skip=yes
+
+
+python manage.py load_location_shape_file mspray/apps/main/tests/fixtures/Lusaka/HF/Mtendere.shp HFC_NAME RHC --parent=DISTRICT --parent-level=district
+
+
+python manage.py load_location_shape_file mspray/apps/main/tests/fixtures/Lusaka/SA/Akros_1.shp SPRAYAREA ta --parent=HFC_NAME --parent-level=RHC --structures=HOUSES
+
+
+```
+
+These three commands from the load_location_shape_file custom management command are used to loads districts, health facility catchment area and spray area shapefiles.
+
+
+```
+
+python manage.py load_osm_hh mspray/apps/main/tests/fixtures/Lusaka/OSM/
+
+```
+
+The load_osm_hh command Loads OSM files as households into the Household model. This then loads the structures found in the region
+
+
+Finally use this command to update location structure numbers for districts/regions from target areas 
+
+```
+
+python manage.py update_locations_structures
+
+```
+
+
 
 Data Flow
 ---------
