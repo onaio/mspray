@@ -38,6 +38,7 @@ TEMPLATES = [
                 "mspray.libs.context_processors.mspray_settings",
                 "mspray.libs.context_processors.show_directly_observed",
                 "mspray.libs.context_processors.show_trial_survey",
+                "mspray.libs.context_processors.enable_mda",
             ],
             "debug": False,
             "loaders": [
