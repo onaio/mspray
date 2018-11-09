@@ -76,13 +76,13 @@
                             {{ location.structures|intcomma }}
                             {% endif %}
                         </td>
-                        <td class='numbers'>{{ district.found|intcomma }}</td>
+                        <td class='numbers'>{{ location.mda_spray_areas_found|intcomma }}</td>
                         <td class='numbers'>
                             {% if site_name != 'namibia' %}
-                            {% percentage location.mda_found location.mda_spray_areas %}
+                            {% percentage location.mda_spray_areas_found location.mda_spray_areas %}
                             {% endif %}</td>
-                        <td class='numbers'>{{ location.mda_received|intcomma }}</td>
-                        {% calc_percentage district.mda_received district.mda_found as calculated_percentage %}
+                        <td class='numbers'>{{ location.mda_spray_areas_received|intcomma }}</td>
+                        {% calc_percentage location.mda_spray_areas_received location.mda_spray_areas_found as calculated_percentage %}
                         <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
                         <td class=''>{{ location.sensitized }}</td>
                         <td class=''>{{ location.mobilised }}</td>
@@ -140,17 +140,17 @@
             <tfoot>
                 <tr>
                     <td>Total</a></td>
-                    <td class='numbers'>{{ mda_location.mda_structures|intcomma }}</td>
-                    <td class='numbers'>{{ mda_location.mda_found|intcomma }}</td>
-                    <td class='numbers'>{{ mda_location.mda_received|intcomma }} </td>
-                    {% calc_percentage mda_location.mda_received mda_location.mda_structures as spray_effectiveness_percentage %}
+                    <td class='numbers'>{{ mda_location.mda_spray_areas|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_spray_areas_found|intcomma }}</td>
+                    {% calc_percentage mda_location.mda_spray_areas_found mda_location.mda_spray_areas as spray_effectiveness_percentage %}
                     <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
                         {{ spray_effectiveness_percentage }}
                     </td>
-                    {% calc_percentage mda_location.mda_found mda_location.mda_structures as found_coverage_percentage %}
+                    {% calc_percentage mda_location.mda_spray_areas_found mda_location.mda_structures as found_coverage_percentage %}
                     <td class='numbers'>{{ found_coverage_percentage }}</td>
-                    {% calc_percentage mda_location.mda_received mda_location.mda_found as spray_coverage_percentage %}
+                    {% calc_percentage mda_location.mda_spray_areas_received mda_location.mda_spray_areas_found as spray_coverage_percentage %}
                     <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    <td class='numbers'></td>
                     <td class='numbers'></td>
                 </tr>
             </tfoot>

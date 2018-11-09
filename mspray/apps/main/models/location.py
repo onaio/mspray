@@ -417,3 +417,56 @@ class Location(MPTTModel, models.Model):
         cache.set(key, val)
 
         return val
+
+    @cached_property
+    def mda_spray_areas(self):
+        """Return the number of MDA Spray Areas
+        """
+        key = "mda-spray-areas-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.get_descendants().filter(level="ta").count()
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_spray_areas_found(self):
+        """Return the number of MDA Spray Areas
+        """
+        key = "mda-spray-areas-found-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = sum(
+            1
+            for spray_area in self.get_descendants().filter(level="ta")
+            if spray_area.mda_found > 0
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_spray_areas_received(self):
+        """Return the number of MDA spray areas received.
+
+        ('mda_status'='all_received' +'mda_status'=some_received')
+        """
+
+        key = "mda-spray-area-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = sum(
+            1
+            for l in self.get_descendants().filter(level="ta")
+            if l.mda_received > 0
+        )
+        cache.set(key, val)
+
+        return val
