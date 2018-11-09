@@ -970,6 +970,7 @@ def performance_report(spray_operator, queryset=None):
         )
     queryset = (
         queryset.values_list("sprayformid", flat=True)
+        .exclude(sprayformid__isnull=True)
         .order_by("spray_date")
         .distinct()
     )
