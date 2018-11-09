@@ -1043,7 +1043,11 @@ def create_performance_reports():
     Create PerfomanceReports for all spray operators.
     """
     for spray_operator in SprayOperator.objects.filter().iterator():
-        performance_report(spray_operator)
+        try:
+            performance_report(spray_operator)
+        except AttributeError:
+            # ignore AttributeError exceptions and continue processing
+            pass
         gc.collect()
 
 
@@ -1085,13 +1089,18 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
             log_writer("Need to pull {} records from Ona.".format(count))
             for dataid in new_data:
                 counter += 1
-                log_writer("Pulling {} of {}".format(counter, count))
+                log_writer(
+                    "Pulling {} {} of {}".format(dataid, counter, count)
+                )
                 rec = fetch_form_data(formid, dataid=dataid)
                 if isinstance(rec, dict):
                     try:
                         sync_func(rec)
                     except IntegrityError:
+                        log_writer("Already saved {}".format(dataid))
                         continue
+                else:
+                    log_writer("Unable to process {} {}".format(dataid, rec))
                 if counter % 100 == 0:
                     gc.collect()
     else:
