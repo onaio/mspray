@@ -925,14 +925,18 @@ def start_end_time(sprayday_qs, sprayformid):
     Returns start, end times and spray_date for a given sprayformid.
     """
     start_time = (
-        sprayday_qs.filter(data__sprayformid=sprayformid)
+        sprayday_qs.filter(
+            data__sprayformid=sprayformid, data__start__isnull=False
+        )
         .annotate(start=RawSQL("data->>'start'", ()))
         .values_list("start", flat=True)
         .order_by("start")
         .first()
     )
     end_time = (
-        sprayday_qs.filter(data__sprayformid=sprayformid)
+        sprayday_qs.filter(
+            data__sprayformid=sprayformid, data__end__isnull=False
+        )
         .annotate(end=RawSQL("data->>'end'", ()))
         .values_list("end", flat=True)
         .order_by("-end")
