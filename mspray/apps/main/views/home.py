@@ -150,7 +150,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
     slug_field = "pk"
 
     def get_queryset(self):
-        qs = super(TargetAreaView, self).get_queryset()
+        qs = super(TargetAreaView, self).get_queryset().filter(target=True)
 
         return get_location_qs(qs)
 

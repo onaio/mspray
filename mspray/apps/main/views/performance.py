@@ -83,7 +83,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
     template_name = "performance.html"
 
     def get_queryset(self):
-        queryset = super(DistrictPerfomanceView, self).get_queryset()
+        queryset = super(DistrictPerfomanceView,
+                         self).get_queryset().filter(target=True)
 
         return queryset.filter(parent=None).order_by("name")
 
