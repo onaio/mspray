@@ -925,14 +925,18 @@ def start_end_time(sprayday_qs, sprayformid):
     Returns start, end times and spray_date for a given sprayformid.
     """
     start_time = (
-        sprayday_qs.filter(data__sprayformid=sprayformid)
+        sprayday_qs.filter(
+            data__sprayformid=sprayformid, data__start__isnull=False
+        )
         .annotate(start=RawSQL("data->>'start'", ()))
         .values_list("start", flat=True)
         .order_by("start")
         .first()
     )
     end_time = (
-        sprayday_qs.filter(data__sprayformid=sprayformid)
+        sprayday_qs.filter(
+            data__sprayformid=sprayformid, data__end__isnull=False
+        )
         .annotate(end=RawSQL("data->>'end'", ()))
         .values_list("end", flat=True)
         .order_by("-end")
@@ -970,6 +974,7 @@ def performance_report(spray_operator, queryset=None):
         )
     queryset = (
         queryset.values_list("sprayformid", flat=True)
+        .exclude(sprayformid__isnull=True)
         .order_by("spray_date")
         .distinct()
     )
@@ -1034,15 +1039,17 @@ def performance_report(spray_operator, queryset=None):
         report.district = spray_operator.team_leader_assistant.location
         report.save()
 
-        return report
-
 
 def create_performance_reports():
     """
     Create PerfomanceReports for all spray operators.
     """
     for spray_operator in SprayOperator.objects.filter().iterator():
-        performance_report(spray_operator)
+        try:
+            performance_report(spray_operator)
+        except AttributeError:
+            # ignore AttributeError exceptions and continue processing
+            pass
         gc.collect()
 
 
@@ -1084,13 +1091,18 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
             log_writer("Need to pull {} records from Ona.".format(count))
             for dataid in new_data:
                 counter += 1
-                log_writer("Pulling {} of {}".format(counter, count))
+                log_writer(
+                    "Pulling {} {} of {}".format(dataid, counter, count)
+                )
                 rec = fetch_form_data(formid, dataid=dataid)
                 if isinstance(rec, dict):
                     try:
                         sync_func(rec)
                     except IntegrityError:
+                        log_writer("Already saved {}".format(dataid))
                         continue
+                else:
+                    log_writer("Unable to process {} {}".format(dataid, rec))
                 if counter % 100 == 0:
                     gc.collect()
     else:
