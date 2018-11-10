@@ -1035,8 +1035,6 @@ def performance_report(spray_operator, queryset=None):
         report.district = spray_operator.team_leader_assistant.location
         report.save()
 
-        return report
-
 
 def create_performance_reports():
     """
