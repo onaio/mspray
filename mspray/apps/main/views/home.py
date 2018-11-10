@@ -130,6 +130,19 @@ class DistrictView(SiteNameMixin, ListView):
                     )
                 except KeyError:
                     pass
+        if not_targeted:
+            not_targeted_fields = [
+                ("visited_total", "found"),
+                ("visited_sprayed", "sprayed"),
+                ("visited_not_sprayed", "not_sprayed"),
+                ("visited_refused", "refused"),
+                ("visited_other", "other"),
+            ]
+            for total_field, not_field in not_targeted_fields:
+                try:
+                    totals[total_field] += not_targeted[not_field]
+                except KeyError:
+                    totals[total_field] = not_targeted[not_field]
 
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
