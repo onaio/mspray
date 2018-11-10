@@ -28,3 +28,4 @@ services:
        - DB_NAME=mspray
        - DB_PASS=mspray
        - DB_HOST=db
+       - WORKON_HOME=.virtualenvs
