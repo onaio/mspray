@@ -6,7 +6,7 @@ SprayDay model module - holds all submissions for the IRS HH Form
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 
 DATA_FILTER = getattr(
     settings, "MSPRAY_DATA_FILTER", '"sprayable_structure":"yes"'
@@ -229,5 +229,30 @@ post_save.connect(
     dispatch_uid="link_district_location",
 )
 
+
+def mda_population_calculations(sender, instance=None, **kwargs):
+    """Calculate MDA population metrics"""
+    eligible_field = "_population_eligible"
+    treatment_field = "_population_treatment"
+    persons_field = "sprayable/anotherperson"
+    if instance.data and eligible_field not in instance.data:
+        instance.data[eligible_field] = 0
+        instance.data[treatment_field] = 0
+        if persons_field in instance.data:
+            for person in instance.data[persons_field]:
+                if person.get("{}/eligible".format(persons_field)) == "yes":
+                    instance.data[eligible_field] += 1
+                    treatment = person.get(
+                        "{}/treatment".format(persons_field)
+                    )
+                    if treatment == "received":
+                        instance.data[treatment_field] += 1
+
+
+pre_save.connect(
+    mda_population_calculations,
+    sender=SprayDay,
+    dispatch_uid="mda_population_calculations",
+)
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {"geom": "POINT25D"}  # pylint: disable=C0103

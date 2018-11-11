@@ -38,6 +38,7 @@ class TestUtils(TestCase):
         self.assertEqual(
             sprayday.data["values_from_omk/mda_status"], "noteligible"
         )
+        self.assertEqual(sprayday.data.get("_population_eligible"), 0)
 
         sprayday = add_spray_data(data[1])
         self.assertEqual(SprayDay.objects.count(), 2)
@@ -51,6 +52,8 @@ class TestUtils(TestCase):
         self.assertEqual(
             sprayday.data["values_from_omk/mda_status"], "all_received"
         )
+        self.assertEqual(sprayday.data.get("_population_eligible"), 1)
+        self.assertEqual(sprayday.data.get("_population_treatment"), 1)
 
         sprayday = add_spray_data(data[2])
         self.assertEqual(SprayDay.objects.count(), 3)
@@ -63,6 +66,8 @@ class TestUtils(TestCase):
         self.assertEqual(
             sprayday.data["values_from_omk/mda_status"], "some_received"
         )
+        self.assertEqual(sprayday.data.get("_population_eligible"), 0)
+        self.assertEqual(sprayday.data.get("_population_treatment"), 0)
 
         sprayday = add_spray_data(data[3])
         self.assertEqual(SprayDay.objects.count(), 4)
@@ -75,6 +80,8 @@ class TestUtils(TestCase):
         self.assertEqual(
             sprayday.data["values_from_omk/mda_status"], "none_received"
         )
+        self.assertEqual(sprayday.data.get("_population_eligible"), 0)
+        self.assertEqual(sprayday.data.get("_population_treatment"), 0)
 
         sprayday = add_spray_data(data[5])
         self.assertEqual(SprayDay.objects.count(), 5)
@@ -87,3 +94,5 @@ class TestUtils(TestCase):
         self.assertEqual(
             sprayday.data["values_from_omk/mda_status"], "some_received"
         )
+        self.assertEqual(sprayday.data.get("_population_eligible"), 0)
+        self.assertEqual(sprayday.data.get("_population_treatment"), 0)
