@@ -7,13 +7,15 @@ from django.contrib.gis.db import models
 from django.core.cache import cache
 from django.db.models import Count, Q, Sum
 from django.utils.functional import cached_property
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models.functions import Cast
 
 from mptt.models import MPTTModel, TreeForeignKey
 
 from mspray.libs.common_tags import MOBILISED_FIELD, SENSITIZED_FIELD
 
 
-class Location(MPTTModel, models.Model):
+class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     """
     Location model
     """
@@ -495,6 +497,36 @@ class Location(MPTTModel, models.Model):
             for l in self.get_descendants().filter(level="ta")
             if l.mda_received > 0
         )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def population_eligible(self):
+        """Return the number of MDA population eligible."""
+        key = "population-eligible-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        if self.level != "ta":
+            val = sum(
+                l.population_eligible
+                for l in self.get_descendants().filter(level="ta")
+            )
+        else:
+            queryset = (
+                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
+                .annotate(
+                    population=Cast(
+                        KeyTextTransform("_population_eligible", "data"),
+                        models.IntegerField(),
+                    )
+                )
+                .aggregate(total_eligible=Sum("population"))
+            )
+            val = queryset["total_eligible"] or 0
+
         cache.set(key, val)
 
         return val

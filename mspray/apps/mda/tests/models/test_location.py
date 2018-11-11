@@ -43,3 +43,13 @@ class TestLocation(TestCase):
         load_mda_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.mda_received, 3)
+
+    def test_population_eligible(self):
+        """Test mda_received."""
+        data_setup()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.population_eligible, 0)
+
+        load_mda_data()
+        akros_2 = Location.objects.get(name="Akros_2", level="ta")
+        self.assertEqual(akros_2.population_eligible, 1)
