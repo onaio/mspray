@@ -530,3 +530,33 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         cache.set(key, val)
 
         return val
+
+    @cached_property
+    def population_treatment(self):
+        """Return the number of MDA population treatment."""
+        key = "population-treatment-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        if self.level != "ta":
+            val = sum(
+                l.population_treatment
+                for l in self.get_descendants().filter(level="ta")
+            )
+        else:
+            queryset = (
+                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
+                .annotate(
+                    population=Cast(
+                        KeyTextTransform("_population_treatment", "data"),
+                        models.IntegerField(),
+                    )
+                )
+                .aggregate(total_treatment=Sum("population"))
+            )
+            val = queryset["total_treatment"] or 0
+
+        cache.set(key, val)
+
+        return val
