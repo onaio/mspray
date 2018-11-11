@@ -110,7 +110,10 @@
                         <td class='numbers'>{{ found_coverage_percentage }}</td>
                         {% calc_percentage location.mda_received location.mda_found as spray_coverage_percentage %}
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
-                        <td class='numbers'></td>
+                        <td class='numbers'>
+                            {% calc_percentage location.population_treatment location.population_eligible as population_percentage %}
+                            {{ population_percentage }}
+                        </td>
                         <td class=''>{{ location.sensitized }}</td>
                         <td class=''>{{ location.mobilised }}</td>
                     </tr>
