@@ -4,11 +4,11 @@ Location model module.
 """
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.core.cache import cache
 from django.db.models import Count, Q, Sum
-from django.utils.functional import cached_property
-from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db.models.functions import Cast
+from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
 

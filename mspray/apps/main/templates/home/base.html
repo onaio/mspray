@@ -81,7 +81,11 @@
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
                                 <span>
+                                {% if mda_performance_tables %}
+                                    Performance
+                                {% else %}
                                     MDA
+                                {% endif %}
                                 </span>
                                 <b class="caret"></b>
                             </a>
@@ -90,6 +94,8 @@
                                 {% if view.request.session.show_csv %}
                                 <li role="separator" class="divider"></li>
                                 {% endif %}
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mda:performance:districts' %} ">Performance</a></li>
                                 <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>
