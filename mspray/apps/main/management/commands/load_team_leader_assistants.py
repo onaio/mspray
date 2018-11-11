@@ -50,19 +50,29 @@ class Command(BaseCommand):
                             if created:
                                 print(row)
                         codes.append(row["code"])
-                        district = row["district"].strip()
-                        if district:
-                            location = Location.get_district_by_code_or_name(
-                                district
+                        if row.get("health_facility_code"):
+                            try:
+                                team_leader_assistant.location = Location.objects.get(  # noqa pylint: disable=line-too-long
+                                    code=row.get(
+                                        "health_facility_code"
+                                    ).strip(),
+                                    level="RHC",
+                                ).parent
+                            except Location.DoesNotExist:
+                                pass
+                            else:
+                                team_leader_assistant.save()
+
+                        if row.get("district"):
+                            team_leader_assistant.location = Location.get_district_by_code_or_name(  # noqa pylint: disable=line-too-long
+                                row.get("district").strip()
                             )
-                            team_leader_assistant.location = location
                             team_leader_assistant.save()
-                        team_code = row["team_leader"].strip()
-                        if team_code:
-                            team_leader = TeamLeader.objects.get(
-                                code=team_code
+                        if row.get("team_leader"):
+                            team_leader_assistant.team_leader = TeamLeader.objects.get(  # noqa pylint: disable=line-too-long
+                                code=row.get("team_leader").strip()
                             )
-                            team_leader_assistant.team_leader = team_leader
+
                             team_leader_assistant.save()
                     print(
                         TeamLeaderAssistant.objects.exclude(

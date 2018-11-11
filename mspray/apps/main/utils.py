@@ -973,6 +973,8 @@ def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
+    if not spray_operator.team_leader_assistant:
+        return None
     operator_qs = SprayDay.objects.none()
     if spray_operator is not None:
         operator_qs = SprayDay.objects.filter(
@@ -1054,6 +1056,8 @@ def performance_report(spray_operator, queryset=None):
         ).count()
         report.district = spray_operator.team_leader_assistant.location
         report.save()
+
+    return spray_operator
 
 
 def create_performance_reports():
