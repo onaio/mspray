@@ -15,7 +15,7 @@ Setup
 ------------------------------------------------------------------------
 
 ```
-git clone git\@github.com:onaio/mspray.git
+git clone git@github.com:onaio/mspray.git
 
 ```
 
