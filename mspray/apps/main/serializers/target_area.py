@@ -1271,7 +1271,7 @@ class TargetAreaQuerySerializer(
             "bounds",
             "spray_dates",
             "level",
-            "Priority",
+            "priority",
         )
         model = TargetArea
 
