@@ -583,10 +583,12 @@ def add_spray_operator_daily(data):
     spray_operator_code = data.get("sprayop_code")
     spray_operator = get_spray_operator(spray_operator_code)
     spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
-    spray_form_id = data.get(
-        "sprayformid",
-        get_formid(spray_operator, spray_date, spray_operator_code),
-    )
+    sprayformid = get_formid(spray_operator, spray_date, spray_operator_code)
+    spray_form_id = data.get("sprayformid", sprayformid)
+    # lets trust the spray_operator code for the sprayformid
+    if spray_form_id != sprayformid and spray_operator:
+        spray_form_id = sprayformid
+        spray_operator_code = spray_operator.code
     data["sprayformid"] = spray_form_id
 
     try:
@@ -637,6 +639,8 @@ def get_spray_operator(code):
         try:
             return SprayOperator.objects.get(code=code)
         except SprayOperator.DoesNotExist:
+            if code.startswith("0"):
+                return get_spray_operator(code[1:])
             try:
                 return SprayOperator.objects.get(code__iendswith=code)
             except SprayOperator.DoesNotExist:
@@ -1088,7 +1092,7 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
         all_data = [rec["_id"] for rec in raw_data]
         all_data.sort()
         if all_data is not None and isinstance(all_data, list):
-            new_data = list(set(all_data) - set(old_data))
+            new_data = sorted(list(set(all_data) - set(old_data)))
             count = len(new_data)
             counter = 0
             log_writer("Need to pull {} records from Ona.".format(count))
