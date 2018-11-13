@@ -77,6 +77,7 @@ class DistrictView(SiteNameMixin, ListView):
                 "visited",
                 "sprayed",
                 "is_sensitized",
+                "priority",
             )
         )
         pk = self.kwargs.get(self.slug_field)

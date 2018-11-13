@@ -30,6 +30,7 @@
                 {% else %}
                 <tr>
                     <th>Target Area</th>
+                    <th>Priority</th>
                     <th>Structures on ground</th>
                     <th>Found</th>
                     <th>Sprayed</th>
@@ -100,6 +101,7 @@
                             </td>
                         </td>
 
+                        <td class='numbers'>{{ district.priority|default_if_none:"" }}</td>
                         <td class='numbers'>{{ district.structures|intcomma }}</td>
                         <td class='numbers'>{{ district.found|intcomma }}</td>
                         <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
@@ -115,6 +117,7 @@
                 {% endfor %}
                 <tr>
                     <td>{% trans "Not in Targeted Area" %}</td>
+                    <td></td>
                     <td class='numbers'></td>
                     <td class='numbers'>{{ no_location.found|default_if_none:"0"|intcomma }}</td>
                     <td class='numbers'>{{ no_location.sprayed|default_if_none:"0"|intcomma }}</td>
@@ -144,6 +147,7 @@
                         <td class='numbers'>{{ district_totals.sensitized }}</td>
                         <td class='numbers'>&nbsp;</td>
                     {% else %}
+                        <td class='numbers'></td>
                         <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }} </td>
