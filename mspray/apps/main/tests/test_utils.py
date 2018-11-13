@@ -8,6 +8,8 @@ from unittest.mock import patch
 from django.conf import settings
 from django.db.models import Count
 
+from django.core.exceptions import ValidationError
+
 from mspray.apps.main.models import (
     Household,
     Location,
@@ -105,6 +107,14 @@ class TestUtils(TestBase):
         _args, kwargs = mock.call_args_list[0]
         self.assertEqual(kwargs["sprayday"], SprayDay.objects.first())
         self.assertEqual(kwargs["data"], SUBMISSION_DATA[0])
+
+    def test_add_spray_data_with_Exception(self):
+        """
+        test that raises Validation error in case no data is passed
+        """
+        data = {}
+        with self.assertRaises(ValidationError):
+            add_spray_data(data)
 
     @patch("mspray.apps.main.tasks.fetch_osm_xml")
     @patch("mspray.apps.main.utils.run_tasks_after_spray_data")

@@ -246,7 +246,10 @@ def add_spray_data(data):
     """
     submission_id = data.get(DATA_ID_FIELD)
     spray_date = data.get(DATE_FIELD)
-    spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
+    try:
+        spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
+    except TypeError:
+        raise ValidationError("{} not provided".format(DATE_FIELD))
     gps_field = data.get(
         STRUCTURE_GPS_FIELD, data.get(NON_STRUCTURE_GPS_FIELD)
     )
