@@ -44,5 +44,5 @@ class Command(BaseCommand):
                             else:
                                 priority = row.get("Priority")
                                 if priority:
-                                    spray_area.priority = True
+                                    spray_area.priority = priority
                                     spray_area.save()

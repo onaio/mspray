@@ -19,8 +19,12 @@ class TestLoadLocationsPriority(TestCase):
         data_setup()
         location = Location.objects.get(name="Akros_1")
         self.assertIsNone(location.priority)
+        location = Location.objects.get(name="Akros_2")
+        self.assertIsNone(location.priority)
 
         path = os.path.join(FIXTURES_DIR, "Lusaka", "priority.csv")
         call_command("load_locations_priority", path)
         location = Location.objects.get(name="Akros_1")
         self.assertEqual(location.priority, 1)
+        location = Location.objects.get(name="Akros_2")
+        self.assertEqual(location.priority, 2)
