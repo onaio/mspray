@@ -13,7 +13,10 @@
         <table class="table table-stripe">
             <thead>
                 <tr>
-                    <th>Health Facility</th>
+                    <th>Health Facility</th>    
+                    {% if district.name == "Sinda" %}
+                    <th>Priority</th>
+                    {% endif %}   
                     <th>Spray Area</th>
                     <th>Structures on the Ground</th>
                     <th>Visited Sprayed</th>
@@ -32,6 +35,11 @@
                         <td>
                             {{ location.parent.name }}
                         </td>
+                        {% if district.name == "Sinda" %}
+
+                        <td>{{ location.priority }}</td>
+
+                        {% endif %}
                         <td>
                             <a href="{% url 'target_area' location.parent_id location.pk  %}">
                                 <i class="fa fa-map"></i> {{ location.name }}
@@ -73,6 +81,9 @@
             <tfoot>
                 <tr>
                     <td>Total</a></td>
+                    {% if district.name == "Sinda" %}
+                    <td> location.priority </td>
+                    {% endif %}
                     <td class='numbers'>{{ district.name }}</td>
                     <td class='numbers'>{{ district.structures_on_ground }}</td>
                     <td class='numbers'>{{ district.visited_sprayed }}</td>

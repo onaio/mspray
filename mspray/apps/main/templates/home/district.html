@@ -30,6 +30,9 @@
                 {% else %}
                 <tr>
                     <th>Target Area</th>
+                    {% if the_district.name == "Sinda" %}
+                    <th>Priority</th>
+                    {% endif %}
                     <th>Structures on ground</th>
                     <th>Found</th>
                     <th>Sprayed</th>
@@ -100,6 +103,9 @@
                             </td>
                         </td>
 
+                        {% if the_district.name == "Sinda" %}
+                        <td class='numbers'>{{ district.priority|default_if_none:"" }}</td>
+                        {% endif %}
                         <td class='numbers'>{{ district.structures|intcomma }}</td>
                         <td class='numbers'>{{ district.found|intcomma }}</td>
                         <td class='numbers'>{{ district.visited_sprayed|intcomma }} </td>
@@ -115,7 +121,10 @@
                 {% endfor %}
                 <tr>
                     <td>{% trans "Not in Targeted Area" %}</td>
+                    <td></td>
+                    {% if the_district.name == "Sinda" %}
                     <td class='numbers'></td>
+                    {% endif %}
                     <td class='numbers'>{{ no_location.found|default_if_none:"0"|intcomma }}</td>
                     <td class='numbers'>{{ no_location.sprayed|default_if_none:"0"|intcomma }}</td>
                     {% if no_location.sprayed and no_location.found %}
@@ -144,6 +153,9 @@
                         <td class='numbers'>{{ district_totals.sensitized }}</td>
                         <td class='numbers'>&nbsp;</td>
                     {% else %}
+                        {% if the_district.name == "Sinda" %}
+                        <td class='numbers'></td>
+                        {% endif %}
                         <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
                         <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }} </td>

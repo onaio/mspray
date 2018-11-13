@@ -1081,6 +1081,7 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
             "sensitized",
             "is_mobilised",
             "mobilised",
+            "priority",
         )
         model = Location
 
@@ -1270,6 +1271,7 @@ class TargetAreaQuerySerializer(
             "bounds",
             "spray_dates",
             "level",
+            "priority",
         )
         model = TargetArea
 

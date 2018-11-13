@@ -77,6 +77,7 @@ class DistrictView(SiteNameMixin, ListView):
                 "visited",
                 "sprayed",
                 "is_sensitized",
+                "priority",
             )
         )
         pk = self.kwargs.get(self.slug_field)
@@ -105,7 +106,11 @@ class DistrictView(SiteNameMixin, ListView):
                 not_targeted = get_not_targeted_within_geom(obj.geom)
                 not_targeted = not_targeted[0]
                 context["no_location"] = not_targeted
-
+                if obj.level == "district":
+                    context["the_district"] = obj
+                else:
+                    context["the_district"] = obj.get_ancestors().filter(
+                        level="district").first()
         serializer = serializer_class(
             qs, many=True, context={"request": self.request}
         )

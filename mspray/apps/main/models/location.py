@@ -34,6 +34,7 @@ class Location(MPTTModel, models.Model):
     target = models.BooleanField(default=True)
     is_sensitized = models.BooleanField(null=True)
     is_mobilised = models.BooleanField(null=True)
+    priority = models.PositiveIntegerField(null=True)
 
     class Meta:
         app_label = "main"
