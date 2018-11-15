@@ -76,6 +76,19 @@
                 </div>
                 <hr>
                 <div>
+                <dl>
+                <p> 
+                    Community Ready? {%if object.is_sensitized %}<i class="fa fa-check-circle" style="color: green"></i>{% else %} <i class="fa fa-times" style="color: red"></i>{% endif %}
+                    </p>
+                    <p> 
+                    Mobilised? {%if object.is_mobilised %}<i class="fa fa-check-circle" style="color: green"></i>{% else %}<i class="fa fa-times" style="color: red"></i>{% endif %}
+                </p>
+                </dl>
+                </div>
+
+
+                <hr>
+                <div>
                     <dl class="dl-horizontal" id="target-area-stats">
                         <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-previous-structure' value='Previous Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data"/>
                         <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data" />

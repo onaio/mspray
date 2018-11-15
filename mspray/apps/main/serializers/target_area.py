@@ -1291,6 +1291,8 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
     visited_refused = serializers.SerializerMethodField()
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
+    is_sensitized = serializers.NullBooleanField()
+    is_mobilised = serializers.NullBooleanField()
     geom = GeometryField()
 
     class Meta:
@@ -1310,6 +1312,8 @@ class GeoTargetAreaSerializer(TargetAreaMixin, GeoFeatureModelSerializer):
             "num_new_structures",
             "num_of_spray_areas",
             "id",
+            "is_sensitized",
+            "is_mobilised",
         )
         model = Location
         geo_field = "geom"
