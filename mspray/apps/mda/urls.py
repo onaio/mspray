@@ -3,11 +3,28 @@
 from django.conf.urls import include
 from django.urls import path
 
-from mspray.apps.main.views import performance
+from rest_framework import routers
+
+from mspray.apps.main.views import (
+    districts,
+    household,
+    household_buffer,
+    performance,
+    sprayday,
+    target_area,
+)
 from mspray.apps.mda.views.index import MDALocationView, MDAView
 from mspray.apps.mda.views.map import MapView
 
 app_name = "mda"  # pylint: disable=invalid-name
+
+router = routers.DefaultRouter(trailing_slash=False)  # pylint: disable=C0103
+
+router.register(r"buffers", household_buffer.HouseholdBufferViewSet)
+router.register(r"districts", districts.DistrictViewSet, "district")
+router.register(r"households", household.HouseholdViewSet)
+router.register(r"spraydays", sprayday.SprayDayViewSet)
+router.register(r"targetareas", target_area.TargetAreaViewSet)
 
 performance_urls = (  # pylint: disable=C0103
     [
@@ -44,4 +61,5 @@ urlpatterns = [  # pylint: disable=invalid-name
     path("<int:location>", MDALocationView.as_view(), name="location"),
     path("<int:district_pk>/<int:slug>", MapView.as_view(), name="spray-area"),
     path("performance", include(performance_urls, namespace="performance")),
+    path("api/", include(router.urls)),
 ]
