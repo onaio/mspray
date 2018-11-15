@@ -44,7 +44,7 @@ class TestTargetAreaView(TestCase):
             html=True)
 
     def test_sensitization(self):
-        """Test processing a sensitiza visit via MobilisationView."""
+        """Test a sensitization visit within the target area."""
         data_setup()
         factory = RequestFactory()
         sprayarea = Location.objects.get(name='Akros_1')
@@ -71,3 +71,17 @@ class TestTargetAreaView(TestCase):
             'Community Ready? \
             <i class="fa fa-check-circle" style="color: green"></i>',
             html=True)
+
+    def test_health_facility_map(self):
+        """Test the health facility map visualization."""
+        data_setup()
+        factory = RequestFactory()
+        health_facility = Location.objects.get(name='Mtendere')
+        view = TargetAreaView.as_view()
+
+        request = factory.get("/2/3")
+        response = view(
+            request,
+            district_pk=health_facility.parent_id,
+            slug=health_facility.id)
+        self.assertEqual(response.status_code, 200)

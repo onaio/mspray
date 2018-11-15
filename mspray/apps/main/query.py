@@ -21,8 +21,11 @@ from mspray.apps.main.models.spray_day import (
 
 
 def get_location_qs(queryset, level=None):
-    """Returns a Location queryset with num_new_structures and
-    total_structures calculations."""
+    """Return a Location queryset with aggreagates.
+
+    Has the aggregates num_new_structures and
+    total_structures calculations for each location.
+    """
     if level == "RHC":
         new_gps = {
             "content_object__data__has_key": (
@@ -31,11 +34,11 @@ def get_location_qs(queryset, level=None):
         }
         sprays = (
             SprayDayHealthCenterLocation.objects.filter(
-                Q(content_object__data__has_key="osmstructure:node:id")
-                | Q(**new_gps)
-                | Q(
+                Q(content_object__data__has_key="osmstructure:node:id") |
+                Q(**new_gps) |
+                Q(
                     content_object__data__has_key="osmstructure:way:id",
-                    household__isnull=True,
+                    content_object__household__isnull=True,
                 ),
                 location=OuterRef("pk"),
             )
@@ -44,8 +47,12 @@ def get_location_qs(queryset, level=None):
         )
         new_structure_count = (
             sprays.filter(
-                Q(sprayable=True, spraypoint__isnull=False)
-                | Q(sprayable=True, spraypoint__isnull=True, was_sprayed=True)
+                Q(content_object__sprayable=True,
+                    content_object__spraypoint__isnull=False) |
+                Q(
+                    content_object__sprayable=True,
+                    content_object__spraypoint__isnull=True,
+                    content_object__was_sprayed=True)
             )
             .annotate(c=Count("location"))
             .values("c")
@@ -66,9 +73,9 @@ def get_location_qs(queryset, level=None):
     else:
         sprays = (
             SprayDay.objects.filter(
-                Q(data__has_key="osmstructure:node:id")
-                | Q(data__has_key="newstructure/gps_osm_file:node:id")
-                | Q(
+                Q(data__has_key="osmstructure:node:id") |
+                Q(data__has_key="newstructure/gps_osm_file:node:id") |
+                Q(
                     data__has_key="osmstructure:way:id", household__isnull=True
                 ),
                 location=OuterRef("pk"),
@@ -78,8 +85,8 @@ def get_location_qs(queryset, level=None):
         )
         new_structure_count = (
             sprays.filter(
-                Q(sprayable=True, spraypoint__isnull=False)
-                | Q(sprayable=True, spraypoint__isnull=True, was_sprayed=True)
+                Q(sprayable=True, spraypoint__isnull=False) |
+                Q(sprayable=True, spraypoint__isnull=True, was_sprayed=True)
             )
             .annotate(c=Count("location"))
             .values("c")
