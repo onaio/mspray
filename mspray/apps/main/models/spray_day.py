@@ -26,6 +26,9 @@ NEW_STRUCTURE_SPRAYABLE_FIELD = settings.NEW_STRUCTURE_SPRAYABLE_FIELD
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 SPRAYED_VALUE = getattr(settings, "MSPRAY_WAS_SPRAYED_VALUE", "yes")
 OSM_STRUCTURE_FIELD = getattr(settings, "MSPRAY_UNIQUE_FIELD", None)
+NEW_STRUCTURE_GPS_FIELD = getattr(
+    settings, "NEW_STRUCTURE_GPS_FIELD", "newstructure/gps_osm_file"
+)
 
 
 def get_osmid(data):
@@ -33,9 +36,13 @@ def get_osmid(data):
     Returns the OSM way id or node id depending on what is in the data.
     """
     if OSM_STRUCTURE_FIELD:
-        return data.get("%s:way:id" % OSM_STRUCTURE_FIELD) or data.get(
-            "%s:node:id" % OSM_STRUCTURE_FIELD
+        return (
+            data.get("%s:way:id" % OSM_STRUCTURE_FIELD)
+            or data.get("%s:node:id" % OSM_STRUCTURE_FIELD)
+            or data.get("%s:node:id" % NEW_STRUCTURE_GPS_FIELD)
         )
+
+    return None
 
 
 class SprayDay(models.Model):

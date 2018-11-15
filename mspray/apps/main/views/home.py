@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+"""Spray effectiveness dashboard."""
 import csv
 import json
-import gc
+# import gc
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
@@ -109,8 +111,9 @@ class DistrictView(SiteNameMixin, ListView):
                 if obj.level == "district":
                     context["the_district"] = obj
                 else:
-                    context["the_district"] = obj.get_ancestors().filter(
-                        level="district").first()
+                    context["the_district"] = (
+                        obj.get_ancestors().filter(level="district").first()
+                    )
         serializer = serializer_class(
             qs, many=True, context={"request": self.request}
         )
@@ -370,7 +373,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Sprayed Coverage",
                 ]
                 previous_rhc = None
-                for value in queryset_iterator(context.get("qs")):
+                for value in context.get("qs").iterator():
                     district = TargetAreaSerializer(
                         value, context=context
                     ).data
@@ -417,7 +420,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                             district.get("found"),
                         ),
                     ]
-                    gc.collect()
+                    # gc.collect()
 
             sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
@@ -515,7 +518,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
                     item["bottles_empty"],
                     item["bottles_accounted"],
                 ]
-                gc.collect()
+                # gc.collect()
 
         sprayarea_buffer = SprayAreaBuffer()
         writer = csv.writer(sprayarea_buffer)

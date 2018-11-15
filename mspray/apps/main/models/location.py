@@ -204,7 +204,10 @@ class Location(MPTTModel, models.Model):
             return val
 
         val = self.sprayday_set.filter(
-            sprayable=True, was_sprayed=True, household__isnull=True
+            Q(spraypoint__isnull=False)
+            | Q(spraypoint__isnull=True, was_sprayed=True),
+            sprayable=True,
+            household__isnull=True,
         ).count()
         cache.set(key, val)
 
