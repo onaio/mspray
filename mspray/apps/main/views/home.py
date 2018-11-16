@@ -2,27 +2,30 @@
 """Spray effectiveness dashboard."""
 import csv
 import json
-# import gc
 
 from django.conf import settings
 from django.http import StreamingHttpResponse
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
-from mspray.apps.main.utils import queryset_iterator
 from mspray.apps.main.serializers import DistrictSerializer
 from mspray.apps.main.serializers.target_area import (
     GeoTargetAreaSerializer,
     TargetAreaQuerySerializer,
+    TargetAreaRichSerializer,
     TargetAreaSerializer,
     count_duplicates,
     get_duplicates,
-    TargetAreaRichSerializer,
 )
-from mspray.apps.main.utils import get_location_dict, parse_spray_date
+from mspray.apps.main.utils import (
+    get_location_dict,
+    parse_spray_date,
+    queryset_iterator,
+)
 from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
 from mspray.apps.main.views.target_area import (
     TargetAreaHouseholdsViewSet,
@@ -38,21 +41,21 @@ class DistrictView(SiteNameMixin, ListView):
     slug_field = "pk"
 
     def get_queryset(self):
-        qs = super(DistrictView, self).get_queryset().filter(target=True)
-        pk = self.kwargs.get(self.slug_field)
-        if pk is not None:
-            qs = qs.filter(parent__pk=pk)
+        queryset = super(DistrictView, self).get_queryset().filter(target=True)
+        location_id = self.kwargs.get(self.slug_field)
+        if location_id is not None:
+            queryset = queryset.filter(parent__pk=location_id)
         else:
-            qs = qs.filter(parent=None).order_by("name")
+            queryset = queryset.filter(parent=None).order_by("name")
 
-        return get_location_qs(qs)
+        return get_location_qs(queryset)
 
     def get_context_data(self, **kwargs):
         context = super(DistrictView, self).get_context_data(**kwargs)
 
         not_targeted = None
 
-        qs = (
+        queryset = (
             context["object_list"]
             .extra(
                 select={
@@ -82,8 +85,8 @@ class DistrictView(SiteNameMixin, ListView):
                 "priority",
             )
         )
-        pk = self.kwargs.get(self.slug_field)
-        if pk is None:
+        location_id = self.kwargs.get(self.slug_field)
+        if location_id is None:
             serializer_class = DistrictSerializer
         else:
             level = (
@@ -101,7 +104,7 @@ class DistrictView(SiteNameMixin, ListView):
                 )
             # no location structures
             try:
-                obj = Location.objects.get(pk=pk)
+                obj = get_object_or_404(Location, pk=location_id, target=True)
             except Location.DoesNotExist:
                 pass
             else:
@@ -115,7 +118,7 @@ class DistrictView(SiteNameMixin, ListView):
                         obj.get_ancestors().filter(level="district").first()
                     )
         serializer = serializer_class(
-            qs, many=True, context={"request": self.request}
+            queryset, many=True, context={"request": self.request}
         )
         context["district_list"] = serializer.data
         fields = [
@@ -420,7 +423,6 @@ class SprayAreaView(SiteNameMixin, ListView):
                             district.get("found"),
                         ),
                     ]
-                    # gc.collect()
 
             sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
@@ -518,7 +520,6 @@ class DetailedCSVView(SiteNameMixin, ListView):
                     item["bottles_empty"],
                     item["bottles_accounted"],
                 ]
-                # gc.collect()
 
         sprayarea_buffer = SprayAreaBuffer()
         writer = csv.writer(sprayarea_buffer)
