@@ -125,14 +125,19 @@ class SprayDay(models.Model):
     def _set_sprayable_status(self):
         # pylint: disable=no-member
         sprayable_field = getattr(settings, "SPRAYABLE_FIELD", SPRAYABLE_FIELD)
+        new_sprayable_field = getattr(
+            settings, "NEW_STRUCTURE_SPRAYABLE_FIELD", NEW_STRUCTURE_GPS_FIELD
+        )
+        not_sprayable_value = getattr(
+            settings, "NOT_SPRAYABLE_VALUE", NOT_SPRAYABLE_VALUE
+        )
         if self.data.get(sprayable_field):
             self.sprayable = (
-                self.data.get(sprayable_field) != NOT_SPRAYABLE_VALUE
+                self.data.get(sprayable_field) != not_sprayable_value
             )
-        elif self.data.get(NEW_STRUCTURE_SPRAYABLE_FIELD):
+        elif self.data.get(new_sprayable_field):
             self.sprayable = (
-                self.data.get(NEW_STRUCTURE_SPRAYABLE_FIELD)
-                != NOT_SPRAYABLE_VALUE
+                self.data.get(new_sprayable_field) != not_sprayable_value
             )
 
     def has_osm_data(self):

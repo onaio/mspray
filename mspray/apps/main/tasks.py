@@ -206,26 +206,29 @@ def add_unique_record(sprayday_pk, location_pk):
 
 
 @app.task
-def link_spraypoint_with_osm(pk):
+def link_spraypoint_with_osm(spray_day_id):
+    """Use OSM to link a record to a location."""
     try:
-        sp = SprayDay.objects.get(pk=pk)
+        spray_day = SprayDay.objects.get(pk=spray_day_id)
     except SprayDay.DoesNotExist:
         pass
     else:
-        location, geom, is_node = get_location_from_osm(sp.data)
+        location, geom, is_node = get_location_from_osm(spray_day.data)
         if location is None:
-            location, geom = get_new_structure_location(sp.data, geom, is_node)
+            location, geom = get_new_structure_location(
+                spray_day.data, geom, is_node
+            )
             if location is None and FALLBACK_TO_ODK:
-                location = get_location_from_data(sp.data)
+                location = get_location_from_data(spray_day.data)
             else:
                 is_node = isinstance(geom, Point)
 
-        if location is None and FALLBACK_TO_ODK is False:
-            sp.location = None
+        if not location and not FALLBACK_TO_ODK and not spray_day.location:
+            spray_day.location = None
 
-        set_spraypoint_location(sp, location, geom, is_node)
+        set_spraypoint_location(spray_day, location, geom, is_node)
 
-        return sp.pk
+        return spray_day.pk
 
 
 def _create_household(way, location):
