@@ -1108,6 +1108,11 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
                     except IntegrityError:
                         log_writer("Already saved {}".format(dataid))
                         continue
+                    except ValidationError as err:
+                        log_writer(
+                            "An error occurred while proccessing {}.".format(
+                                err))
+                        continue
                 else:
                     log_writer("Unable to process {} {}".format(dataid, rec))
                 if counter % 100 == 0:
@@ -1118,7 +1123,7 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
 
 def remove_household_geom_duplicates(spray_area=None):
     """
-    Gets all the Household objects that have duplicate geom fields in a spray
+    Get all the Household objects that have duplicate geom fields in a spray
     area, and removes duplicates
     Also prints a "report" to screen - the expectation is that this function
     will be run from the command line
