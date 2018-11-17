@@ -4,14 +4,18 @@ Location model module.
 """
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.core.cache import cache
 from django.db.models import Count, Q, Sum
+from django.db.models.functions import Cast
 from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
 
+from mspray.libs.common_tags import MOBILISED_FIELD, SENSITIZED_FIELD
 
-class Location(MPTTModel, models.Model):
+
+class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     """
     Location model
     """
@@ -327,3 +331,232 @@ class Location(MPTTModel, models.Model):
             return val
 
         return ""
+
+    @cached_property
+    def mobilised(self):
+        """Return mobilisation status"""
+        sensitized = self.mb_spray_areas.first()  # pylint: disable=no-member
+        if sensitized:
+            return sensitized.data.get(MOBILISED_FIELD)
+        return ""
+
+    @cached_property
+    def sensitized(self):
+        """Return sensitization status"""
+        sensitized = self.sv_spray_areas.first()  # pylint: disable=no-member
+        if sensitized:
+            return sensitized.data.get(SENSITIZED_FIELD)
+        return ""
+
+    @cached_property
+    def mda_structures(self):
+        """Return the number of MDA structures on the ground."""
+        if self.level != "ta":
+            return sum(
+                l.mda_structures
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-structures-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = (
+            self.household_set.exclude(sprayable=False).count()
+            + self.new_structures
+            + self.duplicates
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_found(self):
+        """Return the number of MDA structures found on the ground.i
+
+        ('mda_status'='all_received' + 'mda_status'=some_received' +
+        'mda_status'=none_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_found for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-found-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = (
+            self.household_set.filter(sprayable=True, visited=True).count()
+            + self.new_structures
+            + self.duplicates
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_received(self):
+        """Return the number of MDA structures received.
+
+        ('mda_status'='all_received' +'mda_status'=some_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_received
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.sprayday_set.filter(
+            sprayable=True, was_sprayed=True
+        ).count()
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_none_received(self):
+        """Return the number of MDA structures none received.
+
+        ('mda_status'='none_received')
+        """
+        if self.level != "ta":
+            return sum(
+                l.mda_none_received
+                for l in self.get_descendants().filter(level="ta")
+            )
+
+        key = "mda-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = (
+            self.sprayday_set.filter(sprayable=True, was_sprayed=False)
+            .values("osmid")
+            .distinct()
+            .count()
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_spray_areas(self):
+        """Return the number of MDA Spray Areas
+        """
+        key = "mda-spray-areas-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = self.get_descendants().filter(level="ta").count()
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_spray_areas_found(self):
+        """Return the number of MDA Spray Areas
+        """
+        key = "mda-spray-areas-found-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = sum(
+            1
+            for spray_area in self.get_descendants().filter(level="ta")
+            if spray_area.mda_found > 0
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def mda_spray_areas_received(self):
+        """Return the number of MDA spray areas received.
+
+        ('mda_status'='all_received' +'mda_status'=some_received')
+        """
+
+        key = "mda-spray-area-received-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        val = sum(
+            1
+            for l in self.get_descendants().filter(level="ta")
+            if l.mda_received > 0
+        )
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def population_eligible(self):
+        """Return the number of MDA population eligible."""
+        key = "population-eligible-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        if self.level != "ta":
+            val = sum(
+                l.population_eligible
+                for l in self.get_descendants().filter(level="ta")
+            )
+        else:
+            queryset = (
+                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
+                .annotate(
+                    population=Cast(
+                        KeyTextTransform("_population_eligible", "data"),
+                        models.IntegerField(),
+                    )
+                )
+                .aggregate(total_eligible=Sum("population"))
+            )
+            val = queryset["total_eligible"] or 0
+
+        cache.set(key, val)
+
+        return val
+
+    @cached_property
+    def population_treatment(self):
+        """Return the number of MDA population treatment."""
+        key = "population-treatment-{}".format(self.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+
+        if self.level != "ta":
+            val = sum(
+                l.population_treatment
+                for l in self.get_descendants().filter(level="ta")
+            )
+        else:
+            queryset = (
+                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
+                .annotate(
+                    population=Cast(
+                        KeyTextTransform("_population_treatment", "data"),
+                        models.IntegerField(),
+                    )
+                )
+                .aggregate(total_treatment=Sum("population"))
+            )
+            val = queryset["total_treatment"] or 0
+
+        cache.set(key, val)
+
+        return val

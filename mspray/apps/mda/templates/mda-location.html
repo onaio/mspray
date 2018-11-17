@@ -1,0 +1,197 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">
+            {% if mda_location.level == 'district' %}
+            District:
+            {% elif mda_location.level == 'RHC' %}
+            Health Facility Catchment:
+            {% endif %}
+
+            {% if mda_location %}
+            {{ mda_location.name }}
+            <a href="{% url 'mda:location' mda_location.pk %}">
+                <i class="fa fa-map"></i>
+            </a>
+            {% else %}
+            All
+            {% endif%}
+        </h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                {% if not mda_location or mda_location.level != 'RHC' %}
+                <tr>
+                    <th rowspan="2">{% if mda_location %} Health Facility {% else %} District {% endif%}</th>
+                    <th rowspan="2">Eligible Spray Areas</th>
+                    <th colspan="2">MDA Areas Reached<sup title=""></sup></th>
+                    <th colspan="2">MDA Areas Covered Effectively<sup title=""></sup></th>
+                    <th rowspan="2">Community Readiness</th>
+                    <th rowspan="2">Mobilised</th>
+                </tr>
+                <tr>
+                    <th>Number</th>
+                    <th>%</th>
+                    <th>Number</th>
+                    <th>%</th>
+                </tr>
+                {% else %}
+                <tr>
+                    <th>Target Area</th>
+                    <th>Eligible Structures on the Ground</th>
+                    <th>Structures Found</th>
+                    <th>Structures Received</th>
+                    <th>Structures Received Coverage</th>
+                    <th>Structures Found Coverage</th>
+                    <th>Structures Received Success Rate</th>
+                    <th>Population Received Success Rate</th>
+                    <th>Community Ready?</th>
+                    <th>Mobilised?</th>
+                </tr>
+                {% endif%}
+            </thead>
+            <tbody>
+            {% if not mda_location or mda_location.level != 'RHC' %}
+                {% for location in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'mda:index' %}">
+                                <i class="fa fa-map"></i>
+                            </a>
+                            <a href="{% url 'mda:location' location.pk  %}">
+                                {{ location.name }}
+                            </a>
+                        </td>
+                        <td class='numbers'>
+                            {% if location.level != 'ta' %}
+                            {{location.mda_spray_areas }}
+                            {% else %}
+                            {{ location.structures|intcomma }}
+                            {% endif %}
+                        </td>
+                        <td class='numbers'>{{ location.mda_spray_areas_found|intcomma }}</td>
+                        <td class='numbers'>
+                            {% if site_name != 'namibia' %}
+                            {% percentage location.mda_spray_areas_found location.mda_spray_areas %}
+                            {% endif %}</td>
+                        <td class='numbers'>{{ location.mda_spray_areas_received|intcomma }}</td>
+                        {% calc_percentage location.mda_spray_areas_received location.mda_spray_areas_found as calculated_percentage %}
+                        <td class='numbers {{ calculated_percentage|sprayed_effectively_color }}'>{{ calculated_percentage }}</td>
+                        <td class=''>{{ location.sensitized }}</td>
+                        <td class=''>{{ location.mobilised }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                {% for location in object_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'mda:spray-area' location.parent_id location.pk %}">
+                                <i class="fa fa-map"></i>
+                                {{ location.name }}
+                            </a>
+                            </td>
+                        </td>
+
+                        <td class='numbers'>{{ location.mda_structures|intcomma }}</td>
+                        <td class='numbers'>{{ location.mda_found|intcomma }}</td>
+                        <td class='numbers'>{{ location.mda_received|intcomma }} </td>
+                        {% calc_percentage location.mda_received location.mda_structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                            {{ spray_effectiveness_percentage }}
+                        </td>
+                        {% calc_percentage location.mda_found location.mda_structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage location.mda_received location.mda_found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                        <td class='numbers'>
+                            {% calc_percentage location.population_treatment location.population_eligible as population_percentage %}
+                            {{ population_percentage }}
+                        </td>
+                        <td class=''>{{ location.sensitized }}</td>
+                        <td class=''>{{ location.mobilised }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td>{% trans "Not in Targeted Area" %}</td>
+                    <td class='numbers'></td>
+                    <td class='numbers'>{{ no_location.found|default_if_none:"0"|intcomma }}</td>
+                    <td class='numbers'>{{ no_location.sprayed|default_if_none:"0"|intcomma }}</td>
+                    {% if no_location.sprayed and no_location.found %}
+                     {% calc_percentage no_location.sprayed no_location.found as spray_effectiveness_percentage %}
+                     <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                    {% else %}
+                        <td class='numbers'></td>
+                    {% endif %}
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                    <td class=''></td>
+                    <td class=''></td>
+                </tr>
+            {% endif%}
+            </tbody>
+            {% if not mda_location or mda_location.level != 'RHC' %}
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'>{{ mda_location.mda_spray_areas|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_spray_areas_found|intcomma }}</td>
+                    {% calc_percentage mda_location.mda_spray_areas_found mda_location.mda_spray_areas as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                        {{ spray_effectiveness_percentage }}
+                    </td>
+                    {% calc_percentage mda_location.mda_spray_areas_found mda_location.mda_structures as found_coverage_percentage %}
+                    <td class='numbers'>{{ found_coverage_percentage }}</td>
+                    {% calc_percentage mda_location.mda_spray_areas_received mda_location.mda_spray_areas_found as spray_coverage_percentage %}
+                    <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                </tr>
+            </tfoot>
+            {% else %}
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'>{{ mda_location.mda_structures|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_found|intcomma }}</td>
+                    <td class='numbers'>{{ mda_location.mda_received|intcomma }} </td>
+                    {% calc_percentage mda_location.mda_received mda_location.mda_structures as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                        {{ spray_effectiveness_percentage }}
+                    </td>
+                    {% calc_percentage mda_location.mda_found mda_location.mda_structures as found_coverage_percentage %}
+                    <td class='numbers'>{{ found_coverage_percentage }}</td>
+                    {% calc_percentage mda_location.mda_received mda_location.mda_found as spray_coverage_percentage %}
+                    <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    <td class='numbers'></td>
+                    <td class=''></td>
+                    <td class=''></td>
+                </tr>
+            </tfoot>
+            {% endif%}
+        </table>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}

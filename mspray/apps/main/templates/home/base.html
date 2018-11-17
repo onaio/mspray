@@ -76,6 +76,35 @@
                                 {% endif %}
                             </ul>
                         </li>
+                        {% if ENABLE_MDA %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle"
+                               data-toggle="dropdown">
+                                <span>
+                                {% if mda_performance_tables %}
+                                    Performance
+                                {% else %}
+                                    MDA
+                                {% endif %}
+                                </span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'mda:index' %}">MDA</a></li>
+                                {% if view.request.session.show_csv %}
+                                <li role="separator" class="divider"></li>
+                                {% endif %}
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mda:performance:districts' %} ">Performance</a></li>
+                                <li role="separator" class="divider"></li>
+                                {% if view.request.session.show_csv %}
+                                    <li ><a href="{% url 'logout' %}">Logout</a></li>
+                                {% else %}
+                                    <li ><a href="{% url 'login' %}">Login</a></li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        {% endif %}
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         {% block main_menu %}

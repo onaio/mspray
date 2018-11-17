@@ -17,6 +17,7 @@ from mspray.apps.main.tests.utils import data_setup, load_spray_data
 
 
 class TestSerializers(TestBase):
+    """Test alerts serializers."""
     def setUp(self):
         TestBase.setUp(self)
         self._load_fixtures()
@@ -186,5 +187,5 @@ class TestSprayEffectivenessSerializer(TestCase):
         serializer = SprayEffectivenessSerializer(locations, many=True)
         data = serializer.data[0]
         self.assertEqual(data["spray_effectiveness"], 62)
-        self.assertEqual(data["district"], '1')
-        self.assertEqual(data["spray_area"], 'Akros_2')
+        self.assertEqual(data["district"], "1")
+        self.assertEqual(data["spray_area"], "Akros_2")

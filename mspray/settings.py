@@ -38,6 +38,7 @@ TEMPLATES = [
                 "mspray.libs.context_processors.mspray_settings",
                 "mspray.libs.context_processors.show_directly_observed",
                 "mspray.libs.context_processors.show_trial_survey",
+                "mspray.libs.context_processors.enable_mda",
             ],
             "debug": False,
             "loaders": [
@@ -81,6 +82,7 @@ INSTALLED_APPS = (
     "mspray.apps.warehouse",
     "mspray.apps.alerts",
     "mspray.apps.trials",
+    "mspray.apps.mda",
 )
 
 MIDDLEWARE = (
@@ -104,10 +106,10 @@ WSGI_APPLICATION = "mspray.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        'NAME': os.environ.get('DB_NAME', 'mspray'),
-        "USER": os.environ.get('DB_USER', 'mspray'),
-        "PASSWORD": os.environ.get('DB_PASS', 'mspray'),
-        "HOST": os.environ.get('DB_HOST', '127.0.0.1'),
+        "NAME": os.environ.get("DB_NAME", "mspray"),
+        "USER": os.environ.get("DB_USER", "mspray"),
+        "PASSWORD": os.environ.get("DB_PASS", "mspray"),
+        "HOST": os.environ.get("DB_HOST", "127.0.0.1"),
     }
 }
 

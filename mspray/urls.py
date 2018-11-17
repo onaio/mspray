@@ -31,6 +31,7 @@ from mspray.apps.main.views.mopup import HealthFacilityMopUpView, MopUpView
 from mspray.apps.main.views.sensitization_visit import SensitizationVisitView
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
 from mspray.apps.warehouse import urls as warehouse_urls
+from mspray.apps.mda import urls as mda_urls
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
@@ -75,6 +76,7 @@ performance_urls = (  # pylint: disable=C0103
 )
 
 urlpatterns = [  # pylint: disable=C0103
+    path("mda/", include(mda_urls, namespace="mda")),
     path("trials/", include("mspray.apps.trials.urls", namespace="trials")),
     path("api/alerts/", include(alerts_urls, namespace="alerts")),
     path("api/", include(router.urls)),

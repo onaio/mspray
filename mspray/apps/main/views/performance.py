@@ -211,7 +211,7 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 / round(
                     TeamLeaderAssistant.objects.filter(
                         location=district
-                    ).count()
+                    ).count() or 1
                 )
             ),
             "avg_start_time": average_time(

@@ -22,7 +22,7 @@ def mspray_settings(request):
 
 
 def show_directly_observed(request):
-    """Set show_directly_observed context variable
+    """Set SHOW_DIRECTLY_OBSERVED context variable
 
     If true the Directly Observed Spraying link will be displayed.
     """
@@ -34,12 +34,16 @@ def show_directly_observed(request):
 
 
 def show_trial_survey(request):
-    """Set show_trial_survey context variable
+    """Set SHOW_TRIAL_SURVEY context variable
 
     If true the Trial Survey link will be displayed.
     """
-    return {
-        "SHOW_TRIAL_SURVEY": getattr(
-            settings, "SHOW_TRIAL_SURVEY", False
-        )
-    }
+    return {"SHOW_TRIAL_SURVEY": getattr(settings, "SHOW_TRIAL_SURVEY", False)}
+
+
+def enable_mda(request):
+    """Set ENABLE_MDA context variable
+
+    When ENABLE_MDA is set to True the MDA dashboard links are enabled.
+    """
+    return {"ENABLE_MDA": getattr(settings, "ENABLE_MDA", False)}

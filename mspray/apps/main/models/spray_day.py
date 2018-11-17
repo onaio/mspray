@@ -6,7 +6,7 @@ SprayDay model module - holds all submissions for the IRS HH Form
 from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 
 DATA_FILTER = getattr(
     settings, "MSPRAY_DATA_FILTER", '"sprayable_structure":"yes"'
@@ -104,10 +104,19 @@ class SprayDay(models.Model):
 
     def _set_sprayed_status(self):
         # pylint: disable=no-member
-        if self.data.get(WAS_SPRAYED_FIELD):
-            self.was_sprayed = (
-                self.data.get(WAS_SPRAYED_FIELD) == SPRAYED_VALUE
-            )
+        was_sprayed_field = getattr(
+            settings, "MSPRAY_WAS_SPRAYED_FIELD", WAS_SPRAYED_FIELD
+        )
+        sprayed_values = getattr(settings, "SPRAYED_VALUES", [])
+        if self.data.get(was_sprayed_field):
+            if sprayed_values:
+                self.was_sprayed = (
+                    self.data.get(was_sprayed_field) in sprayed_values
+                )
+            else:
+                self.was_sprayed = (
+                    self.data.get(was_sprayed_field) == SPRAYED_VALUE
+                )
         elif self.data.get(NEW_WAS_SPRAYED_FIELD):
             self.was_sprayed = (
                 self.data.get(NEW_WAS_SPRAYED_FIELD) == SPRAYED_VALUE
@@ -115,14 +124,20 @@ class SprayDay(models.Model):
 
     def _set_sprayable_status(self):
         # pylint: disable=no-member
-        if self.data.get(SPRAYABLE_FIELD):
+        sprayable_field = getattr(settings, "SPRAYABLE_FIELD", SPRAYABLE_FIELD)
+        new_sprayable_field = getattr(
+            settings, "NEW_STRUCTURE_SPRAYABLE_FIELD", NEW_STRUCTURE_GPS_FIELD
+        )
+        not_sprayable_value = getattr(
+            settings, "NOT_SPRAYABLE_VALUE", NOT_SPRAYABLE_VALUE
+        )
+        if self.data.get(sprayable_field):
             self.sprayable = (
-                self.data.get(SPRAYABLE_FIELD) != NOT_SPRAYABLE_VALUE
+                self.data.get(sprayable_field) != not_sprayable_value
             )
-        elif self.data.get(NEW_STRUCTURE_SPRAYABLE_FIELD):
+        elif self.data.get(new_sprayable_field):
             self.sprayable = (
-                self.data.get(NEW_STRUCTURE_SPRAYABLE_FIELD)
-                != NOT_SPRAYABLE_VALUE
+                self.data.get(new_sprayable_field) != not_sprayable_value
             )
 
     def has_osm_data(self):
@@ -219,5 +234,30 @@ post_save.connect(
     dispatch_uid="link_district_location",
 )
 
+
+def mda_population_calculations(sender, instance=None, **kwargs):
+    """Calculate MDA population metrics"""
+    eligible_field = "_population_eligible"
+    treatment_field = "_population_treatment"
+    persons_field = "sprayable/anotherperson"
+    if instance.data and eligible_field not in instance.data:
+        instance.data[eligible_field] = 0
+        instance.data[treatment_field] = 0
+        if persons_field in instance.data:
+            for person in instance.data[persons_field]:
+                if person.get("{}/eligible".format(persons_field)) == "yes":
+                    instance.data[eligible_field] += 1
+                    treatment = person.get(
+                        "{}/treatment".format(persons_field)
+                    )
+                    if treatment == "received":
+                        instance.data[treatment_field] += 1
+
+
+pre_save.connect(
+    mda_population_calculations,
+    sender=SprayDay,
+    dispatch_uid="mda_population_calculations",
+)
 # Auto-generated `LayerMapping` dictionary for SprayDay model
 sprayday_mapping = {"geom": "POINT25D"}  # pylint: disable=C0103
