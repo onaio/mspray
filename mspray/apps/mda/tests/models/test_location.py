@@ -63,3 +63,51 @@ class TestLocation(TestCase):
         load_mda_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.population_treatment, 1)
+
+    def test_mda_spray_areas_found(self):
+        """Test a spray is is found if only 20% has been sprayed"""
+        data_setup()
+        hfc = Location.objects.get(name="Mtendere")
+        self.assertEqual(hfc.mda_spray_areas_found, 0)
+        self.assertEqual(
+            [
+                foci.mda_received_percentage
+                for foci in hfc.location_set.all().order_by("name")
+            ],
+            [0.0, 0.0],
+        )
+
+        load_mda_data()
+        hfc = Location.objects.get(name="Mtendere")
+        self.assertEqual(hfc.mda_spray_areas_found, 1)
+        self.assertEqual(
+            [
+                foci.mda_received_percentage
+                for foci in hfc.location_set.all().order_by("name")
+            ],
+            [0.0, 25.0],
+        )
+
+    def test_mda_spray_areas_received(self):
+        """Test a spray is is received if only 90% has been sprayed"""
+        data_setup()
+        hfc = Location.objects.get(name="Mtendere")
+        self.assertEqual(hfc.mda_spray_areas_received, 0)
+        self.assertEqual(
+            [
+                foci.mda_received_percentage
+                for foci in hfc.location_set.all().order_by("name")
+            ],
+            [0.0, 0.0],
+        )
+
+        load_mda_data()
+        hfc = Location.objects.get(name="Mtendere")
+        self.assertEqual(hfc.mda_spray_areas_received, 0)
+        self.assertEqual(
+            [
+                foci.mda_received_percentage
+                for foci in hfc.location_set.all().order_by("name")
+            ],
+            [0.0, 25.0],
+        )

@@ -463,18 +463,29 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         return val
 
     @cached_property
+    def mda_received_percentage(self):
+        """Return percentage of received over eligible structures."""
+        return (
+            0
+            if self.mda_structures == 0
+            else (self.mda_received * 100) / self.mda_structures
+        )
+
+    @cached_property
     def mda_spray_areas_found(self):
-        """Return the number of MDA Spray Areas
-        """
+        """Return the number of MDA Spray Areas."""
         key = "mda-spray-areas-found-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
+        sprayed_found_percentage = getattr(
+            settings, "SPRAYED_FOUND_PERCENTAGE", 20
+        )
 
         val = sum(
             1
             for spray_area in self.get_descendants().filter(level="ta")
-            if spray_area.mda_found > 0
+            if spray_area.mda_received_percentage >= sprayed_found_percentage
         )
         cache.set(key, val)
 
@@ -492,10 +503,14 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
+        location_sprayed_percentage = getattr(
+            settings, "LOCATION_SPRAYED_PERCENTAGE", 90
+        )
+
         val = sum(
             1
             for l in self.get_descendants().filter(level="ta")
-            if l.mda_received > 0
+            if l.mda_received_percentage >= location_sprayed_percentage
         )
         cache.set(key, val)
 
