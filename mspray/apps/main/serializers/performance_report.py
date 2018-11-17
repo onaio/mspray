@@ -4,6 +4,7 @@ PerformanceReportSerializer
 """
 from rest_framework import serializers
 
+from django.core.cache import cache
 from mspray.apps.main.datetime_tools import average_time
 from mspray.apps.main.models import (
     Location,
@@ -321,15 +322,25 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns number of sprayable structures not eligible reason.
         """
-        return (
-            SprayDay.objects.filter(sprayable=False, team_leader_assistant=obj)
-            .exclude(
-                osmid__in=SprayDay.objects.filter(sprayable=True)
-                .values("osmid")
-                .distinct()
+        key = "tla-not-eligible-{}".format(obj.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+        val = (
+            SprayDay.objects.filter(
+                household__isnull=False,
+                household__sprayable=False,
+                team_leader_assistant_id=obj.pk,
+                sprayable=False,
             )
+            .values("osmid")
+            .distinct()
             .count()
         )
+
+        cache.set(key, val)
+
+        return val
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
         """
@@ -520,17 +531,25 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         """
         Returns number of sprayable structures not eligible reason.
         """
-        return (
+        key = "performance-not-eligible-{}".format(obj.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+        val = (
             SprayDay.objects.filter(
-                sprayable=False, location__parent__parent=obj
+                household__isnull=False,
+                household__sprayable=False,
+                location__parent__parent_id=obj.pk,
+                sprayable=False,
             )
-            .exclude(
-                osmid__in=SprayDay.objects.filter(
-                    sprayable=True, location__parent__parent=obj
-                ).values("osmid")
-            )
+            .values("osmid")
+            .distinct()
             .count()
         )
+
+        cache.set(key, val)
+
+        return val
 
     def get_sprayed(self, obj):  # pylint: disable=no-self-use
         """
