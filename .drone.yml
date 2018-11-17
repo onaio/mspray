@@ -10,12 +10,12 @@ pipeline:
         environment:
             - DB_HOST=db
             - DJANGO_SETTINGS_MODULE=mspray.preset.test_settings
-notify:
-    image: plugins/slack
-    secrets: [ slack_webhook ]
-    when:
-        status: [success, failure]
-        event: [push, pull_request, tag, deployment]
+    notify:
+        image: plugins/slack
+        secrets: [ slack_webhook ]
+        when:
+            status: [success, failure]
+            event: [push, pull_request, tag, deployment]
 
 services:
     db:
