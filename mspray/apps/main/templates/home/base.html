@@ -33,6 +33,21 @@
                 <div class="collapse navbar-collapse" id="msp-collapse">
                     <ul class="nav navbar-nav navbar-left">
                         <li class="dropdown">
+                            {% if 'mda' not in request.get_full_path %}
+                            <a href="#" class="dropdown-toggle" style="background-color: green" data-toggle="dropdown">
+                                <span>
+                                    {% if performance_tables %}
+                                        Performance
+                                    {% elif directly_observed_spraying %}
+                                        Directly Observed Spraying
+                                    {% elif trials %}
+                                       Trial Survey
+                                    {% else %}
+                                        Spray Effectiveness
+                                    {% endif %}</span>
+                                <b class="caret"></b>
+                            </a>
+                            {% else %}
                             <a href="#" class="dropdown-toggle"
                                data-toggle="dropdown">
                                 <span>
@@ -47,6 +62,7 @@
                                     {% endif %}</span>
                                 <b class="caret"></b>
                             </a>
+                            {% endif %}
                             <ul class="dropdown-menu">
                                 <li><a href="{% url 'index' %}">Spray Effectiveness</a></li>
                                 <!-- <li role="separator" class="divider"></li> -->
