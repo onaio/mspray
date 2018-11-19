@@ -39,6 +39,7 @@ TEMPLATES = [
                 "mspray.libs.context_processors.show_directly_observed",
                 "mspray.libs.context_processors.show_trial_survey",
                 "mspray.libs.context_processors.enable_mda",
+                "django.template.context_processors.request",
             ],
             "debug": False,
             "loaders": [
