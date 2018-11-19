@@ -79,8 +79,8 @@
                         {% if ENABLE_MDA %}
                         <li class="dropdown">
                             {% if 'mda' in request.get_full_path %}
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                <span style="background-color: green">
+                            <a href="#" class="dropdown-toggle" style="background-color: green" data-toggle="dropdown">
+                                <span>
                                 {% if mda_performance_tables %}
                                     Performance
                                 {% else %}
