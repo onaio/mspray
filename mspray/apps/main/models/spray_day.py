@@ -140,6 +140,13 @@ class SprayDay(models.Model):
                 self.data.get(new_sprayable_field) != not_sprayable_value
             )
 
+    def _set_parent_locations(self):
+        if self.location:
+            if self.rhc != self.location.parent:
+                self.rhc = self.location.parent
+            if self.district != self.rhc.parent:
+                self.district = self.rhc.parent
+
     def has_osm_data(self):
         """
         Check if OSM data has been received for this record
@@ -154,6 +161,7 @@ class SprayDay(models.Model):
 
         self._set_sprayed_status()
         self._set_sprayable_status()
+        self._set_parent_locations()
 
         if "sprayformid" and self.spray_operator:
             self.data.update(
