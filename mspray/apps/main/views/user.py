@@ -17,12 +17,13 @@ def get_form_owners(formid):
     """
     form = ona.fetch_form(formid)
     owners = []
-    role = "owner"
+    role = ["owner", "readonly"]
     if form:
         users = form.get("users")
         if users:
-            owners = [user["user"] for user in users if user["role"] == role]
+            owners = [user["user"] for user in users if user["role"] in role]
     return owners
+
 
 
 def login(request):
