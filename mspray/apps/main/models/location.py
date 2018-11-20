@@ -338,18 +338,22 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     @cached_property
     def mobilised(self):
         """Return mobilisation status"""
-        sensitized = self.mb_spray_areas.first()  # pylint: disable=no-member
-        if sensitized:
-            return sensitized.data.get(MOBILISED_FIELD)
-        return ""
+        key = "data__{}".format(MOBILISED_FIELD)
+        mobilised = self.mb_spray_areas.values_list(
+            key, flat=True
+        ).first()  # pylint: disable=no-member
+
+        return mobilised if mobilised else ""
 
     @cached_property
     def sensitized(self):
         """Return sensitization status"""
-        sensitized = self.sv_spray_areas.first()  # pylint: disable=no-member
-        if sensitized:
-            return sensitized.data.get(SENSITIZED_FIELD)
-        return ""
+        key = "data__{}".format(SENSITIZED_FIELD)
+        sensitized = self.sv_spray_areas.values_list(
+            key, flat=True
+        ).first()  # pylint: disable=no-member
+
+        return sensitized if sensitized else ""
 
     @cached_property
     def mda_structures(self):
