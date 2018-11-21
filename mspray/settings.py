@@ -85,7 +85,7 @@ INSTALLED_APPS = (
     "mspray.apps.alerts",
     "mspray.apps.trials",
     "mspray.apps.mda",
-    "mspray.apps.reveal",
+    "mspray.apps.reveal.apps.RevealConfig",
 )
 
 MIDDLEWARE = (
