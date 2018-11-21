@@ -134,6 +134,17 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         return val
 
     @cached_property
+    def household_queryset(self):
+        """Return a SprayDay queryset depending on location level."""
+        if self.level == "RHC":
+            return self.visited_rhc  # pylint: disable=no-member
+
+        if self.level == "district":
+            return self.visited_district  # pylint: disable=no-member
+
+        return self.household_set
+
+    @cached_property
     def sprayday_queryset(self):
         """Return a SprayDay queryset depending on location level."""
         if self.level == "RHC":
@@ -279,18 +290,12 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         The number of households visited
         Add number of new structures sprayed.
         """
-        if self.level != "ta":
-            return sum(
-                l.visited_found
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-
         key = "visited-found-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
 
-        new_structures = self.sprayday_set.filter(
+        new_structures = self.sprayday_queryset.filter(
             sprayable=True, was_sprayed=True, household__isnull=True
         ).count()
 

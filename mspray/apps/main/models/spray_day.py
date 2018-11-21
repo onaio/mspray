@@ -142,10 +142,10 @@ class SprayDay(models.Model):
 
     def _set_parent_locations(self):
         if self.location:
-            if self.rhc != self.location.parent:
-                self.rhc = self.location.parent
-            if self.district != self.rhc.parent:
-                self.district = self.rhc.parent
+            if self.rhc != self.location.parent:  # pylint: disable=no-member
+                self.rhc = self.location.parent  # pylint: disable=no-member
+            if self.district != self.rhc.parent:  # pylint: disable=no-member
+                self.district = self.rhc.parent  # pylint: disable=no-member
 
     def has_osm_data(self):
         """
