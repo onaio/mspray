@@ -36,37 +36,37 @@
                             <a href="#" class="dropdown-toggle" {% if 'mda' not in request.get_full_path %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
                                     {% if performance_tables %}
-                                        Performance
+                                        IRS: Performance
                                     {% elif directly_observed_spraying %}
-                                        Directly Observed Spraying
+                                        IRS: Directly Observed Spraying
                                     {% elif trials %}
-                                       Trial Survey
+                                        IRS: Trial Survey
                                     {% else %}
-                                        Spray Effectiveness
+                                        IRS{% if 'mda' not in request.get_full_path %}: Spray Effectiveness{% endif %}
                                     {% endif %}</span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'index' %}">Spray Effectiveness</a></li>
+                                <li><a href="{% url 'index' %}">IRS: Spray Effectiveness</a></li>
                                 <!-- <li role="separator" class="divider"></li> -->
                                 {% if view.request.session.show_csv %}
-                                    <li class="dropdown-header"><a href="{% url 'sprayareas' %}">All Spray Areas</a></li>
-                                    <li class="dropdown-header"><a href="{% url 'sprayareas' %}?format=csv"> CSV: All Spray Areas</a></li>
-                                    <li class="dropdown-header"><a href="{% url 'detailed_sprayareas' %}"> CSV: Detailed Spray Areas</a></li>
-                                    <li class="dropdown-header"><a href="{% url 'weeklyreports' %}"> CSV: Weekly Reports</a></li>
+                                    <li class="dropdown-header"><a href="{% url 'sprayareas' %}">IRS: All Spray Areas</a></li>
+                                    <li class="dropdown-header"><a href="{% url 'sprayareas' %}?format=csv"> IRS: CSV: All Spray Areas</a></li>
+                                    <li class="dropdown-header"><a href="{% url 'detailed_sprayareas' %}"> IRS: CSV: Detailed Spray Areas</a></li>
+                                    <li class="dropdown-header"><a href="{% url 'weeklyreports' %}"> IRS: CSV: Weekly Reports</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'performance:districts' %} ">Performance</a></li>
+                                <li><a href="{% url 'performance:districts' %} ">IRS: Performance</a></li>
                                 {% if SHOW_DIRECTLY_OBSERVED %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'directly-observed-spraying' %} ">Directly Observed Spraying</a></li>
+                                <li><a href="{% url 'directly-observed-spraying' %} ">IRS: Directly Observed Spraying</a></li>
                                 {% endif %}
                                 {% if SHOW_TRIAL_SURVEY %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'trials:index' %}">Trial Survey</a></li>
+                                <li><a href="{% url 'trials:index' %}">IRS: Trial Survey</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'mop-up' %}">Mop-up</a></li>
+                                <li><a href="{% url 'mop-up' %}">IRS: Mop-up</a></li>
                                 <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>
@@ -80,7 +80,7 @@
                             <a href="#" class="dropdown-toggle" {% if 'mda' in request.get_full_path %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
                                 {% if mda_performance_tables %}
-                                    Performance
+                                    MDA: Performance
                                 {% else %}
                                     MDA
                                 {% endif %}
