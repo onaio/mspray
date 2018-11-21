@@ -22,7 +22,7 @@ class TestUtils(TestBase):
 
     def test_add_spray_data(self):
         """
-        Test add_spray_data
+        Test add_spray_data for reveal
         """
         SprayDay.objects.all().delete()
         input_data = {
