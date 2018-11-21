@@ -1,4 +1,4 @@
-"""reveal vies moduke"""
+"""reveal vies module"""
 import json
 from datetime import date
 
@@ -12,9 +12,9 @@ from mspray.apps.reveal.views import add_spray_data_view
 
 
 @override_settings(ROOT_URLCONF='mspray.apps.reveal.urls')
-class TestViewss(TestBase):
+class TestViews(TestBase):
     """
-    Viewss test class
+    Views test class
     """
 
     def setUp(self):
