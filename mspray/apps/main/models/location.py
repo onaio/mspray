@@ -207,17 +207,12 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     @cached_property
     def new_structures(self):
         """Return number of new structures that have been sprayed."""
-        if self.level != "ta":
-            return sum(
-                l.new_structures
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
         key = "new-structures-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
 
-        val = self.sprayday_set.filter(
+        val = self.sprayday_queryset.filter(
             Q(spraypoint__isnull=False)
             | Q(spraypoint__isnull=True, was_sprayed=True),
             sprayable=True,
@@ -236,7 +231,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return val
 
         agg = (
-            self.sprayday_set.filter(was_sprayed=True)
+            self.sprayday_queryset.filter(was_sprayed=True)
             .exclude(household__isnull=True)
             .values("household")
             .distinct()
@@ -316,7 +311,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
-        last_sprayday = self.sprayday_set.last()
+        last_sprayday = self.sprayday_queryset.last()
         if last_sprayday:
             val = last_sprayday.spray_date
             cache.set(key, val)
@@ -418,18 +413,12 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
 
         ('mda_status'='all_received' +'mda_status'=some_received')
         """
-        if self.level != "ta":
-            return sum(
-                l.mda_received
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-
         key = "mda-received-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
 
-        val = self.sprayday_set.filter(
+        val = self.sprayday_queryset.filter(
             sprayable=True, was_sprayed=True
         ).count()
         cache.set(key, val)
@@ -442,19 +431,13 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
 
         ('mda_status'='none_received')
         """
-        if self.level != "ta":
-            return sum(
-                l.mda_none_received
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-
         key = "mda-received-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
 
         val = (
-            self.sprayday_set.filter(sprayable=True, was_sprayed=False)
+            self.sprayday_queryset.filter(sprayable=True, was_sprayed=False)
             .values("osmid")
             .distinct()
             .count()
@@ -541,23 +524,17 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
-        if self.level != "ta":
-            val = sum(
-                l.population_eligible
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-        else:
-            queryset = (
-                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
-                .annotate(
-                    population=Cast(
-                        KeyTextTransform("_population_eligible", "data"),
-                        models.IntegerField(),
-                    )
+        queryset = (
+            self.sprayday_queryset.filter(sprayable=True, was_sprayed=True)
+            .annotate(
+                population=Cast(
+                    KeyTextTransform("_population_eligible", "data"),
+                    models.IntegerField(),
                 )
-                .aggregate(total_eligible=Sum("population"))
             )
-            val = queryset["total_eligible"] or 0
+            .aggregate(total_eligible=Sum("population"))
+        )
+        val = queryset["total_eligible"] or 0
 
         cache.set(key, val)
 
@@ -571,23 +548,17 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
-        if self.level != "ta":
-            val = sum(
-                l.population_treatment
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-        else:
-            queryset = (
-                self.sprayday_set.filter(sprayable=True, was_sprayed=True)
-                .annotate(
-                    population=Cast(
-                        KeyTextTransform("_population_treatment", "data"),
-                        models.IntegerField(),
-                    )
+        queryset = (
+            self.sprayday_queryset.filter(sprayable=True, was_sprayed=True)
+            .annotate(
+                population=Cast(
+                    KeyTextTransform("_population_treatment", "data"),
+                    models.IntegerField(),
                 )
-                .aggregate(total_treatment=Sum("population"))
             )
-            val = queryset["total_treatment"] or 0
+            .aggregate(total_treatment=Sum("population"))
+        )
+        val = queryset["total_treatment"] or 0
 
         cache.set(key, val)
 
