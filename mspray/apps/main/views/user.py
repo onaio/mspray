@@ -6,16 +6,16 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from mspray.libs import ona
+from mspray.libs.ona import fetch_form, login as ona_login, get_form_owners
 
 FORM_ID = getattr(settings, "ONA_FORM_PK", None)
 
 
-def get_form_owners(formid):
+def get_form_users(formid):
     """
     Returns a list of usernames of users with the role 'owner' in the Ona Form.
     """
-    form = ona.fetch_form(formid)
+    form = fetch_form(formid)
     owners = []
     role = ["owner", "readonly"]
     if form:
@@ -23,7 +23,6 @@ def get_form_owners(formid):
         if users:
             owners = [user["user"] for user in users if user["role"] in role]
     return owners
-
 
 
 def login(request):
@@ -35,7 +34,7 @@ def login(request):
         username = request.POST.get("username1")
         password = request.POST.get("password1")
         if username and password:
-            auth = ona.login(username, password)
+            auth = ona_login(username, password)
             if auth:
                 owners = get_form_owners(FORM_ID)
                 if username in owners:
