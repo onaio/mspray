@@ -23,6 +23,13 @@ class TestMopUpView(TestCase):
         self.assertContains(response, "Mop-up", status_code=200)
         self.assertContains(response, "Lusaka", 1, status_code=200)
 
+        # test targeted
+        lusaka = Location.objects.get(name="Lusaka")
+        lusaka.target = False
+        lusaka.save()
+        response = view(request)
+        self.assertContains(response, "Lusaka", 0, status_code=200)
+
     def test_mopup_url(self):
         """Test mop-up URL"""
         self.assertEqual(reverse("mop-up"), "/mop-up")
@@ -43,3 +50,11 @@ class TestMopUpView(TestCase):
             reverse("mop-up", kwargs={"district": health_facility.parent_id}),
             "/mop-up/{}".format(health_facility.parent_id),
         )
+
+        # test targeted
+        spray_area.target = False
+        spray_area.save()
+        view = HealthFacilityMopUpView.as_view()
+        response = view(request, district=health_facility.parent_id)
+        self.assertContains(response, health_facility.name, 1, 200)
+        self.assertContains(response, spray_area.name, 0, 200)
