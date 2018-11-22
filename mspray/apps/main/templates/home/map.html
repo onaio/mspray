@@ -77,10 +77,10 @@
                 <hr>
                 <div>
                 <dl>
-                <p> 
+                <p>
                     Community Ready? {%if object.is_sensitized %}<i class="fa fa-check-circle" style="color: green"></i>{% else %} <i class="fa fa-times" style="color: red"></i>{% endif %}
                     </p>
-                    <p> 
+                    <p>
                     Mobilised? {%if object.is_mobilised %}<i class="fa fa-check-circle" style="color: green"></i>{% else %}<i class="fa fa-times" style="color: red"></i>{% endif %}
                 </p>
                 </dl>
@@ -166,7 +166,7 @@
         app.notSprayedDuplicatesData = {{ not_sprayed_duplicates_data|safe }};
         {% endif %}
         {% if target_data.level == 'ta' %}
-        var spraypoints_url = "{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date__lte={{ spray_date|date:'Y-m-d' }}";
+        var spraypoints_url = "{{ request.scheme }}://{{ request.get_host }}{% url 'sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date__lte={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
 
         var count = 0;
