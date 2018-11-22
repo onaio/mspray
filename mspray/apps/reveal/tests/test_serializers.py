@@ -1,6 +1,8 @@
 """module to test reveal Serializers"""
 from collections import OrderedDict
+
 from django.test import override_settings
+
 from mspray.apps.main.models import Household, Location
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.reveal.serializers import (HouseholdSerializer,
