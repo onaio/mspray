@@ -1,9 +1,10 @@
 """serializer module for reveal app"""
 from django.conf import settings
+
 from rest_framework import serializers
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Household, Location
 
 
 class LocationSerializer(GeoFeatureModelSerializer):
@@ -52,7 +53,7 @@ class HouseholdSerializer(LocationSerializer):
     name = serializers.SerializerMethodField()
 
     class Meta:
-        model = Location
+        model = Household
         geo_field = "geom"
         fields = [
             'id',
