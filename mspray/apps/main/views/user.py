@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from mspray.libs.ona import fetch_form, login as ona_login, get_form_owners
+from mspray.libs.ona import fetch_form, login as ona_login
 
 FORM_ID = getattr(settings, "ONA_FORM_PK", None)
 
@@ -36,7 +36,7 @@ def login(request):
         if username and password:
             auth = ona_login(username, password)
             if auth:
-                owners = get_form_owners(FORM_ID)
+                owners = get_form_users(FORM_ID)
                 if username in owners:
                     request.session["show_csv"] = True
 
