@@ -15,7 +15,7 @@ pipeline:
         secrets: [ slack_webhook ]
         when:
             status: [success, failure]
-            event: [push, pull_request, tag, deployment]
+            event: [push, tag, deployment]
 
 services:
     db:
