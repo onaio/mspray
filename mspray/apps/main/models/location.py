@@ -89,7 +89,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     def health_centers_to_mopup(self):
         """Return the number of Health Centers to Mop-up
         """
-        return self.get_children().filter(level="RHC").count()
+        return self.get_children().filter(level="RHC", target=True).count()
 
     @cached_property
     def spray_areas_to_mopup(self):
@@ -97,7 +97,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """
         return sum(
             1
-            for l in self.get_descendants().filter(level="ta")
+            for l in self.get_descendants().filter(level="ta", target=True)
             if l.structures_to_mopup > 0
         )
 
@@ -111,7 +111,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.structures_to_mopup
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "structures-to-mopup-{}".format(self.pk)
@@ -138,7 +138,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.visited_sprayed
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "visited-sprayed-{}".format(self.pk)
@@ -161,7 +161,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return sum(
                 [
                     l.mopup_days_needed
-                    for l in self.get_descendants().filter(level="ta")
+                    for l in self.get_descendants().filter(
+                        level="ta", target=True
+                    )
                 ]
             )
 
@@ -200,7 +202,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.new_structures
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
         key = "new-structures-{}".format(self.pk)
         val = cache.get(key)
@@ -250,7 +252,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.structures_on_ground
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "structures-on-ground-{}".format(self.pk)
@@ -277,7 +279,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.visited_found
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "visited-found-{}".format(self.pk)
@@ -354,7 +356,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.mda_structures
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "mda-structures-{}".format(self.pk)
@@ -380,7 +382,8 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """
         if self.level != "ta":
             return sum(
-                l.mda_found for l in self.get_descendants().filter(level="ta")
+                l.mda_found
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "mda-found-{}".format(self.pk)
@@ -406,7 +409,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.mda_received
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "mda-received-{}".format(self.pk)
@@ -430,7 +433,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             return sum(
                 l.mda_none_received
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
 
         key = "mda-received-{}".format(self.pk)
@@ -457,7 +460,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
-        val = self.get_descendants().filter(level="ta").count()
+        val = self.get_descendants().filter(level="ta", target=True).count()
         cache.set(key, val)
 
         return val
@@ -484,7 +487,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
 
         val = sum(
             1
-            for spray_area in self.get_descendants().filter(level="ta")
+            for spray_area in self.get_descendants().filter(
+                level="ta", target=True
+            )
             if spray_area.mda_received_percentage >= sprayed_found_percentage
         )
         cache.set(key, val)
@@ -509,7 +514,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
 
         val = sum(
             1
-            for l in self.get_descendants().filter(level="ta")
+            for l in self.get_descendants().filter(level="ta", target=True)
             if l.mda_received_percentage >= location_sprayed_percentage
         )
         cache.set(key, val)
@@ -527,7 +532,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             val = sum(
                 l.population_eligible
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
         else:
             queryset = (
@@ -557,7 +562,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if self.level != "ta":
             val = sum(
                 l.population_treatment
-                for l in self.get_descendants().filter(level="ta")
+                for l in self.get_descendants().filter(level="ta", target=True)
             )
         else:
             queryset = (

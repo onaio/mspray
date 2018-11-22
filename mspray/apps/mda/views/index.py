@@ -12,7 +12,7 @@ class MDAView(ListView):
     """MDA view."""
 
     template_name = "mda-location.html"
-    queryset = Location.objects.filter(level="district")
+    queryset = Location.objects.filter(level="district", target=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
@@ -29,13 +29,13 @@ class MDALocationView(ListView):
     """MDA Location view."""
 
     template_name = "mda-location.html"
-    queryset = Location.objects.filter()
+    queryset = Location.objects.filter(target=True)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
         context["site_name"] = "MDA"
         context["mda_location"] = get_object_or_404(
-            Location, pk=self.kwargs["location"]
+            Location, pk=self.kwargs["location"], target=True
         )
         context["ENABLE_MDA"] = True
 
