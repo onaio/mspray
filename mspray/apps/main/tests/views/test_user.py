@@ -65,11 +65,11 @@ class TestUser(TestCase):
     def test_get_form_users(self, fetch_form_mock):
         """Test fetch form users."""
         fetch_form_mock.return_value = FORM_DATA
-        form_id = 361934
+        form_id = 344713
         result = [
             'paulG', 'CSale', 'MRose', 'lucy', 'larryK', 'Mjones']
 
-        get_form_users(form_id)
+        users = get_form_users(form_id)
 
         fetch_form_mock.assert_called()
-        self.assertEqual(get_form_users(344713), result)
+        self.assertEqual(users, result)
