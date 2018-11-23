@@ -2,20 +2,20 @@
 """Test alerts.views module."""
 from unittest.mock import patch
 
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.timezone import now
 
-from mspray.apps.alerts.views import (
-    daily_spray_effectiveness,
-    start_health_facility_catchment,
-    start_send_weekly_update_email,
-    start_so_daily_form_completion,
-)
+from mspray.apps.alerts.views import (daily_spray_effectiveness,
+                                      start_health_facility_catchment,
+                                      start_send_weekly_update_email,
+                                      start_so_daily_form_completion)
 from mspray.apps.main.models import Location, TeamLeader
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.celery import app
 
 
+@override_settings(RAPIDPRO_DAILY_SPRAY_SUCCESS_FLOW_ID="abcdef")
 class TestViews(TestBase):
     """Test alerts.views module."""
 
@@ -79,7 +79,7 @@ class TestViews(TestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_task.delay.called)
         args, _ = mock_task.delay.call_args_list[0]
-        self.assertEqual(args[0], "")
+        self.assertEqual(args[0], "abcdef")
         self.assertEqual(args[1], now().date())
 
         request = self.factory.get(
@@ -89,7 +89,7 @@ class TestViews(TestBase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_task.delay.called)
         args, _ = mock_task.delay.call_args_list[1]
-        self.assertEqual(args[0], "")
+        self.assertEqual(args[0], "abcdef")
         self.assertEqual(args[1], "2018-11-01")
 
         self.assertEqual(
