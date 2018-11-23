@@ -268,7 +268,7 @@ MSPRAY_IRS_NUM_FIELD = "irs_sticker_num"
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
 HEALTH_FACILITY_CATCHMENT_THRESHOLD = 10
-ONA_URI = "https://ona.io"
+ONA_URI = "https://api.ona.io"
 MSPRAY_WEEKLY_DASHBOARD_UPDATE_URL = "http://example.com"
 MSPRAY_AWS_PATH = "mspray"
 
