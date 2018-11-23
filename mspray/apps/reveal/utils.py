@@ -5,8 +5,7 @@ from django.conf import settings
 from django.contrib.gis.geos import Point
 from django.core.exceptions import ValidationError
 
-from mspray.apps.main.models.location import Location
-from mspray.apps.main.models.spray_day import SprayDay
+from mspray.apps.main.models import Household, Location, SprayDay
 from mspray.apps.reveal.common_tags import NOT_PROVIDED
 
 
@@ -18,9 +17,11 @@ def add_spray_data(data: dict):
         submission_id: int => id of the submission
         date: str => date of submissions
         location: str => coordinates as lat,long string
+        spray_status: str => the spray status
     """
     submission_id = data.get(settings.REVEAL_DATA_ID_FIELD)
     spray_date = data.get(settings.REVEAL_DATE_FIELD)
+    spray_status = data.get(settings.REVEAL_SPRAY_STATUS_FIELD)
 
     try:
         spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
@@ -56,5 +57,23 @@ def add_spray_data(data: dict):
             sprayday.location = location
 
         sprayday.save()
+
+        household = Household.objects.filter(
+            bgeom__contains=sprayday.geom).first()
+
+        if household and sprayday.household != household:
+            sprayday.household = household
+            sprayday.geom = household.geom
+            sprayday.bgeom = household.bgeom
+            location = sprayday.location = household.location
+            sprayday.save()
+
+            if spray_status == settings.REVEAL_NOT_VISITED_VALUE:
+                household.visited = False
+            else:
+                household.visited = True
+
+            household.sprayable = sprayday.sprayable
+            household.save()
 
         return sprayday
