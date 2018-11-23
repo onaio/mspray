@@ -1,5 +1,6 @@
 import gc
 import json
+import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -1057,7 +1058,12 @@ def performance_report(spray_operator, queryset=None):
             sprayable=False, data__sprayformid=sprayformid
         ).count()
         report.district = spray_operator.team_leader_assistant.location
-        report.save()
+
+        try:
+            report.save()
+        except IntegrityError:
+            logging.error("{} Already exists".format(spray_operator))
+            continue
 
     return spray_operator
 
