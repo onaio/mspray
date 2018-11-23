@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import gc
 import os
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -737,6 +738,5 @@ def fetch_mobilisation():
                 try:
                     create_mobilisation_visit(data)
                 except IntegrityError:
-                    # Fail silently, likely we did not find the household
-                    # matching the osm id.
-                    pass
+                    logging.error("{} Record not found.".format(formid))
+                    continue
