@@ -78,3 +78,4 @@ class TestProgressExtras(TestCase):
         """Test mopup_days_needed filter."""
         self.assertEqual(mopup_days_needed(2.6), 3)
         self.assertEqual(mopup_days_needed(0.3), "<1")
+        self.assertEqual(mopup_days_needed(0.0), "<1")

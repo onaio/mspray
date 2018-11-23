@@ -123,10 +123,11 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         ninetieth_percentile = round(
             (mopup_percentage / 100) * self.structures_on_ground
         )
-        if self.visited_sprayed >= ninetieth_percentile:
-            val = 0
-        else:
-            val = ninetieth_percentile - self.visited_sprayed
+        val = (
+            0
+            if self.visited_sprayed >= ninetieth_percentile
+            else ninetieth_percentile - self.visited_sprayed
+        )
 
         cache.set(key, val)
 
