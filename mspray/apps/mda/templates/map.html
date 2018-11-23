@@ -124,11 +124,11 @@
     <script src='https://api.tiles.mapbox.com/mapbox.js/v2.2.0/mapbox.js'></script>
     <script src="https://maps.google.com/maps/api/js?key={{ GOOGLE_API_KEY }}&v=3"></script>
     <script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-label/v0.2.1/leaflet.label.js'></script>
-    <script src="{% static "js/L.Control.Locate.min.js" %}"></script>
-    <script src="{% static "js/Google.js" %}"></script>
-    <script src="{% static "js/Bing.js" %}"></script>
-    <script src="{% static "js/circles.min.js" %}"></script>
-    <script src="{% static "js/app-mda.js" %}"></script>
+    <script src="/mda{% static "js/L.Control.Locate.min.js" %}"></script>
+    <script src="/mda{% static "js/Google.js" %}"></script>
+    <script src="/mda{% static "js/Bing.js" %}"></script>
+    <script src="/mda{% static "js/circles.min.js" %}"></script>
+    <script src="/mda{% static "js/app-mda.js" %}"></script>
 
     <script type="text/javascript">
         // {{ object.name }} {{ object.level }}
@@ -147,6 +147,8 @@
         app.visitedOther = {{ target_data.visited_other }};
         app.WAS_SPRAYED_VALUE = '{{ WAS_SPRAYED_VALUE }}';
         app.WAS_NOT_SPRAYED_VALUE = '{{ WAS_NOT_SPRAYED_VALUE }}';
+        app.WAS_SPRAYED_VALUES = {{ WAS_SPRAYED_VALUES|safe }};
+        app.WAS_NOT_SPRAYED_VALUES = {{ WAS_NOT_SPRAYED_VALUES|safe }};
         app.REASONS = {{ not_sprayed_reasons|safe }};
 
         {% if sprayed_duplicates %}

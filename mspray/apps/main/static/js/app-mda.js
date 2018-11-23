@@ -157,7 +157,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
             app.sprayData = geojson;
             var reasonCounter = function(key, data) {
                 return data.filter(function(k, v) {
-                    return k.properties.reason !== null && k.properties.sprayed == app.WAS_NOT_SPRAYED_VALUE;
+                    return k.properties.reason !== null && (k.properties.sprayed == app.WAS_NOT_SPRAYED_VALUE || app.WAS_NOT_SPRAYED_VALUES.includes(feature.properties.sprayed));
                 }) .reduce(function(k, v){
                     return v.properties.reason === key ? k + 1: k;
                 }, 0);
@@ -171,7 +171,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
             if(geojson.features !== undefined && geojson.features.length > 0) {
                 app.sprayLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
-                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
+                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE || app.WAS_SPRAYED_VALUES.includes(feature.properties.sprayed)){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
@@ -181,7 +181,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                         return L.circleMarker(latlng, app.sprayOptions);
                     },
                     style: function (feature) {
-                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
+                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE || app.WAS_NOT_SPRAYED_VALUES.includes(feature.properties.sprayed)){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
@@ -233,7 +233,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                 app.map.fitBounds(app.sprayLayer.getBounds());
                 app.duplicateLayer = L.geoJson(geojson, {
                     pointToLayer: function (feature, latlng) {
-                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE){
+                        if(feature.properties.sprayed === app.WAS_SPRAYED_VALUE || app.WAS_SPRAYED_VALUES.includes(feature.properties.sprayed)){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";
@@ -244,7 +244,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                     },
                     style: function (feature) {
                         // console.log(feature.properties.sprayed);
-                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE){
+                        if(feature.properties.sprayed === app.WAS_NOT_SPRAYED_VALUE || app.WAS_NOT_SPRAYED_VALUES.includes(feature.properties.sprayed)){
                             app.sprayOptions.fillColor = "#D82118";
                         } else if (feature.properties.sprayed === app.WAS_NOT_SPRAYABLE) {
                             app.sprayOptions.fillColor = "#000000";

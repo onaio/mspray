@@ -18,6 +18,10 @@ def mspray_settings(request):
         "WAS_NOT_SPRAYED_VALUE": getattr(
             settings, "MSPRAY_WAS_NOT_SPRAYED_VALUE", "no"
         ),
+        "WAS_SPRAYED_VALUES": getattr(settings, "SPRAYED_VALUES", ["sprayed"]),
+        "WAS_NOT_SPRAYED_VALUES": getattr(
+            settings, "NOT_SPRAYED_VALUES", ["notsprayed"]
+        ),
     }
 
 
