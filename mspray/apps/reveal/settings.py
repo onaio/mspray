@@ -35,7 +35,7 @@ REVEAL_OPENSRP_TARGET_AREA = getattr(settings, 'REVEAL_OPENSRP_TARGET_AREA', 2)
 REVEAL_OPENSRP_HOUSEHOLD = getattr(settings, 'REVEAL_OPENSRP_HOUSEHOLD', 4)
 
 # these general mSpray fields should be set up this way
-# this is commented our so that it does not affect other mSpray tests
+# this is commented out so that it does not affect other mSpray tests
 # MSPRAY_OSM_PRESENCE_FIELD = False
 # SPRAYABLE_FIELD = REVEAL_SPRAY_STATUS_FIELD
 # MSPRAY_WAS_SPRAYED_FIELD = REVEAL_SPRAY_STATUS_FIELD

@@ -22,9 +22,9 @@ from mspray.apps.reveal.serializers import (HouseholdSerializer,
     REVEAL_OPENSRP_USERNAME="mosh",
     REVEAL_OPENSRP_PASSWORD="hunter2",
 )
-class TestSerializers(TestBase):
+class TestExports(TestBase):
     """
-    Serializers test class
+    Export test class
     """
 
     def setUp(self):
