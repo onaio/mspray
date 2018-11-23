@@ -28,6 +28,7 @@ REVEAL_DATE_FIELD = "date"
     SPRAYED_VALUE=REVEAL_SPRAYED_VALUE,
     SPRAYED_VALUES=[REVEAL_SPRAYED_VALUE],
     MSPRAY_DATE_FIELD=REVEAL_DATE_FIELD,
+    CELERY_TASK_ALWAYS_EAGER=True,
 )
 class TestUtils(TestBase):
     """
@@ -49,7 +50,7 @@ class TestUtils(TestBase):
         input_data = {
             "id": 1337,
             "date": "2015-09-21",
-            "location": "-15.4183222196675, 28.35119431662",
+            "location": "-15.41818400162254, 28.35517894260948",
             "spray_status": "Sprayed"
         }
         add_spray_data(data=input_data)
@@ -59,7 +60,7 @@ class TestUtils(TestBase):
         self.assertEqual(1337, sprayday.submission_id)
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
-            Point(float(28.35119431662), float(-15.4183222196675)).coords,
+            Point(float(28.35517894260948), float(-15.41818400162254)).coords,
             sprayday.geom.coords)
         self.assertTrue(sprayday.location is not None)
         self.assertEqual(
@@ -68,6 +69,8 @@ class TestUtils(TestBase):
                 geom__contains=sprayday.geom).first().location)
         self.assertTrue(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
+        self.assertTrue(sprayday.household.visited)
+        self.assertTrue(sprayday.household.sprayable)
 
     def test_add_spray_data_not_sprayed(self):
         """
@@ -77,7 +80,7 @@ class TestUtils(TestBase):
         input_data = {
             "id": 1337,
             "date": "2015-09-21",
-            "location": "-15.4183222196675, 28.35119431662",
+            "location": "-15.41818400162254, 28.35517894260948",
             "spray_status": "Not Sprayed - Refused"
         }
         add_spray_data(data=input_data)
@@ -85,6 +88,8 @@ class TestUtils(TestBase):
         sprayday = SprayDay.objects.first()
         self.assertFalse(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
+        self.assertTrue(sprayday.household.visited)
+        self.assertTrue(sprayday.household.sprayable)
 
     def test_add_spray_data_not_visited(self):
         """
@@ -94,7 +99,7 @@ class TestUtils(TestBase):
         input_data = {
             "id": 1337,
             "date": "2015-09-21",
-            "location": "-15.4183222196675, 28.35119431662",
+            "location": "-15.41818400162254, 28.35517894260948",
             "spray_status": "Not Visited"
         }
         add_spray_data(data=input_data)
@@ -102,6 +107,8 @@ class TestUtils(TestBase):
         sprayday = SprayDay.objects.first()
         self.assertFalse(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
+        self.assertFalse(sprayday.household.visited)
+        self.assertTrue(sprayday.household.sprayable)
 
     def test_add_spray_data_not_sprayable(self):
         """
@@ -111,7 +118,7 @@ class TestUtils(TestBase):
         input_data = {
             "id": 1337,
             "date": "2015-09-21",
-            "location": "-15.4183222196675, 28.35119431662",
+            "location": "-15.41818400162254, 28.35517894260948",
             "spray_status": "Not Sprayable"
         }
         add_spray_data(data=input_data)
@@ -119,3 +126,5 @@ class TestUtils(TestBase):
         sprayday = SprayDay.objects.first()
         self.assertFalse(sprayday.was_sprayed)
         self.assertFalse(sprayday.sprayable)
+        self.assertTrue(sprayday.household.visited)
+        self.assertFalse(sprayday.household.sprayable)
