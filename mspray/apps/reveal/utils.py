@@ -46,6 +46,7 @@ def add_spray_data(data: dict):
         sprayday, _ = SprayDay.objects.get_or_create(
             submission_id=submission_id, spray_date=spray_date
         )
+
         sprayday.data = data
         sprayday.save()
 
