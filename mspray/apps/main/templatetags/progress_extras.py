@@ -89,7 +89,7 @@ def structures_mopup_colour(value):
         if 10 <= value < 20:
             return ORANGE
 
-        if value > 20:
+        if value >= 20:
             return RED
     except TypeError:
         # ignore if we got a string instead
