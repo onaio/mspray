@@ -35,9 +35,14 @@ def export_locations(queryset):
     """
     url = urljoin(settings.REVEAL_OPENSRP_BASE_URL,
                   settings.REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT)
+    payload = []
 
-    serializer = LocationSerializer(queryset, many=True)
-    json_data = JSONRenderer().render(serializer.data)
+    for item in queryset.iterator():
+        serializer = LocationSerializer(item)
+        payload.append(serializer.data)
+
+    json_data = JSONRenderer().render(payload)
+
     res = send_request(url=url, payload=json_data)
 
     return res
@@ -49,10 +54,15 @@ def export_households(location):
     """
     url = urljoin(settings.REVEAL_OPENSRP_BASE_URL,
                   settings.REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT)
+    payload = []
     queryset = Household.objects.filter(location=location)
 
-    serializer = HouseholdSerializer(queryset, many=True)
-    json_data = JSONRenderer().render(serializer.data)
+    for item in queryset.iterator():
+        serializer = HouseholdSerializer(item)
+        payload.append(serializer.data)
+
+    json_data = JSONRenderer().render(payload)
+
     res = send_request(url=url, payload=json_data)
 
     return res
@@ -62,33 +72,5 @@ def export_rhc_target_areas(rhc_id: int):
     """
     Export an entire RHC's target areas
     """
-    qs = Location.objects.filter(parent__id=rhc_id)
+    qs = Location.objects.filter(parent__id=rhc_id, target=True)
     return export_locations(qs)
-
-
-def export_district(district_id: int):
-    """
-    Export an entire district
-
-    THIS WILL BE REFACTORED INTO A COMMAND
-    """
-    district_qs = Location.objects.filter(id=district_id)
-    if district_qs:
-        print(f'Exporting district {district_qs.first().name}')
-        district_res = export_locations(district_qs)
-        if district_res:
-            print('Success')
-            rhc_qs = Location.objects.filter(parent__id=district_id)
-            print(f'Exporting RHCs in {district_qs.first().name}')
-            rhc_res = export_locations(rhc_qs)
-            if rhc_res:
-                print('Success')
-                for rhc in rhc_qs:
-                    print(f'Exporting target areas in {rhc.name}')
-                    ta_res = export_rhc_target_areas(rhc_id=rhc.id)
-                    if ta_res:
-                        print('Success')
-                        ta_qs = Location.objects.filter(parent=rhc)
-                        for ta in ta_qs:
-                            print(f'Exporting structures in {ta.name}')
-                            export_households(location=ta)
