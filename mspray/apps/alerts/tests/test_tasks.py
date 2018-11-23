@@ -182,5 +182,5 @@ class TestTasks(TestBase):
     @patch("mspray.apps.alerts.tasks.daily_spray_effectiveness")
     def test_daily_spray_effectiveness(self, mocked_function):
         """Test task that triggers daily spray effectiveness notifications."""
-        daily_spray_effectiveness_task.delay("flow_uuid", "2018-11-03")
+        daily_spray_effectiveness_task("flow_uuid", "2018-11-03")
         self.assertTrue(mocked_function.called)
