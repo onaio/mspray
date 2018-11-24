@@ -37,8 +37,8 @@ performance_urls = (  # pylint: disable=C0103
             name="team-leaders",
         ),
         path(
-            "spray-operators/<int:slug>/<int:team_leader>/summary",
-            performance.SprayOperatorSummaryView.as_view(),
+            "spray-operators/<int:district_id>/summary",
+            performance.MDASprayOperatorSummaryView.as_view(),
             name="spray-operator-summary",
         ),
         path(
@@ -60,6 +60,6 @@ urlpatterns = [  # pylint: disable=invalid-name
     path("", MDAView.as_view(), name="index"),
     path("<int:location>", MDALocationView.as_view(), name="location"),
     path("<int:district_pk>/<int:slug>", MapView.as_view(), name="spray-area"),
-    path("performance", include(performance_urls, namespace="performance")),
+    path("performance/", include(performance_urls, namespace="performance")),
     path("api/", include(router.urls)),
 ]

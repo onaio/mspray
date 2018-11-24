@@ -107,9 +107,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.SerializerMethodField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
-    team_leader_assistant_name = serializers.CharField(
-        source="team_leader_assistant.name"
-    )
+    team_leader_assistant_name = serializers.SerializerMethodField()
     spray_operator_code = serializers.CharField(source="code")
     spray_operator_id = serializers.CharField(source="id")
     no_of_days_worked = serializers.IntegerField()
@@ -137,6 +135,13 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
             "avg_structures_per_so",
         )
         model = SprayOperator
+
+    def get_team_leader_assistant_name(self, obj):  # pylint: disable=R0201
+        """Return Team Leader Assistant's name."""
+        if obj and obj.team_leader_assistant:
+            return obj.team_leader_assistant.name
+
+        return ""
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
         """

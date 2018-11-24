@@ -54,6 +54,12 @@ FROM
 (SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."team_leader_assistant_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
 """  # noqa
 
+MDA_SOP_PERFORMANCE_SQL = """
+SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
+FROM
+(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."district_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
+"""  # noqa
+
 
 class IsPerformanceViewMixin(SiteNameMixin):  # pylint: disable=R0903
     """Set context variable performance_tables to True."""
@@ -83,8 +89,11 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
     template_name = "performance.html"
 
     def get_queryset(self):
-        queryset = super(DistrictPerfomanceView,
-                         self).get_queryset().filter(target=True)
+        queryset = (
+            super(DistrictPerfomanceView, self)
+            .get_queryset()
+            .filter(target=True)
+        )
 
         return queryset.filter(parent=None).order_by("name")
 
@@ -211,7 +220,8 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 / round(
                     TeamLeaderAssistant.objects.filter(
                         location=district
-                    ).count() or 1
+                    ).count()
+                    or 1
                 )
             ),
             "avg_start_time": average_time(
@@ -337,9 +347,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
         team_leader = self.kwargs.get("team_leader")
         spray_operator_id = self.kwargs.get("spray_operator")
-        spray_operator = get_object_or_404(
-            SprayOperator, pk=spray_operator_id
-        )
+        spray_operator = get_object_or_404(SprayOperator, pk=spray_operator_id)
         queryset = PerformanceReport.objects.filter(
             spray_operator=spray_operator
         ).order_by("spray_date")
@@ -379,6 +387,75 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "district_name": district.name,
                 "team_leader": team_leader,
                 "team_leader_name": spray_operator.team_leader_assistant.name,
+            }
+        )
+        context.update(DEFINITIONS["sop"])
+
+        return context
+
+
+# pylint: disable=too-many-ancestors
+class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
+    """
+    Spray Operator summary performance page.
+    """
+
+    template_name = "spray-operator-summary.html"
+    model = Location
+    slug_field = "id"
+    slug_url_kwarg = "district_id"
+
+    def get_context_data(self, **kwargs):
+        context = super(MDASprayOperatorSummaryView, self).get_context_data(
+            **kwargs
+        )
+        district = context["object"]
+
+        queryset = SprayOperator.objects.raw(
+            MDA_SOP_PERFORMANCE_SQL, [district.id]
+        )
+
+        serializer = SprayOperatorPerformanceReportSerializer(
+            queryset, many=True
+        )
+        totals = {
+            "other": sum([i["other"] for i in serializer.data]),
+            "refused": sum([i["refused"] for i in serializer.data]),
+            "sprayed": sum([i["sprayed"] for i in serializer.data]),
+            "sprayable": sum([i["sprayable"] for i in serializer.data]),
+            "not_sprayable": 0,
+            "not_sprayed_total": sum(
+                [i["not_sprayed_total"] for i in serializer.data]
+            ),
+            "data_quality_check": all(
+                [i["data_quality_check"] for i in serializer.data]
+            ),
+            "found_difference": sum(
+                [i["found_difference"] for i in serializer.data]
+            ),
+            "sprayed_difference": sum(
+                [i["sprayed_difference"] for i in serializer.data]
+            ),
+            "no_of_days_worked": sum(
+                [i["no_of_days_worked"] for i in serializer.data]
+            ),
+            "avg_structures_per_so": sum(
+                [i["avg_structures_per_so"] for i in serializer.data]
+            ),
+            "avg_start_time": average_time(
+                [i["avg_start_time"] for i in serializer.data]
+            ),
+            "avg_end_time": average_time(
+                [i["avg_end_time"] for i in serializer.data]
+            ),
+        }
+
+        context.update(
+            {
+                "data": serializer.data,
+                "totals": totals,
+                "district": district,
+                "district_name": district.name,
             }
         )
         context.update(DEFINITIONS["sop"])
