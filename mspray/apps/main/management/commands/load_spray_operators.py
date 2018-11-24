@@ -6,11 +6,12 @@ import codecs
 import csv
 import os
 
-from django.db import IntegrityError
 from django.core.management.base import BaseCommand, CommandError
+from django.db import IntegrityError
 from django.utils.translation import gettext as _
 
 from mspray.apps.main.models import (
+    Location,
     SprayOperator,
     TeamLeader,
     TeamLeaderAssistant,
@@ -58,35 +59,52 @@ class Command(BaseCommand):
                             if created:
                                 print(row)
                         codes.append(row["code"])
-                        team_code = row["team_leader_assistant"].strip()
-                        if team_code:
-                            try:
-                                team_leader = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
-                                    code=team_code
-                                )
-                            except TeamLeaderAssistant.DoesNotExist:
-                                self.stderr.write(
-                                    "TLA {} does not exist".format(team_code)
-                                )
-                            else:
-                                spray_operator.team_leader_assistant = (
-                                    team_leader
-                                )
-                                spray_operator.save()
-                        team_code = row["team_leader"].strip()
-                        if team_code:
-                            try:
-                                team_leader = TeamLeader.objects.get(
-                                    code=team_code
-                                )
-                            except TeamLeader.DoesNotExist:
-                                self.stderr.write(
-                                    "TL {} does not exist".format(team_code)
-                                )
-                                pass
-                            else:
-                                spray_operator.team_leader = team_leader
-                                spray_operator.save()
+                        self._add_team_leader_assistant(
+                            spray_operator, row.get("team_leader_assistant")
+                        )
+                        self._add_team_leader(
+                            spray_operator, row.get("team_leader")
+                        )
+                        self._add_location(
+                            spray_operator, row.get("health_facility")
+                        )
                     print(
                         SprayOperator.objects.exclude(code__in=codes).delete()
                     )
+
+    def _add_team_leader_assistant(self, spray_operator, team_code):
+        if team_code:
+            try:
+                team_leader = TeamLeaderAssistant.objects.get(  # noqa pylint: disable=line-too-long
+                    code=team_code.strip()
+                )
+            except TeamLeaderAssistant.DoesNotExist:
+                self.stderr.write("TLA {} does not exist".format(team_code))
+            else:
+                spray_operator.team_leader_assistant = team_leader
+                spray_operator.save()
+
+    def _add_team_leader(self, spray_operator, team_code):
+        if team_code:
+            try:
+                team_leader = TeamLeader.objects.get(code=team_code.strip())
+            except TeamLeader.DoesNotExist:
+                self.stderr.write("TL {} does not exist".format(team_code))
+            else:
+                spray_operator.team_leader = team_leader
+                spray_operator.save()
+
+    def _add_location(self, spray_operator, health_facility):
+        if health_facility:
+            try:
+                health_facility = Location.objects.get(
+                    code=health_facility.strip(), level="RHC"
+                )
+            except Location.DoesNotExist:
+                self.stderr.write(
+                    "Catchment {} does not exist".format(health_facility)
+                )
+            else:
+                spray_operator.rhc = health_facility
+                spray_operator.district = health_facility.parent
+                spray_operator.save()
