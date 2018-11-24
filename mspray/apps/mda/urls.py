@@ -42,9 +42,8 @@ performance_urls = (  # pylint: disable=C0103
             name="spray-operator-summary",
         ),
         path(
-            "spray-operators/<int:slug>/<int:team_leader>/"
-            "<int:spray_operator>/daily",
-            performance.SprayOperatorDailyView.as_view(),
+            "spray-operators/<int:district_id>/<int:spray_operator>/daily",
+            performance.MDASprayOperatorDailyView.as_view(),
             name="spray-operator-daily",
         ),
         path(

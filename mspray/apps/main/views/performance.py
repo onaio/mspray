@@ -461,3 +461,66 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         context.update(DEFINITIONS["sop"])
 
         return context
+
+
+# pylint: disable=too-many-ancestors
+class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
+    """
+    Spray Operator Daily view.
+    """
+
+    template_name = "spray-operator-daily.html"
+    model = Location
+    slug_field = "id"
+    slug_url_kwarg = "district_id"
+
+    def get_context_data(self, **kwargs):
+        context = super(MDASprayOperatorDailyView, self).get_context_data(
+            **kwargs
+        )
+        district = context["object"]
+
+        spray_operator_id = self.kwargs.get("spray_operator")
+        spray_operator = get_object_or_404(SprayOperator, pk=spray_operator_id)
+        queryset = PerformanceReport.objects.filter(
+            spray_operator=spray_operator
+        ).order_by("spray_date")
+        serializer = PerformanceReportSerializer(queryset, many=True)
+        totals = {
+            "other": sum([i["other"] for i in serializer.data]),
+            "refused": sum([i["refused"] for i in serializer.data]),
+            "sprayed": sum([i["sprayed"] for i in serializer.data]),
+            "sprayable": sum([i["sprayable"] for i in serializer.data]),
+            "not_sprayable": 0,
+            "not_sprayed_total": sum(
+                [i["not_sprayed_total"] for i in serializer.data]
+            ),
+            "data_quality_check": all(
+                [i["data_quality_check"] for i in serializer.data]
+            ),
+            "found_difference": sum(
+                [i["found_difference"] for i in serializer.data]
+            ),
+            "sprayed_difference": sum(
+                [i["sprayed_difference"] for i in serializer.data]
+            ),
+            "avg_start_time": average_time(
+                [i["avg_start_time"] for i in serializer.data]
+            ),
+            "avg_end_time": average_time(
+                [i["avg_end_time"] for i in serializer.data]
+            ),
+        }
+        context.update(
+            {
+                "data": serializer.data,
+                "totals": totals,
+                "spray_operator": spray_operator.code,
+                "spray_operator_name": spray_operator.name,
+                "district": district,
+                "district_name": district.name,
+            }
+        )
+        context.update(DEFINITIONS["sop"])
+
+        return context
