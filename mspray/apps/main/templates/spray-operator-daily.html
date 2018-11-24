@@ -8,9 +8,14 @@
         <div class="container">
             <h1>Data for: {{ spray_operator_name }}</h1>
             <ol class="breadcrumb">
+              {% if 'mda' not in request.url_path %}
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
               <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
               <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">Spray Operators</a></li>
+              {% else %}
+              <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
+              <li><a href="{% url "mda:performance:spray-operator-summary" district.pk %}">Spray Operators</a></li>
+              {% endif %}
               <li class="active">Spray Operator</li>
             </ol>
             <div class="row">

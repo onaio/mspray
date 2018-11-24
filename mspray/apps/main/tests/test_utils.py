@@ -137,6 +137,9 @@ class TestUtils(TestBase):
         self.assertTrue(mock.called)
         args, _kwargs = mock.call_args_list[0]
         self.assertEqual(args[0], spray)
+        self.assertIsNotNone(spray.location)
+        self.assertIsNotNone(spray.rhc)
+        self.assertIsNotNone(spray.district)
 
     def test_link_sprayday_to_actors(self):
         """

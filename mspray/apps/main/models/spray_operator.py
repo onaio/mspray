@@ -21,6 +21,20 @@ class SprayOperator(models.Model):
     )
     data_quality_check = models.BooleanField(default=False)
     average_spray_quality_score = models.FloatField(default=0.0)
+    rhc = models.ForeignKey(
+        "Location",
+        db_index=True,
+        null=True,
+        related_name="sop_rhc",
+        on_delete=models.CASCADE,
+    )
+    district = models.ForeignKey(
+        "Location",
+        db_index=True,
+        null=True,
+        related_name="sop_district",
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         app_label = "main"

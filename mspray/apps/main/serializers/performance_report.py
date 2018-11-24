@@ -1,7 +1,5 @@
 # -*- coding=utf-8 -*-
-"""
-PerformanceReportSerializer
-"""
+"""Performance report Serializers."""
 from rest_framework import serializers
 
 from django.core.cache import cache
@@ -16,9 +14,7 @@ from mspray.apps.main.models import (
 
 
 class PerformanceReportSerializer(serializers.ModelSerializer):
-    """
-    PerformanceReportSerializer
-    """
+    """PerformanceReportSerializer"""
 
     date = serializers.SerializerMethodField()
     sprayable = serializers.IntegerField(source="found")
@@ -93,9 +89,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
 
 
 class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
-    """
-    PerformanceReportSerializer
-    """
+    """SprayOperatorPerformanceReportSerializer"""
 
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
@@ -107,9 +101,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.SerializerMethodField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
-    team_leader_assistant_name = serializers.CharField(
-        source="team_leader_assistant.name"
-    )
+    team_leader_assistant_name = serializers.SerializerMethodField()
     spray_operator_code = serializers.CharField(source="code")
     spray_operator_id = serializers.CharField(source="id")
     no_of_days_worked = serializers.IntegerField()
@@ -137,6 +129,13 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
             "avg_structures_per_so",
         )
         model = SprayOperator
+
+    def get_team_leader_assistant_name(self, obj):  # pylint: disable=R0201
+        """Return Team Leader Assistant's name."""
+        if obj and obj.team_leader_assistant:
+            return obj.team_leader_assistant.name
+
+        return ""
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
         """
@@ -256,9 +255,7 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
 
 
 class TLAPerformanceReportSerializer(serializers.ModelSerializer):
-    """
-    PerformanceReportSerializer
-    """
+    """TLAPerformanceReportSerializer"""
 
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
@@ -409,9 +406,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         return other + refused
 
     def get_found_difference(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns spray operator found - submitted found difference.
-        """
+        """Returns spray operator found - submitted found difference."""
         reported_found = 0
         found = 0
 
@@ -431,9 +426,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
         return reported_found - found
 
     def get_sprayed_difference(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns spray operator sprayed - submitted sprayed difference.
-        """
+        """Returns spray operator sprayed - submitted sprayed difference."""
         reported_sprayed = 0
         sprayed = 0
 
@@ -454,9 +447,7 @@ class TLAPerformanceReportSerializer(serializers.ModelSerializer):
 
 
 class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
-    """
-    District PerformanceReportSerializer
-    """
+    """District PerformanceReportSerializer"""
 
     sprayable = serializers.SerializerMethodField()
     sprayed = serializers.SerializerMethodField()
@@ -501,36 +492,26 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         model = Location
 
     def get_location(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns the location object.
-        """
+        """Return the location object."""
         return obj
 
     def get_avg_structures_per_so(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns ratio of number of structures found over number_of_days_worked.
-        """
+        """Ratio of number of structures found over number_of_days_worked."""
         if obj.no_of_days_worked == 0 or obj.no_of_days_worked is None:
             return 0
 
         return obj.found / round(obj.no_of_days_worked)
 
     def get_refused(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns number of sprayable structures refused spraying.
-        """
+        """Return number of sprayable structures refused spraying."""
         return 0 if obj.refused is None else obj.refused
 
     def get_other(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns number of sprayable structures not sprayed other reason.
-        """
+        """Return number of sprayable structures not sprayed other reason."""
         return 0 if obj.other is None else obj.other
 
     def get_not_eligible(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns number of sprayable structures not eligible reason.
-        """
+        """Return number of sprayable structures not eligible reason."""
         key = "performance-not-eligible-{}".format(obj.pk)
         val = cache.get(key)
         if val is not None:
@@ -552,22 +533,15 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return val
 
     def get_sprayed(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns number of sprayable structures sprayed.
-        """
+        """Return number of sprayable structures sprayed."""
         return 0 if obj.p_sprayed is None else obj.p_sprayed
 
     def get_sprayable(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns number of sprayable structures.
-        """
+        """Returns number of sprayable structures."""
         return 0 if obj.found is None else obj.found
 
     def get_data_quality_check(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns True or False for all data quality checks for the spray
-        operator.
-        """
+        """Return True or False for all data quality checks."""
 
         quality_checks = []
         sops = SprayOperator.objects.filter(
@@ -585,9 +559,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return all(quality_checks)
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns start_time as time object.
-        """
+        """Return start_time as time object."""
         return average_time(
             [
                 report.start_time
@@ -599,9 +571,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns end_time as time object.
-        """
+        """Return end_time as time object."""
         return average_time(
             [
                 report.end_time
@@ -611,18 +581,14 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         )
 
     def get_not_sprayed_total(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns not sprayed other + refused.
-        """
+        """Return not sprayed other + refused."""
         if obj.other is None or obj.refused is None:
             return 0
 
         return obj.other + obj.refused
 
     def get_found_difference(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns spray operator found - submitted found difference.
-        """
+        """Return spray operator found - submitted found difference."""
         reported_found = 0
         found = 0
 
@@ -644,9 +610,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return reported_found - found
 
     def get_sprayed_difference(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns spray operator sprayed - submitted sprayed difference.
-        """
+        """Return spray operator sprayed - submitted sprayed difference."""
         reported_sprayed = 0
         sprayed = 0
 
@@ -668,9 +632,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return reported_sprayed - sprayed
 
     def get_success_rate(self, obj):  # pylint: disable=no-self-use
-        """
-        Returns spray operator sprayed - submitted sprayed difference.
-        """
+        """Return spray operator sprayed - submitted sprayed difference."""
         if obj.sprayed is None or obj.found is None or obj.found == 0:
             return 0
 
