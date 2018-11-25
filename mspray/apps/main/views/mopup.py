@@ -27,8 +27,7 @@ class MopUpView(ListView):
 
 
 class HealthFacilityMopUpView(ListView):
-    """Mopup view.
-    """
+    """Mopup view."""
 
     context_object_name = "mopup_locations"
     template_name = "health-facility-mop-up.html"
@@ -45,9 +44,12 @@ class HealthFacilityMopUpView(ListView):
             for location in context[self.context_object_name]
             if location.structures_to_mopup > 0
         ]
+        print(context)
 
         # show definitions legend for mopup
-        context.update(DEFINITIONS.get("mopup", {}))
+        context.update(DEFINITIONS["mopup"])
+        active_site = "IRS"
+        context.update(DEFINITIONS["mopup"][active_site])
 
         return context
 

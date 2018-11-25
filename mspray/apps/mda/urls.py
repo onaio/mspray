@@ -13,6 +13,7 @@ from mspray.apps.main.views import (
     sprayday,
     target_area,
 )
+from mspray.apps.main.views.mopup import HealthFacilityMopUpView, MopUpView
 from mspray.apps.mda.views.index import MDALocationView, MDAView
 from mspray.apps.mda.views.map import MapView
 from mspray.apps.mda.views.spray_area import SprayAreaView
@@ -67,5 +68,11 @@ urlpatterns = [  # pylint: disable=invalid-name
         r"^sprayareas\.(?P<format>[csv]{3})$",
         SprayAreaView.as_view(),
         name="sprayareas-csv",
+    ),
+    path("mop-up", MopUpView.as_view(), name="mop-up"),
+    path(
+        "mop-up/<int:district>",
+        HealthFacilityMopUpView.as_view(),
+        name="mop-up",
     ),
 ]

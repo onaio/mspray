@@ -13,7 +13,21 @@ DEFINITIONS = {
                 ("Orange", ">=10", "<20"),
                 ("Red", ">=20", ""),
             ],
-        }
+        },
+        "IRS": {
+            "spray_area_label": "Spray Area",
+            "visited_sprayed_label": "Visited Sprayed",
+            "structures_remaining_label": "Structures remaining to spray to reach 90% SE",  # noqa
+            "spray_effectiveness_label": "Spray Effectiveness",
+            "spray_coverage_label": "Spray Coverage",
+        },
+        "MDA": {
+            "spray_area_label": "Eligible Area",
+            "visited_sprayed_label": "Structures Received",
+            "structures_remaining_label": "Structures remaining to receive to reach 90% SE",  # noqa
+            "spray_effectiveness_label": "Structures Received Success Rate",
+            "spray_coverage_label": "Structures Received Coverage",
+        },
     },
     "district": {
         "definitions": [
