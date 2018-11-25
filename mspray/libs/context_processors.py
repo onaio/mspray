@@ -50,4 +50,7 @@ def enable_mda(request):
 
     When ENABLE_MDA is set to True the MDA dashboard links are enabled.
     """
-    return {"ENABLE_MDA": getattr(settings, "ENABLE_MDA", False)}
+    return {
+        "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
+        "MDA_STATIC_PREFIX": getattr(settings, "MDA_STATIC_PREFIX", "/mda"),
+    }

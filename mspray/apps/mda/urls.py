@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """MDA urls"""
 from django.conf.urls import include
-from django.urls import path
+from django.urls import path, re_path
 
 from rest_framework import routers
 
@@ -15,6 +15,7 @@ from mspray.apps.main.views import (
 )
 from mspray.apps.mda.views.index import MDALocationView, MDAView
 from mspray.apps.mda.views.map import MapView
+from mspray.apps.mda.views.spray_area import SprayAreaView
 
 app_name = "mda"  # pylint: disable=invalid-name
 
@@ -61,4 +62,10 @@ urlpatterns = [  # pylint: disable=invalid-name
     path("<int:district_pk>/<int:slug>", MapView.as_view(), name="spray-area"),
     path("performance/", include(performance_urls, namespace="performance")),
     path("api/", include(router.urls)),
+    path("sprayareas", SprayAreaView.as_view(), name="sprayareas"),
+    re_path(
+        r"^sprayareas\.(?P<format>[csv]{3})$",
+        SprayAreaView.as_view(),
+        name="sprayareas-csv",
+    ),
 ]

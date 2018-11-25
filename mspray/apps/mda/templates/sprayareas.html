@@ -1,0 +1,99 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">
+            All Eligible Areas
+        </h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>District</th>
+                    <th>Health Centre</th>
+                    <th>Target Area</th>
+                    <th>Structures on ground</th>
+                    <th>Found</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found coverage</th>
+                    <th>Spray coverage</th>
+                    <th>Population Received Success Rate</th>
+                    <th>Community Ready?</th>
+                    <th>Mobilised?</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for location in object_list %}
+                    <tr>
+                        <td class='numbers'>{{ location.parent.parent.name }}</td>
+                        <td class='numbers'>{{ location.parent.name }}</td>
+                        <td>
+                            <a href="{% url 'mda:spray-area' location.parent_id location.id %}">
+                                <i class="fa fa-map"></i>
+                                {{ location.name }}
+                            </a>
+                            </td>
+                        </td>
+
+                        <td class='numbers'>{{ location.mda_structures|intcomma }}</td>
+                        <td class='numbers'>{{ location.mda_found|intcomma }}</td>
+                        <td class='numbers'>{{ location.mda_received|intcomma }} </td>
+                        {% calc_percentage location.mda_received location.mda_structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage location.mda_found location.mda_structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage location.mda_received location.mda_found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                        <td class='numbers'>
+                            {% calc_percentage location.population_treatment location.population_eligible as population_percentage %}
+                            {{ population_percentage }}
+                        </td>
+                        <td class=''>{{ location.sensitized }}</td>
+                        <td class=''>{{ location.mobilised }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td class='numbers'>{{ district_totals.structures|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_total|intcomma }}</td>
+                        <td class='numbers'>{{ district_totals.visited_sprayed|intcomma }} </td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage district_totals.visited_total district_totals.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage district_totals.visited_sprayed district_totals.visited_total as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                </tr>
+            </tfoot>
+        </table>
+        <!-- <p>* To sort a column, click on the column name</p> -->
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
