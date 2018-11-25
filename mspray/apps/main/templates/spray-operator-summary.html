@@ -8,7 +8,7 @@
         <div class="container">
             <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
-              {% if 'mda' not in request.url_path %}
+              {% if 'mda' not in request.get_full_path %}
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
               <li><a href="{% url "performance:team-leaders" district.pk %}"> Team Leader Assistants</a></li>
               {% else %}
@@ -42,7 +42,7 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    {% if 'mda' not in request.url_path %}
+                                    {% if 'mda' not in request.get_full_path %}
                                     <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
                                     {% else %}
                                     <td><a href="{% url "mda:performance:spray-operator-daily" district.id  row.spray_operator_id %}">{{ row.name }}</a></td>
