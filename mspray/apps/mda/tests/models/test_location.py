@@ -18,11 +18,11 @@ from mspray.apps.mda.tests.utils import load_mda_data
 class TestLocation(TestCase):
     """Test Location model class"""
 
-    def test_mda_structures(self):
-        """Test mda_structures."""
+    def test_structures_on_ground(self):
+        """Test structures_on_ground."""
         data_setup()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_2.mda_structures, 13)
+        self.assertEqual(akros_2.structures_on_ground, 13)
 
     def test_mda_found(self):
         """Test mda_found."""
@@ -34,18 +34,18 @@ class TestLocation(TestCase):
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.mda_found, 4)
 
-    def test_mda_received(self):
-        """Test mda_received."""
+    def test_mda_visited_sprayed(self):
+        """Test MDA location.visited_sprayed."""
         data_setup()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_2.mda_received, 0)
+        self.assertEqual(akros_2.visited_sprayed, 0)
 
         load_mda_data()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
-        self.assertEqual(akros_2.mda_received, 3)
+        self.assertEqual(akros_2.visited_sprayed, 3)
 
     def test_population_eligible(self):
-        """Test mda_received."""
+        """Test population_eligible."""
         data_setup()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.population_eligible, 0)
@@ -55,7 +55,7 @@ class TestLocation(TestCase):
         self.assertEqual(akros_2.population_eligible, 1)
 
     def test_population_treatment(self):
-        """Test mda_received."""
+        """Test population_treatment."""
         data_setup()
         akros_2 = Location.objects.get(name="Akros_2", level="ta")
         self.assertEqual(akros_2.population_treatment, 0)

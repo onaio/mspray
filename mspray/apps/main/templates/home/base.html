@@ -97,6 +97,8 @@
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'mda:performance:districts' %} ">MDA: Performance</a></li>
                                 <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mda:mop-up' %}">MDA: Mop-up</a></li>
+                                <li role="separator" class="divider"></li>
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>
                                 {% else %}

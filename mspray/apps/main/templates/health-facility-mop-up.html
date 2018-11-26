@@ -13,18 +13,18 @@
         <table class="table table-stripe">
             <thead>
                 <tr>
-                    <th>Health Facility</th>    
+                    <th>Health Facility</th>
                     {% if district.name == "Sinda" %}
                     <th>Priority</th>
-                    {% endif %}   
-                    <th>Spray Area</th>
+                    {% endif %}
+                    <th>{{ spray_area_label }}</th>
                     <th>Structures on the Ground</th>
-                    <th>Visited Sprayed</th>
-                    <th>Structures remaining to spray to reach 90% SE</th>
+                    <th>{{ visited_sprayed_label }}</th>
+                    <th>{{ structures_remaining_label }}</th>
                     <th>TLA days</th>
-                    <th>Spray Effectiveness</th>
+                    <th>{{ spray_effectiveness_label }}</th>
                     <th>Found Coverage</th>
-                    <th>Spray Coverage</th>
+                    <th>{{ spray_coverage_label }}</th>
                     <th>Date of Last Visit</th>
                     <th>Date of Last Decision Form</th>
                 </tr>
@@ -41,7 +41,7 @@
 
                         {% endif %}
                         <td>
-                            <a href="{% url 'target_area' location.parent_id location.pk  %}">
+                            <a href="{{ MDA_STATIC_PREFIX }}{% url 'target_area' location.parent_id location.pk  %}">
                                 <i class="fa fa-map"></i> {{ location.name }}
                             </a>
                         </td>
