@@ -976,6 +976,8 @@ def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
+
+    logger = logging.getLogger(__name__)
     if not spray_operator.team_leader_assistant:
         return None
     operator_qs = SprayDay.objects.none()
@@ -1062,7 +1064,7 @@ def performance_report(spray_operator, queryset=None):
         try:
             report.save()
         except IntegrityError:
-            logging.error("{} Already exists".format(spray_operator))
+            logger.exception("{} Already exists".format(spray_operator))
             continue
 
     return spray_operator
