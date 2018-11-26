@@ -1095,8 +1095,11 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
     """
     Fetches missing data for a form
     """
-    if not formid:
-        raise ValueError("'formid' is required.")
+    try:
+        if not formid:
+            raise ValueError("'formid' is required.")
+    except ValueError:
+        log_writer("'formid' is required.")
     old_data = (
         ModelClass.objects.filter()
         .order_by("-submission_id")
