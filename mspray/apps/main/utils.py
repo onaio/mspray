@@ -1,5 +1,6 @@
 import gc
 import json
+import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -61,6 +62,9 @@ REASON_REFUSED = settings.MSPRAY_UNSPRAYED_REASON_REFUSED
 REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
 REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_formid(spray_operator, spray_date, spray_operator_code=None):
@@ -1057,7 +1061,12 @@ def performance_report(spray_operator, queryset=None):
             sprayable=False, data__sprayformid=sprayformid
         ).count()
         report.district = spray_operator.team_leader_assistant.location
-        report.save()
+
+        try:
+            report.save()
+        except IntegrityError:
+            logger.exception("{} Already exists".format(spray_operator))
+            continue
 
     return spray_operator
 
