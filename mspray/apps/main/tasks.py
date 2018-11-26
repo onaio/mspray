@@ -58,6 +58,8 @@ DIRECTLY_OBSERVED_FORM_ID = getattr(
 DAILY_SUMMARY_FORM_PK = getattr(settings, "SOP_DAILY_SUMMARY_FORM_PK", None)
 FALLBACK_TO_ODK = settings.FALLBACK_TO_SUBMISSION_DATA_LOCATION
 
+logger = logging.getLogger(__name__)
+
 
 def get_new_structure_location(data, geom, is_node=False):
     from mspray.apps.main.utils import geojson_from_gps_string
@@ -738,5 +740,5 @@ def fetch_mobilisation():
                 try:
                     create_mobilisation_visit(data)
                 except IntegrityError:
-                    logging.error("{} Record not found.".format(formid))
+                    logger.exceprion("{} Record not found.".format(formid))
                     continue
