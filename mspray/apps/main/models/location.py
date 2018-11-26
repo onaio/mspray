@@ -157,17 +157,18 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
 
     @cached_property
     def visited_sprayed(self):
-        """Return the number of structures sprayed."""
+        """Return the number of structures sprayed.
+
+        For MDA ('mda_status'='all_received' + 'mda_status'=some_received')
+        """
         key = "visited-sprayed-{}".format(self.pk)
         val = cache.get(key)
         if val is not None:
             return val
 
-        queryset = self.sprayday_queryset.filter(
+        val = self.sprayday_queryset.filter(
             sprayable=True, was_sprayed=True
-        )
-
-        val = queryset.count()
+        ).count()
         cache.set(key, val)
 
         return val
@@ -363,29 +364,6 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         return sensitized if sensitized else ""
 
     @cached_property
-    def mda_structures(self):
-        """Return the number of MDA structures on the ground."""
-        if self.level != "ta":
-            return sum(
-                l.mda_structures
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
-
-        key = "mda-structures-{}".format(self.pk)
-        val = cache.get(key)
-        if val is not None:
-            return val
-
-        val = (
-            self.household_set.exclude(sprayable=False).count()
-            + self.new_structures
-            + self.duplicates
-        )
-        cache.set(key, val)
-
-        return val
-
-    @cached_property
     def mda_found(self):
         """Return the number of MDA structures found on the ground.i
 
@@ -408,24 +386,6 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             + self.new_structures
             + self.duplicates
         )
-        cache.set(key, val)
-
-        return val
-
-    @cached_property
-    def mda_received(self):
-        """Return the number of MDA structures received.
-
-        ('mda_status'='all_received' +'mda_status'=some_received')
-        """
-        key = "mda-received-{}".format(self.pk)
-        val = cache.get(key)
-        if val is not None:
-            return val
-
-        val = self.sprayday_queryset.filter(
-            sprayable=True, was_sprayed=True
-        ).count()
         cache.set(key, val)
 
         return val
@@ -470,8 +430,8 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """Return percentage of received over eligible structures."""
         return (
             0
-            if self.mda_structures == 0
-            else (self.mda_received * 100) / self.mda_structures
+            if self.structures_on_ground == 0
+            else (self.visited_sprayed * 100) / self.structures_on_ground
         )
 
     @cached_property

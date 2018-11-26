@@ -139,9 +139,9 @@
         var app = new App(undefined, targetAreaData, hhData, notSprayableValue);
         app.fitBounds(bounds);
 
-        app.housesCount = {% if object.level != 'ta' %} {{object.num_of_spray_areas }} {% else %}{{ object.mda_structures }} {% endif %};
+        app.housesCount = {% if object.level != 'ta' %} {{object.num_of_spray_areas }} {% else %}{{ object.structures_on_ground }} {% endif %};
         app.visitedTotal = {{ object.mda_found }};
-        app.visitedSprayed = {{ object.mda_received }};
+        app.visitedSprayed = {{ object.visited_sprayed }};
         app.visitedNotSprayed = {{ object.mda_none_received }};
         app.visitedRefused = {{ target_data.visited_refused }};
         app.visitedOther = {{ target_data.visited_other }};

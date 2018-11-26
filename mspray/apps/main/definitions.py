@@ -6,27 +6,39 @@ Needs to be imported and relevant key updated into the view context variables.
 # pylint: disable=line-too-long
 DEFINITIONS = {
     "mopup": {
-        "colors": {
-            "title": "Structures remaining to spray to reach 90% Spray Effectiveness:",  # noqa
-            "colors": [
-                ("Green", ">", "10"),
-                ("Orange", ">=10", "<20"),
-                ("Red", ">=20", ""),
-            ],
-        },
         "IRS": {
+            "colors": {
+                "title": "Structures remaining to spray to reach 90% Spray Effectiveness:",  # noqa
+                "colors": [
+                    ("Green", ">", "10"),
+                    ("Orange", ">=10", "<20"),
+                    ("Red", ">=20", ""),
+                ],
+            },
             "spray_area_label": "Spray Area",
             "visited_sprayed_label": "Visited Sprayed",
             "structures_remaining_label": "Structures remaining to spray to reach 90% SE",  # noqa
             "spray_effectiveness_label": "Spray Effectiveness",
             "spray_coverage_label": "Spray Coverage",
+            "spray_areas_to_mopup_label": "# Spray Areas to Mop-up",
+            "structures_to_mopup_90_label": "Structures to spray for areas to reach 90%*",  # noqa
         },
         "MDA": {
+            "colors": {
+                "title": "Structures remaining to receive treatment to reach 90% Received Success Rate:",  # noqa
+                "colors": [
+                    ("Green", ">", "10"),
+                    ("Orange", ">=10", "<20"),
+                    ("Red", ">=20", ""),
+                ],
+            },
             "spray_area_label": "Eligible Area",
             "visited_sprayed_label": "Structures Received",
-            "structures_remaining_label": "Structures remaining to receive to reach 90% SE",  # noqa
+            "structures_remaining_label": "Structures remaining to receive treatment to reach 90% SE",  # noqa
             "spray_effectiveness_label": "Structures Received Success Rate",
             "spray_coverage_label": "Structures Received Coverage",
+            "spray_areas_to_mopup_label": "# Eligible Areas to Mop-up",
+            "structures_to_mopup_90_label": "Structures to reach for areas to reach 90%*",  # noqa
         },
     },
     "district": {

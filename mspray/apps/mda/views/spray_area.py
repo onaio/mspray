@@ -90,19 +90,20 @@ class SprayAreaView(SiteNameMixin, ListView):
                         location.parent.parent.name,
                         location.parent.name,
                         location.name,
-                        location.mda_structures,
+                        location.structures_on_ground,
                         location.mda_found,
-                        location.mda_received,
+                        location.visited_sprayed,
                         location.population_treatment,
                         location.population_eligible,
                         calc_percentage(
-                            location.mda_received, location.mda_structures
+                            location.visited_sprayed,
+                            location.structures_on_ground,
                         ),
                         calc_percentage(
-                            location.mda_found, location.mda_structures
+                            location.mda_found, location.structures_on_ground
                         ),
                         calc_percentage(
-                            location.mda_received, location.mda_found
+                            location.visited_sprayed, location.mda_found
                         ),
                         calc_percentage(
                             location.population_treatment,
