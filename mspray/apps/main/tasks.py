@@ -2,6 +2,7 @@ from __future__ import absolute_import
 
 import gc
 import os
+import logging
 from datetime import timedelta
 
 from django.conf import settings
@@ -56,6 +57,8 @@ DIRECTLY_OBSERVED_FORM_ID = getattr(
 )
 DAILY_SUMMARY_FORM_PK = getattr(settings, "SOP_DAILY_SUMMARY_FORM_PK", None)
 FALLBACK_TO_ODK = settings.FALLBACK_TO_SUBMISSION_DATA_LOCATION
+
+logger = logging.getLogger(__name__)
 
 
 def get_new_structure_location(data, geom, is_node=False):
@@ -737,6 +740,5 @@ def fetch_mobilisation():
                 try:
                     create_mobilisation_visit(data)
                 except IntegrityError:
-                    # Fail silently, likely we did not find the household
-                    # matching the osm id.
-                    pass
+                    logger.exceprion("{} Record not found.".format(formid))
+                    continue
