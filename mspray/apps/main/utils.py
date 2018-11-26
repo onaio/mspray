@@ -64,6 +64,9 @@ REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 
 
+logger = logging.getLogger(__name__)
+
+
 def get_formid(spray_operator, spray_date, spray_operator_code=None):
     """
     Returns a string with 'DAY.MONTH.SPRAY_OPERATOR_CODE' from a spray_operator
@@ -976,8 +979,6 @@ def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
-
-    logger = logging.getLogger(__name__)
     if not spray_operator.team_leader_assistant:
         return None
     operator_qs = SprayDay.objects.none()
