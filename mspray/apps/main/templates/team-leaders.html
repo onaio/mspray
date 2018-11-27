@@ -9,14 +9,14 @@
     <h1>{{ district_name }}</h1>
     <ol class="breadcrumb">
       <li><a href="{% url "performance:districts" %}">Districts</a></li>
-      <li class="active">Team Leader Assistants</li>
+      <li class="active">{{SUPERVISOR}}</li>
     </ol>
     <div class="row">
         <div class="col-md-12">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th rowspan="3">Team Leader Assistants (TLA)</th>
+                        <th rowspan="3">{{SUPERVISOR}}</th>
                         <th colspan="6">Number of Structures</th>
                         <!-- <th rowspan="3">Spray Coverage</th> -->
                         <th rowspan="3">Average structures <br />found per SOP per day</th>

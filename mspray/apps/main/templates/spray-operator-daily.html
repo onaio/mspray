@@ -10,13 +10,13 @@
             <ol class="breadcrumb">
               {% if 'mda' not in request.get_full_path %}
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "performance:team-leaders" district.pk %}">Team Leader Assistants</a></li>
-              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">Spray Operators</a></li>
+              <li><a href="{% url "performance:team-leaders" district.pk %}">{{SUPERVISOR}}</a></li>
+              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">{{COMMUNITY_HEALTH_WORKER}}</a></li>
               {% else %}
               <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "mda:performance:spray-operator-summary" district.pk %}">Spray Operators</a></li>
+              <li><a href="{% url "mda:performance:spray-operator-summary" district.pk %}">{{COMMUNITY_HEALTH_WORKER}}</a></li>
               {% endif %}
-              <li class="active">Spray Operator</li>
+              <li class="active">{{COMMUNITY_HEALTH_WORKER}}</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
