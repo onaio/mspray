@@ -54,3 +54,17 @@ def enable_mda(request):
         "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
         "MDA_STATIC_PREFIX": getattr(settings, "MDA_STATIC_PREFIX", "/mda"),
     }
+
+
+def community_health_worker(request):
+    """Set COMMUNITY HEALTH WORKER value."""
+    return {
+        "COMMUNITY_HEALTH_WORKER": getattr(
+            settings,
+            "MSPRAY_COMMUNITY_HEALTH_WORKER", "community health worker")}
+
+
+def supervisor(request):
+    """Set SUPERVISOR value."""
+    return {
+        "SUPERVISOR": getattr(settings, "MSPRAY_SUPERVISOR", "supervisor")}
