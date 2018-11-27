@@ -31,8 +31,10 @@ router.register(r"targetareas", target_area.TargetAreaViewSet)
 performance_urls = (  # pylint: disable=C0103
     [
         path(
-            "", performance.DistrictPerfomanceView.as_view(), name="districts"
-        ),
+            "",
+            performance.DistrictPerfomanceView.as_view(
+                template_name="mda/performance.html"),
+            name="districts"),
         path(
             "team-leaders/<int:slug>",
             performance.TeamLeadersPerformanceView.as_view(),
