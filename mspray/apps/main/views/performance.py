@@ -190,7 +190,6 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         queryset = TeamLeaderAssistant.objects.raw(
             TLA_PERFORMANCE_SQL, [district.id]
         )
-        supervisor = context["object"]
         serializer = TLAPerformanceReportSerializer(queryset, many=True)
 
         totals = {
@@ -246,7 +245,6 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 "totals": totals,
                 "district": district,
                 "district_name": district.name,
-                "supervisor": supervisor,
             }
         )
         context.update(DEFINITIONS["tla"])
@@ -268,7 +266,6 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorSummaryView, self).get_context_data(
             **kwargs
         )
-        community_health_worker = context["community_health_worker"]
         district = context["object"]
         team_leader = self.kwargs.get("team_leader")
         team_leader_assistant = get_object_or_404(
@@ -324,7 +321,6 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 ).name,
                 "district": district,
                 "district_name": district.name,
-                "community_health_worker": community_health_worker,
             }
         )
         context.update(DEFINITIONS["sop"])
@@ -346,7 +342,6 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         context = super(SprayOperatorDailyView, self).get_context_data(
             **kwargs
         )
-        community_health_worker = context["community_health_worker"]
         district = context["object"]
 
         team_leader = self.kwargs.get("team_leader")
@@ -389,7 +384,6 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "spray_operator_name": spray_operator.name,
                 "district": district,
                 "district_name": district.name,
-                "community_health_worker": community_health_worker,
                 "team_leader": team_leader,
                 "team_leader_name": spray_operator.team_leader_assistant.name,
             }

@@ -56,15 +56,12 @@ def enable_mda(request):
     }
 
 
-def community_health_worker(request):
+def labels(request):
     """Set COMMUNITY HEALTH WORKER value."""
     return {
         "COMMUNITY_HEALTH_WORKER": getattr(
             settings,
-            "MSPRAY_COMMUNITY_HEALTH_WORKER", "community health worker")}
+            "MSPRAY_SPRAY_OPERATOR", "community health worker"),
 
-
-def supervisor(request):
-    """Set SUPERVISOR value."""
-    return {
-        "SUPERVISOR": getattr(settings, "MSPRAY_SUPERVISOR", "supervisor")}
+        "SUPERVISOR": getattr(
+            settings, "MSPRAY_TEAM_LEADER_ASSISTANT", "supervisor")}
