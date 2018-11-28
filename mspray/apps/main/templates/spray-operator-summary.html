@@ -8,20 +8,16 @@
         <div class="container">
             <h1>{{ team_leader_name }}</h1>
             <ol class="breadcrumb">
-              {% if 'mda' not in request.get_full_path %}
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "performance:team-leaders" district.pk %}"> Team Leader Assistants</a></li>
-              {% else %}
-              <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
-              {% endif %}
-              <li class="active">{{COMMUNITY_HEALTH_WORKER}}</li>
+              <li><a href="{% url "performance:team-leaders" district.pk %}">{{ SUPERVISOR_LABEL_PLURAL }}</a></li>
+               <li class="active">{{ COMMUNITY_HEALTH_WORKER_LABEL_PLURAL }}</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th rowspan="2">{{COMMUNITY_HEALTH_WORKER}}</th>
+                                <th rowspan="2">{{ COMMUNITY_HEALTH_WORKER_LABEL }}</th>
                                 <th rowspan="2">Number of <br/> days worked</th>
                                 <th colspan="3">Structures</th>
                                 <!-- <th rowspan="2">Spray Coverage</th> -->

@@ -8,15 +8,10 @@
         <div class="container">
             <h1>Data for: {{ spray_operator_name }}</h1>
             <ol class="breadcrumb">
-              {% if 'mda' not in request.get_full_path %}
               <li><a href="{% url "performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "performance:team-leaders" district.pk %}">{{SUPERVISOR}}</a></li>
-              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">{{COMMUNITY_HEALTH_WORKER}}</a></li>
-              {% else %}
-              <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
-              <li><a href="{% url "mda:performance:spray-operator-summary" district.pk %}">{{COMMUNITY_HEALTH_WORKER}}</a></li>
-              {% endif %}
-              <li class="active">{{COMMUNITY_HEALTH_WORKER}}</li>
+              <li><a href="{% url "performance:team-leaders" district.pk %}">{{SUPERVISOR_LABEL_PLURAL}}</a></li>
+              <li><a href="{% url "performance:spray-operator-summary" district.pk team_leader %}">{{ COMMUNITY_HEALTH_WORKER_LABEL_PLURAL }}</a></li>
+              <li class="active">{{ COMMUNITY_HEALTH_WORKER_LABEL }}</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
