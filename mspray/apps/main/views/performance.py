@@ -482,9 +482,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
-        context = super(MDASprayOperatorSummaryView, self).get_context_data(
-            **kwargs
-        )
+        context = super().get_context_data(**kwargs)
         rhc = context["object"]
 
         queryset = SprayOperator.objects.raw(
@@ -530,8 +528,8 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             {
                 "data": serializer.data,
                 "totals": totals,
-                "district": rhc,
-                "district_name": rhc.name,
+                "rhc": rhc,
+                "rhc_name": rhc.name,
             }
         )
         context.update(DEFINITIONS["sop"])
