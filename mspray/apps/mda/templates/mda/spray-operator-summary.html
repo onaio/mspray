@@ -8,7 +8,7 @@
         <div class="container">
             <h1>{{ object.name }}</h1>
             <ol class="breadcrumb">
-              <li><a href="{% url "mda:performance:rhcs" object.parent.id %}">{{RHC_LABEL_PLURAL}}</a></li>
+              <li><a href="{% url "mda:performance:rhcs" rhc.parent.id %}">{{RHC_LABEL_PLURAL}}</a></li>
               <li class="active">{{ COMMUNITY_HEALTH_WORKER_LABEL_PLURAL }}</li>
             </ol>
             <div class="row">

@@ -8,7 +8,7 @@
         <div class="container">
             <h1>Data for: {{ spray_operator_name }}</h1>
             <ol class="breadcrumb">
-              <li><a href="{% url "mda:performance:rhcs" rhc.pk %}">{{ RHC_LABEL_PLURAL }}</a></li>
+              <li><a href="{% url "mda:performance:rhcs" rhc.parent.pk %}">{{ RHC_LABEL_PLURAL }}</a></li>
               <li><a href="{% url "mda:performance:spray-operator-summary" rhc.pk %}">{{ COMMUNITY_HEALTH_WORKER_LABEL_PLURAL }}</a></li>
               <li class="active">{{ COMMUNITY_HEALTH_WORKER_LABEL }}</li>
             </ol>
