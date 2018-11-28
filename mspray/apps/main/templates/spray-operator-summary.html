@@ -14,14 +14,14 @@
               {% else %}
               <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
               {% endif %}
-              <li class="active">Spray Operators</li>
+              <li class="active">{{COMMUNITY_HEALTH_WORKER}}</li>
             </ol>
             <div class="row">
                 <div class="col-md-12">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th rowspan="2">Spray Operator</th>
+                                <th rowspan="2">{{COMMUNITY_HEALTH_WORKER}}</th>
                                 <th rowspan="2">Number of <br/> days worked</th>
                                 <th colspan="3">Structures</th>
                                 <!-- <th rowspan="2">Spray Coverage</th> -->

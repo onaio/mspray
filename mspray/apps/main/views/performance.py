@@ -190,7 +190,6 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         queryset = TeamLeaderAssistant.objects.raw(
             TLA_PERFORMANCE_SQL, [district.id]
         )
-
         serializer = TLAPerformanceReportSerializer(queryset, many=True)
 
         totals = {
