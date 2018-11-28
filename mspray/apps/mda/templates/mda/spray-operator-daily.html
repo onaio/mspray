@@ -20,7 +20,6 @@
                                 <th rowspan="3">Day</th>
                                 <th rowspan="3">Date</th>
                                 <th colspan="5">Number of Structures</th>
-                                <!-- <th rowspan="3">Spray Coverage</th> -->
                                 <th rowspan="3">Data collection start time</th>
                                 <th rowspan="3">Data collection end time</th>
                                 <th rowspan="3">Duration in field</th>
@@ -49,7 +48,6 @@
                                     <td class='numbers'>{{ row.refused|intcomma  }}</td>
                                     <td class='numbers'>{{ row.other|intcomma  }}</td>
                                     <td class='numbers'>{{ row.not_sprayed_total }}</td>
-                                    <!-- <td class='numbers'>{{ row.spray_success_rate }}%</td> -->
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
                                     <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
@@ -73,7 +71,6 @@
                                 <td class='numbers'>{{ totals.refused|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.other|intcomma  }}</td>
                                 <td class='numbers'>{{ totals.not_sprayed_total }}</td>
-                                <!-- <td class='numbers'>{{ totals.spray_success_rate }}%</td> -->
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
                                 <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>
