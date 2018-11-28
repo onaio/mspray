@@ -18,6 +18,7 @@ from mspray.apps.main.serializers import (
     PerformanceReportSerializer,
     SprayOperatorPerformanceReportSerializer,
     TLAPerformanceReportSerializer,
+    RHCPerformanceReportSerializer,
 )
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -42,6 +43,12 @@ FROM
 (SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_performancereport" ON ("main_location"."id" = "main_performancereport"."district_id") WHERE "main_location"."parent_id" IS NULL GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
 """  # noqa
 
+RHC_PERFORMANCE_SQL = """
+SELECT "main_location"."id", "main_location"."name", "main_location"."code", "main_location"."level", "main_location"."parent_id", "main_location"."structures", "main_location"."pre_season_target", "main_location"."num_of_spray_areas", "main_location"."data_quality_check", "main_location"."average_spray_quality_score", "main_location"."visited", "main_location"."sprayed", "main_location"."lft", "main_location"."rght", "main_location"."tree_id", "main_location"."mptt_level", "subq"."found", "subq"."no_of_days_worked", "subq"."reported_sprayed", "subq"."refused", "subq"."reported_found", "subq"."other", "subq"."p_sprayed", "subq"."not_eligible"
+FROM 
+(SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_sprayoperator" ON ("main_sprayoperator"."rhc_id" = "main_location"."id") LEFT OUTER JOIN "main_performancereport" ON ("main_performancereport"."spray_operator_id" = "main_sprayoperator"."id") WHERE "main_location"."parent_id" = %s GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
+"""  # noqa
+
 TLA_PERFORMANCE_SQL = """
 SELECT "main_teamleaderassistant"."id", "main_teamleaderassistant"."code", "main_teamleaderassistant"."name", "main_teamleaderassistant"."location_id", "main_teamleaderassistant"."data_quality_check", "main_teamleaderassistant"."average_spray_quality_score", "main_teamleaderassistant"."team_leader_id", "subq"."no_of_days_worked", "subq"."found", "subq"."reported_sprayed", "subq"."reported_found", "subq"."not_eligible", "subq"."sprayed", "subq"."other", "subq"."refused"
 FROM
@@ -57,7 +64,7 @@ FROM
 MDA_SOP_PERFORMANCE_SQL = """
 SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
 FROM
-(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."district_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
+(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."rhc_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
 """  # noqa
 
 
@@ -164,6 +171,76 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             if num_of_succes_rates
             else 0
         )
+
+        context.update({"data": serializer.data, "totals": totals})
+        context.update(DEFINITIONS["performance:district"])
+
+        return context
+
+
+class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
+    """
+    RHC performance view
+    """
+    model = Location
+    template_name = "mda/rhc-performance.html"
+    slug_field = "id"
+    slug_url_kwarg = "district_id"
+
+    def get_queryset(self):
+        queryset = super().get_queryset().filter(target=True)
+
+        return queryset.filter(parent=None).order_by("name")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        rhcs = Location.objects.filter(parent=self.object).order_by("name")
+        queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [self.object.id])
+        serializer = RHCPerformanceReportSerializer(queryset, many=True)
+        num_of_rhcs = round(rhcs.count())
+        num_of_succes_rates = round(len([i for i in serializer.data]))
+        totals = {
+            "other":
+            sum([i["other"] for i in serializer.data]),
+            "refused":
+            sum([i["refused"] for i in serializer.data]),
+            "sprayed":
+            sum([i["sprayed"] for i in serializer.data]),
+            "sprayable":
+            sum([i["sprayable"] for i in serializer.data]),
+            "not_sprayable":
+            0,
+            "not_eligible":
+            sum([i["not_eligible"] for i in serializer.data]),
+            "not_sprayed_total":
+            sum([i["not_sprayed_total"] for i in serializer.data]),
+            "data_quality_check":
+            all([i["data_quality_check"] for i in serializer.data]),
+            "found_difference":
+            sum([i["found_difference"] for i in serializer.data]),
+            "sprayed_difference":
+            sum([i["sprayed_difference"] for i in serializer.data]),
+            "houses":
+            sum([i["location"].structures for i in serializer.data]),
+            "no_of_days_worked":
+            sum([i["no_of_days_worked"] for i in serializer.data]),
+        }
+        totals["avg_structures_per_so"] = ((
+            sum([i["avg_structures_per_so"]
+                 for i in serializer.data]) / num_of_rhcs)
+                                           if num_of_rhcs else 0)
+        totals["avg_start_time"] = average_time([
+            i["avg_start_time"] for i in serializer.data
+            if i["avg_start_time"] != ""
+        ])
+        totals["avg_end_time"] = average_time([
+            i["avg_end_time"] for i in serializer.data
+            if i["avg_start_time"] != ""
+        ])
+        totals["success_rate"] = ((
+            sum([i["success_rate"]
+                 for i in serializer.data]) / num_of_succes_rates)
+                                  if num_of_succes_rates else 0)
 
         context.update({"data": serializer.data, "totals": totals})
         context.update(DEFINITIONS["performance:district"])
@@ -399,19 +476,17 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     Spray Operator summary performance page.
     """
 
-    template_name = "spray-operator-summary.html"
+    template_name = "mda/spray-operator-summary.html"
     model = Location
     slug_field = "id"
-    slug_url_kwarg = "district_id"
+    slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
-        context = super(MDASprayOperatorSummaryView, self).get_context_data(
-            **kwargs
-        )
-        district = context["object"]
+        context = super().get_context_data(**kwargs)
+        rhc = context["object"]
 
         queryset = SprayOperator.objects.raw(
-            MDA_SOP_PERFORMANCE_SQL, [district.id]
+            MDA_SOP_PERFORMANCE_SQL, [rhc.id]
         )
 
         serializer = SprayOperatorPerformanceReportSerializer(
@@ -453,8 +528,8 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             {
                 "data": serializer.data,
                 "totals": totals,
-                "district": district,
-                "district_name": district.name,
+                "rhc": rhc,
+                "rhc_name": rhc.name,
             }
         )
         context.update(DEFINITIONS["sop"])
@@ -468,16 +543,14 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     Spray Operator Daily view.
     """
 
-    template_name = "spray-operator-daily.html"
+    template_name = "mda/spray-operator-daily.html"
     model = Location
     slug_field = "id"
-    slug_url_kwarg = "district_id"
+    slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
-        context = super(MDASprayOperatorDailyView, self).get_context_data(
-            **kwargs
-        )
-        district = context["object"]
+        context = super().get_context_data(**kwargs)
+        rhc = context["object"]
 
         spray_operator_id = self.kwargs.get("spray_operator")
         spray_operator = get_object_or_404(SprayOperator, pk=spray_operator_id)
@@ -516,8 +589,8 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "totals": totals,
                 "spray_operator": spray_operator.code,
                 "spray_operator_name": spray_operator.name,
-                "district": district,
-                "district_name": district.name,
+                "rhc": rhc,
+                "rhc_name": rhc.name,
             }
         )
         context.update(DEFINITIONS["sop"])

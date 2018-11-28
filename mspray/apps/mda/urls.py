@@ -31,7 +31,14 @@ router.register(r"targetareas", target_area.TargetAreaViewSet)
 performance_urls = (  # pylint: disable=C0103
     [
         path(
-            "", performance.DistrictPerfomanceView.as_view(), name="districts"
+            "",
+            performance.DistrictPerfomanceView.as_view(
+                template_name="mda/performance.html"),
+            name="districts"),
+        path(
+            "rhcs/<int:district_id>",
+            performance.RHCPerformanceView.as_view(),
+            name="rhcs",
         ),
         path(
             "team-leaders/<int:slug>",
@@ -39,12 +46,12 @@ performance_urls = (  # pylint: disable=C0103
             name="team-leaders",
         ),
         path(
-            "spray-operators/<int:district_id>/summary",
+            "spray-operators/<int:rhc_id>/summary",
             performance.MDASprayOperatorSummaryView.as_view(),
             name="spray-operator-summary",
         ),
         path(
-            "spray-operators/<int:district_id>/<int:spray_operator>/daily",
+            "spray-operators/<int:rhc_id>/<int:spray_operator>/daily",
             performance.MDASprayOperatorDailyView.as_view(),
             name="spray-operator-daily",
         ),

@@ -8,9 +8,8 @@ from mspray.apps.main.serializers.performance_report import (
 )
 from mspray.apps.main.serializers.performance_report import (
     DistrictPerformanceReportSerializer,
-    SprayOperatorPerformanceReportSerializer,
-    TLAPerformanceReportSerializer,
-)
+    SprayOperatorPerformanceReportSerializer, TLAPerformanceReportSerializer,
+    RHCPerformanceReportSerializer,)
 
 __all__ = [
     "DistrictPerformanceReportSerializer",
@@ -18,4 +17,5 @@ __all__ = [
     "SprayOperatorPerformanceReportSerializer",
     "TLAPerformanceReportSerializer",
     "DistrictSerializer",
+    "RHCPerformanceReportSerializer",
 ]

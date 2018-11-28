@@ -1,0 +1,80 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <h2>Performance (District)</h2>
+        <table class="table table-stripe">
+            <thead>
+                    <tr>
+                        <th rowspan="3">District</th>
+                        <th colspan="8">Number of Structures</th>
+                        <th rowspan="3">Spray Progress</th>
+                        <th rowspan="3">Average structures <br />found per CHW per day</th>
+                        <th rowspan="3">Average start time</th>
+                        <th rowspan="3">Average end time</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">Pre Season Target</th>
+                        <th rowspan="2">Total Eligible Structures on the ground</th>
+                        <th colspan="2">Found</th>
+                        <th rowspan="2">Received</th>
+                        <th colspan="3">None Received</th>
+                    </tr>
+                    <tr>
+                        <th>Residential</th>
+                        <th>Non-Eligible</th>
+                        <th>Refused</th>
+                        <th>Other</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+            <tbody>
+            {% for row in data %}
+                <tr>
+                    <td><a href="{% url 'mda:performance:rhcs' row.location.id %}">{{ row.location.name }}</a></td>
+                    <td class='numbers'>{{ row.location.pre_season_target|intcomma }}</td>
+                    <td class='numbers'>{{ row.location.structures_on_ground|intcomma }}</td>
+                    <td class='numbers'>{{ row.sprayable|intcomma }}</td>
+                    <td class='numbers'>{{ row.not_eligible|intcomma }}</td>
+                    <td class='numbers'>{{ row.sprayed|intcomma }}</td>
+                    <td class='numbers'>{{ row.refused|intcomma }}</td>
+                    <td class='numbers'>{{ row.other|intcomma }}</td>
+                    <td class='numbers'>{{ row.not_sprayed_total|intcomma }}</td>
+                    <td class='numbers'>{{ row.success_rate|floatformat:"0" }}%</td>
+                    <td class='numbers {{ row.avg_structures_per_so|sprayed_color }}'>
+                        {{ row.avg_structures_per_so|floatformat:"0" }}</td>
+                    <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
+                    <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td>Totals</td>
+                    <td class='numbers'>{{ totals.pre_season_target|intcomma }}</td>
+                    <td class='numbers'>{{ totals.houses|intcomma }}</td>
+                    <td class='numbers'>{{ totals.sprayable|intcomma }}</td>
+                    <td class='numbers'>{{ totals.not_eligible|intcomma  }}</td>
+                    <td class='numbers'>{{ totals.sprayed|intcomma }}</td>
+                    <td class='numbers'>{{ totals.refused|intcomma }}</td>
+                    <td class='numbers'>{{ totals.other|intcomma }}</td>
+                    <td class='numbers'>{{ totals.not_sprayed_total|intcomma }}</td>
+                    <td class='numbers'>{{ totals.success_rate|floatformat:"0" }}%</td>
+                    <td class='numbers {{ totals.avg_structures_per_so|sprayed_color }}'>
+                        {{ totals.avg_structures_per_so|floatformat:"0" }}</td>
+                    <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
+                    <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
+                </tr>
+            </tfoot>
+        </table>
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+
+{% endblock %}
