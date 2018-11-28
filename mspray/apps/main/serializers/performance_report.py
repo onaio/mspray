@@ -470,6 +470,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = (
+            "id",
             "name",
             "no_of_days_worked",
             "spray_operator_code",
@@ -637,3 +638,40 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
             return 0
 
         return (100 * obj.p_sprayed) / obj.found
+
+
+class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
+    """DistrictPerformanceReportSerializer"""
+
+    def get_not_eligible(self, obj):  # pylint: disable=no-self-use
+        """Return number of sprayable structures not eligible reason."""
+        key = "performance-not-eligible-rhc-{}".format(obj.pk)
+        val = cache.get(key)
+        if val is not None:
+            return val
+        val = (SprayDay.objects.filter(
+            household__isnull=False,
+            household__sprayable=False,
+            location__parent_id=obj.pk,
+            sprayable=False,
+        ).values("osmid").distinct().count())
+
+        cache.set(key, val)
+
+        return val
+
+    def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
+        """Return start_time as time object."""
+        return average_time([
+            report.start_time for report in PerformanceReport.objects.filter(
+                spray_operator__rhc=obj).only("start_time")
+            if report.start_time is not None
+        ])
+
+    def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
+        """Return end_time as time object."""
+        return average_time([
+            report.end_time for report in PerformanceReport.objects.filter(
+                spray_operator__rhc=obj).only("end_time")
+            if report.end_time is not None
+        ])
