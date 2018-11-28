@@ -64,7 +64,7 @@ FROM
 MDA_SOP_PERFORMANCE_SQL = """
 SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
 FROM
-(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."district_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
+(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."rhc_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
 """  # noqa
 
 
@@ -476,19 +476,19 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     Spray Operator summary performance page.
     """
 
-    template_name = "spray-operator-summary.html"
+    template_name = "mda/spray-operator-summary.html"
     model = Location
     slug_field = "id"
-    slug_url_kwarg = "district_id"
+    slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
         context = super(MDASprayOperatorSummaryView, self).get_context_data(
             **kwargs
         )
-        district = context["object"]
+        rhc = context["object"]
 
         queryset = SprayOperator.objects.raw(
-            MDA_SOP_PERFORMANCE_SQL, [district.id]
+            MDA_SOP_PERFORMANCE_SQL, [rhc.id]
         )
 
         serializer = SprayOperatorPerformanceReportSerializer(
@@ -530,8 +530,8 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             {
                 "data": serializer.data,
                 "totals": totals,
-                "district": district,
-                "district_name": district.name,
+                "district": rhc,
+                "district_name": rhc.name,
             }
         )
         context.update(DEFINITIONS["sop"])
@@ -545,16 +545,14 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     Spray Operator Daily view.
     """
 
-    template_name = "spray-operator-daily.html"
+    template_name = "mda/spray-operator-daily.html"
     model = Location
     slug_field = "id"
-    slug_url_kwarg = "district_id"
+    slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
-        context = super(MDASprayOperatorDailyView, self).get_context_data(
-            **kwargs
-        )
-        district = context["object"]
+        context = super().get_context_data(**kwargs)
+        rhc = context["object"]
 
         spray_operator_id = self.kwargs.get("spray_operator")
         spray_operator = get_object_or_404(SprayOperator, pk=spray_operator_id)
@@ -593,8 +591,8 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "totals": totals,
                 "spray_operator": spray_operator.code,
                 "spray_operator_name": spray_operator.name,
-                "district": district,
-                "district_name": district.name,
+                "rhc": rhc,
+                "rhc_name": rhc.name,
             }
         )
         context.update(DEFINITIONS["sop"])
