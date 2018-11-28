@@ -22,9 +22,7 @@ class TestPerformanceView(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
 
-    @override_settings(
-        MSPRAY_TEAM_LEADER_ASSISTANT='supervisor'
-    )
+    @override_settings(MSPRAY_SUPERVISOR_LABEL='Supervisor')
     def test_team_leader_performance(self):
         """Test team leaders performance view."""
         data_setup()
@@ -35,4 +33,4 @@ class TestPerformanceView(TestCase):
         view = TeamLeadersPerformanceView.as_view()
         response = view(request, slug=sprayarea.id)
         self.assertEqual(response.status_code, 200)
-        self.assertTrue('supervisor' in str(response.render().content))
+        self.assertTrue('Supervisor' in str(response.render().content))
