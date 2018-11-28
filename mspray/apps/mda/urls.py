@@ -36,6 +36,11 @@ performance_urls = (  # pylint: disable=C0103
                 template_name="mda/performance.html"),
             name="districts"),
         path(
+            "rhcs/<int:district_id>/summary",
+            performance.RHCPerformanceView.as_view(),
+            name="rhcs",
+        ),
+        path(
             "team-leaders/<int:slug>",
             performance.TeamLeadersPerformanceView.as_view(),
             name="team-leaders",
