@@ -59,9 +59,19 @@ def enable_mda(request):
 def labels(request):
     """Set COMMUNITY HEALTH WORKER value."""
     return {
-        "COMMUNITY_HEALTH_WORKER": getattr(
-            settings,
-            "MSPRAY_SPRAY_OPERATOR", "community health worker"),
-
-        "SUPERVISOR": getattr(
-            settings, "MSPRAY_TEAM_LEADER_ASSISTANT", "supervisor")}
+        "COMMUNITY_HEALTH_WORKER_LABEL":
+        getattr(settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL",
+                "Spray Operator"),
+        "COMMUNITY_HEALTH_WORKER_LABEL_PLURAL":
+        getattr(settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL_PLURAL",
+                "Spray Operators"),
+        "SUPERVISOR_LABEL":
+        getattr(settings, "MSPRAY_SUPERVISOR_LABEL",
+                "Team Leader Assistant (TLA)"),
+        "SUPERVISOR_LABEL_PLURAL":
+        getattr(settings, "MSPRAY_SUPERVISOR_LABEL_PLURAL",
+                "Team Leader Assistants (TLA)"),
+        "RHC_LABEL": getattr(settings, "MSPRAY_RHC_LABEL", "RHC"),
+        "RHC_LABEL_PLURAL": getattr(
+            settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"),
+    }
