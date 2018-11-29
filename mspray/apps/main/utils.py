@@ -179,6 +179,7 @@ def create_households_buffer(distance=15, recreate=False, target=None):
             continue
         bf = MultiPolygon([hhb for hhb in hh_buffers])
 
+        # pylint: disable=no-member
         for b in bf.cascaded_union.simplify(settings.BUFFER_TOLERANCE):
             if not isinstance(b, Polygon):
                 continue
