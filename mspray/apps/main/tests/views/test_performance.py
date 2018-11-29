@@ -9,14 +9,14 @@ from mspray.apps.main.views.performance import (
     DistrictPerfomanceView, TeamLeadersPerformanceView,
     DISTRICT_PERFORMANCE_SQL, TLA_PERFORMANCE_SQL,
     SOP_PERFORMANCE_SQL, SprayOperatorSummaryView,
-    SprayOperatorDailyView)
+    SprayOperatorDailyView, MDA_SOP_PERFORMANCE_SQL)
+from mspray.apps.main.tests.utils import data_setup
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.utils import performance_report
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer, TLAPerformanceReportSerializer,
     SprayOperatorPerformanceReportSerializer, PerformanceReportSerializer,
     MDASprayOperatorSummaryView)
-from mspray.apps.main.tests.utils import data_setup
 
 
 class TestPerformanceView(TestBase):
@@ -303,3 +303,29 @@ class TestPerformanceView(TestBase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context_data['rhc_name'], "Mtendere")
+
+        queryset = SprayOperator.objects.raw(
+            MDA_SOP_PERFORMANCE_SQL, [sprayarea.id]
+        )
+        serializer = SprayOperatorPerformanceReportSerializer(
+            queryset, many=True
+        )
+        result = {
+            'other': 0,
+            'refused': 0,
+            'sprayed': 0,
+            'sprayable': 0,
+            'not_sprayable': 0,
+            'not_sprayed_total': 0,
+            'data_quality_check': True,
+            'found_difference': 0,
+            'sprayed_difference': 0,
+            'no_of_days_worked': 0,
+            'avg_structures_per_so': 0,
+            'avg_start_time': '',
+            'avg_end_time': ''}
+
+        self.assertEqual(
+            response.context_data['totals'], result)
+        self.assertEqual(
+            response.context_data['data'], serializer.data)
