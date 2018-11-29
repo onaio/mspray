@@ -32,18 +32,13 @@
             <tbody>
                 {% for location in mopup_locations %}
                     <tr>
-                        <td>
-                            {{ location.parent.name }}
-                        </td>
+                        <td> {{ location.parent.name }} </td>
                         {% if district.name == "Sinda" %}
-
-                        <td>{{ location.priority|default_if_none:"" }}</td>
-
+                            <td>{{ location.priority|default_if_none:"" }}</td>
                         {% endif %}
                         <td>
                             <a href="{% if 'mda' in request.get_full_path %}{{ MDA_STATIC_PREFIX }}{% endif %}{% url 'target_area' location.parent_id location.pk  %}">
-                                <i class="fa fa-map"></i> {{ location.name }}
-                            </a>
+                                <i class="fa fa-map"></i> {{ location.name }} </a>
                         </td>
                         <td class='numbers'>
                             {{ location.structures_on_ground }}
