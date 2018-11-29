@@ -415,8 +415,8 @@ class TestUtils(TestBase):
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         team_leader = TeamLeader.objects.last()
         spray_operator.team_leader = team_leader
-        performance_report(spray_operator)
-        self.assertEqual(spray_operator.team_leader, team_leader)
+        report = performance_report(spray_operator)
+        self.assertEqual(report.team_leader, team_leader)
         self.assertEqual(
             PerformanceReport.objects.filter(
                 spray_operator=spray_operator).count(), 1)
