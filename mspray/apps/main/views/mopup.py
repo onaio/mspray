@@ -11,15 +11,13 @@ from mspray.apps.main.models import Location
 from mspray.apps.main.models.location import get_mopup_locations
 
 
-def get_district_mopup_totals(district_id, queryset=None):
+def get_mopup_totals(
+        district: object = None, queryset: object = None):
     """
-    Get mopup data for a district
+    Get mopup totals for a queryset
     """
     if queryset is None:
-        target_areas = Location.objects.filter(
-            level="ta", target=True).filter(parent__parent_id=district_id)
-
-        locations = get_mopup_locations(queryset=target_areas)
+        locations = district.get_locations_list_to_mopup()
     else:
         locations = queryset
 
@@ -44,6 +42,21 @@ class MopUpView(SiteNameMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["site_name"] = settings.MSPRAY_MOPUP_LABEL
 
+        context['totals'] = {
+            'health_centers_to_mopup':
+            sum((_.health_centers_to_mopup
+                 for _ in context[self.context_object_name])),
+            'spray_areas_to_mopup':
+            sum((_.spray_areas_to_mopup
+                 for _ in context[self.context_object_name])),
+            'structures_to_mopup':
+            sum((_.structures_to_mopup
+                 for _ in context[self.context_object_name])),
+            'mopup_days_needed':
+            sum((_.mopup_days_needed
+                 for _ in context[self.context_object_name])),
+        }
+
         # show definitions legend for mopup
         context.update(DEFINITIONS["mopup"][context.get("active_site", "IRS")])
 
@@ -66,8 +79,8 @@ class HealthFacilityMopUpView(SiteNameMixin, ListView):
         context[self.context_object_name] = get_mopup_locations(
             queryset=context[self.context_object_name])
 
-        context['totals'] = get_district_mopup_totals(
-            district_id=self.kwargs["district"],
+        context['totals'] = get_mopup_totals(
+            district=context["district"],
             queryset=context[self.context_object_name])
 
         # show definitions legend for mopup
