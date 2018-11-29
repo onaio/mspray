@@ -301,3 +301,5 @@ class TestPerformanceView(TestBase):
         view = MDASprayOperatorSummaryView.as_view()
         response = view(request, rhc_id=sprayarea.id)
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context_data['rhc_name'], "Mtendere")
