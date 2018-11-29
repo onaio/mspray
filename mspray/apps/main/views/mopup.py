@@ -8,19 +8,7 @@ from django.views.generic import ListView
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
-
-
-def get_mopup_locations(queryset):
-    """
-    Returns locations for mop-up
-    """
-    lower_bound = getattr(settings, 'MSPRAY_MOPUP_LOWER_BOUND', 0.2)
-    return [
-        location for location in queryset.iterator()
-        if location.structures_to_mopup > 0 and
-        location.structures_on_ground > 0 and
-        (location.visited_found / location.structures_on_ground) > lower_bound
-    ]
+from mspray.apps.main.models.location import get_mopup_locations
 
 
 def get_district_mopup_totals(district_id, queryset=None):
@@ -29,8 +17,7 @@ def get_district_mopup_totals(district_id, queryset=None):
     """
     if queryset is None:
         target_areas = Location.objects.filter(
-            level="ta",
-            target=True).filter(parent__parent_id=district_id)
+            level="ta", target=True).filter(parent__parent_id=district_id)
 
         locations = get_mopup_locations(queryset=target_areas)
     else:
