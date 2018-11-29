@@ -99,12 +99,21 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return cls.objects.get(name__iexact=name_or_code, level="district")
 
     @cached_property
+    def get_locations_list_to_mopup(self):
+        """
+        Get list of locations to mopup
+        """
+        locations = get_mopup_locations(
+            queryset=self.get_descendants().filter(level="ta", target=True))
+
+        return locations
+
+    @cached_property
     def health_centers_to_mopup(self):
         """Return the number of Health Centers to Mop-up
         """
         # get all the locations that need mopup
-        locations = get_mopup_locations(
-            queryset=self.get_descendants().filter(level="ta", target=True))
+        locations = self.get_locations_list_to_mopup
 
         # get the RHCs using the locations above
         rhcs = list(set([_.parent for _ in locations]))
@@ -116,8 +125,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """Return the number of Spray Areas to Mop-up
         """
         # get all the locations that need mopup
-        locations = get_mopup_locations(
-            queryset=self.get_descendants().filter(level="ta", target=True))
+        locations = self.get_locations_list_to_mopup
 
         return len(locations)
 
@@ -130,9 +138,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """
         if self.level != "ta":
             # get all the locations that need mopup
-            locations = get_mopup_locations(
-                queryset=self.get_descendants().filter(level="ta", target=True)
-            )
+            locations = self.get_locations_list_to_mopup
 
             return sum((_.structures_to_mopup for _ in locations))
 
@@ -200,14 +206,10 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """Return the number of structures to reach 90% divide by 45"""
         denominator = getattr(settings, "MOPUP_DAYS_DENOMINATOR", 45)
         if self.level != "ta":
-            return sum(
-                [
-                    l.mopup_days_needed
-                    for l in self.get_descendants().filter(
-                        level="ta", target=True
-                    )
-                ]
-            )
+            # get all the locations that need mopup
+            locations = self.get_locations_list_to_mopup
+
+            return sum((_.mopup_days_needed for _ in locations))
 
         key = "mopup-days-needed-{}".format(self.pk)
         val = cache.get(key)
