@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test mspray.apps.main.utils module."""
 import codecs
+import datetime
 import json
 import os
 from unittest.mock import patch
@@ -398,10 +399,24 @@ class TestUtils(TestBase):
         spray_operator.team_leader = team_leader
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
+
+        # check that the there is no performance report for that spray_operator
         self.assertEqual(
             PerformanceReport.objects.filter(
                 spray_operator=spray_operator).count(), 0)
+
+        # test creating a performance report for that spray operator
         performance_report(spray_operator)
+        self.assertEqual(
+            PerformanceReport.objects.filter(
+                spray_operator=spray_operator).count(), 1)
+
+        # test that the record updates for that particular spray operator
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        team_leader = TeamLeader.objects.last()
+        spray_operator.team_leader = team_leader
+        performance_report(spray_operator)
+        self.assertEqual(spray_operator.team_leader, team_leader)
         self.assertEqual(
             PerformanceReport.objects.filter(
                 spray_operator=spray_operator).count(), 1)
