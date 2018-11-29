@@ -14,7 +14,8 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.utils import performance_report
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer, TLAPerformanceReportSerializer,
-    SprayOperatorPerformanceReportSerializer, PerformanceReportSerializer)
+    SprayOperatorPerformanceReportSerializer, PerformanceReportSerializer,
+    MDASprayOperatorSummaryView)
 from mspray.apps.main.tests.utils import data_setup
 
 
@@ -288,3 +289,15 @@ class TestPerformanceView(TestBase):
         self.assertEqual(response.context_data['data'], serializer.data)
         self.assertEqual(
             response.context_data['totals'], result)
+
+    def test_mda_spray_operator_summary_view(self):
+        """Test MDASprayOperatorSummaryView."""
+        data_setup()
+        sprayarea = Location.objects.get(name='Mtendere')
+
+        factory = RequestFactory()
+        request = factory.get("spray-operators/2/summary")
+
+        view = MDASprayOperatorSummaryView.as_view()
+        response = view(request, rhc_id=sprayarea.id)
+        self.assertEqual(response.status_code, 200)
