@@ -6,7 +6,7 @@ from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
 from mspray.apps.main.models import Location
-from mspray.apps.main.tests.utils import data_setup
+from mspray.apps.main.tests.utils import data_setup, load_spray_data
 from mspray.apps.main.views.mopup import HealthFacilityMopUpView, MopUpView
 
 
@@ -37,13 +37,28 @@ class TestMopUpView(TestCase):
     def test_health_facility_mopup_view(self):
         """Test HealthFacilityMopUpView"""
         data_setup()
+        load_spray_data()
+
         health_facility = Location.objects.filter(level="RHC").first()
-        spray_area = health_facility.get_children().first()
+        spray_area = health_facility.get_children().filter(
+            name='Akros_2').first()
+
         factory = RequestFactory()
         request = factory.get("/mopup-up/{}".format(health_facility.parent_id))
         view = HealthFacilityMopUpView.as_view()
         response = view(request, district=health_facility.parent_id)
-        self.assertContains(response, health_facility.name, 2, 200)
+
+        self.assertDictEqual(
+            {
+                'structures_on_ground': 9,
+                'visited_sprayed': 5,
+                'structures_to_mopup': 3,
+                'mopup_days_needed': 0.022222222222222223
+            },
+            response.context_data['totals']
+        )
+
+        self.assertContains(response, health_facility.name, 1, 200)
         self.assertContains(response, spray_area.name, 1, 200)
 
         self.assertEqual(
@@ -56,5 +71,12 @@ class TestMopUpView(TestCase):
         spray_area.save()
         view = HealthFacilityMopUpView.as_view()
         response = view(request, district=health_facility.parent_id)
-        self.assertContains(response, health_facility.name, 1, 200)
+        self.assertContains(response, health_facility.name, 0, 200)
         self.assertContains(response, spray_area.name, 0, 200)
+
+        self.assertDictEqual({
+            'structures_on_ground': 0,
+            'visited_sprayed': 0,
+            'structures_to_mopup': 0,
+            'mopup_days_needed': 0
+        }, response.context_data['totals'])
