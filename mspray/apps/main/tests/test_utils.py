@@ -18,6 +18,7 @@ from mspray.apps.main.models import (
     SprayOperatorDailySummary,
     TeamLeader,
     TeamLeaderAssistant,
+    PerformanceReport,
 )
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.tests.test_base import TestBase
@@ -34,6 +35,7 @@ from mspray.apps.main.utils import (
     link_sprayday_to_actors,
     remove_duplicate_sprayoperatordailysummary,
     remove_household_geom_duplicates,
+    performance_report,
 )
 from mspray.celery import app
 
@@ -383,3 +385,37 @@ class TestUtils(TestBase):
         self.assertEqual(get_spray_operator("01234").pk, operator.pk)
         self.assertEqual(get_spray_operator("1234").pk, operator.pk)
         self.assertIsNone(get_spray_operator("01234X"))
+
+    def test_spray_operator_performance_report(self):
+        """
+        Test that performance_report actually updates an existing record.
+
+        if it receives data for the same spray_operator in the same date
+        """
+        self._load_fixtures()
+        spray_operator = SprayOperator.objects.first()
+        team_leader = TeamLeader.objects.first()
+        spray_operator.team_leader = team_leader
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        spray_day.update(sprayable=True)
+
+        # check that the there is no performance report for that spray_operator
+        self.assertEqual(
+            PerformanceReport.objects.filter(
+                spray_operator=spray_operator).count(), 0)
+
+        # test creating a performance report for that spray operator
+        performance_report(spray_operator)
+        self.assertEqual(
+            PerformanceReport.objects.filter(
+                spray_operator=spray_operator).count(), 1)
+
+        # test that the record updates for that particular spray operator
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        team_leader = TeamLeader.objects.last()
+        spray_operator.team_leader = team_leader
+        report = performance_report(spray_operator)
+        self.assertEqual(report.team_leader, team_leader)
+        self.assertEqual(
+            PerformanceReport.objects.filter(
+                spray_operator=spray_operator).count(), 1)
