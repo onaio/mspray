@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test performance views module."""
 import datetime
+from collections import OrderedDict
 from django.test import RequestFactory, override_settings
 from mspray.apps.main.models import (
     Location, PerformanceReport,
@@ -293,23 +294,29 @@ class TestPerformanceView(TestBase):
     def test_mda_spray_operator_summary_view(self):
         """Test MDASprayOperatorSummaryView."""
         data_setup()
-        sprayarea = Location.objects.get(name='Mtendere')
+        self._load_fixtures()
+        rhc_name = Location.objects.get(name='Chadiza_104')
+        spray_operator = SprayOperator.objects.first()
+        team_leader = TeamLeader.objects.first()
+        spray_operator.team_leader = team_leader
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        spray_day.update(sprayable=True)
 
         factory = RequestFactory()
         request = factory.get("spray-operators/2/summary")
-
         view = MDASprayOperatorSummaryView.as_view()
-        response = view(request, rhc_id=sprayarea.id)
+        response = view(request, rhc_id=rhc_name.id)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
-            response.context_data['rhc_name'], "Mtendere")
+            response.context_data['rhc_name'], "Chadiza_104")
 
         queryset = SprayOperator.objects.raw(
-            MDA_SOP_PERFORMANCE_SQL, [sprayarea.id]
+            MDA_SOP_PERFORMANCE_SQL, [spray_operator.team_leader_assistant.id]
         )
         serializer = SprayOperatorPerformanceReportSerializer(
             queryset, many=True
         )
+
         result = {
             'other': 0,
             'refused': 0,
@@ -327,5 +334,81 @@ class TestPerformanceView(TestBase):
 
         self.assertEqual(
             response.context_data['totals'], result)
+        self.assertEqual(response.context_data['data'], serializer.data)
+
+    def test_mda_spray_operator_daily_view(self):
+        """Test MDASprayOperatorDailyView."""
+        data_setup()
+        self._load_fixtures()
+        rhc_name = Location.objects.get(name='John')
+        spray_operator = SprayOperator.objects.first()
+        team_leader = TeamLeader.objects.first()
+        spray_operator.team_leader = team_leader
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        spray_day.update(sprayable=True)
+
+        factory = RequestFactory()
+        request = factory.get("/mda/performance/spray-operators/33/42/daily")
+        view = MDASprayOperatorSummaryView.as_view()
+
+        performance_report(spray_operator)
+        report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
+        report1.found = 7
+        report1.reported_sprayed = 16
+        report1.reported_found = 22
+        report1.save()
+
+        report2 = PerformanceReport.objects.get(spray_operator=spray_operator)
+        report2.refused = 6
+        report2.save()
+
+        queryset = PerformanceReport.objects.filter(
+            spray_operator=spray_operator
+        ).order_by("spray_date")
+        serializer = PerformanceReportSerializer(queryset, many=True)
+
+        response = view(
+            request, rhc_id=rhc_name.id, spray_operator=spray_operator.id)
+        self.assertEqual(response.status_code, 200)
+
+        report_data = [OrderedDict([
+            ('spray_date', '2017-10-09'),
+            ('found', 7),
+            ('sprayed', 1),
+            ('refused', 6),
+            ('other', 0),
+            ('start_time', '16:22:17.598000'),
+            ('end_time', '16:38:08.129000'),
+            ('data_quality_check', False),
+            ('reported_found', 22),
+            ('reported_sprayed', 16),
+            ('sprayable', 7),
+            ('found_difference', 15),
+            ('sprayed_difference', 15),
+            ('date', datetime.date(2017, 10, 9)),
+            ('avg_start_time', datetime.time(16, 22, 17, 598000)),
+            ('avg_end_time', datetime.time(16, 38, 8, 129000)),
+            ('not_sprayed_total', 6),
+            ('sprayformid', '09.10.2001')
+        ])]
+
+        result = {
+            'other': 0,
+            'refused': 0,
+            'sprayed': 0,
+            'sprayable': 0,
+            'not_sprayable': 0,
+            'not_sprayed_total': 0,
+            'data_quality_check': True,
+            'found_difference': 0,
+            'sprayed_difference': 0,
+            'no_of_days_worked': 0,
+            'avg_structures_per_so': 0,
+            'avg_start_time': '',
+            'avg_end_time': ''}
+
         self.assertEqual(
-            response.context_data['data'], serializer.data)
+            response.context_data['rhc_name'], "John")
+        self.assertEqual(report_data, serializer.data)
+        self.assertEqual(
+            response.context_data['totals'], result)
