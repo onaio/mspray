@@ -44,10 +44,14 @@
             <tfoot>
                 <tr>
                     <td>Total</a></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
-                    <td class='numbers'></td>
+                    <td class='numbers'>{{ totals.health_centers_to_mopup }}</td>
+                    <td class='numbers'>{{ totals.spray_areas_to_mopup }}</td>
+                    <td class='numbers {{ totals.structures_to_mopup|structures_mopup_colour }}'>
+                        {{ totals.structures_to_mopup }}
+                    </td>
+                    <td class='numbers'>
+                        {{ totals.mopup_days_needed|mopup_days_needed }}
+                    </td>
                 </tr>
             </tfoot>
         </table>

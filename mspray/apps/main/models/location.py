@@ -15,6 +15,19 @@ from mptt.models import MPTTModel, TreeForeignKey
 from mspray.libs.common_tags import MOBILISED_FIELD, SENSITIZED_FIELD
 
 
+def get_mopup_locations(queryset):
+    """
+    Returns locations for mop-up
+    """
+    lower_bound = getattr(settings, 'MSPRAY_MOPUP_LOWER_BOUND', 0.2)
+    return [
+        location for location in queryset.iterator()
+        if location.structures_to_mopup > 0 and
+        location.structures_on_ground > 0 and
+        (location.visited_found / location.structures_on_ground) > lower_bound
+    ]
+
+
 class Location(MPTTModel, models.Model):  # pylint: disable=R0904
     """
     Location model
@@ -86,20 +99,35 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return cls.objects.get(name__iexact=name_or_code, level="district")
 
     @cached_property
+    def get_locations_list_to_mopup(self):
+        """
+        Get list of locations to mopup
+        """
+        locations = get_mopup_locations(
+            queryset=self.get_descendants().filter(level="ta", target=True))
+
+        return locations
+
+    @cached_property
     def health_centers_to_mopup(self):
         """Return the number of Health Centers to Mop-up
         """
-        return self.get_children().filter(level="RHC", target=True).count()
+        # get all the locations that need mopup
+        locations = self.get_locations_list_to_mopup
+
+        # get the RHCs using the locations above
+        rhcs = list(set([_.parent for _ in locations]))
+
+        return len(rhcs)
 
     @cached_property
     def spray_areas_to_mopup(self):
         """Return the number of Spray Areas to Mop-up
         """
-        return sum(
-            1
-            for l in self.get_descendants().filter(level="ta", target=True)
-            if l.structures_to_mopup > 0
-        )
+        # get all the locations that need mopup
+        locations = self.get_locations_list_to_mopup
+
+        return len(locations)
 
     @cached_property
     def structures_to_mopup(self):
@@ -109,10 +137,10 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         effectiveness.
         """
         if self.level != "ta":
-            return sum(
-                l.structures_to_mopup
-                for l in self.get_descendants().filter(level="ta", target=True)
-            )
+            # get all the locations that need mopup
+            locations = self.get_locations_list_to_mopup
+
+            return sum((_.structures_to_mopup for _ in locations))
 
         key = "structures-to-mopup-{}".format(self.pk)
         val = cache.get(key)
@@ -178,14 +206,10 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         """Return the number of structures to reach 90% divide by 45"""
         denominator = getattr(settings, "MOPUP_DAYS_DENOMINATOR", 45)
         if self.level != "ta":
-            return sum(
-                [
-                    l.mopup_days_needed
-                    for l in self.get_descendants().filter(
-                        level="ta", target=True
-                    )
-                ]
-            )
+            # get all the locations that need mopup
+            locations = self.get_locations_list_to_mopup
+
+            return sum((_.mopup_days_needed for _ in locations))
 
         key = "mopup-days-needed-{}".format(self.pk)
         val = cache.get(key)
@@ -195,8 +219,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         val = (
             self.household_set.filter(
                 Q(visited=False) | Q(visited__isnull=True)
-            ).count()
-            / denominator
+            ).count() / denominator
         )
         cache.set(key, val)
 
@@ -225,8 +248,8 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return val
 
         val = self.sprayday_queryset.filter(
-            Q(spraypoint__isnull=False)
-            | Q(spraypoint__isnull=True, was_sprayed=True),
+            Q(spraypoint__isnull=False) |
+            Q(spraypoint__isnull=True, was_sprayed=True),
             sprayable=True,
             household__isnull=True,
         ).count()
@@ -276,9 +299,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return val
 
         val = (
-            self.household_set.exclude(sprayable=False).count()
-            + self.new_structures
-            + self.duplicates
+            self.household_set.exclude(sprayable=False).count() +
+            self.new_structures +
+            self.duplicates
         )
         cache.set(key, val)
 
@@ -301,9 +324,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         ).count()
 
         val = (
-            self.household_set.filter(sprayable=True, visited=True).count()
-            + new_structures
-            + self.duplicates
+            self.household_set.filter(sprayable=True, visited=True).count() +
+            new_structures +
+            self.duplicates
         )
         cache.set(key, val)
 
@@ -382,9 +405,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
             return val
 
         val = (
-            self.household_set.filter(sprayable=True, visited=True).count()
-            + self.new_structures
-            + self.duplicates
+            self.household_set.filter(sprayable=True, visited=True).count() +
+            self.new_structures +
+            self.duplicates
         )
         cache.set(key, val)
 

@@ -32,18 +32,13 @@
             <tbody>
                 {% for location in mopup_locations %}
                     <tr>
-                        <td>
-                            {{ location.parent.name }}
-                        </td>
+                        <td> {{ location.parent.name }} </td>
                         {% if district.name == "Sinda" %}
-
-                        <td>{{ location.priority|default_if_none:"" }}</td>
-
+                            <td>{{ location.priority|default_if_none:"" }}</td>
                         {% endif %}
                         <td>
-                            <a href="{{ MDA_STATIC_PREFIX }}{% url 'target_area' location.parent_id location.pk  %}">
-                                <i class="fa fa-map"></i> {{ location.name }}
-                            </a>
+                            <a href="{% if 'mda' in request.get_full_path %}{{ MDA_STATIC_PREFIX }}{% endif %}{% url 'target_area' location.parent_id location.pk  %}">
+                                <i class="fa fa-map"></i> {{ location.name }} </a>
                         </td>
                         <td class='numbers'>
                             {{ location.structures_on_ground }}
@@ -82,23 +77,23 @@
                 <tr>
                     <td>Total</a></td>
                     {% if district.name == "Sinda" %}
-                    <td> location.priority </td>
+                    <td> {{ district.priority|default_if_none:"" }} </td>
                     {% endif %}
                     <td class='numbers'>{{ district.name }}</td>
-                    <td class='numbers'>{{ district.structures_on_ground }}</td>
-                    <td class='numbers'>{{ district.visited_sprayed }}</td>
-                    <td class='numbers {{ district.structures_to_mopup|structures_mopup_colour }}'>{{ district.structures_to_mopup }}</td>
-                    <td class='numbers'>{{ district.mopup_days_needed|mopup_days_needed }}</td>
+                    <td class='numbers'>{{ totals.structures_on_ground }}</td>
+                    <td class='numbers'>{{ totals.visited_sprayed }}</td>
+                    <td class='numbers {{ totals.structures_to_mopup|structures_mopup_colour }}'>{{ totals.structures_to_mopup }}</td>
+                    <td class='numbers'>{{ totals.mopup_days_needed|mopup_days_needed }}</td>
                     <td class='numbers'>
-                        {% calc_percentage district.visited_sprayed district.structures_on_ground as spray_effectiveness %}
+                        {% calc_percentage totals.visited_sprayed totals.structures_on_ground as spray_effectiveness %}
                         {{ spray_effectiveness }}
                     </td>
                     <td class='numbers'>
-                        {% calc_percentage district.visited_found district.structures_on_ground as found_coverage %}
+                        {% calc_percentage totals.visited_found totals.structures_on_ground as found_coverage %}
                         {{ found_coverage }}
                     </td>
                     <td class='numbers'>
-                        {% calc_percentage district.visited_sprayed district.visited_found as spray_coverage %}
+                        {% calc_percentage totals.visited_sprayed totals.visited_found as spray_coverage %}
                         {{ spray_coverage }}
                     </td>
                     <td class='numbers'></td>
