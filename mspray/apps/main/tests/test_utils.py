@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """Test mspray.apps.main.utils module."""
 import codecs
-import datetime
 import json
 import os
 from unittest.mock import patch
