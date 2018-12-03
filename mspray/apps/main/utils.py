@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+from django.contrib.gis.measure import D
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -21,29 +22,21 @@ from mspray.apps.main.models.household import Household, household_mapping
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.performance_report import PerformanceReport
-from mspray.apps.main.models.spray_day import (
-    DATA_ID_FIELD,
-    DATE_FIELD,
-    NON_STRUCTURE_GPS_FIELD,
-    STRUCTURE_GPS_FIELD,
-    SprayDay,
-    sprayday_mapping,
-)
+from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
+                                               NON_STRUCTURE_GPS_FIELD,
+                                               STRUCTURE_GPS_FIELD, SprayDay,
+                                               sprayday_mapping)
 from mspray.apps.main.models.spray_operator import (
-    DirectlyObservedSprayingForm,
-    SprayOperator,
-    SprayOperatorDailySummary,
-)
+    DirectlyObservedSprayingForm, SprayOperator, SprayOperatorDailySummary)
 from mspray.apps.main.models.spraypoint import SprayPoint, SprayPointView
 from mspray.apps.main.models.target_area import TargetArea, namibia_mapping
 from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
+from mspray.apps.main.tasks import (link_spraypoint_with_osm,
+                                    run_tasks_after_spray_data)
 from mspray.libs.ona import fetch_form_data
-from mspray.apps.main.tasks import (
-    link_spraypoint_with_osm,
-    run_tasks_after_spray_data,
-)
 from mspray.libs.utils.geom_buffer import with_metric_buffer
+from mspray.apps.main.tasks import add_unique_record
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -1291,3 +1284,44 @@ def get_spraydays_with_mismatched_locations():
     Gets all SprayDay objects where the geom is not within the location geom
     """
     return SprayDay.objects.exclude(geom__within=F("location__geom"))
+
+
+def link_new_structures_to_existing(target_area: object, distance: int = 10):
+    """
+    Attempts to match spray data that represents new structures to existing
+    households
+
+    :param target_area:  the target location in question
+    :param distance:  the distance, in metres used to match nearby structures
+    :return: None
+    """
+    sprays = SprayDay.objects.filter(location=target_area, household=None)
+    for sp in sprays:
+        sp.household = Household.objects.filter(
+            location=sp.location, geom__distance_lte=(sp.geom,
+                                                      D(m=distance))).first()
+        if sp.household:
+            # match the structure geo fields with the spray day
+            sp.geom = sp.household.geom
+            sp.bgeom = sp.household.bgeom
+
+            # match the structure osmid with the sprayday
+            sp.osmid = sp.household.hh_id
+
+            # add osmid to sprayday data
+            sp.data[f'{settings.MSPRAY_UNIQUE_FIELD}:way:id'] = sp.osmid
+
+            # remove the field that identifies this  spray data as belonging
+            # to a new structure
+            if sp.data.get("osmstructure:node:id"):
+                # we rename it so that we can be able to recover it
+                sp.data["original_osmstructure:node:id"] =\
+                    sp.data["osmstructure:node:id"]
+                # then we delete it
+                del sp.data["osmstructure:node:id"]
+
+            # finally create new spraypoints
+            sp.spraypoint_set.all().delete()
+            add_unique_record(sp.pk, sp.location_id)
+
+            sp.save()
