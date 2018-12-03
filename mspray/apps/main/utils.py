@@ -1320,8 +1320,8 @@ def link_new_structures_to_existing(target_area: object, distance: int = 10):
                 # then we delete it
                 del sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
 
+            sp.save()
+
             # finally create new spraypoints
             sp.spraypoint_set.all().delete()
             add_unique_record(sp.pk, sp.location_id)
-
-            sp.save()
