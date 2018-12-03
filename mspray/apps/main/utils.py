@@ -1313,12 +1313,12 @@ def link_new_structures_to_existing(target_area: object, distance: int = 10):
 
             # remove the field that identifies this  spray data as belonging
             # to a new structure
-            if sp.data.get("osmstructure:node:id"):
+            if sp.data.get(f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"):
                 # we rename it so that we can be able to recover it
-                sp.data["original_osmstructure:node:id"] =\
-                    sp.data["osmstructure:node:id"]
+                sp.data[f"original_{settings.MSPRAY_UNIQUE_FIELD}:node:id"] =\
+                    sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
                 # then we delete it
-                del sp.data["osmstructure:node:id"]
+                del sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
 
             # finally create new spraypoints
             sp.spraypoint_set.all().delete()
