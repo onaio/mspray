@@ -15,6 +15,7 @@ from django.db.models.expressions import RawSQL
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
+from django.contrib.gis.db.models.functions import Distance
 
 from dateutil.parser import parse
 
@@ -1297,9 +1298,11 @@ def link_new_structures_to_existing(target_area: object, distance: int = 10):
     """
     sprays = SprayDay.objects.filter(location=target_area, household=None)
     for sp in sprays:
-        sp.household = Household.objects.filter(
-            location=sp.location, geom__distance_lte=(sp.geom,
-                                                      D(m=distance))).first()
+        sp.household = Household.objects.annotate(
+            spray_distance=Distance('geom', sp.geom)).filter(
+                location=sp.location,
+                geom__distance_lte=(sp.geom, D(
+                    m=distance))).order_by('spray_distance').first()
         if sp.household:
             # match the structure geo fields with the spray day
             sp.geom = sp.household.geom
