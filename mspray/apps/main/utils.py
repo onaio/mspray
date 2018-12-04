@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+from django.contrib.gis.measure import D
 from django.contrib.gis.utils import LayerMapping
 from django.core.cache import cache
 from django.core.exceptions import ValidationError
@@ -14,6 +15,7 @@ from django.db.models.expressions import RawSQL
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
+from django.contrib.gis.db.models.functions import Distance
 
 from dateutil.parser import parse
 
@@ -38,12 +40,13 @@ from mspray.apps.main.models.spraypoint import SprayPoint, SprayPointView
 from mspray.apps.main.models.target_area import TargetArea, namibia_mapping
 from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
-from mspray.libs.ona import fetch_form_data
 from mspray.apps.main.tasks import (
     link_spraypoint_with_osm,
     run_tasks_after_spray_data,
 )
+from mspray.libs.ona import fetch_form_data
 from mspray.libs.utils.geom_buffer import with_metric_buffer
+from mspray.apps.main.tasks import add_unique_record
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -1137,7 +1140,9 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
                     except ValidationError as err:
                         log_writer(
                             "An error occurred while proccessing {}.".format(
-                                err))
+                                err
+                            )
+                        )
                         continue
                 else:
                     log_writer("Unable to process {} {}".format(dataid, rec))
@@ -1291,3 +1296,51 @@ def get_spraydays_with_mismatched_locations():
     Gets all SprayDay objects where the geom is not within the location geom
     """
     return SprayDay.objects.exclude(geom__within=F("location__geom"))
+
+
+def link_new_structures_to_existing(target_area: object, distance: int = 10):
+    """
+    Match new structures to existing households.
+
+    :param target_area:  the target location in question
+    :param distance:  the distance, in metres used to match nearby structures
+    """
+    sprays = SprayDay.objects.filter(location=target_area, household=None)
+    for sp in sprays:
+        sp.household = (
+            Household.objects.annotate(
+                spray_distance=Distance("geom", sp.geom)
+            )
+            .filter(
+                location=sp.location,
+                geom__distance_lte=(sp.geom, D(m=distance)),
+            )
+            .order_by("spray_distance")
+            .first()
+        )
+        if sp.household:
+            # match the structure geo fields with the spray day
+            sp.geom = sp.household.geom
+            sp.bgeom = sp.household.bgeom
+
+            # match the structure osmid with the sprayday
+            sp.osmid = sp.household.hh_id
+
+            # add osmid to sprayday data
+            sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:way:id"] = sp.osmid
+
+            # remove the field that identifies this  spray data as belonging
+            # to a new structure
+            if sp.data.get(f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"):
+                # we rename it so that we can be able to recover it
+                sp.data[
+                    f"original_{settings.MSPRAY_UNIQUE_FIELD}:node:id"
+                ] = sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
+                # then we delete it
+                del sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
+
+            sp.save()
+
+            # finally create new spraypoints
+            sp.spraypoint_set.all().delete()
+            add_unique_record(sp.pk, sp.location_id)

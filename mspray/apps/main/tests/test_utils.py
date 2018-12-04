@@ -36,6 +36,7 @@ from mspray.apps.main.utils import (
     remove_duplicate_sprayoperatordailysummary,
     remove_household_geom_duplicates,
     performance_report,
+    link_new_structures_to_existing,
 )
 from mspray.celery import app
 
@@ -43,7 +44,7 @@ SUBMISSION_DATA = [
     {
         "osm_building": "OSMWay-1760.osm",
         "today": "2015-09-21",
-        "_id": 3563261,
+        "_id": 3_563_261,
         "_attachments": [
             {
                 "mimetype": "text/xml",
@@ -52,8 +53,8 @@ SUBMISSION_DATA = [
                     "?filename=osm_experiments/attachments/OSMWay-1942.osm"
                 ),  # noqa
                 "filename": "osm_experiments/attachments/OSMWay-1942.osm",
-                "instance": 3542171,
-                "id": 583377,
+                "instance": 3_542_171,
+                "id": 583_377,
                 "xform": 79639,
             }
         ],
@@ -67,7 +68,7 @@ class TestUtils(TestBase):
 
     def setUp(self):
         TestBase.setUp(self)
-        app.conf.update(CELERY_ALWAYS_EAGER=True)
+        app.conf.update(CELERY_TASK_ALWAYS_EAGER=True)
 
     def test_avg_time_tuple(self):
         """Test avg_time_tuple() returns the avg time tuple.
@@ -279,7 +280,7 @@ class TestUtils(TestBase):
         hh_obj = Household.objects.first()
         # create a duplicate Household object
         duplicate_hh_obj = Household(
-            hh_id=-99999999,
+            hh_id=-99_999_999,
             geom=hh_obj.geom,
             bgeom=hh_obj.bgeom,
             location=hh_obj.location,
@@ -378,9 +379,7 @@ class TestUtils(TestBase):
 
     def test_get_spray_operator(self):
         """Test get_spray_operator function."""
-        operator = SprayOperator.objects.create(
-            name="Test", code="01234"
-        )
+        operator = SprayOperator.objects.create(name="Test", code="01234")
         self.assertIsInstance(operator, SprayOperator)
         self.assertEqual(get_spray_operator("01234").pk, operator.pk)
         self.assertEqual(get_spray_operator("1234").pk, operator.pk)
@@ -402,13 +401,19 @@ class TestUtils(TestBase):
         # check that the there is no performance report for that spray_operator
         self.assertEqual(
             PerformanceReport.objects.filter(
-                spray_operator=spray_operator).count(), 0)
+                spray_operator=spray_operator
+            ).count(),
+            0,
+        )
 
         # test creating a performance report for that spray operator
         performance_report(spray_operator)
         self.assertEqual(
             PerformanceReport.objects.filter(
-                spray_operator=spray_operator).count(), 1)
+                spray_operator=spray_operator
+            ).count(),
+            1,
+        )
 
         # test that the record updates for that particular spray operator
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
@@ -418,4 +423,57 @@ class TestUtils(TestBase):
         self.assertEqual(report.team_leader, team_leader)
         self.assertEqual(
             PerformanceReport.objects.filter(
-                spray_operator=spray_operator).count(), 1)
+                spray_operator=spray_operator
+            ).count(),
+            1,
+        )
+
+    def test_link_new_structures_to_existing(self):
+        """
+        Test that link_new_structures_to_existing works
+        """
+        # we essentially need to find a SprayDay object that was sent to us
+        # as a new structure but yet it is sufficiently close to an existing
+        # Household object.  Unfortunately as at 3/12/2018 this does not exist
+        # in any of our test fixtures and so we shall have to artificially
+        # create one
+
+        # first we load our test data
+        self._load_fixtures()
+
+        # next we find a suitable SprayDay object
+        sprayday = SprayDay.objects.first()
+
+        # lets change its details a little bit
+        # change osmstructure data to make it look like a new structure
+        if sprayday.data.get(f"{settings.MSPRAY_UNIQUE_FIELD}:way:id"):
+            del sprayday.data[f"{settings.MSPRAY_UNIQUE_FIELD}:way:id"]
+        sprayday.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"] = 1234
+
+        sprayday.osmid = -1337  # new structure-like osmid
+        sprayday.household = None  # no household
+        sprayday.save()  # save it!
+
+        # now link it
+        link_new_structures_to_existing(
+            target_area=sprayday.location, distance=5
+        )
+
+        sprayday.refresh_from_db()
+
+        self.assertEqual(
+            1234,
+            sprayday.data[f"original_{settings.MSPRAY_UNIQUE_FIELD}:node:id"],
+        )
+        self.assertIsNotNone(sprayday.household)
+        self.assertIsNone(
+            sprayday.data.get(f"{settings.MSPRAY_UNIQUE_FIELD}:node:id")
+        )
+        self.assertEqual(sprayday.geom, sprayday.household.geom)
+        self.assertEqual(sprayday.bgeom, sprayday.household.bgeom)
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
+        self.assertEqual(
+            sprayday.household.hh_id,
+            sprayday.data[f"{settings.MSPRAY_UNIQUE_FIELD}:way:id"],
+        )
+        self.assertEqual(1, sprayday.spraypoint_set.all().count())
