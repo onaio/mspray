@@ -20,7 +20,12 @@ class TestPerformanceView(TestBase):
     """Test performance view class."""
 
     def test_district_performance(self):
-        """Test district performance view."""
+        """Test district performance view.
+
+        This is done by confirming the data received in the response
+        context is being aggregated appropriately within the view
+        """
+        # first we load our test data
         data_setup()
         self._load_fixtures()
         rhc = Location.objects.get(name='Zemba')
@@ -30,10 +35,14 @@ class TestPerformanceView(TestBase):
         spray_operator.team_leader = team_leader
         spray_operator.rhc = rhc
         spray_operator.save()
-
+        # next we identify a SprayDay object for the spray operator
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
+        """
+        Create performance report objects from the different submissions
+        made by the particular sprayoperator.
+        """
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -57,6 +66,10 @@ class TestPerformanceView(TestBase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
 
+        """
+        Query obtains all data for the SprayOperator
+        including submissions made and passes this to the serializer
+        """
         queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
         import pdb; pdb.set_trace()
