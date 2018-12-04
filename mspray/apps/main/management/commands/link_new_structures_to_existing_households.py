@@ -22,9 +22,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         """Command arguments"""
         parser.add_argument(
-            'location_id',
-            type=int,
-            help=_('The location_id.'),
+            "location_id", type=int, help=_("The location_id.")
         )
 
     def handle(self, *args, **options):
@@ -32,13 +30,13 @@ class Command(BaseCommand):
         Actually do the work!
         """
         try:
-            pk = options['location_id']
+            pk = options["location_id"]
         except KeyError:
-            raise CommandError(_('Please specify field to use.'))
+            raise CommandError(_("Please specify field to use."))
         else:
             try:
                 location = Location.objects.get(pk=int(pk))
             except Location.DoesNotExist:
-                raise CommandError(_('Location does not exist.'))
+                raise CommandError(_("Location does not exist."))
             else:
                 link_new_structures_to_existing(target_area=location)

@@ -23,18 +23,27 @@ from mspray.apps.main.models.household import Household, household_mapping
 from mspray.apps.main.models.households_buffer import HouseholdsBuffer
 from mspray.apps.main.models.location import Location
 from mspray.apps.main.models.performance_report import PerformanceReport
-from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
-                                               NON_STRUCTURE_GPS_FIELD,
-                                               STRUCTURE_GPS_FIELD, SprayDay,
-                                               sprayday_mapping)
+from mspray.apps.main.models.spray_day import (
+    DATA_ID_FIELD,
+    DATE_FIELD,
+    NON_STRUCTURE_GPS_FIELD,
+    STRUCTURE_GPS_FIELD,
+    SprayDay,
+    sprayday_mapping,
+)
 from mspray.apps.main.models.spray_operator import (
-    DirectlyObservedSprayingForm, SprayOperator, SprayOperatorDailySummary)
+    DirectlyObservedSprayingForm,
+    SprayOperator,
+    SprayOperatorDailySummary,
+)
 from mspray.apps.main.models.spraypoint import SprayPoint, SprayPointView
 from mspray.apps.main.models.target_area import TargetArea, namibia_mapping
 from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
-from mspray.apps.main.tasks import (link_spraypoint_with_osm,
-                                    run_tasks_after_spray_data)
+from mspray.apps.main.tasks import (
+    link_spraypoint_with_osm,
+    run_tasks_after_spray_data,
+)
 from mspray.libs.ona import fetch_form_data
 from mspray.libs.utils.geom_buffer import with_metric_buffer
 from mspray.apps.main.tasks import add_unique_record
@@ -1131,7 +1140,9 @@ def sync_missing_data(formid, ModelClass, sync_func, log_writer):
                     except ValidationError as err:
                         log_writer(
                             "An error occurred while proccessing {}.".format(
-                                err))
+                                err
+                            )
+                        )
                         continue
                 else:
                     log_writer("Unable to process {} {}".format(dataid, rec))
@@ -1298,11 +1309,17 @@ def link_new_structures_to_existing(target_area: object, distance: int = 10):
     """
     sprays = SprayDay.objects.filter(location=target_area, household=None)
     for sp in sprays:
-        sp.household = Household.objects.annotate(
-            spray_distance=Distance('geom', sp.geom)).filter(
+        sp.household = (
+            Household.objects.annotate(
+                spray_distance=Distance("geom", sp.geom)
+            )
+            .filter(
                 location=sp.location,
-                geom__distance_lte=(sp.geom, D(
-                    m=distance))).order_by('spray_distance').first()
+                geom__distance_lte=(sp.geom, D(m=distance)),
+            )
+            .order_by("spray_distance")
+            .first()
+        )
         if sp.household:
             # match the structure geo fields with the spray day
             sp.geom = sp.household.geom
@@ -1312,14 +1329,15 @@ def link_new_structures_to_existing(target_area: object, distance: int = 10):
             sp.osmid = sp.household.hh_id
 
             # add osmid to sprayday data
-            sp.data[f'{settings.MSPRAY_UNIQUE_FIELD}:way:id'] = sp.osmid
+            sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:way:id"] = sp.osmid
 
             # remove the field that identifies this  spray data as belonging
             # to a new structure
             if sp.data.get(f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"):
                 # we rename it so that we can be able to recover it
-                sp.data[f"original_{settings.MSPRAY_UNIQUE_FIELD}:node:id"] =\
-                    sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
+                sp.data[
+                    f"original_{settings.MSPRAY_UNIQUE_FIELD}:node:id"
+                ] = sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
                 # then we delete it
                 del sp.data[f"{settings.MSPRAY_UNIQUE_FIELD}:node:id"]
 
