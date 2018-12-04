@@ -115,37 +115,36 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         num_of_districts = round(districts.count())
         num_of_succes_rates = round(len([i for i in serializer.data]))
         totals = {
-            "other": sum([i["other"] for i in serializer.data]),
-            "refused": sum([i["refused"] for i in serializer.data]),
-            "sprayed": sum([i["sprayed"] for i in serializer.data]),
-            "sprayable": sum([i["sprayable"] for i in serializer.data]),
+            "other": sum(i["other"] for i in serializer.data),
+            "refused": sum(i["refused"] for i in serializer.data),
+            "sprayed": sum(i["sprayed"] for i in serializer.data),
+            "sprayable": sum(i["sprayable"] for i in serializer.data),
             "not_sprayable": 0,
-            "not_eligible": sum([i["not_eligible"] for i in serializer.data]),
+            "not_eligible": sum(i["not_eligible"] for i in serializer.data),
             "not_sprayed_total": sum(
-                [i["not_sprayed_total"] for i in serializer.data]
+                i["not_sprayed_total"] for i in serializer.data
             ),
             "data_quality_check": all(
-                [i["data_quality_check"] for i in serializer.data]
+                i["data_quality_check"] for i in serializer.data
             ),
             "found_difference": sum(
-                [i["found_difference"] for i in serializer.data]
+                i["found_difference"] for i in serializer.data
             ),
             "sprayed_difference": sum(
-                [i["sprayed_difference"] for i in serializer.data]
+                i["sprayed_difference"] for i in serializer.data
             ),
             "pre_season_target": sum(
-                [i["location"].pre_season_target for i in serializer.data]
+                i["location"].pre_season_target for i in serializer.data
             ),
-            "houses": sum([i["location"].structures for i in serializer.data]),
+            "houses": sum(i["location"].structures for i in serializer.data),
             "no_of_days_worked": sum(
-                [i["no_of_days_worked"] for i in serializer.data]
+                i["no_of_days_worked"] for i in serializer.data
             ),
         }
         totals["avg_structures_per_so"] = (
-            (
-                sum([i["avg_structures_per_so"] for i in serializer.data])
-                / num_of_districts
-            )
+            (sum(
+                i["avg_structures_per_so"]
+                for i in serializer.data) / num_of_districts)
             if num_of_districts
             else 0
         )
@@ -165,9 +164,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         )
         totals["success_rate"] = (
             (
-                sum([i["success_rate"] for i in serializer.data])
-                / num_of_succes_rates
-            )
+                sum([i["success_rate"]
+                    for i in serializer.data]) / num_of_succes_rates)
             if num_of_succes_rates
             else 0
         )
