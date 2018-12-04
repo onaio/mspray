@@ -1300,12 +1300,10 @@ def get_spraydays_with_mismatched_locations():
 
 def link_new_structures_to_existing(target_area: object, distance: int = 10):
     """
-    Attempts to match spray data that represents new structures to existing
-    households
+    Match new structures to existing households.
 
     :param target_area:  the target location in question
     :param distance:  the distance, in metres used to match nearby structures
-    :return: None
     """
     sprays = SprayDay.objects.filter(location=target_area, household=None)
     for sp in sprays:
