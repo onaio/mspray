@@ -294,19 +294,30 @@ class TestPerformanceView(TestBase):
             response.context_data['totals'], result)
 
     def test_mda_spray_operator_summary_view(self):
-        """Test MDASprayOperatorSummaryView."""
+        """Test MDASprayOperatorSummaryView.
+
+        This is done by confirming the data received in the response
+        context is being aggregated appropriately within the view
+        """
+        # first we load our test data
         data_setup()
         self._load_fixtures()
         rhc = Location.objects.get(name='Chadiza_104')
         spray_operator = SprayOperator.objects.first()
         team_leader = TeamLeader.objects.first()
+        # next we identify a SprayDay object for the spray operator
         spray_operator.team_leader = team_leader
         spray_operator.rhc = rhc
         spray_operator.save()
 
+        # update spray day object for the particular spray operator
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
+        """
+        Create performance report objects from the submissions made
+        by the particular sprayoperator.
+        """
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -331,6 +342,10 @@ class TestPerformanceView(TestBase):
         self.assertEqual(
             response.context_data['rhc_name'], "Chadiza_104")
 
+        """
+        Query obtains all data for the SprayOperator
+        including submissions made and passes this to the serializer
+        """
         queryset = SprayOperator.objects.raw(
             MDA_SOP_PERFORMANCE_SQL, [rhc.id]
         )
@@ -358,7 +373,12 @@ class TestPerformanceView(TestBase):
         self.assertEqual(response.context_data['data'], serializer.data)
 
     def test_mda_spray_operator_daily_view(self):
-        """Test MDASprayOperatorDailyView."""
+        """Test MDASprayOperatorDailyView.
+
+        This is done by confirming the data received in the response
+        context is being aggregated appropriately within the view
+        """
+        # first we load our test data
         data_setup()
         self._load_fixtures()
         rhc = Location.objects.get(name='John')
@@ -366,6 +386,7 @@ class TestPerformanceView(TestBase):
         team_leader = TeamLeader.objects.first()
         spray_operator.team_leader = team_leader
         spray_operator.save()
+        # next we identify a SprayDay object for the spray operator
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
@@ -373,6 +394,10 @@ class TestPerformanceView(TestBase):
         request = factory.get("/mda/performance/spray-operators/33/42/daily")
         view = MDASprayOperatorDailyView.as_view()
 
+        """
+        Create performance report objects from the submissions made
+        by the particular sprayoperator.
+        """
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -388,6 +413,10 @@ class TestPerformanceView(TestBase):
         report2.reported_sprayed = 6
         report2.save()
 
+        """
+        Query obtains all data for the SprayOperator
+        including submissions made and passes this to the serializer
+        """
         queryset = PerformanceReport.objects.filter(
             spray_operator=spray_operator
         ).order_by("spray_date")
@@ -419,6 +448,7 @@ class TestPerformanceView(TestBase):
 
     def test_rhc_performance_view(self):
         """Test RHCPerformanceView."""
+        # first we load our test data
         data_setup()
         self._load_fixtures()
         rhc = Location.objects.get(name='Zemba')
@@ -428,9 +458,14 @@ class TestPerformanceView(TestBase):
         spray_operator.team_leader = team_leader
         spray_operator.rhc = rhc
         spray_operator.save()
+        # next we identify a SprayDay object for the spray operator
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
+        """
+        Create performance report objects from the submissions made
+        by the particular sprayoperator.
+        """
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -454,6 +489,10 @@ class TestPerformanceView(TestBase):
         response = view(request, district_id=district.id)
         self.assertEqual(response.status_code, 200)
 
+        """
+        Query obtains all data for the SprayOperator,
+        including submissions made and passes this to the serializer
+        """
         queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [district.id])
         serializer = RHCPerformanceReportSerializer(queryset, many=True)
 
