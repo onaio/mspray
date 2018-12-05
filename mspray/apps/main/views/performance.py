@@ -116,36 +116,37 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         num_of_districts = round(districts.count())
         num_of_succes_rates = round(len([i for i in serializer.data]))
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
-            "not_eligible": sum(i["not_eligible"] for i in serializer.data),
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "pre_season_target": sum(
-                i["location"].pre_season_target for i in serializer.data
+                (i["location"].pre_season_target for i in serializer.data)
             ),
-            "houses": sum(i["location"].structures for i in serializer.data),
+            "houses": sum((i["location"].structures for i in serializer.data)),
             "no_of_days_worked": sum(
-                i["no_of_days_worked"] for i in serializer.data
+                (i["no_of_days_worked"] for i in serializer.data)
             ),
         }
         totals["avg_structures_per_so"] = (
             (sum(
-                i["avg_structures_per_so"]
-                for i in serializer.data) / num_of_districts)
+                (
+                    i["avg_structures_per_so"]
+                    for i in serializer.data)) / num_of_districts)
             if num_of_districts
             else 0
         )
@@ -165,8 +166,8 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         )
         totals["success_rate"] = (
             (
-                sum([i["success_rate"]
-                    for i in serializer.data]) / num_of_succes_rates)
+                sum((i["success_rate"]
+                    for i in serializer.data)) / num_of_succes_rates)
             if num_of_succes_rates
             else 0
         )
@@ -201,34 +202,36 @@ class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
         num_of_succes_rates = round(len([i for i in serializer.data]))
         totals = {
             "other":
-            sum(i["other"] for i in serializer.data),
+            sum((i["other"] for i in serializer.data)),
             "refused":
-            sum(i["refused"] for i in serializer.data),
+            sum((i["refused"] for i in serializer.data)),
             "sprayed":
-            sum(i["sprayed"] for i in serializer.data),
+            sum((i["sprayed"] for i in serializer.data)),
             "sprayable":
-            sum(i["sprayable"] for i in serializer.data),
+            sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable":
             0,
             "not_eligible":
-            sum(i["not_eligible"] for i in serializer.data),
+            sum((i["not_eligible"] for i in serializer.data)),
             "not_sprayed_total":
-            sum(i["not_sprayed_total"] for i in serializer.data),
+            sum((i["not_sprayed_total"] for i in serializer.data)),
             "data_quality_check":
-            all(i["data_quality_check"] for i in serializer.data),
+            all((i["data_quality_check"] for i in serializer.data)),
             "found_difference":
-            sum(i["found_difference"] for i in serializer.data),
+            sum((i["found_difference"] for i in serializer.data)),
             "sprayed_difference":
-            sum(i["sprayed_difference"] for i in serializer.data),
+            sum((i["sprayed_difference"] for i in serializer.data)),
             "houses":
-            sum(i["location"].structures for i in serializer.data),
+            sum((i["location"].structures for i in serializer.data)),
             "no_of_days_worked":
-            sum(i["no_of_days_worked"] for i in serializer.data),
+            sum((i["no_of_days_worked"] for i in serializer.data)),
         }
         totals["avg_structures_per_so"] = ((
             sum(
-                i["avg_structures_per_so"]
-                for i in serializer.data) / num_of_rhcs) if num_of_rhcs else 0)
+                (
+                    i["avg_structures_per_so"]
+                    for i in serializer.data)) / num_of_rhcs)
+            if num_of_rhcs else 0)
         totals["avg_start_time"] = average_time([
             i["avg_start_time"] for i in serializer.data
             if i["avg_start_time"] != ""
@@ -239,8 +242,9 @@ class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
         ])
         totals["success_rate"] = ((
             sum(
-                i["success_rate"]
-                for i in serializer.data) / num_of_succes_rates)
+                (
+                    i["success_rate"]
+                    for i in serializer.data)) / num_of_succes_rates)
             if num_of_succes_rates else 0)
 
         context.update({"data": serializer.data, "totals": totals})
@@ -270,31 +274,32 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         serializer = TLAPerformanceReportSerializer(queryset, many=True)
 
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
-            "not_eligible": sum(i["not_eligible"] for i in serializer.data),
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "no_of_days_worked": sum(
-                i["no_of_days_worked"] for i in serializer.data
+                (i["no_of_days_worked"] for i in serializer.data)
             ),
             "avg_structures_per_so": (
                 sum(
-                    i["avg_structures_per_so"]
-                    for i in serializer.data) / round(
+                    (
+                        i["avg_structures_per_so"]
+                        for i in serializer.data)) / round(
                     TeamLeaderAssistant.objects.filter(
                         location=district
                     ).count() or 1
@@ -356,28 +361,28 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             queryset, many=True
         )
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "no_of_days_worked": sum(
-                i["no_of_days_worked"] for i in serializer.data
+                (i["no_of_days_worked"] for i in serializer.data)
             ),
             "avg_structures_per_so": sum(
-                i["avg_structures_per_so"] for i in serializer.data
+                (i["avg_structures_per_so"] for i in serializer.data)
             ),
             "avg_start_time": average_time(
                 [i["avg_start_time"] for i in serializer.data]
@@ -427,22 +432,22 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         ).order_by("spray_date")
         serializer = PerformanceReportSerializer(queryset, many=True)
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "avg_start_time": average_time(
                 [i["avg_start_time"] for i in serializer.data]
@@ -490,28 +495,28 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             queryset, many=True
         )
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "no_of_days_worked": sum(
-                i["no_of_days_worked"] for i in serializer.data
+                (i["no_of_days_worked"] for i in serializer.data)
             ),
             "avg_structures_per_so": sum(
-                i["avg_structures_per_so"] for i in serializer.data
+                (i["avg_structures_per_so"] for i in serializer.data)
             ),
             "avg_start_time": average_time(
                 [i["avg_start_time"] for i in serializer.data]
@@ -554,22 +559,22 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
         ).order_by("spray_date")
         serializer = PerformanceReportSerializer(queryset, many=True)
         totals = {
-            "other": sum(i["other"] for i in serializer.data),
-            "refused": sum(i["refused"] for i in serializer.data),
-            "sprayed": sum(i["sprayed"] for i in serializer.data),
-            "sprayable": sum(i["sprayable"] for i in serializer.data),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
             "not_sprayed_total": sum(
-                i["not_sprayed_total"] for i in serializer.data
+                (i["not_sprayed_total"] for i in serializer.data)
             ),
             "data_quality_check": all(
-                i["data_quality_check"] for i in serializer.data
+                (i["data_quality_check"] for i in serializer.data)
             ),
             "found_difference": sum(
-                i["found_difference"] for i in serializer.data
+                (i["found_difference"] for i in serializer.data)
             ),
             "sprayed_difference": sum(
-                i["sprayed_difference"] for i in serializer.data
+                (i["sprayed_difference"] for i in serializer.data)
             ),
             "avg_start_time": average_time(
                 [i["avg_start_time"] for i in serializer.data]

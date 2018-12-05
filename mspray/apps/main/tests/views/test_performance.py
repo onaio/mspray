@@ -41,10 +41,9 @@ class TestPerformanceView(TestBase):
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
-        """
-        Create performance report objects from the different submissions
-        made by the particular sprayoperator.
-        """
+        # Create performance report objects from the submissions made
+        # by the particular sprayoperator.
+
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -68,10 +67,9 @@ class TestPerformanceView(TestBase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
 
-        """
-        Query obtains all data for the SprayOperator
-        including submissions made and passes this to the serializer
-        """
+        # Query obtains all data for the SprayOperator
+        # including submissions made and passes this to the serializer
+
         queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
 
@@ -94,10 +92,9 @@ class TestPerformanceView(TestBase):
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
-        """
-        Create performance report objects from the different submissions
-        made by the particular sprayoperator.
-        """
+        # Create performance report objects from the submissions made
+        # by the particular sprayoperator.
+
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -166,10 +163,9 @@ class TestPerformanceView(TestBase):
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
-        """
-        Create performance report objects from the submissions made
-        by the particular sprayoperator.
-        """
+        # Create performance report objects from the submissions made
+        # by the particular sprayoperator.
+
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -194,10 +190,9 @@ class TestPerformanceView(TestBase):
 
         self.assertEqual(response.status_code, 200)
 
-        """
-        Query obtains all data for the SprayOperator
-        including submissions made and passes this to the serializer
-        """
+        # Query obtains all data for the SprayOperator
+        # including submissions made and passes this to the serializer
+
         queryset = SprayOperator.objects.raw(
             SOP_PERFORMANCE_SQL, [spray_operator.team_leader_assistant.id]
         )
@@ -246,10 +241,9 @@ class TestPerformanceView(TestBase):
             "/performance/spray-operators/2939/102/538/daily")
         view = SprayOperatorDailyView.as_view()
 
-        """
-        Create performance report objects from the submissions made
-        by the particular sprayoperator.
-        """
+        # Create performance report objects from the submissions made
+        # by the particular sprayoperator.
+
         performance_report(spray_operator)
         report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
         report1.found = 7
@@ -265,10 +259,9 @@ class TestPerformanceView(TestBase):
         report2.reported_sprayed = 6
         report2.save()
 
-        """
-        Query obtains all data for the SprayOperator
-        including submissions made and passes this to the serializer
-        """
+        # Query obtains all data for the SprayOperator
+        # including submissions made and passes this to the serializer
+
         queryset = PerformanceReport.objects.filter(
             spray_operator=spray_operator
         ).order_by("spray_date")
