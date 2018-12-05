@@ -19,7 +19,7 @@ class TestPerformanceSerializer(TestBase):
         """Test RHCPerformanceReportSerializer."""
         data_setup()
         self._load_fixtures()
-        rhc = Location.objects.get(name='Zemba')
+        rhc = Location.objects.get(name='Bwanunkha')
         district = rhc.parent
         spray_operator = SprayOperator.objects.first()
         team_leader = TeamLeader.objects.first()
@@ -51,6 +51,7 @@ class TestPerformanceSerializer(TestBase):
         report2.reported_sprayed = 6
         report1.district = district
         report2.save()
+
         queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [district.id])
         serializer_instance = RHCPerformanceReportSerializer(
             queryset, many=True)
@@ -78,3 +79,9 @@ class TestPerformanceSerializer(TestBase):
 
         self.assertEqual(set(expected_fields),
                          set(list(serializer_instance.data[0].keys())))
+        self.assertEqual(19, serializer_instance.data[0]['sprayable'])
+        self.assertEqual(
+            10.526315789473685, serializer_instance.data[0]['success_rate'])
+        self.assertEqual(0, serializer_instance.data[0]['sprayed_difference'])
+        self.assertEqual(
+            9.5, serializer_instance.data[0]['avg_structures_per_so'])
