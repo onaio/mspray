@@ -72,6 +72,7 @@ class IsPerformanceViewMixin(SiteNameMixin):  # pylint: disable=R0903
     """Set context variable performance_tables to True."""
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super(IsPerformanceViewMixin, self).get_context_data(
             **kwargs
         )
@@ -88,14 +89,13 @@ class DefinitionAndConditionView(IsPerformanceViewMixin, TemplateView):
 
 # pylint: disable=too-many-ancestors
 class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
-    """
-    District perfomance view
-    """
+    """District perfomance view."""
 
     model = Location
     template_name = "performance.html"
 
     def get_queryset(self):
+        """Obtain the queryset."""
         queryset = (
             super(DistrictPerfomanceView, self)
             .get_queryset()
@@ -105,6 +105,7 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         return queryset.filter(parent=None).order_by("name")
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super(DistrictPerfomanceView, self).get_context_data(
             **kwargs
         )
@@ -177,20 +178,21 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
 
 
 class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
-    """
-    RHC performance view
-    """
+    """RHC performance view."""
+
     model = Location
     template_name = "mda/rhc-performance.html"
     slug_field = "id"
     slug_url_kwarg = "district_id"
 
     def get_queryset(self):
+        """Obtain the queryset."""
         queryset = super().get_queryset().filter(target=True)
 
         return queryset.filter(parent=None).order_by("name")
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super().get_context_data(**kwargs)
         rhcs = Location.objects.filter(parent=self.object).order_by("name")
         queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [self.object.id])
@@ -249,15 +251,14 @@ class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
 
 # pylint: disable=too-many-ancestors
 class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
-    """
-    TeamLeaderAssistant performance view.
-    """
+    """TeamLeaderAssistant performance view."""
 
     model = Location
     slug_field = "id"
     template_name = "team-leaders.html"
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super(TeamLeadersPerformanceView, self).get_context_data(
             **kwargs
         )
@@ -269,34 +270,34 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
         serializer = TLAPerformanceReportSerializer(queryset, many=True)
 
         totals = {
-            "other": sum([i["other"] for i in serializer.data]),
-            "refused": sum([i["refused"] for i in serializer.data]),
-            "sprayed": sum([i["sprayed"] for i in serializer.data]),
-            "sprayable": sum([i["sprayable"] for i in serializer.data]),
+            "other": sum(i["other"] for i in serializer.data),
+            "refused": sum(i["refused"] for i in serializer.data),
+            "sprayed": sum(i["sprayed"] for i in serializer.data),
+            "sprayable": sum(i["sprayable"] for i in serializer.data),
             "not_sprayable": 0,
-            "not_eligible": sum([i["not_eligible"] for i in serializer.data]),
+            "not_eligible": sum(i["not_eligible"] for i in serializer.data),
             "not_sprayed_total": sum(
-                [i["not_sprayed_total"] for i in serializer.data]
+                i["not_sprayed_total"] for i in serializer.data
             ),
             "data_quality_check": all(
-                [i["data_quality_check"] for i in serializer.data]
+                i["data_quality_check"] for i in serializer.data
             ),
             "found_difference": sum(
-                [i["found_difference"] for i in serializer.data]
+                i["found_difference"] for i in serializer.data
             ),
             "sprayed_difference": sum(
-                [i["sprayed_difference"] for i in serializer.data]
+                i["sprayed_difference"] for i in serializer.data
             ),
             "no_of_days_worked": sum(
-                [i["no_of_days_worked"] for i in serializer.data]
+                i["no_of_days_worked"] for i in serializer.data
             ),
             "avg_structures_per_so": (
-                sum([i["avg_structures_per_so"] for i in serializer.data])
-                / round(
+                sum(
+                    i["avg_structures_per_so"]
+                    for i in serializer.data) / round(
                     TeamLeaderAssistant.objects.filter(
                         location=district
-                    ).count()
-                    or 1
+                    ).count() or 1
                 )
             ),
             "avg_start_time": average_time(
@@ -330,15 +331,14 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
 
 # pylint: disable=too-many-ancestors
 class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
-    """
-    Spray Operator summary performance page.
-    """
+    """Spray Operator summary performance page."""
 
     template_name = "spray-operator-summary.html"
     model = Location
     slug_field = "id"
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super(SprayOperatorSummaryView, self).get_context_data(
             **kwargs
         )
@@ -406,15 +406,14 @@ class SprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
 # pylint: disable=too-many-ancestors
 class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
-    """
-    Spray Operator Daily view.
-    """
+    """Spray Operator Daily view."""
 
     template_name = "spray-operator-daily.html"
     model = Location
     slug_field = "id"
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super(SprayOperatorDailyView, self).get_context_data(
             **kwargs
         )
@@ -471,9 +470,7 @@ class SprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
 
 # pylint: disable=too-many-ancestors
 class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
-    """
-    Spray Operator summary performance page.
-    """
+    """Spray Operator summary performance page."""
 
     template_name = "mda/spray-operator-summary.html"
     model = Location
@@ -481,6 +478,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
     slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super().get_context_data(**kwargs)
         rhc = context["object"]
 
@@ -522,7 +520,6 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 [i["avg_end_time"] for i in serializer.data]
             ),
         }
-        import pdb; pdb.set_trace()
         context.update(
             {
                 "data": serializer.data,
@@ -538,9 +535,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
 
 # pylint: disable=too-many-ancestors
 class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
-    """
-    Spray Operator Daily view.
-    """
+    """Spray Operator Daily view."""
 
     template_name = "mda/spray-operator-daily.html"
     model = Location
@@ -548,6 +543,7 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
     slug_url_kwarg = "rhc_id"
 
     def get_context_data(self, **kwargs):
+        """Obtain context data."""
         context = super().get_context_data(**kwargs)
         rhc = context["object"]
 
