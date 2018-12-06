@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-"""
-Mobilisation view.
-"""
-
+"""Mobilisation view."""
+import logging
+from django.db.utils import IntegrityError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mspray.apps.main.models.mobilisation import create_mobilisation_visit
+
+logger = logging.getLogger(__name__)
 
 
 class MobilisationView(APIView):
@@ -15,5 +16,9 @@ class MobilisationView(APIView):
 
     def post(self, request):
         """Handle a Mobilisation submission."""
-        create_mobilisation_visit(request.data)
-        return Response(status=status.HTTP_201_CREATED)
+        try:
+            create_mobilisation_visit(request.data)
+            return Response(status=status.HTTP_201_CREATED)
+        except IntegrityError:
+            logger.exception("Mobilisation submission already exists.")
+            return Response(status=status.HTTP_202_CREATED)
