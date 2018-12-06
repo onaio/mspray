@@ -79,6 +79,7 @@ class TestPerformanceSerializer(TestBase):
 
         self.assertEqual(set(expected_fields),
                          set(list(serializer_instance.data[0].keys())))
+        self.assertEqual(rhc.id, serializer_instance.data[0]['id'])
         self.assertEqual(19, serializer_instance.data[0]['sprayable'])
         self.assertEqual(
             10.526315789473685, serializer_instance.data[0]['success_rate'])
