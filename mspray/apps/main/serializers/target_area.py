@@ -262,10 +262,10 @@ def get_spray_data(obj, context):
     #    week_number = int(timezone.now().strftime('%W'))
     if week_number:
         kwargs["spray_date__week__lte"] = week_number
-    qs = loc.sprayday_set.filter(**kwargs)
+    queryset = loc.sprayday_set.filter(**kwargs)
 
     if spray_date:
-        qs = qs.filter(spray_date__lte=spray_date)
+        queryset = queryset.filter(spray_date__lte=spray_date)
 
     cursor = connection.cursor()
 
@@ -551,8 +551,7 @@ class TargetAreaMixin(object):
         if obj:
             level = obj["level"] if isinstance(obj, dict) else obj.level
             if level == TA_LEVEL:
-                data = get_spray_data(obj, self.context)
-                visited_found = data.get("found") or 0
+                visited_found = self.get_found(obj)
             else:
                 visited_found = count_key_if_percent(
                     obj, "sprayed", 20, self.context
@@ -563,11 +562,22 @@ class TargetAreaMixin(object):
     def get_found(self, obj):
         if obj:
             level = obj["level"] if isinstance(obj, dict) else obj.level
+            location = (
+                Location.objects.get(pk=obj.get("pk"))
+                if isinstance(obj, dict)
+                else obj
+            )
             data = get_spray_data(obj, self.context)
-            if level == TA_LEVEL:
-                found = data.get("found") or 0
+            request = self.context.get("request")
+            spray_date = parse_spray_date(request) if request else None
+            week_number = self.context.get("week_number")
+            if spray_date or week_number:
+                if level == TA_LEVEL:
+                    found = data.get("found") or 0
+                else:
+                    found = data.count()
             else:
-                found = data.count()
+                found = location.visited_found
 
             return found
 
@@ -683,27 +693,39 @@ class TargetAreaMixin(object):
         return 0
 
     def get_structures(self, obj):
+        """Return structures on ground in location."""
         structures = (
             obj.get("structures") if isinstance(obj, dict) else obj.structures
         )
-        data = get_spray_data(obj, self.context)
         level = obj["level"] if isinstance(obj, dict) else obj.level
-        if level == TA_LEVEL:
-            not_sprayable = data.get("not_sprayable") or 0
-            new_structures = data.get("new_structures") or 0
-            structures -= not_sprayable
-            structures += new_structures + count_duplicates(
-                obj, was_sprayed=True
-            )
+        location = (
+            Location.objects.get(pk=obj.get("pk"))
+            if isinstance(obj, dict)
+            else obj
+        )
+        data = get_spray_data(obj, self.context)
+        request = self.context.get("request")
+        spray_date = parse_spray_date(request) if request else None
+        week_number = self.context.get("week_number")
+        if spray_date or week_number:
+            if level == TA_LEVEL:
+                not_sprayable = data.get("not_sprayable") or 0
+                new_structures = data.get("new_structures") or 0
+                structures -= not_sprayable
+                structures += new_structures + count_duplicates(
+                    obj, was_sprayed=True
+                )
+            else:
+                not_sprayable = (
+                    data.aggregate(r=Sum("not_sprayable")).get("r") or 0
+                )
+                new_structures = (
+                    data.aggregate(r=Sum("new_structures")).get("r") or 0
+                )
+                structures -= not_sprayable
+                structures += new_structures
         else:
-            not_sprayable = (
-                data.aggregate(r=Sum("not_sprayable")).get("r") or 0
-            )
-            new_structures = (
-                data.aggregate(r=Sum("new_structures")).get("r") or 0
-            )
-            structures -= not_sprayable
-            structures += new_structures
+            structures = location.structures_on_ground
 
         return structures
 

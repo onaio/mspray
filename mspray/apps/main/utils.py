@@ -669,7 +669,23 @@ def get_spray_operator(code):
 
 
 def add_unique_data(sprayday, unique_field, location, osmid=None):
-    sp = None
+    """Create a unique record of sprayday."""
+
+    def _update_spraypoint(spraypoint, updated_data_id=None):
+        """Update a spraypoint object."""
+        was_sprayed = None
+        if spraypoint.sprayday.data.get(WAS_SPRAYED_FIELD):
+            was_sprayed = spraypoint.sprayday.data.get(WAS_SPRAYED_FIELD)
+        elif spraypoint.sprayday.data.get(NEW_WAS_SPRAYED_FIELD):
+            was_sprayed = spraypoint.sprayday.data.get(NEW_WAS_SPRAYED_FIELD)
+
+        if updated_data_id:
+            spraypoint.data_id = updated_data_id
+
+        if was_sprayed != WAS_SPRAYED_VALUE or updated_data_id:
+            spraypoint.sprayday = sprayday
+            spraypoint.save()
+
     if osmid:
         data_id = osmid
     else:
@@ -683,26 +699,29 @@ def add_unique_data(sprayday, unique_field, location, osmid=None):
     if data_id and location:
         if isinstance(data_id, str) and len(data_id) > 50:
             data_id = data_id[:50]
+        # Check if we already have a unique record for spray day. This is
+        # preventing us creating duplicate records. Ideally that should be
+        # addressed at SprayPoint model level but we have existing data, it
+        # would be ideal for a new setup.
         try:
-            sp, created = SprayPoint.objects.get_or_create(
-                sprayday=sprayday, data_id=data_id, location=location
-            )
-        except IntegrityError:
-            sp = SprayPoint.objects.select_related().get(
-                data_id=data_id, location=location
-            )
+            spraypoint = SprayPoint.objects.get(sprayday=sprayday)
+        except SprayPoint.DoesNotExist:
+            # Create a new unique record
+            try:
+                spraypoint, _ = SprayPoint.objects.get_or_create(
+                    sprayday=sprayday, data_id=data_id, location=location
+                )
+            except IntegrityError:
+                spraypoint = SprayPoint.objects.select_related().get(
+                    data_id=data_id, location=location
+                )
+                _update_spraypoint(spraypoint)
+        else:
+            _update_spraypoint(spraypoint, data_id)
 
-            was_sprayed = None
-            if sp.sprayday.data.get(WAS_SPRAYED_FIELD):
-                was_sprayed = sp.sprayday.data.get(WAS_SPRAYED_FIELD)
-            elif sp.sprayday.data.get(NEW_WAS_SPRAYED_FIELD):
-                was_sprayed = sp.sprayday.data.get(NEW_WAS_SPRAYED_FIELD)
+        return spraypoint
 
-            if was_sprayed != WAS_SPRAYED_VALUE:
-                sp.sprayday = sprayday
-                sp.save()
-
-    return sp
+    return None
 
 
 def delete_cached_target_area_keys(sprayday):
