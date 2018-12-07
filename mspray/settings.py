@@ -318,5 +318,6 @@ MSPRAY_SUPERVISOR_LABEL_PLURAL = "Team Leader Assistants (TLA)"
 MSPRAY_RHC_LABEL = "RHC"
 MSPRAY_RHC_LABEL_PLURAL = "RHCs"
 MSPRAY_MOPUP_LABEL = "Mop-up"
+MSPRAY_MDA_ROUND_ONE = "MDA Round 1"
 
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"

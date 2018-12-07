@@ -82,13 +82,13 @@
                                 {% if mda_performance_tables %}
                                     MDA: Performance
                                 {% else %}
-                                    MDA
+                                    {{MDA_ROUND_ONE_LABEL}}
                                 {% endif %}
                                 </span>
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'mda:index' %}">MDA</a></li>
+                                <li><a href="{% url 'mda:index' %}">MDA: Effectiveness</a></li>
                                 {% if view.request.session.show_csv %}
                                 <li role="separator" class="divider"></li>
                                 <li class="dropdown-header"><a href="{% url 'mda:sprayareas' %}">MDA: All Spray Areas</a></li>

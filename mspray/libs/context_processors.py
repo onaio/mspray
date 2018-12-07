@@ -74,4 +74,6 @@ def labels(request):
         "RHC_LABEL": getattr(settings, "MSPRAY_RHC_LABEL", "RHC"),
         "RHC_LABEL_PLURAL": getattr(
             settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"),
+        "MDA_ROUND_ONE_LABEL": getattr(
+            settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1")
     }
