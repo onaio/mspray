@@ -2,12 +2,10 @@
 """Test mobilisation module."""
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
-from django.db.utils import IntegrityError
 
 from mspray.apps.main.models import Mobilisation
 from mspray.apps.main.tests.utils import MOBILISATION_VISIT_DATA, data_setup
 from mspray.apps.main.views.mobilisation import MobilisationView
-from mspray.apps.main.models.mobilisation import create_mobilisation_visit
 
 
 class TestMobilisation(TestCase):
@@ -25,9 +23,8 @@ class TestMobilisation(TestCase):
         visit = Mobilisation.objects.get(submission_id=data["_id"])
         self.assertTrue(visit.is_mobilised)
 
-        with self.assertRaises(IntegrityError):
-            create_mobilisation_visit(data)
-        self.assertEqual(response.status_code, 201)
+        response = view(request)
+        self.assertEqual(response.status_code, 202)
 
     def test_mobilisation_url(self):
         """Test mobilisation-visit URL."""
