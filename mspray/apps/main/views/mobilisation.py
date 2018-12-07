@@ -18,7 +18,10 @@ class MobilisationView(APIView):
         """Handle a Mobilisation submission."""
         try:
             create_mobilisation_visit(request.data)
-            return Response(status=status.HTTP_201_CREATED)
         except IntegrityError:
             logger.exception("Mobilisation submission already exists.")
-            return Response(status=status.HTTP_202_CREATED)
+            status_response = status.HTTP_202_CREATED
+        else:
+            status_response = status.HTTP_201_CREATED
+
+        return Response(status=status_response)

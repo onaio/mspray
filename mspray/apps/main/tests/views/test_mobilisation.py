@@ -27,6 +27,7 @@ class TestMobilisation(TestCase):
 
         with self.assertRaises(IntegrityError):
             create_mobilisation_visit(data)
+        self.assertEqual(response.status_code, 201)
 
     def test_mobilisation_url(self):
         """Test mobilisation-visit URL."""
