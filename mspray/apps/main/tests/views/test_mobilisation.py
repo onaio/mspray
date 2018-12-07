@@ -23,7 +23,6 @@ class TestMobilisation(TestCase):
         visit = Mobilisation.objects.get(submission_id=data["_id"])
         self.assertTrue(visit.is_mobilised)
 
-        # tests that IntegrityError is raised and logged out silently.
         response = view(request)
         self.assertEqual(response.status_code, 202)
 
