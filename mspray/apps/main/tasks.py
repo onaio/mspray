@@ -740,5 +740,5 @@ def fetch_mobilisation():
                 try:
                     create_mobilisation_visit(data)
                 except IntegrityError:
-                    logger.exceprion("{} Record not found.".format(formid))
+                    logger.exception("{} Record not found.".format(formid))
                     continue
