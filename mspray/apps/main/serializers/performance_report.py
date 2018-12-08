@@ -1,8 +1,10 @@
 # -*- coding=utf-8 -*-
 """Performance report Serializers."""
+from django.conf import settings
+from django.core.cache import cache
+
 from rest_framework import serializers
 
-from django.core.cache import cache
 from mspray.apps.main.datetime_tools import average_time
 from mspray.apps.main.models import (
     Location,
@@ -50,7 +52,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
             "not_sprayed_total",
             "sprayformid",
             "not_eligible",
-            'data'
+            "data",
         )
         model = PerformanceReport
 
@@ -110,6 +112,8 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
+    not_eligible = serializers.IntegerField()
+    custom = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
@@ -130,8 +134,21 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
             "avg_end_time",
             "not_sprayed_total",
             "avg_structures_per_so",
+            "not_eligible",
+            "custom",
         )
         model = SprayOperator
+
+    def get_custom(self, obj):  # pylint: disable=R0201
+        """Return custom aggregations."""
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        data = {}
+        for field in custom_aggregations:
+            data[field] = getattr(obj, "data_%s" % field, 0)
+
+        return data
 
     def get_team_leader_assistant_name(self, obj):  # pylint: disable=R0201
         """Return Team Leader Assistant's name."""

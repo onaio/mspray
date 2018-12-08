@@ -98,6 +98,7 @@ DEFINITIONS = {
     "tla": {
         "definitions": [START_TIME, FINISH_TIME],
         "performance_conditions": True,
+        "show_data_quality_definitions": False,
     },
     "sop": {
         "definitions": [
@@ -106,7 +107,15 @@ DEFINITIONS = {
             START_TIME,
             FINISH_TIME,
         ],
+        "performance_text": "Average structures sprayed per day per SO",
         "performance_conditions": True,
+        "show_data_quality_definitions": False,
+    },
+    "mda-sop": {
+        "definitions": [START_TIME, FINISH_TIME],
+        "performance_text": "Average residential structures per day per SO",
+        "performance_conditions": True,
+        "show_data_quality_definitions": False,
     },
     "mda-sop-daily": {
         "definitions": [START_TIME, FINISH_TIME],

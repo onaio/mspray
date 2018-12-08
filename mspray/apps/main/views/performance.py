@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Performance report dashboard module."""
 from django.conf import settings
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models import Count, IntegerField, Sum, Value
+from django.db.models.functions import Cast, Coalesce
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView, TemplateView
 
@@ -16,9 +19,9 @@ from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer,
     PerformanceReportSerializer,
+    RHCPerformanceReportSerializer,
     SprayOperatorPerformanceReportSerializer,
     TLAPerformanceReportSerializer,
-    RHCPerformanceReportSerializer,
 )
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -496,8 +499,38 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         """Obtain context data."""
         context = super().get_context_data(**kwargs)
         rhc = context["object"]
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        extra_annotations = {}
+        for field in custom_aggregations:
+            extra_annotations["data_%s" % field] = Coalesce(
+                Sum(
+                    Cast(
+                        KeyTextTransform(field, "performancereport__data"),
+                        IntegerField(),
+                    )
+                ),
+                Value(0),
+            )
 
-        queryset = SprayOperator.objects.raw(MDA_SOP_PERFORMANCE_SQL, [rhc.id])
+        queryset = (
+            SprayOperator.objects.filter(rhc_id=rhc.pk)
+            .annotate(
+                found=Coalesce(Sum("performancereport__found"), Value(0)),
+                refused=Coalesce(Sum("performancereport__refused"), Value(0)),
+                other=Coalesce(Sum("performancereport__other"), Value(0)),
+                sprayed=Coalesce(Sum("performancereport__sprayed"), Value(0)),
+                not_eligible=Coalesce(
+                    Sum("performancereport__not_eligible"), Value(0)
+                ),
+                no_of_days_worked=Coalesce(
+                    Count("performancereport__id"), Value(0)
+                ),
+                **extra_annotations
+            )
+            .order_by("name")
+        )
 
         serializer = SprayOperatorPerformanceReportSerializer(
             queryset, many=True
@@ -511,6 +544,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             "not_sprayed_total": sum(
                 (i["not_sprayed_total"] for i in serializer.data)
             ),
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "data_quality_check": all(
                 (i["data_quality_check"] for i in serializer.data)
             ),
@@ -532,7 +566,14 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             "avg_end_time": average_time(
                 [i["avg_end_time"] for i in serializer.data]
             ),
+            "custom": {},
         }
+
+        for field in custom_aggregations:
+            totals["custom"][field] = sum(
+                i["custom"][field] for i in serializer.data
+            )
+
         context.update(
             {
                 "data": serializer.data,
@@ -541,7 +582,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 "rhc_name": rhc.name,
             }
         )
-        context.update(DEFINITIONS["sop"])
+        context.update(DEFINITIONS["mda-sop"])
 
         return context
 
