@@ -7,7 +7,7 @@ from django.db import models
 
 class PerformanceReport(models.Model):
     """
-    PerfomanceReport
+    PerformanceReport
     """
 
     sprayformid = models.CharField(max_length=20)
@@ -16,16 +16,18 @@ class PerformanceReport(models.Model):
     refused = models.IntegerField(default=0)
     other = models.IntegerField(default=0)
     spray_date = models.DateField(db_index=True)
-    team_leader = models.ForeignKey("TeamLeader", on_delete=models.CASCADE)
+    team_leader = models.ForeignKey(
+        "TeamLeader", null=True, on_delete=models.CASCADE
+    )
     team_leader_assistant = models.ForeignKey(
-        "TeamLeaderAssistant", on_delete=models.CASCADE
+        "TeamLeaderAssistant", null=True, on_delete=models.CASCADE
     )
     spray_operator = models.ForeignKey(
         "SprayOperator", on_delete=models.CASCADE
     )
     start_time = models.TimeField()
     end_time = models.TimeField()
-    data_quality_check = models.BooleanField()
+    data_quality_check = models.BooleanField(null=True)
     reported_found = models.IntegerField(default=0)
     reported_sprayed = models.IntegerField(default=0)
     not_eligible = models.IntegerField(default=0)
