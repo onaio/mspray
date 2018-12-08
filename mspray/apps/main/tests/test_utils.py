@@ -6,19 +6,18 @@ import os
 from unittest.mock import patch
 
 from django.conf import settings
-from django.db.models import Count
-
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 
 from mspray.apps.main.models import (
     Household,
     Location,
+    PerformanceReport,
     SprayDay,
     SprayOperator,
     SprayOperatorDailySummary,
     TeamLeader,
     TeamLeaderAssistant,
-    PerformanceReport,
 )
 from mspray.apps.main.models.spray_day import DATA_ID_FIELD
 from mspray.apps.main.tests.test_base import TestBase
@@ -32,11 +31,11 @@ from mspray.apps.main.utils import (
     get_formid,
     get_spray_operator,
     get_spraydays_with_mismatched_locations,
+    link_new_structures_to_existing,
     link_sprayday_to_actors,
+    performance_report,
     remove_duplicate_sprayoperatordailysummary,
     remove_household_geom_duplicates,
-    performance_report,
-    link_new_structures_to_existing,
 )
 from mspray.celery import app
 
@@ -111,7 +110,7 @@ class TestUtils(TestBase):
         self.assertEqual(kwargs["sprayday"], SprayDay.objects.first())
         self.assertEqual(kwargs["data"], SUBMISSION_DATA[0])
 
-    def test_add_spray_data_with_Exception(self):
+    def test_add_spray_data_with_exception(self):  # pylint: disable=C0103
         """
         test that raises Validation error in case no data is passed
         """
@@ -385,7 +384,7 @@ class TestUtils(TestBase):
         self.assertEqual(get_spray_operator("1234").pk, operator.pk)
         self.assertIsNone(get_spray_operator("01234X"))
 
-    def test_spray_operator_performance_report(self):
+    def test_spray_operator_performance_report(self):  # pylint: disable=C0103
         """
         Test that performance_report actually updates an existing record.
 
@@ -395,6 +394,8 @@ class TestUtils(TestBase):
         spray_operator = SprayOperator.objects.first()
         team_leader = TeamLeader.objects.first()
         spray_operator.team_leader = team_leader
+        spray_operator.district = team_leader.location
+        spray_operator.save()
         spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
         spray_day.update(sprayable=True)
 
@@ -428,7 +429,7 @@ class TestUtils(TestBase):
             1,
         )
 
-    def test_link_new_structures_to_existing(self):
+    def test_link_new_structures_to_existing(self):  # pylint: disable=C0103
         """
         Test that link_new_structures_to_existing works
         """
