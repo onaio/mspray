@@ -108,8 +108,7 @@ class DistrictView(SiteNameMixin, ListView):
             except Location.DoesNotExist:
                 pass
             else:
-                not_targeted = get_not_targeted_within_geom(obj.geom)
-                not_targeted = not_targeted[0]
+                not_targeted = get_not_targeted_within_geom(obj.geom)[0]
                 context["no_location"] = not_targeted
                 if obj.level == "district":
                     context["the_district"] = obj
@@ -141,6 +140,7 @@ class DistrictView(SiteNameMixin, ListView):
                     )
                 except KeyError:
                     pass
+        not_captured = getattr(settings, "NOT_CAPTURED", {})
         if not_targeted:
             not_targeted_fields = [
                 ("visited_total", "found"),
@@ -149,6 +149,10 @@ class DistrictView(SiteNameMixin, ListView):
                 ("visited_refused", "refused"),
                 ("visited_other", "other"),
             ]
+            not_captured_data = not_captured.get(obj.pk)
+            if not_captured_data:
+                not_targeted["found"] += not_captured_data
+                not_targeted["sprayed"] += not_captured_data
             for total_field, not_field in not_targeted_fields:
                 try:
                     totals[total_field] += not_targeted[not_field]
@@ -376,6 +380,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                     "Sprayed Coverage",
                 ]
                 previous_rhc = None
+                not_captured = getattr(settings, "NOT_CAPTURED", {})
                 for value in context.get("qs").iterator():
                     district = TargetAreaSerializer(
                         value, context=context
@@ -388,6 +393,12 @@ class SprayAreaView(SiteNameMixin, ListView):
                                 pk=previous_rhc.get("rhc_pk")
                             ).geom
                         )[0]
+                        not_captured_data = not_captured.get(
+                            previous_rhc.get("rhc_pk")
+                        )
+                        if not_captured_data:
+                            not_targeted["found"] += not_captured_data
+                            not_targeted["sprayed"] += not_captured_data
                         yield [
                             previous_rhc.get("district"),
                             previous_rhc.get("rhc"),

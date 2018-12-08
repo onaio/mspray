@@ -21,14 +21,21 @@ from rest_framework.response import Response
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, SprayPoint
-from mspray.apps.main.models.spray_day import (DATA_ID_FIELD, DATE_FIELD,
-                                               SprayDay)
-from mspray.apps.main.serializers.sprayday import (SprayDayNamibiaSerializer,
-                                                   SprayDaySerializer,
-                                                   SprayDayShapeSerializer)
+from mspray.apps.main.models.spray_day import (
+    DATA_ID_FIELD,
+    DATE_FIELD,
+    SprayDay,
+)
+from mspray.apps.main.serializers.sprayday import (
+    SprayDayNamibiaSerializer,
+    SprayDaySerializer,
+    SprayDayShapeSerializer,
+)
 from mspray.apps.main.serializers.target_area import dictfetchall
-from mspray.apps.main.utils import (add_spray_data,
-                                    delete_cached_target_area_keys)
+from mspray.apps.main.utils import (
+    add_spray_data,
+    delete_cached_target_area_keys,
+)
 
 SPATIAL_QUERIES = False
 
@@ -217,41 +224,60 @@ class NoLocationSprayDayView(SiteNameMixin, TemplateView):
 
         cursor = connection.cursor()
 
+        not_captured = getattr(settings, "NOT_CAPTURED", {})
+        not_captured_total = 0
         # per district
         district_data = {}
         for district in districts:
             result = get_not_targeted_within_geom(district.geom)
             district_data[district] = result[0]
+            not_captured_data = not_captured.get(district.pk)
+            if not_captured_data:
+                district_data[district]["found"] += not_captured_data
+                district_data[district]["sprayed"] += not_captured_data
+                not_captured_total += not_captured_data
 
         # totals
         cursor = connection.cursor()
         cursor.execute(SPRAY_AREA_INDICATOR_SQL)
 
-        total_results = dictfetchall(cursor)
+        total_results = dictfetchall(cursor)[0]
+        total_results["found"] += not_captured_total
+        total_results["sprayed"] += not_captured_total
         context["district_data"] = district_data
-        context["total"] = total_results[0]
+        context["total"] = total_results
         context["district_sprayed"] = get_num_sprayed_for_districts()
 
         context["no_location"] = {
-            "found": total_results[0]["found"]
-            - sum(
-                [v["found"] for k, v in district_data.items() if v["found"]]
+            "found": (
+                total_results["found"]
+                - sum(
+                    [
+                        v["found"]
+                        for k, v in district_data.items()
+                        if v["found"]
+                    ]
+                )
             ),
-            "sprayed": total_results[0]["sprayed"]
-            - sum(
-                [
-                    v["sprayed"]
-                    for k, v in district_data.items()
-                    if v["sprayed"]
-                ]
+            "sprayed": (
+                total_results["sprayed"]
+                - sum(
+                    [
+                        v["sprayed"]
+                        for k, v in district_data.items()
+                        if v["sprayed"]
+                    ]
+                )
             ),
-            "new_structures": total_results[0]["new_structures"]
-            - sum(
-                [
-                    v["new_structures"]
-                    for k, v in district_data.items()
-                    if v["new_structures"]
-                ]
+            "new_structures": (
+                total_results["new_structures"]
+                - sum(
+                    [
+                        v["new_structures"]
+                        for k, v in district_data.items()
+                        if v["new_structures"]
+                    ]
+                )
             ),
         }
 
