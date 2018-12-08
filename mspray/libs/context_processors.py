@@ -50,30 +50,38 @@ def enable_mda(request):
 
     When ENABLE_MDA is set to True the MDA dashboard links are enabled.
     """
+
     return {
         "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
         "MDA_STATIC_PREFIX": getattr(settings, "MDA_STATIC_PREFIX", "/mda"),
+        "IS_MDA_LINK": "mda" in request.get_full_path(),
     }
 
 
 def labels(request):
     """Set COMMUNITY HEALTH WORKER value."""
     return {
-        "COMMUNITY_HEALTH_WORKER_LABEL":
-        getattr(settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL",
-                "Spray Operator"),
-        "COMMUNITY_HEALTH_WORKER_LABEL_PLURAL":
-        getattr(settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL_PLURAL",
-                "Spray Operators"),
-        "SUPERVISOR_LABEL":
-        getattr(settings, "MSPRAY_SUPERVISOR_LABEL",
-                "Team Leader Assistant (TLA)"),
-        "SUPERVISOR_LABEL_PLURAL":
-        getattr(settings, "MSPRAY_SUPERVISOR_LABEL_PLURAL",
-                "Team Leader Assistants (TLA)"),
+        "COMMUNITY_HEALTH_WORKER_LABEL": getattr(
+            settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL", "Spray Operator"
+        ),
+        "COMMUNITY_HEALTH_WORKER_LABEL_PLURAL": getattr(
+            settings,
+            "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL_PLURAL",
+            "Spray Operators",
+        ),
+        "SUPERVISOR_LABEL": getattr(
+            settings, "MSPRAY_SUPERVISOR_LABEL", "Team Leader Assistant (TLA)"
+        ),
+        "SUPERVISOR_LABEL_PLURAL": getattr(
+            settings,
+            "MSPRAY_SUPERVISOR_LABEL_PLURAL",
+            "Team Leader Assistants (TLA)",
+        ),
         "RHC_LABEL": getattr(settings, "MSPRAY_RHC_LABEL", "RHC"),
         "RHC_LABEL_PLURAL": getattr(
-            settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"),
+            settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"
+        ),
         "MDA_ROUND_ONE_LABEL": getattr(
-            settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1")
+            settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"
+        ),
     }
