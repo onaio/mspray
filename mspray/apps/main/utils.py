@@ -1037,18 +1037,15 @@ def create_performance_report(spray_operator, sprayformid, operator_qs):
         report = PerformanceReport(
             sprayformid=sprayformid, spray_operator=spray_operator
         )
+    queryset = operator_qs.filter(data__sprayformid=sprayformid)
     # found is also same us residential for MDA
-    found = operator_qs.filter(data__sprayformid=sprayformid).count()
-    sprayed = operator_qs.filter(
-        data__sprayformid=sprayformid, was_sprayed=True
-    ).count()
-    refused = operator_qs.filter(
-        data__sprayformid=sprayformid,
-        was_sprayed=False,
-        data__contains={REASON_FIELD: REASON_REFUSED},
+    found = queryset.count()
+    sprayed = queryset.filter(was_sprayed=True).count()
+    refused = queryset.filter(
+        was_sprayed=False, data__contains={REASON_FIELD: REASON_REFUSED}
     ).count()
     other = (
-        operator_qs.filter(data__sprayformid=sprayformid, was_sprayed=False)
+        queryset.filter(was_sprayed=False)
         .exclude(data__contains={REASON_FIELD: REASON_REFUSED})
         .count()
     )
@@ -1098,6 +1095,27 @@ def create_performance_report(spray_operator, sprayformid, operator_qs):
             error,
             sprayformid,
         )
+
+    return apply_custom_aggregations(report, queryset)
+
+
+def apply_custom_aggregations(report, queryset):
+    """Apply custom aggregations to a performance report.
+
+    :param report - a performance report
+    :param queryset - a SprayDay queryset preferably
+
+    :return PerformanceReport.
+    """
+    # custom fields
+    custom_aggregations = getattr(
+        settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+    )
+    for field, query in custom_aggregations.items():
+        report.data[field] = queryset.filter(**query).count()
+
+    if custom_aggregations:
+        report.save()
 
     return report
 

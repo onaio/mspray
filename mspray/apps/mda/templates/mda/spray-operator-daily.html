@@ -38,11 +38,11 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</a></td>
                                     <td>{{ row.date|date:'d-M' }}</a></td>
-                                    <td class='numbers'>{{ row.sprayable|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_eligible|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.refused|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.other|intcomma  }}</td>
-                                    <td class='numbers'>{{ row.not_sprayed_total }}</td>
+                                    <td class='numbers'>{{ row.sprayable|intcomma }}</td>
+                                    <td class='numbers'>{{ row.not_eligible|intcomma }}</td>
+                                    <td class='numbers'>{{ row.data.all_received|intcomma }}</td>
+                                    <td class='numbers'>{{ row.data.some_received|intcomma }}</td>
+                                    <td class='numbers'>{{ row.data.none_received|intcomma }}</td>
                                     <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
                                     <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
                                     <td class='numbers'>{% avg_time_interval row.avg_end_time row.avg_start_time %}</td>
@@ -53,10 +53,10 @@
                             <tr>
                                 <td colspan="2">Totals</td>
                                 <td class='numbers'>{{ totals.sprayable|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.sprayed|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.refused|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.other|intcomma  }}</td>
-                                <td class='numbers'>{{ totals.not_sprayed_total }}</td>
+                                <td class='numbers'>{{ totals.not_eligible|intcomma }}</td>
+                                <td class='numbers'>{{ totals.data.all_received|intcomma }}</td>
+                                <td class='numbers'>{{ totals.data.some_received|intcomma }}</td>
+                                <td class='numbers'>{{ totals.data.none_received|intcomma }}</td>
                                 <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
                                 <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
                                 <td class='numbers'>{% avg_time_interval totals.avg_end_time totals.avg_start_time %}</td>

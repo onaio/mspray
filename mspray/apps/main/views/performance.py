@@ -572,6 +572,7 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             "sprayed": sum((i["sprayed"] for i in serializer.data)),
             "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "not_sprayed_total": sum(
                 (i["not_sprayed_total"] for i in serializer.data)
             ),
@@ -590,7 +591,16 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             "avg_end_time": average_time(
                 [i["avg_end_time"] for i in serializer.data]
             ),
+            "data": {},
         }
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        for field in custom_aggregations:
+            totals["data"][field] = sum(
+                i["data"][field] for i in serializer.data
+            )
+
         context.update(
             {
                 "data": serializer.data,
@@ -601,6 +611,6 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "rhc_name": rhc.name,
             }
         )
-        context.update(DEFINITIONS["sop"])
+        context.update(DEFINITIONS["mda-sop-daily"])
 
         return context

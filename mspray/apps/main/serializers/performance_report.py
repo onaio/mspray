@@ -50,6 +50,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
             "not_sprayed_total",
             "sprayformid",
             "not_eligible",
+            'data'
         )
         model = PerformanceReport
 

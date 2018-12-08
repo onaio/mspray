@@ -1,7 +1,8 @@
 # -*- coding=utf-8 -*-
 """
-perfomance_report module
+PerformanceReport model
 """
+from django.contrib.postgres.fields import JSONField
 from django.db import models
 
 
@@ -32,6 +33,7 @@ class PerformanceReport(models.Model):
     reported_sprayed = models.IntegerField(default=0)
     not_eligible = models.IntegerField(default=0)
     district = models.ForeignKey("Location", on_delete=models.CASCADE)
+    data = JSONField(default=dict)
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)

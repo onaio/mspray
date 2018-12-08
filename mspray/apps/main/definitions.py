@@ -4,6 +4,9 @@
 Needs to be imported and relevant key updated into the view context variables.
 """
 # pylint: disable=line-too-long
+START_TIME = "a - Start time is determined from the time the first form is completed per day per operator"  # noqa
+FINISH_TIME = "b - Finish time is determined from the time the last form is started per day per operator"  # noqa
+
 DEFINITIONS = {
     "mopup": {
         "IRS": {
@@ -89,26 +92,24 @@ DEFINITIONS = {
         },
     },
     "performance:district": {
-        "definitions": [
-            "a - Start time is determined from the time the first form is completed per day per operator",  # noqa
-            "b - Finish time is determined from the time the last form is started per day per operator",  # noqa
-        ],
+        "definitions": [START_TIME, FINISH_TIME],
         "performance_conditions": True,
     },
     "tla": {
-        "definitions": [
-            "a - Start time is determined from the time the first form is completed per day per operator",  # noqa
-            "b - Finish time is determined from the time the last form is started per day per operator",  # noqa
-        ],
+        "definitions": [START_TIME, FINISH_TIME],
         "performance_conditions": True,
     },
     "sop": {
         "definitions": [
             "Found Difference TODAY is SOP Summary found minus HH Submissions found.",  # noqa
             "Sprayed Difference TODAY should just be for today i.e. the last row in the daily spray operator table.",  # noqa
-            "a - Start time is determined from the time the first form is completed per day per operator",  # noqa
-            "b - Finish time is determined from the time the last form is started per day per operator",  # noqa
+            START_TIME,
+            FINISH_TIME,
         ],
         "performance_conditions": True,
+    },
+    "mda-sop-daily": {
+        "definitions": [START_TIME, FINISH_TIME],
+        "performance_conditions": False,
     },
 }

@@ -321,3 +321,10 @@ MSPRAY_MOPUP_LABEL = "Mop-up"
 MSPRAY_MDA_ROUND_ONE = "MDA Round 1"
 
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+
+# Custom performance aggregations
+# EXTRA_PERFORMANCE_AGGREGATIONS = {
+#     "all_received": {"data__values_from_omk/mda_status": "all_received"},
+#     "some_received": {"data__values_from_omk/mda_status": "some_received"},
+#     "none_received": {"data__values_from_omk/mda_status": "none_received"},
+# }
