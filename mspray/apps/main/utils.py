@@ -1037,6 +1037,7 @@ def create_performance_report(spray_operator, sprayformid, operator_qs):
         report = PerformanceReport(
             sprayformid=sprayformid, spray_operator=spray_operator
         )
+    # found is also same us residential for MDA
     found = operator_qs.filter(data__sprayformid=sprayformid).count()
     sprayed = operator_qs.filter(
         data__sprayformid=sprayformid, was_sprayed=True

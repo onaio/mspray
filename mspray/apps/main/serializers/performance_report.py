@@ -27,6 +27,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.BooleanField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
+    not_eligible = serializers.IntegerField()
 
     class Meta:
         fields = (
@@ -48,6 +49,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
             "avg_end_time",
             "not_sprayed_total",
             "sprayformid",
+            "not_eligible",
         )
         model = PerformanceReport
 
@@ -649,12 +651,17 @@ class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
         val = cache.get(key)
         if val is not None:
             return val
-        val = (SprayDay.objects.filter(
-            household__isnull=False,
-            household__sprayable=False,
-            location__parent_id=obj.pk,
-            sprayable=False,
-        ).values("osmid").distinct().count())
+        val = (
+            SprayDay.objects.filter(
+                household__isnull=False,
+                household__sprayable=False,
+                location__parent_id=obj.pk,
+                sprayable=False,
+            )
+            .values("osmid")
+            .distinct()
+            .count()
+        )
 
         cache.set(key, val)
 
@@ -662,16 +669,24 @@ class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """Return start_time as time object."""
-        return average_time([
-            report.start_time for report in PerformanceReport.objects.filter(
-                spray_operator__rhc=obj).only("start_time")
-            if report.start_time is not None
-        ])
+        return average_time(
+            [
+                report.start_time
+                for report in PerformanceReport.objects.filter(
+                    spray_operator__rhc=obj
+                ).only("start_time")
+                if report.start_time is not None
+            ]
+        )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
         """Return end_time as time object."""
-        return average_time([
-            report.end_time for report in PerformanceReport.objects.filter(
-                spray_operator__rhc=obj).only("end_time")
-            if report.end_time is not None
-        ])
+        return average_time(
+            [
+                report.end_time
+                for report in PerformanceReport.objects.filter(
+                    spray_operator__rhc=obj
+                ).only("end_time")
+                if report.end_time is not None
+            ]
+        )
