@@ -26,7 +26,6 @@ from mspray.apps.main.tests.utils import data_setup
 from mspray.apps.main.utils import performance_report
 from mspray.apps.main.views.performance import (
     DISTRICT_PERFORMANCE_SQL,
-    RHC_PERFORMANCE_SQL,
     SOP_PERFORMANCE_SQL,
     TLA_PERFORMANCE_SQL,
     DistrictPerfomanceView,
@@ -516,10 +515,12 @@ class TestPerformanceView(TestBase):
         # Query obtains all data for the SprayOperator
         # including submissions made and passes this to the serializer
 
-        queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [district.id])
+        queryset = Location.rhc_performance_queryset(district)
         serializer = RHCPerformanceReportSerializer(queryset, many=True)
 
         result = {
+            "custom": {},
+            "days_worked": 1,
             "other": 0,
             "refused": 6,
             "sprayed": 2,
@@ -530,12 +531,12 @@ class TestPerformanceView(TestBase):
             "data_quality_check": True,
             "found_difference": 0,
             "sprayed_difference": 0,
-            "houses": 8975,
+            "houses": 26,
             "no_of_days_worked": 2,
             "avg_structures_per_so": 0.4523809523809524,
             "avg_start_time": datetime.time(16, 22, 17),
             "avg_end_time": datetime.time(16, 38, 8),
-            "success_rate": 0.5012531328320803,
+            "success_rate": 3.47985347985348,
         }
 
         self.assertEqual(response.context_data["totals"], result)

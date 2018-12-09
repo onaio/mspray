@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 """Test mspray.apps.main.serializers RHCPerformanceReportSerializer."""
 
-from mspray.apps.main.tests.test_base import TestBase
-
 from mspray.apps.main.models import (
+    Household,
     Location,
+    PerformanceReport,
+    SprayDay,
     SprayOperator,
     TeamLeader,
-    Household,
-    SprayDay,
-    PerformanceReport,
 )
-from mspray.apps.main.views.performance import RHC_PERFORMANCE_SQL
+from mspray.apps.main.serializers import RHCPerformanceReportSerializer
+from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.main.tests.utils import data_setup
 from mspray.apps.main.utils import performance_report
-from mspray.apps.main.serializers import RHCPerformanceReportSerializer
 
 
 class TestPerformanceSerializer(TestBase):
@@ -58,7 +56,7 @@ class TestPerformanceSerializer(TestBase):
         report1.district = district
         report2.save()
 
-        queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [district.id])
+        queryset = Location.rhc_performance_queryset(district)
         serializer_instance = RHCPerformanceReportSerializer(
             queryset, many=True
         )
@@ -83,6 +81,8 @@ class TestPerformanceSerializer(TestBase):
             "not_sprayed_total",
             "avg_structures_per_so",
             "success_rate",
+            "custom",
+            "days_worked",
         ]
 
         self.assertEqual(
@@ -90,9 +90,7 @@ class TestPerformanceSerializer(TestBase):
         )
         self.assertEqual(rhc.id, serializer_instance.data[0]["id"])
         self.assertEqual(19, serializer_instance.data[0]["sprayable"])
-        self.assertEqual(
-            10.526315789473685, serializer_instance.data[0]["success_rate"]
-        )
+        self.assertEqual(0, serializer_instance.data[0]["success_rate"])
         self.assertEqual(0, serializer_instance.data[0]["sprayed_difference"])
         self.assertEqual(
             9.5, serializer_instance.data[0]["avg_structures_per_so"]
