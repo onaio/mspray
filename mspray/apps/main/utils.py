@@ -1002,96 +1002,122 @@ def performance_report(spray_operator, queryset=None):
     """
     Update performance report for spray_operator.
     """
-    if not spray_operator.team_leader_assistant:
-        return None
-    operator_qs = SprayDay.objects.none()
     if spray_operator is not None:
         operator_qs = SprayDay.objects.filter(
             spray_operator=spray_operator, sprayable=True
         )
-    else:
-        return None
-    if queryset is None:
-        queryset = operator_qs.annotate(
-            sprayformid=RawSQL("data->'sprayformid'", ())
-        )
-    else:
-        queryset = queryset.annotate(
-            sprayformid=RawSQL("data->'sprayformid'", ())
-        )
-    queryset = (
-        queryset.values_list("sprayformid", flat=True)
-        .exclude(sprayformid__isnull=True)
-        .order_by("spray_date")
-        .distinct()
-    )
-    report_qs = SprayOperatorDailySummary.objects.filter(
-        sprayoperator_code=spray_operator.code
-    )
-    for sprayformid in queryset:
-        print(sprayformid, spray_operator.name)
-        found = operator_qs.filter(data__sprayformid=sprayformid).count()
-        sprayed = operator_qs.filter(
-            data__sprayformid=sprayformid, was_sprayed=True
-        ).count()
-        refused = operator_qs.filter(
-            data__sprayformid=sprayformid,
-            was_sprayed=False,
-            data__contains={REASON_FIELD: REASON_REFUSED},
-        ).count()
-        other = (
-            operator_qs.filter(
-                data__sprayformid=sprayformid, was_sprayed=False
+        if queryset is None:
+            queryset = operator_qs.annotate(
+                sprayformid=RawSQL("data->'sprayformid'", ())
             )
-            .exclude(data__contains={REASON_FIELD: REASON_REFUSED})
-            .count()
+        else:
+            queryset = queryset.annotate(
+                sprayformid=RawSQL("data->'sprayformid'", ())
+            )
+        queryset = (
+            queryset.values_list("sprayformid", flat=True)
+            .exclude(sprayformid__isnull=True)
+            .order_by("spray_date")
+            .distinct()
         )
-        reported = (
-            report_qs.filter(spray_form_id=sprayformid)
-            .order_by("date_created")
-            .last()
+        for sprayformid in queryset:
+            create_performance_report(spray_operator, sprayformid, operator_qs)
+
+        return spray_operator
+    return None
+
+
+def create_performance_report(spray_operator, sprayformid, operator_qs):
+    """Create or update a PerformanceReport object."""
+    try:
+        report = PerformanceReport.objects.get(
+            sprayformid=sprayformid, spray_operator=spray_operator
         )
+    except PerformanceReport.DoesNotExist:
+        report = PerformanceReport(
+            sprayformid=sprayformid, spray_operator=spray_operator
+        )
+    queryset = operator_qs.filter(data__sprayformid=sprayformid)
+    # found is also same us residential for MDA
+    found = queryset.count()
+    sprayed = queryset.filter(was_sprayed=True).count()
+    refused = queryset.filter(
+        was_sprayed=False, data__contains={REASON_FIELD: REASON_REFUSED}
+    ).count()
+    other = (
+        queryset.filter(was_sprayed=False)
+        .exclude(data__contains={REASON_FIELD: REASON_REFUSED})
+        .count()
+    )
+    report.found = found
+    report.sprayed = sprayed
+    report.refused = refused
+    report.other = other
+
+    report.start_time, report.end_time, report.spray_date = start_end_time(
+        operator_qs, sprayformid
+    )
+
+    reported = (
+        SprayOperatorDailySummary.objects.filter(
+            sprayoperator_code=spray_operator.code
+        )
+        .filter(spray_form_id=sprayformid)
+        .order_by("date_created")
+        .last()
+    )
+    if reported:
         reported_found = 0 if not reported else reported.found
         reported_sprayed = 0 if not reported else reported.sprayed
         found_difference = reported_found - found
         sprayed_difference = reported_sprayed - sprayed
         data_quality_check = found_difference == 0 and sprayed_difference == 0
-        start_time, end_time, spray_date = start_end_time(
-            operator_qs, sprayformid
-        )
-        report = PerformanceReport(
-            sprayformid=sprayformid, spray_operator=spray_operator
-        )
-        try:
-            report = PerformanceReport.objects.get(
-                sprayformid=sprayformid, spray_operator=spray_operator
-            )
-        except PerformanceReport.DoesNotExist:
-            pass
-        report.found = found
-        report.sprayed = sprayed
-        report.refused = refused
-        report.other = other
         report.reported_found = reported_found
         report.reported_sprayed = reported_sprayed
-        report.start_time = start_time
-        report.end_time = end_time
         report.data_quality_check = data_quality_check
-        report.spray_date = spray_date
+
+    if spray_operator.team_leader:
         report.team_leader = spray_operator.team_leader
+    if spray_operator.team_leader_assistant:
         report.team_leader_assistant = spray_operator.team_leader_assistant
-        report.not_eligible = spray_operator.sprayday_set.filter(
-            sprayable=False, data__sprayformid=sprayformid
-        ).count()
-        report.district = spray_operator.team_leader_assistant.location
 
-        try:
-            report.save()
-        except IntegrityError:
-            logger.exception("{} Already exists".format(spray_operator))
-            continue
+    report.not_eligible = spray_operator.sprayday_set.filter(
+        sprayable=False, data__sprayformid=sprayformid
+    ).count()
 
-    return spray_operator
+    report.district = spray_operator.district
+
+    try:
+        report.save()
+    except IntegrityError as error:
+        logger.error(
+            "Error: %s while creating %s performance report.",
+            error,
+            sprayformid,
+        )
+
+    return apply_custom_aggregations(report, queryset)
+
+
+def apply_custom_aggregations(report, queryset):
+    """Apply custom aggregations to a performance report.
+
+    :param report - a performance report
+    :param queryset - a SprayDay queryset preferably
+
+    :return PerformanceReport.
+    """
+    # custom fields
+    custom_aggregations = getattr(
+        settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+    )
+    for field, query in custom_aggregations.items():
+        report.data[field] = queryset.filter(**query).count()
+
+    if custom_aggregations:
+        report.save()
+
+    return report
 
 
 def create_performance_reports():

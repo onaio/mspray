@@ -1,8 +1,10 @@
 # -*- coding=utf-8 -*-
 """Performance report Serializers."""
+from django.conf import settings
+from django.core.cache import cache
+
 from rest_framework import serializers
 
-from django.core.cache import cache
 from mspray.apps.main.datetime_tools import average_time
 from mspray.apps.main.models import (
     Location,
@@ -27,6 +29,7 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
     data_quality_check = serializers.BooleanField()
     found_difference = serializers.SerializerMethodField()
     sprayed_difference = serializers.SerializerMethodField()
+    not_eligible = serializers.IntegerField()
 
     class Meta:
         fields = (
@@ -48,6 +51,8 @@ class PerformanceReportSerializer(serializers.ModelSerializer):
             "avg_end_time",
             "not_sprayed_total",
             "sprayformid",
+            "not_eligible",
+            "data",
         )
         model = PerformanceReport
 
@@ -107,6 +112,8 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
+    not_eligible = serializers.IntegerField()
+    custom = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
@@ -127,8 +134,21 @@ class SprayOperatorPerformanceReportSerializer(serializers.ModelSerializer):
             "avg_end_time",
             "not_sprayed_total",
             "avg_structures_per_so",
+            "not_eligible",
+            "custom",
         )
         model = SprayOperator
+
+    def get_custom(self, obj):  # pylint: disable=R0201
+        """Return custom aggregations."""
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        data = {}
+        for field in custom_aggregations:
+            data[field] = getattr(obj, "data_%s" % field, 0)
+
+        return data
 
     def get_team_leader_assistant_name(self, obj):  # pylint: disable=R0201
         """Return Team Leader Assistant's name."""
@@ -461,17 +481,20 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
     sprayed_difference = serializers.SerializerMethodField()
     spray_operator_code = serializers.CharField(source="code")
     spray_operator_id = serializers.CharField(source="id")
+    days_worked = serializers.IntegerField()
     no_of_days_worked = serializers.IntegerField()
     name = serializers.CharField()
     avg_structures_per_so = serializers.SerializerMethodField()
     not_eligible = serializers.SerializerMethodField()
     location = serializers.SerializerMethodField()
     success_rate = serializers.SerializerMethodField()
+    custom = serializers.SerializerMethodField()
 
     class Meta:
         fields = (
             "id",
             "name",
+            "days_worked",
             "no_of_days_worked",
             "spray_operator_code",
             "spray_operator_id",
@@ -489,6 +512,7 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
             "not_sprayed_total",
             "avg_structures_per_so",
             "success_rate",
+            "custom",
         )
         model = Location
 
@@ -633,45 +657,75 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return reported_sprayed - sprayed
 
     def get_success_rate(self, obj):  # pylint: disable=no-self-use
-        """Return spray operator sprayed - submitted sprayed difference."""
+        """Return percentage sprayed of found structures."""
         if obj.sprayed is None or obj.found is None or obj.found == 0:
             return 0
 
         return (100 * obj.p_sprayed) / obj.found
 
+    def get_custom(self, obj):  # pylint: disable=R0201
+        """Return custom aggregations."""
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        data = {}
+        for field in custom_aggregations:
+            data[field] = getattr(obj, "data_%s" % field, 0)
 
-class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
+        return data
+
+
+class SuccessRateMixin:  # pylint: disable=too-few-public-methods
+    """MDA SuccessRateMixin class."""
+
+    def get_success_rate(self, obj):  # pylint: disable=no-self-use
+        """Return percentage found of residential on the ground."""
+        will_be_zero_devision = (
+            obj.mda_found is None
+            or obj.structures_on_ground is None
+            or obj.structures_on_ground == 0
+        )
+        if will_be_zero_devision:
+            return 0
+
+        return (100 * obj.mda_found) / obj.structures_on_ground
+
+
+class MDADistrictPerformanceReportSerializer(
+    SuccessRateMixin,  # pylint: disable=bad-continuation
+    DistrictPerformanceReportSerializer,  # pylint: disable=bad-continuation
+):
+    """District PerformanceReportSerializer"""
+
+    pass
+
+
+class RHCPerformanceReportSerializer(
+    SuccessRateMixin,  # pylint: disable=bad-continuation
+    DistrictPerformanceReportSerializer,  # pylint: disable=bad-continuation
+):
     """DistrictPerformanceReportSerializer"""
-
-    def get_not_eligible(self, obj):  # pylint: disable=no-self-use
-        """Return number of sprayable structures not eligible reason."""
-        key = "performance-not-eligible-rhc-{}".format(obj.pk)
-        val = cache.get(key)
-        if val is not None:
-            return val
-        val = (SprayDay.objects.filter(
-            household__isnull=False,
-            household__sprayable=False,
-            location__parent_id=obj.pk,
-            sprayable=False,
-        ).values("osmid").distinct().count())
-
-        cache.set(key, val)
-
-        return val
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
         """Return start_time as time object."""
-        return average_time([
-            report.start_time for report in PerformanceReport.objects.filter(
-                spray_operator__rhc=obj).only("start_time")
-            if report.start_time is not None
-        ])
+        return average_time(
+            [
+                report.start_time
+                for report in PerformanceReport.objects.filter(
+                    spray_operator__rhc=obj
+                ).only("start_time")
+                if report.start_time is not None
+            ]
+        )
 
     def get_avg_end_time(self, obj):  # pylint: disable=no-self-use
         """Return end_time as time object."""
-        return average_time([
-            report.end_time for report in PerformanceReport.objects.filter(
-                spray_operator__rhc=obj).only("end_time")
-            if report.end_time is not None
-        ])
+        return average_time(
+            [
+                report.end_time
+                for report in PerformanceReport.objects.filter(
+                    spray_operator__rhc=obj
+                ).only("end_time")
+                if report.end_time is not None
+            ]
+        )

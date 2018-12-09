@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Performance report dashboard module."""
 from django.conf import settings
+from django.contrib.postgres.fields.jsonb import KeyTextTransform
+from django.db.models import Count, IntegerField, Sum, Value
+from django.db.models.functions import Cast, Coalesce
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView, TemplateView
 
@@ -15,10 +18,11 @@ from mspray.apps.main.models import (
 from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer,
+    MDADistrictPerformanceReportSerializer,
     PerformanceReportSerializer,
+    RHCPerformanceReportSerializer,
     SprayOperatorPerformanceReportSerializer,
     TLAPerformanceReportSerializer,
-    RHCPerformanceReportSerializer,
 )
 
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
@@ -38,15 +42,9 @@ TEAM_LEADER_NAME = settings.MSPRAY_TEAM_LEADER_NAME
 
 
 DISTRICT_PERFORMANCE_SQL = """
-SELECT "main_location"."id", "main_location"."name", "main_location"."code", "main_location"."level", "main_location"."parent_id", "main_location"."structures", "main_location"."pre_season_target", "main_location"."num_of_spray_areas", "main_location"."data_quality_check", "main_location"."average_spray_quality_score", "main_location"."visited", "main_location"."sprayed", "main_location"."lft", "main_location"."rght", "main_location"."tree_id", "main_location"."mptt_level", "subq"."found", "subq"."no_of_days_worked", "subq"."reported_sprayed", "subq"."refused", "subq"."reported_found", "subq"."other", "subq"."p_sprayed", "subq"."not_eligible"
+SELECT "main_location"."id", "main_location"."name", "main_location"."code", "main_location"."level", "main_location"."parent_id", "main_location"."structures", "main_location"."pre_season_target", "main_location"."num_of_spray_areas", "main_location"."data_quality_check", "main_location"."average_spray_quality_score", "main_location"."visited", "main_location"."sprayed", "main_location"."lft", "main_location"."rght", "main_location"."tree_id", "main_location"."mptt_level", "subq"."found", "subq"."days_worked", "subq"."no_of_days_worked", "subq"."reported_sprayed", "subq"."refused", "subq"."reported_found", "subq"."other", "subq"."p_sprayed", "subq"."not_eligible"
 FROM
-(SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_performancereport" ON ("main_location"."id" = "main_performancereport"."district_id") WHERE "main_location"."parent_id" IS NULL GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
-"""  # noqa
-
-RHC_PERFORMANCE_SQL = """
-SELECT "main_location"."id", "main_location"."name", "main_location"."code", "main_location"."level", "main_location"."parent_id", "main_location"."structures", "main_location"."pre_season_target", "main_location"."num_of_spray_areas", "main_location"."data_quality_check", "main_location"."average_spray_quality_score", "main_location"."visited", "main_location"."sprayed", "main_location"."lft", "main_location"."rght", "main_location"."tree_id", "main_location"."mptt_level", "subq"."found", "subq"."no_of_days_worked", "subq"."reported_sprayed", "subq"."refused", "subq"."reported_found", "subq"."other", "subq"."p_sprayed", "subq"."not_eligible"
-FROM 
-(SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_sprayoperator" ON ("main_sprayoperator"."rhc_id" = "main_location"."id") LEFT OUTER JOIN "main_performancereport" ON ("main_performancereport"."spray_operator_id" = "main_sprayoperator"."id") WHERE "main_location"."parent_id" = %s GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
+(SELECT "main_location"."id", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COUNT(DISTINCT "main_performancereport"."spray_date") AS "days_worked", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "p_sprayed", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_location" LEFT OUTER JOIN "main_performancereport" ON ("main_location"."id" = "main_performancereport"."district_id") WHERE "main_location"."parent_id" IS NULL GROUP BY "main_location"."id") "subq" JOIN "main_location" ON "main_location"."id" = "subq"."id" ORDER BY "main_location"."name" ASC
 """  # noqa
 
 TLA_PERFORMANCE_SQL = """
@@ -56,15 +54,9 @@ FROM
 """  # noqa
 
 SOP_PERFORMANCE_SQL = """
-SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
+SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked", "subq"."not_eligible"
 FROM
-(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."team_leader_assistant_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
-"""  # noqa
-
-MDA_SOP_PERFORMANCE_SQL = """
-SELECT "main_sprayoperator"."id", "main_sprayoperator"."code", "main_sprayoperator"."name", "main_sprayoperator"."team_leader_id", "main_sprayoperator"."team_leader_assistant_id", "main_sprayoperator"."data_quality_check", "main_sprayoperator"."average_spray_quality_score", "subq"."refused", "subq"."reported_found", "subq"."found", "subq"."other", "subq"."sprayed", "subq"."reported_sprayed", "subq"."no_of_days_worked"
-FROM
-(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."rhc_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
+(SELECT "main_sprayoperator"."id",  COALESCE(SUM("main_performancereport"."refused"), 0) AS "refused", COALESCE(SUM("main_performancereport"."reported_found"), 0) AS "reported_found", COALESCE(SUM("main_performancereport"."found"), 0) AS "found", COALESCE(SUM("main_performancereport"."other"), 0) AS "other", COALESCE(SUM("main_performancereport"."sprayed"), 0) AS "sprayed", COALESCE(SUM("main_performancereport"."reported_sprayed"), 0) AS "reported_sprayed", COUNT("main_performancereport"."id") AS "no_of_days_worked", COALESCE(SUM("main_performancereport"."not_eligible"), 0) AS "not_eligible" FROM "main_sprayoperator" LEFT OUTER JOIN "main_performancereport" ON ("main_sprayoperator"."id" = "main_performancereport"."spray_operator_id") WHERE "main_sprayoperator"."team_leader_assistant_id" = %s GROUP BY "main_sprayoperator"."id") "subq" JOIN "main_sprayoperator" on "main_sprayoperator"."id" = "subq"."id" ORDER BY "main_sprayoperator"."name"
 """  # noqa
 
 
@@ -143,10 +135,10 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
             ),
         }
         totals["avg_structures_per_so"] = (
-            (sum(
-                (
-                    i["avg_structures_per_so"]
-                    for i in serializer.data)) / num_of_districts)
+            (
+                sum((i["avg_structures_per_so"] for i in serializer.data))
+                / num_of_districts
+            )
             if num_of_districts
             else 0
         )
@@ -166,11 +158,133 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         )
         totals["success_rate"] = (
             (
-                sum((i["success_rate"]
-                    for i in serializer.data)) / num_of_succes_rates)
+                sum((i["success_rate"] for i in serializer.data))
+                / num_of_succes_rates
+            )
             if num_of_succes_rates
             else 0
         )
+
+        context.update({"data": serializer.data, "totals": totals})
+        context.update(DEFINITIONS["performance:district"])
+
+        return context
+
+
+# pylint: disable=too-many-ancestors
+class MDADistrictPerfomanceView(IsPerformanceViewMixin, ListView):
+    """District perfomance view."""
+
+    model = Location
+    template_name = "mda/performance.html"
+
+    def get_queryset(self):
+        """Obtain the queryset."""
+        queryset = (
+            super(MDADistrictPerfomanceView, self)
+            .get_queryset()
+            .filter(target=True)
+        )
+
+        return queryset.filter(parent=None).order_by("name")
+
+    def get_context_data(self, **kwargs):
+        """Obtain context data."""
+        context = super(MDADistrictPerfomanceView, self).get_context_data(
+            **kwargs
+        )
+        districts = Location.objects.filter(parent=None).order_by("name")
+
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        extra_annotations = {}
+        for field in custom_aggregations:
+            extra_annotations["data_%s" % field] = Coalesce(
+                Sum(
+                    Cast(
+                        KeyTextTransform(
+                            field, "sop_district__performancereport__data"
+                        ),
+                        IntegerField(),
+                    )
+                ),
+                Value(0),
+            )
+        queryset = Location.performance_queryset(
+            "sop_district", None, **extra_annotations
+        )
+        context["districts_queryset"] = queryset
+        serializer = MDADistrictPerformanceReportSerializer(
+            queryset, many=True
+        )
+        num_of_districts = round(districts.count())
+        num_of_succes_rates = round(len([i for i in serializer.data]))
+        totals = {
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
+            "not_sprayable": 0,
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
+            "not_sprayed_total": sum(
+                (i["not_sprayed_total"] for i in serializer.data)
+            ),
+            "data_quality_check": all(
+                (i["data_quality_check"] for i in serializer.data)
+            ),
+            "found_difference": sum(
+                (i["found_difference"] for i in serializer.data)
+            ),
+            "sprayed_difference": sum(
+                (i["sprayed_difference"] for i in serializer.data)
+            ),
+            "pre_season_target": sum(
+                (i["location"].pre_season_target for i in serializer.data)
+            ),
+            "houses": sum(
+                (i["location"].structures_on_ground for i in serializer.data)
+            ),
+            "no_of_days_worked": sum(
+                (i["no_of_days_worked"] for i in serializer.data)
+            ),
+            "custom": {},
+        }
+        totals["avg_structures_per_so"] = (
+            (
+                sum((i["avg_structures_per_so"] for i in serializer.data))
+                / num_of_districts
+            )
+            if num_of_districts
+            else 0
+        )
+        totals["avg_start_time"] = average_time(
+            [
+                i["avg_start_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["avg_end_time"] = average_time(
+            [
+                i["avg_end_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["success_rate"] = (
+            (
+                sum((i["success_rate"] for i in serializer.data))
+                / num_of_succes_rates
+            )
+            if num_of_succes_rates
+            else 0
+        )
+
+        for field in custom_aggregations:
+            totals["custom"][field] = sum(
+                i["custom"][field] for i in serializer.data
+            )
 
         context.update({"data": serializer.data, "totals": totals})
         context.update(DEFINITIONS["performance:district"])
@@ -195,57 +309,95 @@ class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
     def get_context_data(self, **kwargs):
         """Obtain context data."""
         context = super().get_context_data(**kwargs)
-        rhcs = Location.objects.filter(parent=self.object).order_by("name")
-        queryset = Location.objects.raw(RHC_PERFORMANCE_SQL, [self.object.id])
+        rhcs = Location.objects.filter(
+            parent=self.object, target=True
+        ).order_by("name")
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        extra_annotations = {}
+        for field in custom_aggregations:
+            extra_annotations["data_%s" % field] = Coalesce(
+                Sum(
+                    Cast(
+                        KeyTextTransform(
+                            field, "sop_rhc__performancereport__data"
+                        ),
+                        IntegerField(),
+                    )
+                ),
+                Value(0),
+            )
+        queryset = Location.performance_queryset(
+            "sop_rhc", self.object, **extra_annotations
+        )
+        context["rhc_queryset"] = queryset
         serializer = RHCPerformanceReportSerializer(queryset, many=True)
         num_of_rhcs = round(rhcs.count())
         num_of_succes_rates = round(len([i for i in serializer.data]))
         totals = {
-            "other":
-            sum((i["other"] for i in serializer.data)),
-            "refused":
-            sum((i["refused"] for i in serializer.data)),
-            "sprayed":
-            sum((i["sprayed"] for i in serializer.data)),
-            "sprayable":
-            sum((i["sprayable"] for i in serializer.data)),
-            "not_sprayable":
-            0,
-            "not_eligible":
-            sum((i["not_eligible"] for i in serializer.data)),
-            "not_sprayed_total":
-            sum((i["not_sprayed_total"] for i in serializer.data)),
-            "data_quality_check":
-            all((i["data_quality_check"] for i in serializer.data)),
-            "found_difference":
-            sum((i["found_difference"] for i in serializer.data)),
-            "sprayed_difference":
-            sum((i["sprayed_difference"] for i in serializer.data)),
-            "houses":
-            sum((i["location"].structures for i in serializer.data)),
-            "no_of_days_worked":
-            sum((i["no_of_days_worked"] for i in serializer.data)),
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
+            "not_sprayable": 0,
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
+            "not_sprayed_total": sum(
+                (i["not_sprayed_total"] for i in serializer.data)
+            ),
+            "data_quality_check": all(
+                (i["data_quality_check"] for i in serializer.data)
+            ),
+            "found_difference": sum(
+                (i["found_difference"] for i in serializer.data)
+            ),
+            "sprayed_difference": sum(
+                (i["sprayed_difference"] for i in serializer.data)
+            ),
+            "houses": sum(
+                (i["location"].structures_on_ground for i in serializer.data)
+            ),
+            "no_of_days_worked": sum(
+                (i["no_of_days_worked"] for i in serializer.data)
+            ),
+            "days_worked": sum((i["days_worked"] for i in serializer.data)),
+            "custom": {},
         }
-        totals["avg_structures_per_so"] = ((
-            sum(
-                (
-                    i["avg_structures_per_so"]
-                    for i in serializer.data)) / num_of_rhcs)
-            if num_of_rhcs else 0)
-        totals["avg_start_time"] = average_time([
-            i["avg_start_time"] for i in serializer.data
-            if i["avg_start_time"] != ""
-        ])
-        totals["avg_end_time"] = average_time([
-            i["avg_end_time"] for i in serializer.data
-            if i["avg_start_time"] != ""
-        ])
-        totals["success_rate"] = ((
-            sum(
-                (
-                    i["success_rate"]
-                    for i in serializer.data)) / num_of_succes_rates)
-            if num_of_succes_rates else 0)
+        totals["avg_structures_per_so"] = (
+            (
+                sum((i["avg_structures_per_so"] for i in serializer.data))
+                / num_of_rhcs
+            )
+            if num_of_rhcs
+            else 0
+        )
+        totals["avg_start_time"] = average_time(
+            [
+                i["avg_start_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["avg_end_time"] = average_time(
+            [
+                i["avg_end_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["success_rate"] = (
+            (
+                sum((i["success_rate"] for i in serializer.data))
+                / num_of_succes_rates
+            )
+            if num_of_succes_rates
+            else 0
+        )
+
+        for field in custom_aggregations:
+            totals["custom"][field] = sum(
+                i["custom"][field] for i in serializer.data
+            )
 
         context.update({"data": serializer.data, "totals": totals})
         context.update(DEFINITIONS["performance:district"])
@@ -296,13 +448,12 @@ class TeamLeadersPerformanceView(IsPerformanceViewMixin, DetailView):
                 (i["no_of_days_worked"] for i in serializer.data)
             ),
             "avg_structures_per_so": (
-                sum(
-                    (
-                        i["avg_structures_per_so"]
-                        for i in serializer.data)) / round(
+                sum((i["avg_structures_per_so"] for i in serializer.data))
+                / round(
                     TeamLeaderAssistant.objects.filter(
                         location=district
-                    ).count() or 1
+                    ).count()
+                    or 1
                 )
             ),
             "avg_start_time": average_time(
@@ -486,10 +637,39 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
         """Obtain context data."""
         context = super().get_context_data(**kwargs)
         rhc = context["object"]
-
-        queryset = SprayOperator.objects.raw(
-            MDA_SOP_PERFORMANCE_SQL, [rhc.id]
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
         )
+        extra_annotations = {}
+        for field in custom_aggregations:
+            extra_annotations["data_%s" % field] = Coalesce(
+                Sum(
+                    Cast(
+                        KeyTextTransform(field, "performancereport__data"),
+                        IntegerField(),
+                    )
+                ),
+                Value(0),
+            )
+
+        queryset = (
+            SprayOperator.objects.filter(rhc_id=rhc.pk)
+            .annotate(
+                found=Coalesce(Sum("performancereport__found"), Value(0)),
+                refused=Coalesce(Sum("performancereport__refused"), Value(0)),
+                other=Coalesce(Sum("performancereport__other"), Value(0)),
+                sprayed=Coalesce(Sum("performancereport__sprayed"), Value(0)),
+                not_eligible=Coalesce(
+                    Sum("performancereport__not_eligible"), Value(0)
+                ),
+                no_of_days_worked=Coalesce(
+                    Count("performancereport__id"), Value(0)
+                ),
+                **extra_annotations
+            )
+            .order_by("name")
+        )
+        context["spray_operator_qs"] = queryset
 
         serializer = SprayOperatorPerformanceReportSerializer(
             queryset, many=True
@@ -503,6 +683,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             "not_sprayed_total": sum(
                 (i["not_sprayed_total"] for i in serializer.data)
             ),
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "data_quality_check": all(
                 (i["data_quality_check"] for i in serializer.data)
             ),
@@ -524,7 +705,14 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
             "avg_end_time": average_time(
                 [i["avg_end_time"] for i in serializer.data]
             ),
+            "custom": {},
         }
+
+        for field in custom_aggregations:
+            totals["custom"][field] = sum(
+                i["custom"][field] for i in serializer.data
+            )
+
         context.update(
             {
                 "data": serializer.data,
@@ -533,7 +721,7 @@ class MDASprayOperatorSummaryView(IsPerformanceViewMixin, DetailView):
                 "rhc_name": rhc.name,
             }
         )
-        context.update(DEFINITIONS["sop"])
+        context.update(DEFINITIONS["mda-sop"])
 
         return context
 
@@ -564,6 +752,7 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             "sprayed": sum((i["sprayed"] for i in serializer.data)),
             "sprayable": sum((i["sprayable"] for i in serializer.data)),
             "not_sprayable": 0,
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
             "not_sprayed_total": sum(
                 (i["not_sprayed_total"] for i in serializer.data)
             ),
@@ -582,7 +771,16 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
             "avg_end_time": average_time(
                 [i["avg_end_time"] for i in serializer.data]
             ),
+            "data": {},
         }
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        for field in custom_aggregations:
+            totals["data"][field] = sum(
+                i["data"][field] for i in serializer.data
+            )
+
         context.update(
             {
                 "data": serializer.data,
@@ -593,6 +791,6 @@ class MDASprayOperatorDailyView(IsPerformanceViewMixin, DetailView):
                 "rhc_name": rhc.name,
             }
         )
-        context.update(DEFINITIONS["sop"])
+        context.update(DEFINITIONS["mda-sop-daily"])
 
         return context

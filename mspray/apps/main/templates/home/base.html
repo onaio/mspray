@@ -33,16 +33,16 @@
                 <div class="collapse navbar-collapse" id="msp-collapse">
                     <ul class="nav navbar-nav navbar-left">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if 'mda' not in request.get_full_path %} style="background-color: green" {% endif %} data-toggle="dropdown">
+                            <a href="#" class="dropdown-toggle" {% if not IS_MDA_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
-                                    {% if performance_tables %}
+                                    {% if not IS_MDA_LINK and performance_tables %}
                                         IRS: Performance
-                                    {% elif directly_observed_spraying %}
+                                    {% elif not IS_MDA_LINK and directly_observed_spraying %}
                                         IRS: Directly Observed Spraying
-                                    {% elif trials %}
+                                    {% elif not IS_MDA_LINK and trials %}
                                         IRS: Trial Survey
                                     {% else %}
-                                        IRS{% if 'mda' not in request.get_full_path %}: Spray Effectiveness{% endif %}
+                                        IRS{% if not IS_MDA_LINK %}: Spray Effectiveness{% endif %}
                                     {% endif %}</span>
                                 <b class="caret"></b>
                             </a>
@@ -77,12 +77,12 @@
                         </li>
                         {% if ENABLE_MDA %}
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if 'mda' in request.get_full_path %} style="background-color: green" {% endif %} data-toggle="dropdown">
+                            <a href="#" class="dropdown-toggle" {% if IS_MDA_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
-                                {% if mda_performance_tables %}
+                                {% if IS_MDA_LINK and performance_tables %}
                                     MDA: Performance
                                 {% else %}
-                                    {{MDA_ROUND_ONE_LABEL}}
+                                    {{ MDA_ROUND_ONE_LABEL }}
                                 {% endif %}
                                 </span>
                                 <b class="caret"></b>

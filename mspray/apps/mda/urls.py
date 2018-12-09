@@ -32,9 +32,9 @@ performance_urls = (  # pylint: disable=C0103
     [
         path(
             "",
-            performance.DistrictPerfomanceView.as_view(
-                template_name="mda/performance.html"),
-            name="districts"),
+            performance.MDADistrictPerfomanceView.as_view(),
+            name="districts",
+        ),
         path(
             "rhcs/<int:district_id>",
             performance.RHCPerformanceView.as_view(),

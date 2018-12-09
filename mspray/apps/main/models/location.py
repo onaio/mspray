@@ -6,8 +6,8 @@ from django.conf import settings
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.core.cache import cache
-from django.db.models import Count, Q, Sum
-from django.db.models.functions import Cast
+from django.db.models import Count, Q, Sum, Value
+from django.db.models.functions import Cast, Coalesce
 from django.utils.functional import cached_property
 
 from mptt.models import MPTTModel, TreeForeignKey
@@ -561,3 +561,44 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         cache.set(key, val)
 
         return val
+
+    @classmethod
+    def performance_queryset(cls, prefix, parent, **extra_annotations):
+        """Return a Location queryset with performance calculations."""
+        return (
+            cls.objects.filter(parent=parent, target=True)
+            .annotate(
+                found=Coalesce(
+                    Sum("%s__performancereport__found" % prefix), Value(0)
+                ),
+                refused=Coalesce(
+                    Sum("%s__performancereport__refused" % prefix), Value(0)
+                ),
+                other=Coalesce(
+                    Sum("%s__performancereport__other" % prefix), Value(0)
+                ),
+                p_sprayed=Coalesce(
+                    Sum("%s__performancereport__sprayed" % prefix), Value(0)
+                ),
+                not_eligible=Coalesce(
+                    Sum("%s__performancereport__not_eligible" % prefix),
+                    Value(0),
+                ),
+                no_of_days_worked=Coalesce(
+                    Count(
+                        "%s__performancereport__sprayformid" % prefix,
+                        distinct=True,
+                    ),
+                    Value(0),
+                ),
+                days_worked=Coalesce(
+                    Count(
+                        "%s__performancereport__spray_date" % prefix,
+                        distinct=True,
+                    ),
+                    Value(0),
+                ),
+                **extra_annotations
+            )
+            .order_by("name")
+        )
