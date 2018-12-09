@@ -675,7 +675,35 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return data
 
 
-class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
+class SuccessRateMixin:
+    """MDA SuccessRateMixin class."""
+
+    def get_success_rate(self, obj):  # pylint: disable=no-self-use
+        """Return percentage found of residential on the ground."""
+        will_be_zero_devision = (
+            obj.found is None
+            or obj.structures_on_ground is None
+            or obj.structures_on_ground == 0
+        )
+        if will_be_zero_devision:
+            return 0
+
+        return (100 * obj.found) / obj.structures_on_ground
+
+
+class MDADistrictPerformanceReportSerializer(
+    SuccessRateMixin,  # pylint: disable=bad-continuation
+    DistrictPerformanceReportSerializer,  # pylint: disable=bad-continuation
+):
+    """District PerformanceReportSerializer"""
+
+    pass
+
+
+class RHCPerformanceReportSerializer(
+    SuccessRateMixin,  # pylint: disable=bad-continuation
+    DistrictPerformanceReportSerializer,  # pylint: disable=bad-continuation
+):
     """DistrictPerformanceReportSerializer"""
 
     def get_avg_start_time(self, obj):  # pylint: disable=no-self-use
@@ -701,15 +729,3 @@ class RHCPerformanceReportSerializer(DistrictPerformanceReportSerializer):
                 if report.end_time is not None
             ]
         )
-
-    def get_success_rate(self, obj):  # pylint: disable=no-self-use
-        """Return percentage found of residential on the ground."""
-        will_be_zero_devision = (
-            obj.found is None
-            or obj.structures_on_ground is None
-            or obj.structures_on_ground == 0
-        )
-        if will_be_zero_devision:
-            return 0
-
-        return (100 * obj.found) / obj.structures_on_ground

@@ -18,6 +18,7 @@ from mspray.apps.main.models import (
 from mspray.apps.main.models.performance_report import PerformanceReport
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer,
+    MDADistrictPerformanceReportSerializer,
     PerformanceReportSerializer,
     RHCPerformanceReportSerializer,
     SprayOperatorPerformanceReportSerializer,
@@ -170,6 +171,127 @@ class DistrictPerfomanceView(IsPerformanceViewMixin, ListView):
         return context
 
 
+# pylint: disable=too-many-ancestors
+class MDADistrictPerfomanceView(IsPerformanceViewMixin, ListView):
+    """District perfomance view."""
+
+    model = Location
+    template_name = "mda/performance.html"
+
+    def get_queryset(self):
+        """Obtain the queryset."""
+        queryset = (
+            super(MDADistrictPerfomanceView, self)
+            .get_queryset()
+            .filter(target=True)
+        )
+
+        return queryset.filter(parent=None).order_by("name")
+
+    def get_context_data(self, **kwargs):
+        """Obtain context data."""
+        context = super(MDADistrictPerfomanceView, self).get_context_data(
+            **kwargs
+        )
+        districts = Location.objects.filter(parent=None).order_by("name")
+
+        custom_aggregations = getattr(
+            settings, "EXTRA_PERFORMANCE_AGGREGATIONS", {}
+        )
+        extra_annotations = {}
+        for field in custom_aggregations:
+            extra_annotations["data_%s" % field] = Coalesce(
+                Sum(
+                    Cast(
+                        KeyTextTransform(
+                            field, "sop_district__performancereport__data"
+                        ),
+                        IntegerField(),
+                    )
+                ),
+                Value(0),
+            )
+        queryset = Location.performance_queryset(
+            "sop_district", None, **extra_annotations
+        )
+        context["districts_queryset"] = queryset
+        serializer = MDADistrictPerformanceReportSerializer(
+            queryset, many=True
+        )
+        num_of_districts = round(districts.count())
+        num_of_succes_rates = round(len([i for i in serializer.data]))
+        totals = {
+            "other": sum((i["other"] for i in serializer.data)),
+            "refused": sum((i["refused"] for i in serializer.data)),
+            "sprayed": sum((i["sprayed"] for i in serializer.data)),
+            "sprayable": sum((i["sprayable"] for i in serializer.data)),
+            "not_sprayable": 0,
+            "not_eligible": sum((i["not_eligible"] for i in serializer.data)),
+            "not_sprayed_total": sum(
+                (i["not_sprayed_total"] for i in serializer.data)
+            ),
+            "data_quality_check": all(
+                (i["data_quality_check"] for i in serializer.data)
+            ),
+            "found_difference": sum(
+                (i["found_difference"] for i in serializer.data)
+            ),
+            "sprayed_difference": sum(
+                (i["sprayed_difference"] for i in serializer.data)
+            ),
+            "pre_season_target": sum(
+                (i["location"].pre_season_target for i in serializer.data)
+            ),
+            "houses": sum(
+                (i["location"].structures_on_ground for i in serializer.data)
+            ),
+            "no_of_days_worked": sum(
+                (i["no_of_days_worked"] for i in serializer.data)
+            ),
+            "custom": {},
+        }
+        totals["avg_structures_per_so"] = (
+            (
+                sum((i["avg_structures_per_so"] for i in serializer.data))
+                / num_of_districts
+            )
+            if num_of_districts
+            else 0
+        )
+        totals["avg_start_time"] = average_time(
+            [
+                i["avg_start_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["avg_end_time"] = average_time(
+            [
+                i["avg_end_time"]
+                for i in serializer.data
+                if i["avg_start_time"] != ""
+            ]
+        )
+        totals["success_rate"] = (
+            (
+                sum((i["success_rate"] for i in serializer.data))
+                / num_of_succes_rates
+            )
+            if num_of_succes_rates
+            else 0
+        )
+
+        for field in custom_aggregations:
+            totals["custom"][field] = sum(
+                i["custom"][field] for i in serializer.data
+            )
+
+        context.update({"data": serializer.data, "totals": totals})
+        context.update(DEFINITIONS["performance:district"])
+
+        return context
+
+
 class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
     """RHC performance view."""
 
@@ -206,8 +328,8 @@ class RHCPerformanceView(IsPerformanceViewMixin, DetailView):
                 ),
                 Value(0),
             )
-        queryset = Location.rhc_performance_queryset(
-            self.object, **extra_annotations
+        queryset = Location.performance_queryset(
+            "sop_rhc", self.object, **extra_annotations
         )
         context["rhc_queryset"] = queryset
         serializer = RHCPerformanceReportSerializer(queryset, many=True)

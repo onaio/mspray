@@ -14,6 +14,7 @@ from mspray.apps.main.models import (
 )
 from mspray.apps.main.serializers import (
     DistrictPerformanceReportSerializer,
+    MDADistrictPerformanceReportSerializer,
     PerformanceReportSerializer,
     TLAPerformanceReportSerializer,
 )
@@ -29,6 +30,7 @@ from mspray.apps.main.views.performance import (
     SOP_PERFORMANCE_SQL,
     TLA_PERFORMANCE_SQL,
     DistrictPerfomanceView,
+    MDADistrictPerfomanceView,
     MDASprayOperatorDailyView,
     MDASprayOperatorSummaryView,
     RHCPerformanceView,
@@ -93,6 +95,63 @@ class TestPerformanceView(TestBase):
 
         queryset = Location.objects.raw(DISTRICT_PERFORMANCE_SQL)
         serializer = DistrictPerformanceReportSerializer(queryset, many=True)
+
+        self.assertEqual(response.context_data["data"], serializer.data)
+
+    def test_mda_district_performance(self):
+        """Test district performance view.
+
+        This is done by confirming the data received in the response
+        context is being aggregated appropriately within the view
+        """
+        # first we load our test data
+        data_setup()
+        self._load_fixtures()
+        rhc = Location.objects.get(name="Zemba")
+        district = rhc.parent
+        spray_operator = SprayOperator.objects.first()
+        team_leader = TeamLeader.objects.first()
+        spray_operator.team_leader = team_leader
+        spray_operator.rhc = rhc
+        spray_operator.district = rhc.parent
+        spray_operator.save()
+        # next we identify a SprayDay object for the spray operator
+        spray_day = SprayDay.objects.filter(spray_operator=spray_operator)
+        spray_day.update(sprayable=True)
+
+        # Create performance report objects from the submissions made
+        # by the particular sprayoperator.
+
+        performance_report(spray_operator)
+        report1 = PerformanceReport.objects.get(spray_operator=spray_operator)
+        report1.found = 7
+        report1.reported_sprayed = 16
+        report1.reported_found = 22
+        report1.district = district
+        report1.save()
+
+        report2 = PerformanceReport.objects.get(spray_operator=spray_operator)
+        report2.id = None
+        report2.sprayformid = 7658
+        report2.refused = 6
+        report2.found = 12
+        report2.reported_sprayed = 6
+        report1.district = district
+        report2.save()
+
+        factory = RequestFactory()
+        request = factory.get("/")
+        view = MDADistrictPerfomanceView.as_view()
+        response = view(request)
+        self.assertEqual(response.status_code, 200)
+
+        # Query obtains all data for the SprayOperator
+        # including submissions made and passes this to the serializer
+
+        queryset = Location.performance_queryset('sop_district', None)
+        serializer = MDADistrictPerformanceReportSerializer(
+            queryset, many=True
+        )
 
         self.assertEqual(response.context_data["data"], serializer.data)
 
@@ -515,7 +574,7 @@ class TestPerformanceView(TestBase):
         # Query obtains all data for the SprayOperator
         # including submissions made and passes this to the serializer
 
-        queryset = Location.rhc_performance_queryset(district)
+        queryset = Location.performance_queryset("sop_rhc", district)
         serializer = RHCPerformanceReportSerializer(queryset, many=True)
 
         result = {

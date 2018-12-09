@@ -56,7 +56,7 @@ class TestPerformanceSerializer(TestBase):
         report1.district = district
         report2.save()
 
-        queryset = Location.rhc_performance_queryset(district)
+        queryset = Location.performance_queryset("sop_rhc", district)
         serializer_instance = RHCPerformanceReportSerializer(
             queryset, many=True
         )

@@ -563,36 +563,38 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         return val
 
     @classmethod
-    def rhc_performance_queryset(cls, parent, **extra_annotations):
-        """Return a queryset with all RHCs with performance calculations."""
+    def performance_queryset(cls, prefix, parent, **extra_annotations):
+        """Return a Location queryset with performance calculations."""
         return (
             cls.objects.filter(parent=parent, target=True)
             .annotate(
                 found=Coalesce(
-                    Sum("sop_rhc__performancereport__found"), Value(0)
+                    Sum("%s__performancereport__found" % prefix), Value(0)
                 ),
                 refused=Coalesce(
-                    Sum("sop_rhc__performancereport__refused"), Value(0)
+                    Sum("%s__performancereport__refused" % prefix), Value(0)
                 ),
                 other=Coalesce(
-                    Sum("sop_rhc__performancereport__other"), Value(0)
+                    Sum("%s__performancereport__other" % prefix), Value(0)
                 ),
                 p_sprayed=Coalesce(
-                    Sum("sop_rhc__performancereport__sprayed"), Value(0)
+                    Sum("%s__performancereport__sprayed" % prefix), Value(0)
                 ),
                 not_eligible=Coalesce(
-                    Sum("sop_rhc__performancereport__not_eligible"), Value(0)
+                    Sum("%s__performancereport__not_eligible" % prefix),
+                    Value(0),
                 ),
                 no_of_days_worked=Coalesce(
                     Count(
-                        "sop_rhc__performancereport__sprayformid",
+                        "%s__performancereport__sprayformid" % prefix,
                         distinct=True,
                     ),
                     Value(0),
                 ),
                 days_worked=Coalesce(
                     Count(
-                        "sop_rhc__performancereport__spray_date", distinct=True
+                        "%s__performancereport__spray_date" % prefix,
+                        distinct=True,
                     ),
                     Value(0),
                 ),
