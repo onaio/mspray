@@ -595,7 +595,7 @@ class TestPerformanceView(TestBase):
             "avg_structures_per_so": 0.4523809523809524,
             "avg_start_time": datetime.time(16, 22, 17),
             "avg_end_time": datetime.time(16, 38, 8),
-            "success_rate": 3.47985347985348,
+            "success_rate": 0.0,
         }
 
         self.assertEqual(response.context_data["totals"], result)

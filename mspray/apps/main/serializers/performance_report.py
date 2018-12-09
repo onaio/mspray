@@ -675,20 +675,20 @@ class DistrictPerformanceReportSerializer(serializers.ModelSerializer):
         return data
 
 
-class SuccessRateMixin:
+class SuccessRateMixin:  # pylint: disable=too-few-public-methods
     """MDA SuccessRateMixin class."""
 
     def get_success_rate(self, obj):  # pylint: disable=no-self-use
         """Return percentage found of residential on the ground."""
         will_be_zero_devision = (
-            obj.found is None
+            obj.mda_found is None
             or obj.structures_on_ground is None
             or obj.structures_on_ground == 0
         )
         if will_be_zero_devision:
             return 0
 
-        return (100 * obj.found) / obj.structures_on_ground
+        return (100 * obj.mda_found) / obj.structures_on_ground
 
 
 class MDADistrictPerformanceReportSerializer(
