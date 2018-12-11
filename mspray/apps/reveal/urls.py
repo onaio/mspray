@@ -5,6 +5,8 @@ from django.urls import path
 
 from mspray.apps.reveal.views import add_spray_data_view
 
+app_name = "reveal"  # pylint: disable=invalid-name
+
 urlpatterns = [  # pylint: disable=invalid-name
     path(
         "add-spray-data/",
