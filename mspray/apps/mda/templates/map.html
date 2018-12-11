@@ -19,9 +19,9 @@
                             {% for day in target_data.spray_dates %}
                                 <li>
                                     {% if object.parent %}
-                                    <a href="{% url 'target_area' object.parent.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                                    <a href="{% url SPRAY_AREA_URL object.parent.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
                                     {% else %}
-                                    <a href="{% url 'target_area' object.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                                    <a href="{% url SPRAY_AREA_URL object.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
                                     {% endif %}
                                 </li>
                             {% endfor %}

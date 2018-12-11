@@ -77,6 +77,7 @@ performance_urls = (  # pylint: disable=C0103
 
 urlpatterns = [  # pylint: disable=C0103
     path("mda/", include(mda_urls, namespace="mda")),
+    path("mda-round-2/", include(mda_urls, namespace="mda-2")),
     path("trials/", include("mspray.apps.trials.urls", namespace="trials")),
     path("api/alerts/", include(alerts_urls, namespace="alerts")),
     path("api/", include(router.urls)),

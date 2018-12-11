@@ -24,7 +24,7 @@
                 {% for location in mopup_locations %}
                     <tr>
                         <td>
-                            <a href="{% if active_site == 'MDA' %}{% url 'mda:mop-up' location.pk %}{% else %}{% url 'mop-up' location.pk %}{% endif%}">{{ location.name }}</a>
+                            <a href="{% url MOPUP_URL location.pk %}">{{ location.name }}</a>
                         </td>
                         <td class='numbers'>
                             {{ location.health_centers_to_mopup }}

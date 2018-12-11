@@ -10,7 +10,7 @@
     <div class="row">
         <h1>{{object.name}}</h1>
         <ol class="breadcrumb">
-            <li><a href="{% url "mda:performance:districts" %}">Districts</a></li>
+            <li><a href="{% url PERFORMANCE_DISTRICT_URL %}">Districts</a></li>
             <li class="active">{{ RHC_LABEL_PLURAL }}</li>
         </ol>
         <div class="row">
@@ -39,7 +39,7 @@
                     <tbody>
                     {% for row in data %}
                         <tr>
-                            <td><a href="{% if not IS_MDA_LINK %}{% url "performance:team-leaders" row.location.id %}{% else  %}{% url 'mda:performance:spray-operator-summary' row.location.id %}{% endif %}">{{ row.location.name }}</a></td>
+                            <td><a href="{% url PERFORMANCE_TL_URL row.location.id %}">{{ row.location.name }}</a></td>
                             <td class='numbers'>{{ row.days_worked|intcomma }}</td>
                             <td class='numbers'>{{ row.location.structures_on_ground|intcomma }}</td>
                             <td class='numbers'>{{ row.sprayable|intcomma }}</td>

@@ -8,7 +8,7 @@
         <div class="container">
             <h1>{{ object.name }}</h1>
             <ol class="breadcrumb">
-              <li><a href="{% url "mda:performance:rhcs" rhc.parent.id %}">{{RHC_LABEL_PLURAL}}</a></li>
+              <li><a href="{% url PERFORMANCE_RHC_URL rhc.parent.id %}">{{RHC_LABEL_PLURAL}}</a></li>
               <li class="active">{{ COMMUNITY_HEALTH_WORKER_LABEL_PLURAL }}</li>
             </ol>
             <div class="row">
@@ -36,10 +36,10 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    {% if 'mda' not in request.get_full_path %}
-                                    <td><a href="{% url "performance:spray-operator-daily" rhc.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
+                                    {% if not IS_MDA_LINK and not IS_MDA_2_LINK %}
+                                    <td><a href="{% url PERFORMANCE_SO_URL rhc.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
                                     {% else %}
-                                    <td><a href="{% url "mda:performance:spray-operator-daily" rhc.id  row.spray_operator_id %}">{{ row.name }}</a></td>
+                                    <td><a href="{% url PERFORMANCE_SO_URL rhc.id  row.spray_operator_id %}">{{ row.name }}</a></td>
                                     {% endif %}
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>

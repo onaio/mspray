@@ -33,16 +33,16 @@
                 <div class="collapse navbar-collapse" id="msp-collapse">
                     <ul class="nav navbar-nav navbar-left">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if not IS_MDA_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
+                            <a href="#" class="dropdown-toggle" {% if not IS_MDA_LINK and not IS_MDA_2_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
-                                    {% if not IS_MDA_LINK and performance_tables %}
+                                    {% if not IS_MDA_LINK and not IS_MDA_2_LINK and performance_tables %}
                                         IRS: Performance
-                                    {% elif not IS_MDA_LINK and directly_observed_spraying %}
+                                    {% elif not IS_MDA_LINK and not IS_MDA_2_LINK and directly_observed_spraying %}
                                         IRS: Directly Observed Spraying
-                                    {% elif not IS_MDA_LINK and trials %}
+                                    {% elif not IS_MDA_LINK and not IS_MDA_2_LINK and trials %}
                                         IRS: Trial Survey
                                     {% else %}
-                                        IRS{% if not IS_MDA_LINK %}: Spray Effectiveness{% endif %}
+                                        IRS{% if not IS_MDA_LINK and not IS_MDA_2_LINK %}: Spray Effectiveness{% endif %}
                                     {% endif %}</span>
                                 <b class="caret"></b>
                             </a>
@@ -99,11 +99,31 @@
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'mda:mop-up' %}">MDA: Mop-up</a></li>
                                 <li role="separator" class="divider"></li>
-                                {% if view.request.session.show_csv %}
-                                    <li ><a href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" {% if IS_MDA_2_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
+                                <span>
+                                {% if IS_MDA_2_LINK and performance_tables %}
+                                    MDA: Performance
                                 {% else %}
-                                    <li ><a href="{% url 'login' %}">Login</a></li>
+                                    {{ MDA_ROUND_TWO_LABEL }}
                                 {% endif %}
+                                </span>
+                                <b class="caret"></b>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="{% url 'mda-2:index' %}">MDA: Effectiveness</a></li>
+                                {% if view.request.session.show_csv %}
+                                <li role="separator" class="divider"></li>
+                                <li class="dropdown-header"><a href="{% url 'mda-2:sprayareas' %}">MDA: All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="{% url 'mda-2:sprayareas-csv' 'csv' %}"> MDA: CSV: All Spray Areas</a></li>
+                                {% endif %}
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mda-2:performance:districts' %} ">MDA: Performance</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="{% url 'mda-2:mop-up' %}">MDA: Mop-up</a></li>
+                                <li role="separator" class="divider"></li>
                             </ul>
                         </li>
                         {% endif %}

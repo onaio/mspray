@@ -50,11 +50,46 @@ def enable_mda(request):
 
     When ENABLE_MDA is set to True the MDA dashboard links are enabled.
     """
+    url_path = request.get_full_path()
+    is_mda_one = "mda" in url_path and "mda-round-2" not in url_path
+    is_mda_two = "mda-round-2" in url_path
+    spray_area_url = "target_area"
+    performance_district_url = "performance:districts"
+    performance_team_leader_url = "performance:team-leaders"
+    performance_rhc_url = "performance:rhcs"
+    spray_operator_daily_url = "performance:spray-operator-daily"
+    mda_static_prefix = getattr(settings, "MDA_STATIC_PREFIX", "/mda")
+    static_url_prefix = "".join([url_path, mda_static_prefix])
+    mopup_url = "mop-up"
+    if is_mda_one:
+        spray_area_url = "mda:spray-area"
+        performance_district_url = "mda:performance:districts"
+        performance_team_leader_url = "mda:performance:spray-operator-summary"
+        performance_rhc_url = "mda:performance:rhcs"
+        spray_operator_daily_url = "mda:performance:spray-operator-daily"
+        mopup_url = "mda:mop-up"
+    if is_mda_two:
+        spray_area_url = "mda-2:spray-area"
+        performance_district_url = "mda-2:performance:districts"
+        performance_team_leader_url = (
+            "mda-2:performance:spray-operator-summary"
+        )
+        performance_rhc_url = "mda-2:performance:rhcs"
+        spray_operator_daily_url = "mda-2:performance:spray-operator-daily"
+        mopup_url = "mda-2:mop-up"
 
     return {
         "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
-        "MDA_STATIC_PREFIX": getattr(settings, "MDA_STATIC_PREFIX", "/mda"),
-        "IS_MDA_LINK": "mda" in request.get_full_path(),
+        "MDA_STATIC_PREFIX": mda_static_prefix,
+        "MSPRAY_STATIC_URL_PREFIX": static_url_prefix,
+        "IS_MDA_LINK": is_mda_one,
+        "IS_MDA_2_LINK": is_mda_two,
+        "SPRAY_AREA_URL": spray_area_url,
+        "PERFORMANCE_DISTRICT_URL": performance_district_url,
+        "PERFORMANCE_TL_URL": performance_team_leader_url,
+        "PERFORMANCE_RHC_URL": performance_rhc_url,
+        "PERFORMANCE_SO_URL": spray_operator_daily_url,
+        "MOPUP_URL": mopup_url,
     }
 
 
@@ -84,4 +119,5 @@ def labels(request):
         "MDA_ROUND_ONE_LABEL": getattr(
             settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"
         ),
+        "MDA_ROUND_TWO_LABEL": "MDA Round 2",
     }

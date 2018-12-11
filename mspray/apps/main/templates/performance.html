@@ -38,7 +38,7 @@
             <tbody>
             {% for row in data %}
                 <tr>
-                    <td><a href="{% if 'mda' not in request.get_full_path %}{% url "performance:team-leaders" row.location.id %}{% else  %}{% url 'mda:performance:spray-operator-summary' row.location.id %}{% endif %}">{{ row.location.name }}</a></td>
+                    <td><a href="{% url PERFORMANCE_TL_URL row.location.id %}">{{ row.location.name }}</a></td>
                     <td class='numbers'>{{ row.location.pre_season_target|intcomma }}</td>
                     <td class='numbers'>{{ row.location.structures_on_ground|intcomma }}</td>
                     <td class='numbers'>{{ row.sprayable|intcomma }}</td>

@@ -38,10 +38,10 @@
                         <tbody>
                             {% for row in data %}
                                 <tr>
-                                    {% if 'mda' not in request.get_full_path %}
-                                    <td><a href="{% url "performance:spray-operator-daily" district.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
+                                    {% if not IS_MDA_LINK and not IS_MDA_2_LINK %}
+                                    <td><a href="{% url PERFORMANCE_SO_URL district.id team_leader row.spray_operator_id %}">{{ row.name }}</a></td>
                                     {% else %}
-                                    <td><a href="{% url "mda:performance:spray-operator-daily" district.id  row.spray_operator_id %}">{{ row.name }}</a></td>
+                                    <td><a href="{% url PERFORMANCE_SO_URL district.id row.spray_operator_id %}">{{ row.name }}</a></td>
                                     {% endif %}
                                     <td class='numbers'>{{ row.no_of_days_worked|intcomma   }}</td>
                                     <td class='numbers'>{{ row.sprayable|intcomma  }}</td>

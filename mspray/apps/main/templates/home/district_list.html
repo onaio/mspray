@@ -18,7 +18,7 @@
                             {% for loc in top_level %}
                                 <li>
                                     {% if map_menu %}
-                                    <a href="{% url 'target_area' loc.id loc.id %}">{{ loc.name }}</a>
+                                    <a href="{% url SPRAY_AREA_URL loc.id loc.id %}">{{ loc.name }}</a>
                                     {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                     {% endif %}
@@ -47,7 +47,7 @@
                             {% for loc in locations %}
                                 <li>
                                     {% if map_menu %}
-                                    <a href="{% url 'target_area' loc.parent loc.id %}">{{ loc.name }}</a>
+                                    <a href="{% url SPRAY_AREA_URL loc.parent loc.id %}">{{ loc.name }}</a>
                                     {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                     {% endif %}
@@ -76,7 +76,7 @@
                             {% for loc in sub_locations %}
                                 <li>
                                     {% if loc.level == ta_level or map_menu %}
-                                    <a href="{% url 'target_area' loc.parent loc.id %}">{{ loc.name }}</a>
+                                    <a href="{% url SPRAY_AREA_URL loc.parent loc.id %}">{{ loc.name }}</a>
                                     {% else %}
                                     <a href="{% url 'district' loc.id %}">{{ loc.name }}</a>
                                     {% endif %}
