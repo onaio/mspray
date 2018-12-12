@@ -32,7 +32,21 @@ from mspray.apps.main.views.target_area import (
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
 
 
+class SprayAreaBuffer:  # pylint: disable=too-few-public-methods
+    """
+    A file object like class that implements the write operation.
+    """
+
+    def write(self, value):  # pylint: disable=no-self-use
+        """
+        Returns the value passed to it.
+        """
+        return value
+
+
 class DistrictView(SiteNameMixin, ListView):
+    """Spray Effectiveness landing page - lists districts."""
+
     template_name = "home/district.html"
     model = Location
     slug_field = "pk"
@@ -47,7 +61,7 @@ class DistrictView(SiteNameMixin, ListView):
 
         return get_location_qs(queryset)
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  # pylint: disable=R0912,R0914,R0915
         context = super(DistrictView, self).get_context_data(**kwargs)
 
         not_targeted = None
@@ -170,14 +184,17 @@ class DistrictView(SiteNameMixin, ListView):
 
 
 class TargetAreaView(SiteNameMixin, DetailView):
+    """Map view."""
+
     template_name = "home/map.html"
     model = Location
     slug_field = "pk"
 
     def get_queryset(self):
-        qs = super(TargetAreaView, self).get_queryset().filter(target=True)
 
-        return get_location_qs(qs)
+        return get_location_qs(
+            super(TargetAreaView, self).get_queryset().filter(target=True)
+        )
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)
@@ -198,10 +215,12 @@ class TargetAreaView(SiteNameMixin, DetailView):
         spray_date = parse_spray_date(self.request)
         if spray_date:
             context["spray_date"] = spray_date
-        if (
+        is_spatial = (
             settings.MSPRAY_SPATIAL_QUERIES
             or context["object"].geom is not None
-        ):
+        )
+
+        if is_spatial:
             view = TargetAreaViewSet.as_view({"get": "retrieve"})
             response = view(
                 self.request, pk=context["object"].pk, format="geojson"
@@ -209,17 +228,17 @@ class TargetAreaView(SiteNameMixin, DetailView):
             response.render()
             context["not_sprayable_value"] = NOT_SPRAYABLE_VALUE
             context["ta_geojson"] = response.content.decode()
-            bgeom = settings.HH_BUFFER and settings.OSM_SUBMISSIONS
 
             if self.object.level in ["district", "RHC"]:
-                data = GeoTargetAreaSerializer(
-                    get_location_qs(
-                        self.object.location_set.all(), self.object.level
-                    ),
-                    many=True,
-                    context={"request": self.request},
-                ).data
-                context["hh_geojson"] = json.dumps(data)
+                context["hh_geojson"] = json.dumps(
+                    GeoTargetAreaSerializer(
+                        get_location_qs(
+                            self.object.location_set.all(), self.object.level
+                        ),
+                        many=True,
+                        context={"request": self.request},
+                    ).data
+                )
             else:
                 loc = context["object"]
                 hhview = TargetAreaHouseholdsViewSet.as_view(
@@ -228,7 +247,7 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 response = hhview(
                     self.request,
                     pk=loc.pk,
-                    bgeom=bgeom,
+                    bgeom=settings.HH_BUFFER and settings.OSM_SUBMISSIONS,
                     spray_date=spray_date,
                     format="geojson",
                 )
@@ -269,19 +288,23 @@ class TargetAreaView(SiteNameMixin, DetailView):
 
 
 class SprayAreaView(SiteNameMixin, ListView):
+    """Spray area tables."""
+
     template_name = "home/sprayareas.html"
     model = Location
     slug_field = "pk"
 
     def get_queryset(self):
-        qs = super(SprayAreaView, self).get_queryset()
-        qs = qs.filter(level="ta", target=True)
 
-        return get_location_qs(qs)
+        return get_location_qs(
+            super(SprayAreaView, self)
+            .get_queryset()
+            .filter(level="ta", target=True)
+        )
 
     def get_context_data(self, **kwargs):
         context = super(SprayAreaView, self).get_context_data(**kwargs)
-        qs = (
+        queryset = (
             context["object_list"]
             .extra(
                 select={
@@ -316,20 +339,11 @@ class SprayAreaView(SiteNameMixin, ListView):
         if self.request.GET.get("format") != "csv":
             serializer_class = TargetAreaSerializer
             serializer = serializer_class(
-                qs, many=True, context={"request": self.request}
+                queryset, many=True, context={"request": self.request}
             )
             context["district_list"] = serializer.data
-        context["qs"] = qs
-        # fields = ['structures', 'visited_total', 'visited_sprayed',
-        #           'visited_not_sprayed', 'visited_refused', 'visited_other',
-        #           'not_visited', 'found', 'num_of_spray_areas']
-        # totals = {}
-        # for rec in serializer.data:
-        #     for field in fields:
-        #         totals[field] = rec[field] + (totals[field]
-        #                                       if field in totals else 0)
+        context["qs"] = queryset
         context.update(get_location_dict(None))
-        # context['district_totals'] = totals
         context.update(DEFINITIONS["ta"])
 
         return context
@@ -352,17 +366,6 @@ class SprayAreaView(SiteNameMixin, ListView):
                     return ""
 
                 return round((numerator * 100) / denominator)
-
-            class SprayAreaBuffer(object):
-                """
-                A file object like class that implements the write operation.
-                """
-
-                def write(self, value):
-                    """
-                    Returns the value passed to it.
-                    """
-                    return value
 
             def _data():
                 yield [
@@ -463,17 +466,6 @@ class DetailedCSVView(SiteNameMixin, ListView):
         return queryset.filter(level="ta", target=True).order_by("name")
 
     def render_to_response(self, context, **response_kwargs):
-        class SprayAreaBuffer(object):
-            """
-            A file object like class that implements the write operation.
-            """
-
-            def write(self, value):
-                """
-                Returns the value passed to it.
-                """
-                return value
-
         filename = "detailed_sprayareas.csv"
         if default_storage.exists(filename):
             with default_storage.open(filename) as file_pointer:
@@ -500,6 +492,8 @@ class DetailedCSVView(SiteNameMixin, ListView):
 
 
 class WeeklyReportView(SiteNameMixin, ListView):
+    """Weekly Report tables and CSV."""
+
     template_name = "home/sprayareas.html"
     model = WeeklyReport
     slug_field = "pk"
@@ -544,17 +538,6 @@ class WeeklyReportView(SiteNameMixin, ListView):
                 return ""
 
             return round((numerator * 100) / denominator)
-
-        class SprayAreaBuffer(object):
-            """
-            A file object like class that implements the write operation.
-            """
-
-            def write(self, value):
-                """
-                Returns the value passed to it.
-                """
-                return value
 
         def _data():
             yield [
