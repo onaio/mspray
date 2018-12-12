@@ -73,7 +73,7 @@ def detailed_spray_area_data(queryset=None):
 
 def detailed_spray_area_to_file(filename="detailed_sprayareas.csv"):
     """Write the detailed spray area report to file."""
-    with TemporaryFile() as file_pointer:
+    with TemporaryFile(mode="w", encoding="utf-8") as file_pointer:
         writer = csv.writer(file_pointer)
         for row in detailed_spray_area_data():
             writer.writerow(row)
