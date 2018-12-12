@@ -4,11 +4,13 @@ import csv
 import json
 
 from django.conf import settings
+from django.core.files.storage import default_storage
 from django.http import StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from mspray.apps.main.definitions import DEFINITIONS
+from mspray.apps.main.exports import detailed_spray_area_data
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location, WeeklyReport
 from mspray.apps.main.query import get_location_qs
@@ -16,16 +18,11 @@ from mspray.apps.main.serializers import DistrictSerializer
 from mspray.apps.main.serializers.target_area import (
     GeoTargetAreaSerializer,
     TargetAreaQuerySerializer,
-    TargetAreaRichSerializer,
     TargetAreaSerializer,
     count_duplicates,
     get_duplicates,
 )
-from mspray.apps.main.utils import (
-    get_location_dict,
-    parse_spray_date,
-    queryset_iterator,
-)
+from mspray.apps.main.utils import get_location_dict, parse_spray_date
 from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
 from mspray.apps.main.views.target_area import (
     TargetAreaHouseholdsViewSet,
@@ -477,69 +474,27 @@ class DetailedCSVView(SiteNameMixin, ListView):
                 """
                 return value
 
-        def _data():
-            yield [
-                "Target Area",
-                "District",
-                "Structures Found",
-                "Sprayed Structures",
-                "Sprayed Total Pop",
-                "Sprayed Males",
-                "Sprayed Females",
-                "Sprayed Pregnant Women",
-                "Sprayed Children",
-                "Not Sprayed Structures",
-                "Not Sprayed Total Pop",
-                "Not Sprayed Males",
-                "Not Sprayed Females",
-                "Not Sprayed Pregnant Women",
-                "Not Sprayed Children",
-                "Rooms Found",
-                "Rooms Sprayed ",
-                "Nets Total Available",
-                "Nets People Covered",
-                "Bottles Issued",
-                "Bottles Full",
-                "Bottles Empty",
-                "Bottles Not Returned",
-            ]
-            target_areas = self.get_queryset()
-            for ta in queryset_iterator(target_areas):
-                item = TargetAreaRichSerializer(ta).data
-                yield [
-                    item["name"],
-                    item["district"],
-                    item["found"],
-                    item["visited_sprayed"],
-                    item["sprayed_totalpop"],
-                    item["sprayed_males"],
-                    item["sprayed_females"],
-                    item["sprayed_pregwomen"],
-                    item["sprayed_childrenU5"],
-                    item["visited_not_sprayed"],
-                    item["unsprayed_totalpop"],
-                    item["unsprayed_males"],
-                    item["unsprayed_females"],
-                    item["unsprayed_pregnant_women"],
-                    item["unsprayed_children_u5"],
-                    item["total_rooms"],
-                    item["sprayed_rooms"],
-                    item["total_nets"],
-                    item["total_uNet"],
-                    item["bottles_start"],
-                    item["bottles_full"],
-                    item["bottles_empty"],
-                    item["bottles_accounted"],
-                ]
-
-        sprayarea_buffer = SprayAreaBuffer()
-        writer = csv.writer(sprayarea_buffer)
-        response = StreamingHttpResponse(
-            (writer.writerow(row) for row in _data()), content_type="text/csv"
+        filename = "detailed_sprayareas.csv"
+        if default_storage.exists(filename):
+            with default_storage.open(filename) as file_pointer:
+                response = StreamingHttpResponse(
+                    (line for line in file_pointer), content_type="text/csv"
+                )
+        else:
+            sprayarea_buffer = SprayAreaBuffer()
+            writer = csv.writer(sprayarea_buffer)
+            response = StreamingHttpResponse(
+                (
+                    writer.writerow(row)
+                    for row in detailed_spray_area_data(
+                        queryset=self.get_queryset()
+                    )
+                ),
+                content_type="text/csv",
+            )
+        response["Content-Disposition"] = (
+            'attachment; filename="%s"' % filename
         )
-        response[
-            "Content-Disposition"
-        ] = 'attachment; filename="detailed_sprayareas.csv"'
 
         return response
 
