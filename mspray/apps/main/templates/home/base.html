@@ -88,16 +88,16 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'mda:index' %}">MDA: Effectiveness</a></li>
+                                <li><a href="/mda/">MDA: Effectiveness</a></li>
                                 {% if view.request.session.show_csv %}
                                 <li role="separator" class="divider"></li>
-                                <li class="dropdown-header"><a href="{% url 'mda:sprayareas' %}">MDA: All Spray Areas</a></li>
-                                <li class="dropdown-header"><a href="{% url 'mda:sprayareas-csv' 'csv' %}"> MDA: CSV: All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="/mda/sprayareas">MDA: All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="/mda/sprayareas?format=csv"> MDA: CSV: All Spray Areas</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'mda:performance:districts' %} ">MDA: Performance</a></li>
+                                <li><a href="/mda/performance/">MDA: Performance</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'mda:mop-up' %}">MDA: Mop-up</a></li>
+                                <li><a href="/mda/mop-up">MDA: Mop-up</a></li>
                                 <li role="separator" class="divider"></li>
                             </ul>
                         </li>
@@ -113,16 +113,16 @@
                                 <b class="caret"></b>
                             </a>
                             <ul class="dropdown-menu">
-                                <li><a href="{% url 'mda-2:index' %}">MDA: Effectiveness</a></li>
+                                <li><a href="/mda-round-2/">MDA: Effectiveness</a></li>
                                 {% if view.request.session.show_csv %}
                                 <li role="separator" class="divider"></li>
-                                <li class="dropdown-header"><a href="{% url 'mda-2:sprayareas' %}">MDA: All Spray Areas</a></li>
-                                <li class="dropdown-header"><a href="{% url 'mda-2:sprayareas-csv' 'csv' %}"> MDA: CSV: All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="/mda-round-2/sprayareas">MDA: All Spray Areas</a></li>
+                                <li class="dropdown-header"><a href="/mda-round-2/sprayareas?format=csv"> MDA: CSV: All Spray Areas</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'mda-2:performance:districts' %} ">MDA: Performance</a></li>
+                                <li><a href="/mda-round-2/performance/">MDA: Performance</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="{% url 'mda-2:mop-up' %}">MDA: Mop-up</a></li>
+                                <li><a href="/mda-round-2/mop-up">MDA: Mop-up</a></li>
                                 <li role="separator" class="divider"></li>
                             </ul>
                         </li>
