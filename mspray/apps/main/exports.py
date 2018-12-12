@@ -3,8 +3,8 @@
 import csv
 from tempfile import TemporaryFile
 
+from django.core.files.base import File
 from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
 
 from mspray.apps.main.models import Location
 from mspray.apps.main.serializers.target_area import TargetAreaRichSerializer
@@ -73,11 +73,12 @@ def detailed_spray_area_data(queryset=None):
 
 def detailed_spray_area_to_file(filename="detailed_sprayareas.csv"):
     """Write the detailed spray area report to file."""
-    with TemporaryFile(mode="w", encoding="utf-8") as file_pointer:
-        writer = csv.writer(file_pointer)
+    with TemporaryFile(mode="w+", encoding="utf-8") as file_pointer:
+        spray_areas_file = File(file_pointer)
+        writer = csv.writer(spray_areas_file)
         for row in detailed_spray_area_data():
             writer.writerow(row)
-        file_pointer.seek(0)
         if default_storage.exists(filename):
             default_storage.delete(filename)
-        default_storage.save(filename, ContentFile(file_pointer.read()))
+        spray_areas_file.seek(0)
+        default_storage.save(filename, spray_areas_file)
