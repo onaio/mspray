@@ -2,7 +2,7 @@
 from django.conf import settings
 
 REVEAL_SPRAY_STATUS_FIELD = getattr(settings, "REVEAL_SPRAY_STATUS_FIELD",
-                                    "spray_status")
+                                    "task_business_status")
 REVEAL_SPRAYED_VALUE = getattr(settings, "REVEAL_SPRAYED_VALUE", "Sprayed")
 REVEAL_NOT_SPRAYED_VALUE = getattr(settings, "REVEAL_NOT_SPRAYED_VALUE",
                                    "Not Sprayed - Refused")
@@ -10,9 +10,10 @@ REVEAL_NOT_VISITED_VALUE = getattr(settings, "REVEAL_NOT_VISITED_VALUE",
                                    "Not Visited")
 REVEAL_NOT_SPRAYABLE_VALUE = getattr(settings, "REVEAL_NOT_SPRAYABLE_VALUE",
                                      "Not Sprayable")
-REVEAL_DATA_ID_FIELD = getattr(settings, "REVEAL_DATA_ID_FIELD", "id")
-REVEAL_DATE_FIELD = getattr(settings, "REVEAL_DATE_FIELD", "date")
-REVEAL_GPS_FIELD = getattr(settings, "REVEAL_GPS_FIELD", "location")
+REVEAL_DATA_ID_FIELD = getattr(settings, "REVEAL_DATA_ID_FIELD", "task_id")
+REVEAL_DATE_FIELD = getattr(
+    settings, "REVEAL_DATE_FIELD", "task_execution_start_date")
+REVEAL_GPS_FIELD = getattr(settings, "REVEAL_GPS_FIELD", "geometry")
 REVEAL_OPENSRP_USERNAME = getattr(settings, "REVEAL_OPENSRP_USERNAME", "")
 REVEAL_OPENSRP_PASSWORD = getattr(settings, "REVEAL_OPENSRP_PASSWORD", "")
 REVEAL_OPENSRP_BASE_URL = getattr(
