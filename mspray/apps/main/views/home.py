@@ -5,7 +5,7 @@ import json
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.http import StreamingHttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
@@ -477,8 +477,8 @@ class DetailedCSVView(SiteNameMixin, ListView):
         filename = "detailed_sprayareas.csv"
         if default_storage.exists(filename):
             with default_storage.open(filename) as file_pointer:
-                response = StreamingHttpResponse(
-                    (line for line in file_pointer), content_type="text/csv"
+                response = HttpResponse(
+                    file_pointer.read(), content_type="text/csv"
                 )
         else:
             sprayarea_buffer = SprayAreaBuffer()
