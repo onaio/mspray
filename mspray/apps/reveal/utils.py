@@ -1,8 +1,10 @@
 """utils module for reveal app"""
-from datetime import datetime
+from django.contrib.gis.geos import GEOSGeometry
+import uuid
+import json
 
+from dateutil import parser
 from django.conf import settings
-from django.contrib.gis.geos import Point
 from django.core.exceptions import ValidationError
 
 from mspray.apps.main.models import Household, Location, SprayDay
@@ -14,30 +16,45 @@ def add_spray_data(data: dict):
     Add spray data submission from reveal
 
     Expects:
-        submission_id: int => id of the submission
+        submission_id: str => uuid of the submission
         date: str => date of submissions
-        location: str => coordinates as lat,long string
+        location: str => geojson of a Point
         spray_status: str => the spray status
     """
     submission_id = data.get(settings.REVEAL_DATA_ID_FIELD)
     spray_date = data.get(settings.REVEAL_DATE_FIELD)
     spray_status = data.get(settings.REVEAL_SPRAY_STATUS_FIELD)
 
+    # get the int of submission id
+    if isinstance(submission_id, str):
+        if submission_id.isnumeric():
+            submission_id = int(submission_id)
+        else:
+            try:
+                submission_id = uuid.UUID(submission_id).int
+            except ValueError:
+                raise ValidationError(
+                    f"{settings.REVEAL_DATA_ID_FIELD} {NOT_PROVIDED}")
+
     try:
-        spray_date = datetime.strptime(spray_date, "%Y-%m-%d")
+        spray_date = parser.parse(spray_date)
     except TypeError:
         raise ValidationError(f"{settings.REVEAL_DATE_FIELD} {NOT_PROVIDED}")
+    except ValueError:
+        raise ValidationError(f"{settings.REVEAL_DATE_FIELD} {NOT_PROVIDED}")
     else:
-        gps_field = data.get(settings.REVEAL_GPS_FIELD)
+        spray_date = spray_date.date()
 
+        gps_field = data.get(settings.REVEAL_GPS_FIELD)
         if gps_field is None:
             raise ValidationError(
                 f"{settings.REVEAL_GPS_FIELD} {NOT_PROVIDED}")
 
-        # convert to [long, lat]
-        coords = [float(_.strip()) for _ in gps_field.split(",")]
-        coords.reverse()
-        geom = Point(coords[0], coords[1])
+        if isinstance(gps_field, dict):
+            # we need to convert back to geojson
+            gps_field = json.dumps(gps_field)
+
+        geom = GEOSGeometry(gps_field)
 
         # get the location object
         location = Location.objects.filter(
