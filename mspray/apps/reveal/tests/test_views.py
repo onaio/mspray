@@ -1,5 +1,4 @@
 """reveal vies module"""
-import json
 from datetime import date
 
 from django.contrib.gis.geos import Point
@@ -30,14 +29,21 @@ class TestViews(TestBase):
         Test add_spray_data_view
         """
         SprayDay.objects.all().delete()
-        payload = {
-            "id": 1337,
-            "date": "2015-09-21",
-            "location": "-15.4183222196675, 28.35119431662"
-        }
+        payload = """{
+            "id": "156729",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": "{\\"type\\":\\"Point\\",\\"coordinates\\":[28.35517894260948,-15.41818400162254]}",
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Visited",
+            "task_server_version": 1543867945196
+        }"""  # noqa
         request = self.factory.post(
             'add-spray-data',
-            data=json.dumps(payload),
+            data=payload,
             content_type='application/json')
         res = add_spray_data_view(request)
 

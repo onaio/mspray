@@ -9,10 +9,10 @@ from mspray.apps.reveal.utils import add_spray_data
 
 from django.test import override_settings
 
-REVEAL_SPRAY_STATUS_FIELD = "spray_status"
+REVEAL_SPRAY_STATUS_FIELD = "task_business_status"
 REVEAL_NOT_SPRAYABLE_VALUE = "Not Sprayable"
 REVEAL_SPRAYED_VALUE = "Sprayed"
-REVEAL_DATE_FIELD = "date"
+REVEAL_DATE_FIELD = "task_execution_start_date"
 
 
 @override_settings(
@@ -20,7 +20,7 @@ REVEAL_DATE_FIELD = "date"
     REVEAL_NOT_SPRAYABLE_VALUE=REVEAL_NOT_SPRAYABLE_VALUE,
     REVEAL_SPRAYED_VALUE=REVEAL_SPRAYED_VALUE,
     REVEAL_DATE_FIELD=REVEAL_DATE_FIELD,
-    REVEAL_GPS_FIELD="location",
+    REVEAL_GPS_FIELD="geometry",
     MSPRAY_OSM_PRESENCE_FIELD=False,
     SPRAYABLE_FIELD=REVEAL_SPRAY_STATUS_FIELD,
     MSPRAY_WAS_SPRAYED_FIELD=REVEAL_SPRAY_STATUS_FIELD,
@@ -48,10 +48,22 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            "id": 1337,
-            "date": "2015-09-21",
-            "location": "-15.41818400162254, 28.35517894260948",
-            "spray_status": "Sprayed"
+            'id': '1337',
+            'parent_id': '3537',
+            'status': 'Active',
+            'geometry': """{
+                "type": "Point",
+                "coordinates": [
+                    28.35517894260948,-15.41818400162254
+                ]}""",
+            'server_version': 1542970626309,
+            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
+            'task_spray_operator': 'demoMTI',
+            'task_status': 'Ready',
+            'task_business_status': 'Sprayed',
+            'task_execution_start_date': '2015-09-21T1000',
+            'task_execution_end_date': '2015-09-21T1100',
+            'task_server_version': 1543867945196
         }
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
