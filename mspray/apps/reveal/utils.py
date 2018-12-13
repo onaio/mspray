@@ -9,7 +9,7 @@ from django.db.models.functions import Coalesce
 
 from dateutil import parser
 
-from mspray.apps.main.models import Household, Location, SprayDay
+from mspray.apps.main.models import Household, Location, SprayDay, SprayPoint
 from mspray.apps.reveal.common_tags import NOT_PROVIDED
 
 
@@ -26,6 +26,10 @@ def add_spray_data(data: dict):
     submission_id = data.get(settings.REVEAL_DATA_ID_FIELD)
     spray_date = data.get(settings.REVEAL_DATE_FIELD)
     spray_status = data.get(settings.REVEAL_SPRAY_STATUS_FIELD)
+
+    if spray_status == settings.REVEAL_NOT_VISITED_VALUE:
+        # stop here because we have no spray data!
+        return None
 
     try:
         submission_id = int(submission_id)
@@ -91,6 +95,7 @@ def add_spray_data(data: dict):
             sprayday.household = household
             sprayday.geom = household.geom
             sprayday.bgeom = household.bgeom
+            sprayday.osmid = household.hh_id
             location = sprayday.location = household.location
             sprayday.save()
 
@@ -101,5 +106,13 @@ def add_spray_data(data: dict):
 
             household.sprayable = sprayday.sprayable
             household.save()
+
+            SprayPoint.objects.update_or_create(
+                sprayday=sprayday,
+                defaults={
+                    "data_id": sprayday.data[settings.REVEAL_DATA_ID_FIELD],
+                    "location": sprayday.location
+                }
+            )
 
         return sprayday
