@@ -152,23 +152,24 @@ class DistrictView(SiteNameMixin, ListView):
                 except KeyError:
                     pass
         not_captured = getattr(settings, "NOT_CAPTURED", {})
-        if not_targeted:
-            not_targeted_fields = [
-                ("visited_total", "found"),
-                ("visited_sprayed", "sprayed"),
-                ("visited_not_sprayed", "not_sprayed"),
-                ("visited_refused", "refused"),
-                ("visited_other", "other"),
-            ]
-            not_captured_data = not_captured.get(obj.pk)
-            if not_captured_data:
-                not_targeted["found"] += not_captured_data
-                not_targeted["sprayed"] += not_captured_data
-            for total_field, not_field in not_targeted_fields:
-                try:
-                    totals[total_field] += not_targeted[not_field]
-                except KeyError:
-                    totals[total_field] = not_targeted[not_field]
+        if not_targeted and not location_id:
+            if obj.level != 'district':
+                not_targeted_fields = [
+                    ("visited_total", "found"),
+                    ("visited_sprayed", "sprayed"),
+                    ("visited_not_sprayed", "not_sprayed"),
+                    ("visited_refused", "refused"),
+                    ("visited_other", "other"),
+                ]
+                not_captured_data = not_captured.get(obj.pk)
+                if not_captured_data:
+                    not_targeted["found"] += not_captured_data
+                    not_targeted["sprayed"] += not_captured_data
+                for total_field, not_field in not_targeted_fields:
+                    try:
+                        totals[total_field] += not_targeted[not_field]
+                    except KeyError:
+                        totals[total_field] = not_targeted[not_field]
 
         district_code = self.kwargs.get(self.slug_field)
         context.update(get_location_dict(district_code))
