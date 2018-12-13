@@ -115,6 +115,8 @@ class TestUtils(TestBase):
             'task_server_version': 1543867945196
         }
 
+        # we are deleting this household so that it is not found when
+        # attempting to link the spray data to a structure
         Household.objects.filter(
             geom__contains=GEOSGeometry(
                 input_data.get(settings.REVEAL_GPS_FIELD))).first().delete()

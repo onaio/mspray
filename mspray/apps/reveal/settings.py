@@ -16,6 +16,10 @@ REVEAL_DATA_ID_FIELD = getattr(settings, "REVEAL_DATA_ID_FIELD", "task_id")
 REVEAL_DATE_FIELD = getattr(
     settings, "REVEAL_DATE_FIELD", "task_execution_start_date")
 REVEAL_GPS_FIELD = getattr(settings, "REVEAL_GPS_FIELD", "geometry")
+REVEAL_OSMNODE_FIELD = getattr(settings, "REVEAL_OSMNODE_FIELD",
+                               "osmstructure:node:id")
+REVEAL_NEWSTRUCTURE_GPS_FIELD = getattr(
+    settings, "REVEAL_NEWSTRUCTURE_GPS_FIELD", "newstructure/gps")
 REVEAL_OPENSRP_USERNAME = getattr(settings, "REVEAL_OPENSRP_USERNAME", "")
 REVEAL_OPENSRP_PASSWORD = getattr(settings, "REVEAL_OPENSRP_PASSWORD", "")
 REVEAL_OPENSRP_BASE_URL = getattr(

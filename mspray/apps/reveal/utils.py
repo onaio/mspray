@@ -112,10 +112,13 @@ def add_spray_data(data: dict):
             household.sprayable = sprayday.sprayable
             household.save()
 
+        # deal with new structure
         if sprayday.household is None:
-            # deal with new structure
-            sprayday.data['osmstructure:node:id'] = True
-            sprayday.data['newstructure/gps'] = True
+            # these two strange fields are needed when calculating indicators
+            # for new structures
+            sprayday.data[settings.REVEAL_OSMNODE_FIELD] = True
+            sprayday.data[settings.REVEAL_NEWSTRUCTURE_GPS_FIELD] = True
+            # weird hacky way to set the osmid :(
             sprayday.osmid = -sprayday.id
             sprayday.save()
 
