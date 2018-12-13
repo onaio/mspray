@@ -11,6 +11,9 @@ from dateutil import parser
 
 from mspray.apps.main.models import Household, Location, SprayDay, SprayPoint
 from mspray.apps.reveal.common_tags import NOT_PROVIDED
+from mspray.libs.utils.geom_buffer import with_metric_buffer
+
+BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)
 
 
 def add_spray_data(data: dict):
@@ -83,6 +86,8 @@ def add_spray_data(data: dict):
 
         if geom is not None:
             sprayday.geom = geom
+            sprayday.bgeom = with_metric_buffer(sprayday.geom, BUFFER_SIZE)
+
         if location is not None:
             sprayday.location = location
 
@@ -96,7 +101,7 @@ def add_spray_data(data: dict):
             sprayday.geom = household.geom
             sprayday.bgeom = household.bgeom
             sprayday.osmid = household.hh_id
-            location = sprayday.location = household.location
+            sprayday.location = household.location
             sprayday.save()
 
             if spray_status == settings.REVEAL_NOT_VISITED_VALUE:
@@ -107,12 +112,19 @@ def add_spray_data(data: dict):
             household.sprayable = sprayday.sprayable
             household.save()
 
+        if sprayday.household is None:
+            # deal with new structure
+            sprayday.data['osmstructure:node:id'] = True
+            sprayday.data['newstructure/gps'] = True
+            sprayday.osmid = -sprayday.id
+            sprayday.save()
+
+        if sprayday.location:
             SprayPoint.objects.update_or_create(
                 sprayday=sprayday,
                 defaults={
                     "data_id": sprayday.data[settings.REVEAL_DATA_ID_FIELD],
                     "location": sprayday.location
-                }
-            )
+                })
 
         return sprayday
