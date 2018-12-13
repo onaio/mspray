@@ -30,6 +30,7 @@ from mspray.apps.main.views.target_area import (
 )
 
 NOT_SPRAYABLE_VALUE = settings.NOT_SPRAYABLE_VALUE
+ENABLE_REVEAL = getattr(settings, "ENABLE_REVEAL", False)
 
 
 class SprayAreaBuffer:  # pylint: disable=too-few-public-methods
@@ -53,7 +54,7 @@ class DistrictView(SiteNameMixin, ListView):
 
     def get_template_names(self):
         """get template names"""
-        if settings.ENABLE_REVEAL:
+        if ENABLE_REVEAL:
             return ["reveal/district.html"]
 
         return [self.template_name]
