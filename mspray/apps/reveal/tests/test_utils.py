@@ -1,13 +1,13 @@
 """module to test reveal utils"""
 from datetime import date
 
-from django.contrib.gis.geos import Point
+from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry, Point
+from django.test import override_settings
 
 from mspray.apps.main.models import Household, SprayDay, SprayPoint
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.reveal.utils import add_spray_data
-
-from django.test import override_settings
 
 REVEAL_SPRAY_STATUS_FIELD = "task_business_status"
 REVEAL_NOT_SPRAYABLE_VALUE = "Not Sprayable"
@@ -84,6 +84,59 @@ class TestUtils(TestBase):
         self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
         self.assertTrue(sprayday.household.visited)
         self.assertTrue(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
+
+        # try again to ensure we dont create duplicate records
+        add_spray_data(data=input_data)
+        self.assertEqual(1, SprayDay.objects.all().count())
+
+    def test_add_new_point(self):
+        """
+        Test adding data with new point
+        """
+        SprayDay.objects.all().delete()
+
+        input_data = {
+            'id': '1337',
+            'parent_id': '3537',
+            'status': 'Active',
+            'geometry': """{
+                "type": "Point",
+                "coordinates": [
+                    28.35517894260948,-15.41818400162254
+                ]}""",
+            'server_version': 1542970626309,
+            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
+            'task_spray_operator': 'demoMTI',
+            'task_status': 'Ready',
+            'task_business_status': 'Sprayed',
+            'task_execution_start_date': '2015-09-21T1000',
+            'task_execution_end_date': '2015-09-21T1100',
+            'task_server_version': 1543867945196
+        }
+
+        Household.objects.filter(
+            geom__contains=GEOSGeometry(
+                input_data.get(settings.REVEAL_GPS_FIELD))).first().delete()
+
+        add_spray_data(data=input_data)
+        self.assertEqual(1, SprayDay.objects.all().count())
+
+        sprayday = SprayDay.objects.first()
+        self.assertEqual(1, sprayday.submission_id)
+        self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
+        self.assertEqual(
+            Point(float(28.35517894260948), float(-15.41818400162254)).coords,
+            sprayday.geom.coords)
+        self.assertTrue(sprayday.bgeom is not None)
+        self.assertTrue(sprayday.location is not None)
+        self.assertEqual('Lusaka_6000', sprayday.location.name,)
+        self.assertTrue(sprayday.was_sprayed)
+        self.assertTrue(sprayday.sprayable)
+        self.assertTrue(sprayday.data['osmstructure:node:id'])
+        self.assertTrue(sprayday.data['newstructure/gps'])
+        self.assertEqual(sprayday.osmid, -sprayday.id)
+        self.assertFalse(sprayday.household)
         self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
 
         # try again to ensure we dont create duplicate records
