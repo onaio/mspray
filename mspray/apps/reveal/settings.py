@@ -1,6 +1,7 @@
 """settings for reveal app"""
 from django.conf import settings
 
+REVEAL_MODE_ON = getattr(settings, "REVEAL_MODE_ON", False)
 REVEAL_SPRAY_STATUS_FIELD = getattr(settings, "REVEAL_SPRAY_STATUS_FIELD",
                                     "task_business_status")
 REVEAL_SPRAYED_VALUE = getattr(settings, "REVEAL_SPRAYED_VALUE", "Sprayed")
@@ -34,6 +35,8 @@ REVEAL_OPENSRP_RHC = getattr(settings, 'REVEAL_OPENSRP_RHC', 1)
 REVEAL_TARGET_AREA = getattr(settings, 'REVEAL_TARGET_AREA', "ta")
 REVEAL_OPENSRP_TARGET_AREA = getattr(settings, 'REVEAL_OPENSRP_TARGET_AREA', 2)
 REVEAL_OPENSRP_HOUSEHOLD = getattr(settings, 'REVEAL_OPENSRP_HOUSEHOLD', 4)
+REVEAL_SPRAY_OPERATOR = getattr(settings, 'REVEAL_SPRAY_OPERATOR',
+                                'task_spray_operator')
 
 # these general mSpray fields should be set up this way
 # this is commented out so that it does not affect other mSpray tests
@@ -44,3 +47,7 @@ REVEAL_OPENSRP_HOUSEHOLD = getattr(settings, 'REVEAL_OPENSRP_HOUSEHOLD', 4)
 # SPRAYED_VALUE = REVEAL_SPRAYED_VALUE
 # SPRAYED_VALUES = [REVEAL_SPRAYED_VALUE]
 # MSPRAY_DATE_FIELD = REVEAL_DATE_FIELD
+# MSPRAY_WAS_SPRAYED_VALUE = REVEAL_SPRAYED_VALUE
+# MSPRAY_WAS_NOT_SPRAYED_VALUE = REVEAL_NOT_SPRAYED_VALUE
+# MSPRAY_SPRAY_OPERATOR_NAME = REVEAL_SPRAY_OPERATOR
+# MSPRAY_SPRAY_OPERATOR_CODE = REVEAL_SPRAY_OPERATOR
