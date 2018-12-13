@@ -38,7 +38,7 @@ class TestViews(TestBase):
             "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
             "task_spray_operator": "demoMTI",
             "task_status": "Ready",
-            "task_business_status": "Not Visited",
+            "task_business_status": "Sprayed",
             "task_execution_start_date": "2015-09-21T1000",
             "task_execution_end_date": "2015-09-21T1100",
             "task_server_version": 1543867945196

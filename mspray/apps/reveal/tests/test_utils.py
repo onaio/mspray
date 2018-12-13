@@ -3,7 +3,7 @@ from datetime import date
 
 from django.contrib.gis.geos import Point
 
-from mspray.apps.main.models import Household, SprayDay
+from mspray.apps.main.models import Household, SprayDay, SprayPoint
 from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.reveal.utils import add_spray_data
 
@@ -81,8 +81,10 @@ class TestUtils(TestBase):
                 geom__contains=sprayday.geom).first().location)
         self.assertTrue(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
         self.assertTrue(sprayday.household.visited)
         self.assertTrue(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
 
         # try again to ensure we dont create duplicate records
         add_spray_data(data=input_data)
@@ -114,10 +116,12 @@ class TestUtils(TestBase):
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
         sprayday = SprayDay.objects.first()
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
         self.assertFalse(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
         self.assertTrue(sprayday.household.visited)
         self.assertTrue(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
 
     def test_add_spray_data_not_visited(self):
         """
@@ -143,12 +147,8 @@ class TestUtils(TestBase):
             'task_server_version': 1543867945196
         }
         add_spray_data(data=input_data)
-        self.assertEqual(1, SprayDay.objects.all().count())
-        sprayday = SprayDay.objects.first()
-        self.assertFalse(sprayday.was_sprayed)
-        self.assertTrue(sprayday.sprayable)
-        self.assertFalse(sprayday.household.visited)
-        self.assertTrue(sprayday.household.sprayable)
+        # nothing happened
+        self.assertEqual(0, SprayDay.objects.all().count())
 
     def test_add_spray_data_not_sprayable(self):
         """
@@ -177,6 +177,8 @@ class TestUtils(TestBase):
         self.assertEqual(1, SprayDay.objects.all().count())
         sprayday = SprayDay.objects.first()
         self.assertFalse(sprayday.was_sprayed)
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
         self.assertFalse(sprayday.sprayable)
         self.assertTrue(sprayday.household.visited)
         self.assertFalse(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
