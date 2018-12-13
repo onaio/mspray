@@ -23,10 +23,9 @@ git clone git@github.com:onaio/mspray.git
 
 ------------------------------------------------------------------------
 
-Install Docker and Docker Compose. Run the following command to start
-the containers in the background and leave them running. The option -d
-runs in detach mode. Detached mode: Run containers in the background and
-prints new container names.
+You need to have Docker and Docker Compose installed on your machine. 
+Run the following commands to start the containers in the background and leave them running.
+The option -d runs in detach mode(runs the containers in the background).
 
 ```
 
@@ -34,77 +33,44 @@ docker-compose up -d
 
 ```
 
+
+Running docker-compose logs -f, could be useful when you need to follow the log output from services.
+
 ```
 
 docker-compose logs -f
 
 ```
 
-Running docker-compose logs -f, could be useful when you need to follow the 
-log output from services.
 
-
-
-It should now be accessible via http://localhost:8000.
-
-
-**Running the docker container**
-
-The following command can be used to interact with the docker container on the command line.  -it specifies that we will be interacting with that container through the bash or any other shell preferable to you.  
-
-```
-
-docker exec -it mspray_queue_1 bash
+You can use `docker exec` command to start a shell inside the running container. For example:
 
 
 ```
 
-**set up a virtual envirenment**
-
-------------------------------------------------------------------------
-
-For you to run the following command, you mast have pipenv installed:
-
-```
-
-pipenv shell
-
-```
+docker exec -it mspray_web_1 bash
 
 
-**Run tests**
+```  
 
-Consequently, we could use the following commands to run tests associatted with the project.
+The above command starts the bash shell inside the `mspray_web_1` container. 
+
+
+It should now be accessible via:
 
 ```
 
-python manage.py test
+http://localhost:8000.
 
 ```
-
-**Obtaining sufficient privileges**
-
-Get your psql utility running by running the following command. The following command connects to a database under a specific user 'postgres', who is able to grant priviledges to the mspray user
-
-```
-
-psql -h db -U postgres
-
-```
-
-Depending on your configuration, this section describes several methods to configure the database user with sufficient privileges to run tests for the mspray application on PostgreSQL. Your testing database user needs to have the ability to create databases. In other configurations, you may be required to use a database superuser as only superusers can create the extension or update it to a new version. If it is set to false, just the privileges required to execute the commands in the installation or update script are required.
-
-```
-
-ALTER USER mspray WITH SUPERUSER;
-
-```
-
 
 **For Development Use-cases** 
 
-The following packages need to be installed to run tests. 
+The following packages need to be installed to set up a development environment. 
 Note, this is unnecessary for those who do not need to run tests while setting up.
+
+
+For you to run the following command, you must have Pipenv installed:
 
 ```
 
@@ -113,7 +79,31 @@ pipenv install --dev
 ```
 
 
-Afterwards run the following management commands to load relevant data into the application.
+Use `python manage.py test` to now run tests.
+
+
+**Setting up Postgres**
+
+Once you have docker running and are able to get into a container shell environment, you will need to apply the superuser privileges for the mspray database user. 
+Use the `postgres` user to grant privileges to the `mspray` user.
+
+```
+
+psql -h db -U postgres
+
+```
+
+Within on your database configuration, the postgres user must have sufficient privileges to run tests i.e. the user needs to have the ability to create testing databases. 
+
+The following command grants the postgres user role with superuser priviledges. 
+
+```
+
+ALTER USER mspray WITH SUPERUSER;
+
+```
+
+You can  now load some fixtures to your mspray dashboard, this gives you the chance to explore the mspray dashboard.
 
 ```
 
@@ -128,7 +118,7 @@ python manage.py load_location_shape_file mspray/apps/main/tests/fixtures/Lusaka
 
 ```
 
-These three commands from the load_location_shape_file custom management command are used to loads districts, health facility catchment area and spray area shapefiles.
+The above three commands will load the districts, health facility catchment areas and spray area locations from the shape files provided.
 
 
 ```
@@ -137,10 +127,10 @@ python manage.py load_osm_hh mspray/apps/main/tests/fixtures/Lusaka/OSM/
 
 ```
 
-The load_osm_hh command Loads OSM files as households into the Household model. This then loads the structures found in the region
+The load_osm_hh command Loads OSM files as households into the Household model. This then loads the structures found in the region.
 
 
-Finally use this command to update location structure numbers for districts/regions from target areas 
+Finally use this command to update location structure numbers for districts/regions within the target areas.
 
 ```
 
@@ -153,7 +143,7 @@ python manage.py update_locations_structures
 Data Flow
 ---------
 
-- An IRS Form submission is send from ODK Collect to ona.io
+- An IRS Form submission is sent from ODK Collect to ona.io
 - The IRS Form in ona.io has a web service hook configured to transmit the data to the dashboard e.g zambia-2016.mspray.onalabs.org which runs this codebase.
 - On receiving the submission:
     - the submission is saved in the SprayDay table
@@ -165,14 +155,21 @@ Data Flow
     - Once a submission has been linked to spray area, a unique record will be created using the spray area, the OSMID or the GPS in the event the submission only captured a GPS.
     - In the event a unique record already existed, the spray status will be checked, if the spray status was 'not sprayed', the new submission will be linked to the unique record, the old record therefore does not become part of the unique record.
 
+![data_flow](https://user-images.githubusercontent.com/11174326/49940782-9bd80880-fef1-11e8-8ad4-f3ec41c5c00e.png)
+
+
 Spray Area Calculations
 -----------------------
-Enumerated Structures - The number of structures as they are in the spray area shape file
-Not sprayable structures -  the number of structures in the field that were found not to be sprayable
-Duplicate sprayed structures - when a structure has been reported more than one time with the spray status sprayed (if ID XYZ appears twice as sprayed, the count of duplicates will be 1, if it appears 3 times the count will be 2, ... etc.)
-Structures on the ground - Enumerated structures subtract number of not sprayable structures + number of new structureres + number of duplicate structures that have been sprayed
-Found - Number of all unique records that are sprayable add Number of structures that were sprayed that are not part of the unique record set (i.e the number of duplicates)
-Visited Sprayed - Number of all unique records that have the spray status "sprayed"
-Spray Effectiveness - percentage of  Visited Sprayed / Structures on the ground
-Found Coverage - percentage of Found / Structures on the ground
-Sprayed Coverage - percentage of Visited Sprayed / Found
+
+|**Variable** | **Aggregations**         |
+| ------------- | ----------- |
+| Enumerated Structures             | The number of structures as they are in the spray area shape file.|
+| Not sprayable structures          | The number of structures in the field that were found not to be sprayable.     |
+| Duplicate sprayed structures      | When a structure has been reported more than one time with the spray status sprayed (if                                         ID XYZ appears twice as sprayed, the count of duplicates will be 1, if it appears 3 times                                       the count will be 2, ... etc.)     |
+| Structures on the ground     | Enumerated structures subtract the number of not sprayable structures + number of new                                          structures + number of duplicate structures that have been sprayed.     |
+| Found     | Number of all unique records that are sprayable add Number of structures that were sprayed that are not part of                 the unique record set (i.e the number of duplicates.)     |
+| Visited Sprayed     | Number of all unique records that have the spray status "sprayed".     |
+| Spray Effectiveness     | The percentage of  Visited Sprayed / Structures on the ground.     |
+| Found Coverage     | The percentage of Found / Structures on the ground.     |
+| Sprayed Coverage     | The percentage of Visited Sprayed / Found.     |
+
