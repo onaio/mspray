@@ -39,6 +39,8 @@ class TestViews(TestBase):
             "task_spray_operator": "demoMTI",
             "task_status": "Ready",
             "task_business_status": "Not Visited",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
             "task_server_version": 1543867945196
         }"""  # noqa
         request = self.factory.post(
@@ -54,10 +56,10 @@ class TestViews(TestBase):
         # we added the sprayday object
         self.assertEqual(1, SprayDay.objects.all().count())
         sprayday = SprayDay.objects.first()
-        self.assertEqual(1337, sprayday.submission_id)
+        self.assertEqual(1, sprayday.submission_id)
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
-            Point(float(28.35119431662), float(-15.4183222196675)).coords,
+            Point(float(28.35517894260948), float(-15.41818400162254)).coords,
             sprayday.geom.coords)
         self.assertTrue(sprayday.location is not None)
         self.assertEqual(
