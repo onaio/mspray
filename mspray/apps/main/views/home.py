@@ -51,6 +51,13 @@ class DistrictView(SiteNameMixin, ListView):
     model = Location
     slug_field = "pk"
 
+    def get_template_names(self):
+        """get template names"""
+        if settings.ENABLE_REVEAL:
+            return ["reveal/district.html"]
+
+        return [self.template_name]
+
     def get_queryset(self):
         queryset = super(DistrictView, self).get_queryset().filter(target=True)
         location_id = self.kwargs.get(self.slug_field)
@@ -66,17 +73,13 @@ class DistrictView(SiteNameMixin, ListView):
 
         not_targeted = None
 
-        queryset = (
-            context["object_list"]
-            .extra(
-                select={
-                    "xmin": 'ST_xMin("main_location"."geom")',
-                    "ymin": 'ST_yMin("main_location"."geom")',
-                    "xmax": 'ST_xMax("main_location"."geom")',
-                    "ymax": 'ST_yMax("main_location"."geom")',
-                }
-            )
-            .values(
+        queryset = (context["object_list"].extra(
+            select={
+                "xmin": 'ST_xMin("main_location"."geom")',
+                "ymin": 'ST_yMin("main_location"."geom")',
+                "xmax": 'ST_xMax("main_location"."geom")',
+                "ymax": 'ST_yMax("main_location"."geom")',
+            }).values(
                 "pk",
                 "code",
                 "level",
@@ -94,25 +97,19 @@ class DistrictView(SiteNameMixin, ListView):
                 "sprayed",
                 "is_sensitized",
                 "priority",
-            )
-        )
+            ))
         location_id = self.kwargs.get(self.slug_field)
         if location_id is None:
             serializer_class = DistrictSerializer
         else:
-            level = (
-                self.object_list.first().level
-                if self.object_list.first()
-                else ""
-            )
+            level = self.object_list.first().level if self.object_list.first(
+            ) else ""
             if level == "RHC":
                 serializer_class = DistrictSerializer
             else:
-                serializer_class = (
-                    TargetAreaQuerySerializer
-                    if settings.SITE_NAME == "namibia"
-                    else TargetAreaSerializer
-                )
+                serializer_class = (TargetAreaQuerySerializer
+                                    if settings.SITE_NAME == "namibia" else
+                                    TargetAreaSerializer)
             # no location structures
             try:
                 obj = get_object_or_404(Location, pk=location_id, target=True)
@@ -124,12 +121,10 @@ class DistrictView(SiteNameMixin, ListView):
                 if obj.level == "district":
                     context["the_district"] = obj
                 else:
-                    context["the_district"] = (
-                        obj.get_ancestors().filter(level="district").first()
-                    )
+                    context["the_district"] = (obj.get_ancestors().filter(
+                        level="district").first())
         serializer = serializer_class(
-            queryset, many=True, context={"request": self.request}
-        )
+            queryset, many=True, context={"request": self.request})
         context["district_list"] = serializer.data
         fields = [
             "structures",
@@ -146,14 +141,13 @@ class DistrictView(SiteNameMixin, ListView):
         for rec in serializer.data:
             for field in fields:
                 try:
-                    totals[field] = rec[field] + (
-                        totals[field] if field in totals else 0
-                    )
+                    totals[field] = rec[field] + (totals[field]
+                                                  if field in totals else 0)
                 except KeyError:
                     pass
         not_captured = getattr(settings, "NOT_CAPTURED", {})
         if not_targeted and not location_id:
-            if obj.level != 'district':
+            if obj.level != "district":
                 not_targeted_fields = [
                     ("visited_total", "found"),
                     ("visited_sprayed", "sprayed"),
@@ -194,38 +188,30 @@ class TargetAreaView(SiteNameMixin, DetailView):
     def get_queryset(self):
 
         return get_location_qs(
-            super(TargetAreaView, self).get_queryset().filter(target=True)
-        )
+            super(TargetAreaView, self).get_queryset().filter(target=True))
 
     def get_context_data(self, **kwargs):
         context = super(TargetAreaView, self).get_context_data(**kwargs)
-        serializer_class = (
-            TargetAreaQuerySerializer
-            if settings.SITE_NAME == "namibia"
-            else TargetAreaSerializer
-        )
+        serializer_class = (TargetAreaQuerySerializer
+                            if settings.SITE_NAME == "namibia" else
+                            TargetAreaSerializer)
         location = context["object"]
         if location.level == "RHC":
             location = get_location_qs(
-                Location.objects.filter(pk=location.pk), "RHC"
-            ).first()
+                Location.objects.filter(pk=location.pk), "RHC").first()
         serializer = serializer_class(
-            location, context={"request": self.request}
-        )
+            location, context={"request": self.request})
         context["target_data"] = serializer.data
         spray_date = parse_spray_date(self.request)
         if spray_date:
             context["spray_date"] = spray_date
-        is_spatial = (
-            settings.MSPRAY_SPATIAL_QUERIES
-            or context["object"].geom is not None
-        )
+        is_spatial = (settings.MSPRAY_SPATIAL_QUERIES
+                      or context["object"].geom is not None)
 
         if is_spatial:
             view = TargetAreaViewSet.as_view({"get": "retrieve"})
             response = view(
-                self.request, pk=context["object"].pk, format="geojson"
-            )
+                self.request, pk=context["object"].pk, format="geojson")
             response.render()
             context["not_sprayable_value"] = NOT_SPRAYABLE_VALUE
             context["ta_geojson"] = response.content.decode()
@@ -233,18 +219,18 @@ class TargetAreaView(SiteNameMixin, DetailView):
             if self.object.level in ["district", "RHC"]:
                 context["hh_geojson"] = json.dumps(
                     GeoTargetAreaSerializer(
-                        get_location_qs(
-                            self.object.location_set.all(), self.object.level
-                        ),
+                        get_location_qs(self.object.location_set.all(),
+                                        self.object.level),
                         many=True,
-                        context={"request": self.request},
-                    ).data
-                )
+                        context={
+                            "request": self.request
+                        },
+                    ).data)
             else:
                 loc = context["object"]
-                hhview = TargetAreaHouseholdsViewSet.as_view(
-                    {"get": "retrieve"}
-                )
+                hhview = TargetAreaHouseholdsViewSet.as_view({
+                    "get": "retrieve"
+                })
                 response = hhview(
                     self.request,
                     pk=loc.pk,
@@ -255,35 +241,25 @@ class TargetAreaView(SiteNameMixin, DetailView):
                 response.render()
                 context["hh_geojson"] = response.content.decode()
                 sprayed_duplicates = list(
-                    get_duplicates(loc, True, spray_date)
-                )
+                    get_duplicates(loc, True, spray_date))
                 not_sprayed_duplicates = list(
-                    get_duplicates(loc, False, spray_date)
-                )
+                    get_duplicates(loc, False, spray_date))
                 context["sprayed_duplicates_data"] = json.dumps(
-                    sprayed_duplicates
-                )
+                    sprayed_duplicates)
                 context["sprayed_duplicates"] = count_duplicates(
-                    loc, True, spray_date
-                )
+                    loc, True, spray_date)
                 context["not_sprayed_duplicates_data"] = json.dumps(
-                    not_sprayed_duplicates
-                )
+                    not_sprayed_duplicates)
                 context["not_sprayed_duplicates"] = count_duplicates(
-                    loc, False
-                )
+                    loc, False)
 
-        context["districts"] = (
-            Location.objects.filter(parent=None)
-            .values_list("id", "code", "name")
-            .order_by("name")
-        )
+        context["districts"] = (Location.objects.filter(
+            parent=None).values_list("id", "code", "name").order_by("name"))
 
         context.update({"map_menu": True})
         context.update(get_location_dict(self.object.pk))
         context["not_sprayed_reasons"] = json.dumps(
-            settings.MSPRAY_UNSPRAYED_REASON_OTHER
-        )
+            settings.MSPRAY_UNSPRAYED_REASON_OTHER)
 
         return context
 
@@ -298,24 +274,18 @@ class SprayAreaView(SiteNameMixin, ListView):
     def get_queryset(self):
 
         return get_location_qs(
-            super(SprayAreaView, self)
-            .get_queryset()
-            .filter(level="ta", target=True)
-        )
+            super(SprayAreaView, self).get_queryset().filter(
+                level="ta", target=True))
 
     def get_context_data(self, **kwargs):
         context = super(SprayAreaView, self).get_context_data(**kwargs)
-        queryset = (
-            context["object_list"]
-            .extra(
-                select={
-                    "xmin": 'ST_xMin("main_location"."geom")',
-                    "ymin": 'ST_yMin("main_location"."geom")',
-                    "xmax": 'ST_xMax("main_location"."geom")',
-                    "ymax": 'ST_yMax("main_location"."geom")',
-                }
-            )
-            .values(
+        queryset = (context["object_list"].extra(
+            select={
+                "xmin": 'ST_xMin("main_location"."geom")',
+                "ymin": 'ST_yMin("main_location"."geom")',
+                "xmax": 'ST_xMax("main_location"."geom")',
+                "ymax": 'ST_yMax("main_location"."geom")',
+            }).values(
                 "pk",
                 "code",
                 "level",
@@ -334,14 +304,11 @@ class SprayAreaView(SiteNameMixin, ListView):
                 "parent__parent__pk",
                 "parent__pk",
                 "is_sensitized",
-            )
-            .order_by("parent__parent__name", "parent__name", "name")
-        )
+            ).order_by("parent__parent__name", "parent__name", "name"))
         if self.request.GET.get("format") != "csv":
             serializer_class = TargetAreaSerializer
             serializer = serializer_class(
-                queryset, many=True, context={"request": self.request}
-            )
+                queryset, many=True, context={"request": self.request})
             context["district_list"] = serializer.data
         context["qs"] = queryset
         context.update(get_location_dict(None))
@@ -384,19 +351,15 @@ class SprayAreaView(SiteNameMixin, ListView):
                 not_captured = getattr(settings, "NOT_CAPTURED", {})
                 for value in context.get("qs").iterator():
                     district = TargetAreaSerializer(
-                        value, context=context
-                    ).data
+                        value, context=context).data
                     if previous_rhc is None:
                         previous_rhc = district
                     if previous_rhc.get("rhc") != district.get("rhc"):
                         not_targeted = get_not_targeted_within_geom(
                             Location.objects.get(
-                                pk=previous_rhc.get("rhc_pk")
-                            ).geom
-                        )[0]
+                                pk=previous_rhc.get("rhc_pk")).geom)[0]
                         not_captured_data = not_captured.get(
-                            previous_rhc.get("rhc_pk")
-                        )
+                            previous_rhc.get("rhc_pk"))
                         if not_captured_data:
                             not_targeted["found"] += not_captured_data
                             not_targeted["sprayed"] += not_captured_data
@@ -411,8 +374,7 @@ class SprayAreaView(SiteNameMixin, ListView):
                             "",
                             calc_percentage(
                                 not_targeted.get("sprayed"),
-                                not_targeted.get("found"),
-                            ),
+                                not_targeted.get("found")),
                         ]
                         previous_rhc = district
 
@@ -425,23 +387,19 @@ class SprayAreaView(SiteNameMixin, ListView):
                         district.get("visited_sprayed"),
                         calc_percentage(
                             district.get("visited_sprayed"),
-                            district.get("structures"),
-                        ),
+                            district.get("structures")),
                         calc_percentage(
-                            district.get("found"), district.get("structures")
-                        ),
+                            district.get("found"), district.get("structures")),
                         calc_percentage(
                             district.get("visited_sprayed"),
-                            district.get("found"),
-                        ),
+                            district.get("found")),
                     ]
 
             sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
             response = StreamingHttpResponse(
                 (writer.writerow(row) for row in _data()),
-                content_type="text/csv",
-            )
+                content_type="text/csv")
             response[
                 "Content-Disposition"
             ] = 'attachment; filename="sprayareas.csv"'
@@ -449,8 +407,7 @@ class SprayAreaView(SiteNameMixin, ListView):
             return response
 
         return super(SprayAreaView, self).render_to_response(
-            context, **response_kwargs
-        )
+            context, **response_kwargs)
 
 
 class DetailedCSVView(SiteNameMixin, ListView):
@@ -471,23 +428,17 @@ class DetailedCSVView(SiteNameMixin, ListView):
         if default_storage.exists(filename):
             with default_storage.open(filename) as file_pointer:
                 response = HttpResponse(
-                    file_pointer.read(), content_type="text/csv"
-                )
+                    file_pointer.read(), content_type="text/csv")
         else:
             sprayarea_buffer = SprayAreaBuffer()
             writer = csv.writer(sprayarea_buffer)
             response = StreamingHttpResponse(
-                (
-                    writer.writerow(row)
-                    for row in detailed_spray_area_data(
-                        queryset=self.get_queryset()
-                    )
-                ),
+                (writer.writerow(row) for row in detailed_spray_area_data(
+                    queryset=self.get_queryset())),
                 content_type="text/csv",
             )
-        response["Content-Disposition"] = (
-            'attachment; filename="%s"' % filename
-        )
+        response[
+            "Content-Disposition"] = 'attachment; filename="%s"' % filename
 
         return response
 
@@ -502,24 +453,18 @@ class WeeklyReportView(SiteNameMixin, ListView):
     def get_queryset(self):
         queryset = super(WeeklyReportView, self).get_queryset()
 
-        return (
-            queryset.filter(location__level="district")
-            .prefetch_related()
-            .order_by("week_number", "location__name")
-        )
+        return (queryset.filter(
+            location__level="district").prefetch_related().order_by(
+                "week_number", "location__name"))
 
     def get_context_data(self, **kwargs):
         context = super(WeeklyReportView, self).get_context_data(**kwargs)
         context["qs"] = context["object_list"]
-        weeks = list(
-            context["object_list"]
-            .values_list("week_number", flat=True)
-            .order_by("week_number")
-            .distinct()
-        )
+        weeks = list(context["object_list"].values_list(
+            "week_number", flat=True).order_by("week_number").distinct())
         context["weeks"] = dict(
-            list(zip(weeks, [i for i in range(1, len(weeks) + 1)]))
-        )
+            list(zip(weeks, [i for i in range(1,
+                                              len(weeks) + 1)])))
 
         return context
 
@@ -558,22 +503,18 @@ class WeeklyReportView(SiteNameMixin, ListView):
                     district.location.name,
                     district.location.num_of_spray_areas,
                     district.visited,
-                    calc_percentage(
-                        district.visited, district.location.num_of_spray_areas
-                    ),
+                    calc_percentage(district.visited,
+                                    district.location.num_of_spray_areas),
                     district.sprayed,
-                    calc_percentage(
-                        district.sprayed, district.location.visited
-                    ),
+                    calc_percentage(district.sprayed,
+                                    district.location.visited),
                 ]
 
         sprayarea_buffer = SprayAreaBuffer()
         writer = csv.writer(sprayarea_buffer)
         response = StreamingHttpResponse(
-            (writer.writerow(row) for row in _data()), content_type="text/csv"
-        )
+            (writer.writerow(row) for row in _data()), content_type="text/csv")
         response[
-            "Content-Disposition"
-        ] = 'attachment; filename="weeklyreport.csv"'
+            "Content-Disposition"] = 'attachment; filename="weeklyreport.csv"'
 
         return response
