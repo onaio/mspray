@@ -1,7 +1,8 @@
 """settings for reveal app"""
 from django.conf import settings
 
-REVEAL_MODE_ON = getattr(settings, "REVEAL_MODE_ON", False)
+ENABLE_REVEAL = getattr(settings, "ENABLE_REVEAL", False)
+REVEAL_LABEL = getattr(settings, "REVEAL_LABEL", "Reveal")
 REVEAL_SPRAY_STATUS_FIELD = getattr(settings, "REVEAL_SPRAY_STATUS_FIELD",
                                     "task_business_status")
 REVEAL_SPRAYED_VALUE = getattr(settings, "REVEAL_SPRAYED_VALUE", "Sprayed")
