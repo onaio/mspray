@@ -1,11 +1,13 @@
 """utils module for reveal app"""
-from django.contrib.gis.geos import GEOSGeometry
-import uuid
 import json
 
-from dateutil import parser
 from django.conf import settings
+from django.contrib.gis.geos import GEOSGeometry
 from django.core.exceptions import ValidationError
+from django.db.models import Max
+from django.db.models.functions import Coalesce
+
+from dateutil import parser
 
 from mspray.apps.main.models import Household, Location, SprayDay
 from mspray.apps.reveal.common_tags import NOT_PROVIDED
@@ -25,16 +27,23 @@ def add_spray_data(data: dict):
     spray_date = data.get(settings.REVEAL_DATE_FIELD)
     spray_status = data.get(settings.REVEAL_SPRAY_STATUS_FIELD)
 
-    # get the int of submission id
-    if isinstance(submission_id, str):
-        if submission_id.isnumeric():
-            submission_id = int(submission_id)
+    try:
+        submission_id = int(submission_id)
+    except ValueError:
+        # means we are not dealing with a numeric value
+        # we need to generate an int submission_id
+        id_name = f'data__{settings.REVEAL_DATA_ID_FIELD}'
+        try:
+            # try use an existing id in the case that we have already received
+            # this spray data before
+            existing = SprayDay.objects.get(**{id_name: submission_id})
+        except SprayDay.DoesNotExist:
+            # generate a new id by incrementing the last one we received
+            last = SprayDay.objects.all().aggregate(
+                last_id=Coalesce(Max('submission_id'), 0))
+            submission_id = last['last_id'] + 1
         else:
-            try:
-                submission_id = uuid.UUID(submission_id).int
-            except ValueError:
-                raise ValidationError(
-                    f"{settings.REVEAL_DATA_ID_FIELD} {NOT_PROVIDED}")
+            submission_id = existing.submission_id
 
     try:
         spray_date = parser.parse(spray_date)
