@@ -329,13 +329,9 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
         if val is not None:
             return val
 
-        new_structures = self.sprayday_queryset.filter(
-            sprayable=True, was_sprayed=True, household__isnull=True
-        ).count()
-
         val = (
             self.household_set.filter(sprayable=True, visited=True).count()
-            + new_structures
+            + self.new_structures
             + self.duplicates
         )
         cache.set(key, val)
