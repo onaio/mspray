@@ -333,7 +333,7 @@ def set_sprayed_visited(location, week_number=None):
         visited = 0
         context = {"week_number": week_number}
         data, total_structures = get_spray_area_stats(location, context)
-        found = data.get("found")
+        found = location.visited_found
         visited_sprayed = data.get("sprayed")
         if total_structures > 0:
             if found:
