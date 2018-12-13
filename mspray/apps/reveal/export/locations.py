@@ -24,7 +24,7 @@ def send_request(
         url,
         data=payload,
         auth=auth,
-        headers={'Content-type': 'application/json'})
+        headers={"Content-type": "application/json"})
 
     return request.status_code in [200, 201]
 
@@ -33,8 +33,10 @@ def export_locations(queryset):
     """
     Export locations in bulk
     """
-    url = urljoin(settings.REVEAL_OPENSRP_BASE_URL,
-                  settings.REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT)
+    url = urljoin(
+        settings.REVEAL_OPENSRP_BASE_URL,
+        settings.REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT,
+    )
     payload = []
 
     for item in queryset.iterator():
@@ -52,8 +54,10 @@ def export_households(location):
     """
     Export households from one target area in bulk
     """
-    url = urljoin(settings.REVEAL_OPENSRP_BASE_URL,
-                  settings.REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT)
+    url = urljoin(
+        settings.REVEAL_OPENSRP_BASE_URL,
+        settings.REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT,
+    )
     payload = []
     queryset = Household.objects.filter(location=location)
 

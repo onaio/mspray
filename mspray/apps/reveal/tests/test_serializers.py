@@ -9,7 +9,7 @@ from mspray.apps.reveal.serializers import (HouseholdSerializer,
                                             LocationSerializer)
 
 
-@override_settings(REVEAL_OPENSRP_ACTIVE='Active')
+@override_settings(REVEAL_OPENSRP_ACTIVE="Active")
 class TestSerializers(TestBase):
     """
     Serializers test class
@@ -26,21 +26,26 @@ class TestSerializers(TestBase):
         """
         Test reveal LocationSerializer
         """
-        location = Location.objects.filter(level='district').first()
+        location = Location.objects.filter(level="district").first()
         serializer = LocationSerializer(location)
         data = serializer.data
 
-        for key in ['id', 'type', 'geometry', 'properties']:
+        for key in ["id", "type", "geometry", "properties"]:
             self.assertTrue(key in data.keys())
 
-        self.assertEqual(location.id, data['id'])
-        self.assertEqual("Feature", data['type'])
-        self.assertEqual("MultiPolygon", data['geometry']['type'])
+        self.assertEqual(location.id, data["id"])
+        self.assertEqual("Feature", data["type"])
+        self.assertEqual("MultiPolygon", data["geometry"]["type"])
 
         self.assertDictEqual(
-            OrderedDict([('name', 'Chadiza'), ('status', 'Active'),
-                         ('parentId', None), ('geographicLevel', 0)]),
-            data['properties'])
+            OrderedDict([
+                ("name", "Chadiza"),
+                ("status", "Active"),
+                ("parentId", None),
+                ("geographicLevel", 0),
+            ]),
+            data["properties"],
+        )
 
     def test_household_serializer(self):
         """
@@ -50,15 +55,19 @@ class TestSerializers(TestBase):
         serializer = HouseholdSerializer(house)
         data = serializer.data
 
-        for key in ['id', 'type', 'geometry', 'properties']:
+        for key in ["id", "type", "geometry", "properties"]:
             self.assertTrue(key in data.keys())
 
-        self.assertEqual(house.id, data['id'])
-        self.assertEqual("Feature", data['type'])
-        self.assertEqual("Point", data['geometry']['type'])
+        self.assertEqual(house.id, data["id"])
+        self.assertEqual("Feature", data["type"])
+        self.assertEqual("Point", data["geometry"]["type"])
 
         self.assertDictEqual(
-            OrderedDict([('name', None), ('status', 'Active'),
-                         ('parentId', house.location.id),
-                         ('geographicLevel', 4)]),
-            data['properties'])
+            OrderedDict([
+                ("name", None),
+                ("status", "Active"),
+                ("parentId", house.location.id),
+                ("geographicLevel", 4),
+            ]),
+            data["properties"],
+        )

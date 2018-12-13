@@ -13,8 +13,8 @@ REVEAL_NOT_VISITED_VALUE = getattr(settings, "REVEAL_NOT_VISITED_VALUE",
 REVEAL_NOT_SPRAYABLE_VALUE = getattr(settings, "REVEAL_NOT_SPRAYABLE_VALUE",
                                      "Not Sprayable")
 REVEAL_DATA_ID_FIELD = getattr(settings, "REVEAL_DATA_ID_FIELD", "task_id")
-REVEAL_DATE_FIELD = getattr(
-    settings, "REVEAL_DATE_FIELD", "task_execution_start_date")
+REVEAL_DATE_FIELD = getattr(settings, "REVEAL_DATE_FIELD",
+                            "task_execution_start_date")
 REVEAL_GPS_FIELD = getattr(settings, "REVEAL_GPS_FIELD", "geometry")
 REVEAL_OSMNODE_FIELD = getattr(settings, "REVEAL_OSMNODE_FIELD",
                                "osmstructure:node:id")
@@ -23,25 +23,28 @@ REVEAL_NEWSTRUCTURE_GPS_FIELD = getattr(
 REVEAL_OPENSRP_USERNAME = getattr(settings, "REVEAL_OPENSRP_USERNAME", "")
 REVEAL_OPENSRP_PASSWORD = getattr(settings, "REVEAL_OPENSRP_PASSWORD", "")
 REVEAL_OPENSRP_BASE_URL = getattr(
-    settings, "REVEAL_OPENSRP_BASE_URL",
-    "https://reveal-stage.smartregister.org/opensrp/rest/")
+    settings,
+    "REVEAL_OPENSRP_BASE_URL",
+    "https://reveal-stage.smartregister.org/opensrp/rest/",
+)
 REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT = getattr(
-    settings, "REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT",
-    "location/add?is_jurisdiction=true"
+    settings,
+    "REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT",
+    "location/add?is_jurisdiction=true",
 )
 REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT = getattr(
     settings, "REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT",
     "location/add")
 REVEAL_OPENSRP_ACTIVE = getattr(settings, "REVEAL_OPENSRP_ACTIVE", "Active")
-REVEAL_DISTRICT = getattr(settings, 'REVEAL_DISTRICT', "district")
-REVEAL_OPENSRP_DISTRICT = getattr(settings, 'REVEAL_OPENSRP_DISTRICT', 0)
-REVEAL_RHC = getattr(settings, 'REVEAL_RHC', "RHC")
-REVEAL_OPENSRP_RHC = getattr(settings, 'REVEAL_OPENSRP_RHC', 1)
-REVEAL_TARGET_AREA = getattr(settings, 'REVEAL_TARGET_AREA', "ta")
-REVEAL_OPENSRP_TARGET_AREA = getattr(settings, 'REVEAL_OPENSRP_TARGET_AREA', 2)
-REVEAL_OPENSRP_HOUSEHOLD = getattr(settings, 'REVEAL_OPENSRP_HOUSEHOLD', 4)
-REVEAL_SPRAY_OPERATOR = getattr(settings, 'REVEAL_SPRAY_OPERATOR',
-                                'task_spray_operator')
+REVEAL_DISTRICT = getattr(settings, "REVEAL_DISTRICT", "district")
+REVEAL_OPENSRP_DISTRICT = getattr(settings, "REVEAL_OPENSRP_DISTRICT", 0)
+REVEAL_RHC = getattr(settings, "REVEAL_RHC", "RHC")
+REVEAL_OPENSRP_RHC = getattr(settings, "REVEAL_OPENSRP_RHC", 1)
+REVEAL_TARGET_AREA = getattr(settings, "REVEAL_TARGET_AREA", "ta")
+REVEAL_OPENSRP_TARGET_AREA = getattr(settings, "REVEAL_OPENSRP_TARGET_AREA", 2)
+REVEAL_OPENSRP_HOUSEHOLD = getattr(settings, "REVEAL_OPENSRP_HOUSEHOLD", 4)
+REVEAL_SPRAY_OPERATOR = getattr(settings, "REVEAL_SPRAY_OPERATOR",
+                                "task_spray_operator")
 
 # these general mSpray fields should be set up this way
 # this is commented out so that it does not affect other mSpray tests

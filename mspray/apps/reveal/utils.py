@@ -39,7 +39,7 @@ def add_spray_data(data: dict):
     except ValueError:
         # means we are not dealing with a numeric value
         # we need to generate an int submission_id
-        id_name = f'data__{settings.REVEAL_DATA_ID_FIELD}'
+        id_name = f"data__{settings.REVEAL_DATA_ID_FIELD}"
         try:
             # try use an existing id in the case that we have already received
             # this spray data before
@@ -47,8 +47,8 @@ def add_spray_data(data: dict):
         except SprayDay.DoesNotExist:
             # generate a new id by incrementing the last one we received
             last = SprayDay.objects.all().aggregate(
-                last_id=Coalesce(Max('submission_id'), 0))
-            submission_id = last['last_id'] + 1
+                last_id=Coalesce(Max("submission_id"), 0))
+            submission_id = last["last_id"] + 1
         else:
             submission_id = existing.submission_id
 
@@ -74,12 +74,10 @@ def add_spray_data(data: dict):
 
         # get the location object
         location = Location.objects.filter(
-            geom__contains=geom, level=settings.MSPRAY_TA_LEVEL
-        ).first()
+            geom__contains=geom, level=settings.MSPRAY_TA_LEVEL).first()
 
         sprayday, _ = SprayDay.objects.get_or_create(
-            submission_id=submission_id, spray_date=spray_date
-        )
+            submission_id=submission_id, spray_date=spray_date)
 
         sprayday.data = data
         sprayday.save()
@@ -127,7 +125,8 @@ def add_spray_data(data: dict):
                 sprayday=sprayday,
                 defaults={
                     "data_id": sprayday.data[settings.REVEAL_DATA_ID_FIELD],
-                    "location": sprayday.location
-                })
+                    "location": sprayday.location,
+                },
+            )
 
         return sprayday

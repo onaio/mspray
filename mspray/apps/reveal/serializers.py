@@ -9,6 +9,7 @@ from mspray.apps.main.models import Household, Location
 
 class LocationSerializer(GeoFeatureModelSerializer):
     """ A class to serialize locations as OpenSRP GeoJSON compatible data """
+
     status = serializers.SerializerMethodField()
     parentId = serializers.SerializerMethodField()
     geographicLevel = serializers.SerializerMethodField()
@@ -16,13 +17,7 @@ class LocationSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Location
         geo_field = "geom"
-        fields = [
-            'id',
-            'name',
-            "status",
-            "parentId",
-            "geographicLevel",
-        ]
+        fields = ["id", "name", "status", "parentId", "geographicLevel"]
 
     def get_status(self, obj):
         """get location_type"""
@@ -50,20 +45,15 @@ class LocationSerializer(GeoFeatureModelSerializer):
 
 class HouseholdSerializer(LocationSerializer):
     """ A class to serialize house holds as OpenSRP GeoJSON compatible data """
+
     name = serializers.SerializerMethodField()
 
     class Meta:
         model = Household
         geo_field = "geom"
-        fields = [
-            'id',
-            'name',
-            "status",
-            "parentId",
-            "geographicLevel",
-        ]
+        fields = ["id", "name", "status", "parentId", "geographicLevel"]
 
-    def get_name(self, obj):
+    def get_name(self, obj):  # pylint: disable=unused-argument
         """get name"""
         return None
 

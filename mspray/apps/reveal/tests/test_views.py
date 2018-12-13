@@ -3,6 +3,7 @@ from datetime import date
 
 from django.contrib.gis.geos import Point
 from django.test import override_settings
+
 from rest_framework.test import APIRequestFactory
 
 from mspray.apps.main.models import Household, SprayDay
@@ -10,7 +11,7 @@ from mspray.apps.main.tests.test_base import TestBase
 from mspray.apps.reveal.views import add_spray_data_view
 
 
-@override_settings(ROOT_URLCONF='mspray.apps.reveal.urls')
+@override_settings(ROOT_URLCONF="mspray.apps.reveal.urls")
 class TestViews(TestBase):
     """
     Views test class
@@ -44,9 +45,7 @@ class TestViews(TestBase):
             "task_server_version": 1543867945196
         }"""  # noqa
         request = self.factory.post(
-            'add-spray-data',
-            data=payload,
-            content_type='application/json')
+            "add-spray-data", data=payload, content_type="application/json")
         res = add_spray_data_view(request)
 
         # we got the right response
@@ -60,9 +59,11 @@ class TestViews(TestBase):
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
             Point(float(28.35517894260948), float(-15.41818400162254)).coords,
-            sprayday.geom.coords)
+            sprayday.geom.coords,
+        )
         self.assertTrue(sprayday.location is not None)
         self.assertEqual(
             sprayday.location,
             Household.objects.filter(
-                geom__contains=sprayday.geom).first().location)
+                geom__contains=sprayday.geom).first().location,
+        )

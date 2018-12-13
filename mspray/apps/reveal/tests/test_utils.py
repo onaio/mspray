@@ -48,22 +48,22 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            'id': '1337',
-            'parent_id': '3537',
-            'status': 'Active',
-            'geometry': """{
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
                 "type": "Point",
                 "coordinates": [
                     28.35517894260948,-15.41818400162254
                 ]}""",
-            'server_version': 1542970626309,
-            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
-            'task_business_status': 'Sprayed',
-            'task_execution_start_date': '2015-09-21T1000',
-            'task_execution_end_date': '2015-09-21T1100',
-            'task_server_version': 1543867945196
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Sprayed",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
         }
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
@@ -73,12 +73,14 @@ class TestUtils(TestBase):
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
             Point(float(28.35517894260948), float(-15.41818400162254)).coords,
-            sprayday.geom.coords)
+            sprayday.geom.coords,
+        )
         self.assertTrue(sprayday.location is not None)
         self.assertEqual(
             sprayday.location,
             Household.objects.filter(
-                geom__contains=sprayday.geom).first().location)
+                geom__contains=sprayday.geom).first().location,
+        )
         self.assertTrue(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
         self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
@@ -97,29 +99,30 @@ class TestUtils(TestBase):
         SprayDay.objects.all().delete()
 
         input_data = {
-            'id': '1337',
-            'parent_id': '3537',
-            'status': 'Active',
-            'geometry': """{
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
                 "type": "Point",
                 "coordinates": [
                     28.35517894260948,-15.41818400162254
                 ]}""",
-            'server_version': 1542970626309,
-            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
-            'task_business_status': 'Sprayed',
-            'task_execution_start_date': '2015-09-21T1000',
-            'task_execution_end_date': '2015-09-21T1100',
-            'task_server_version': 1543867945196
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Sprayed",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
         }
 
         # we are deleting this household so that it is not found when
         # attempting to link the spray data to a structure
         Household.objects.filter(
             geom__contains=GEOSGeometry(
-                input_data.get(settings.REVEAL_GPS_FIELD))).first().delete()
+                input_data.get(settings.REVEAL_GPS_FIELD))
+        ).first().delete()
 
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
@@ -129,14 +132,15 @@ class TestUtils(TestBase):
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
             Point(float(28.35517894260948), float(-15.41818400162254)).coords,
-            sprayday.geom.coords)
+            sprayday.geom.coords,
+        )
         self.assertTrue(sprayday.bgeom is not None)
         self.assertTrue(sprayday.location is not None)
-        self.assertEqual('Lusaka_6000', sprayday.location.name,)
+        self.assertEqual("Lusaka_6000", sprayday.location.name)
         self.assertTrue(sprayday.was_sprayed)
         self.assertTrue(sprayday.sprayable)
-        self.assertTrue(sprayday.data['osmstructure:node:id'])
-        self.assertTrue(sprayday.data['newstructure/gps'])
+        self.assertTrue(sprayday.data["osmstructure:node:id"])
+        self.assertTrue(sprayday.data["newstructure/gps"])
         self.assertEqual(sprayday.osmid, -sprayday.id)
         self.assertFalse(sprayday.household)
         self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
@@ -151,22 +155,22 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            'id': '1337',
-            'parent_id': '3537',
-            'status': 'Active',
-            'geometry': """{
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
                 "type": "Point",
                 "coordinates": [
                     28.35517894260948,-15.41818400162254
                 ]}""",
-            'server_version': 1542970626309,
-            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
-            'task_business_status': 'Not Sprayed - Refused',
-            'task_execution_start_date': '2015-09-21T1000',
-            'task_execution_end_date': '2015-09-21T1100',
-            'task_server_version': 1543867945196
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Sprayed - Refused",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
         }
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
@@ -184,22 +188,22 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            'id': '1337',
-            'parent_id': '3537',
-            'status': 'Active',
-            'geometry': """{
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
                 "type": "Point",
                 "coordinates": [
                     28.35517894260948,-15.41818400162254
                 ]}""",
-            'server_version': 1542970626309,
-            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
-            'task_business_status': 'Not Visited',
-            'task_execution_start_date': '2015-09-21T1000',
-            'task_execution_end_date': '2015-09-21T1100',
-            'task_server_version': 1543867945196
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Visited",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
         }
         add_spray_data(data=input_data)
         # nothing happened
@@ -211,22 +215,22 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            'id': '1337',
-            'parent_id': '3537',
-            'status': 'Active',
-            'geometry': """{
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
                 "type": "Point",
                 "coordinates": [
                     28.35517894260948,-15.41818400162254
                 ]}""",
-            'server_version': 1542970626309,
-            'task_id': '2caa810d-d4da-4e67-838b-badb9bd86e06',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
-            'task_business_status': 'Not Sprayable',
-            'task_execution_start_date': '2015-09-21T1000',
-            'task_execution_end_date': '2015-09-21T1100',
-            'task_server_version': 1543867945196
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Sprayable",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
         }
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())

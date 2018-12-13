@@ -2,6 +2,7 @@
 from unittest.mock import patch
 
 from django.test import override_settings
+
 from rest_framework.renderers import JSONRenderer
 
 from mspray.apps.main.models import Household, Location
@@ -15,7 +16,7 @@ from mspray.apps.reveal.serializers import (HouseholdSerializer,
 
 
 @override_settings(
-    REVEAL_OPENSRP_ACTIVE='Active',
+    REVEAL_OPENSRP_ACTIVE="Active",
     REVEAL_OPENSRP_BASE_URL="https://example.com",
     REVEAL_OPENSRP_CREATE_PARENT_LOCATIONS_ENDPOINT="add?is_jurisdiction=true",
     REVEAL_OPENSRP_CREATE_STRUCTURE_LOCATIONS_ENDPOINT="add",
@@ -34,7 +35,7 @@ class TestExports(TestBase):
         super().setUp()
         self._load_fixtures()
 
-    @patch('mspray.apps.reveal.export.locations.requests.post')
+    @patch("mspray.apps.reveal.export.locations.requests.post")
     def test_send_request(self, mock):
         """
         Test send_request
@@ -47,11 +48,11 @@ class TestExports(TestBase):
         self.assertEqual(args[0], url)
         self.assertDictEqual(kwargs["data"], payload)
         self.assertDictEqual(kwargs["headers"],
-                             {'Content-type': 'application/json'})
+                             {"Content-type": "application/json"})
         self.assertEqual(kwargs["auth"].password, "hunter2")
         self.assertEqual(kwargs["auth"].username, "mosh")
 
-    @patch('mspray.apps.reveal.export.locations.send_request')
+    @patch("mspray.apps.reveal.export.locations.send_request")
     def test_export_locations(self, mock):
         """
         Test export_locations
@@ -67,12 +68,12 @@ class TestExports(TestBase):
             url="https://example.com/add?is_jurisdiction=true",
             payload=json_data)
 
-    @patch('mspray.apps.reveal.export.locations.send_request')
+    @patch("mspray.apps.reveal.export.locations.send_request")
     def test_export_households(self, mock):
         """
         Test export_households
         """
-        location = Location.objects.filter(level='ta').first()
+        location = Location.objects.filter(level="ta").first()
         queryset = Household.objects.filter(location=location)
 
         export_households(location)
@@ -81,17 +82,17 @@ class TestExports(TestBase):
             [HouseholdSerializer(x).data for x in queryset.iterator()])
 
         mock.assert_called_once_with(
-            url="https://example.com/add",
-            payload=json_data)
+            url="https://example.com/add", payload=json_data)
 
-    @patch('mspray.apps.reveal.export.locations.export_locations')
+    @patch("mspray.apps.reveal.export.locations.export_locations")
     def test_export_rhc_target_areas(self, mock):
         """
         Test export_rhc_target_areas
         """
         export_rhc_target_areas(1337)
 
-        args, kwargs = mock.call_args_list[0]
+        args, _ = mock.call_args_list[0]
         self.assertEqual(
             list(set(Location.objects.filter(parent__id=1337, target=True))),
-            list(set(args[0])))
+            list(set(args[0])),
+        )

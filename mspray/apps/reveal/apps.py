@@ -9,8 +9,8 @@ class RevealConfig(AppConfig):
     reveal app config class
     """
 
-    name = 'mspray.apps.reveal'
-    app_label = 'reveal'
+    name = "mspray.apps.reveal"
+    app_label = "reveal"
 
     def ready(self):
         """
