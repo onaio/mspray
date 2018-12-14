@@ -305,12 +305,13 @@ def add_spray_data(data):
         sprayday.bgeom = household.bgeom
         location = sprayday.location = household.location
         sprayday.save()
-        if not household.visited:
-            household.visited = True
-        if not household.sprayable:
-            household.sprayable = sprayday.sprayable
-        if household.visited or household.sprayable:
-            household.save()
+
+    if household and not household.visited:
+        household.visited = True
+    if household and not household.sprayable:
+        household.sprayable = sprayday.sprayable
+    if household and (household.visited or household.sprayable):
+        household.save()
 
     if settings.OSM_SUBMISSIONS and geom is not None:
         sprayday.geom = geom
