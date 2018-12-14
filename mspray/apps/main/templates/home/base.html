@@ -56,7 +56,9 @@
                                     <li class="dropdown-header"><a href="{% url 'weeklyreports' %}"> IRS: CSV: Weekly Reports</a></li>
                                 {% endif %}
                                 <li role="separator" class="divider"></li>
+                                {% if not ENABLE_REVEAL %}
                                 <li><a href="{% url 'performance:districts' %} ">IRS: Performance</a></li>
+                                {% endif %}
                                 {% if SHOW_DIRECTLY_OBSERVED %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'directly-observed-spraying' %} ">IRS: Directly Observed Spraying</a></li>
@@ -65,9 +67,11 @@
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'trials:index' %}">IRS: Trial Survey</a></li>
                                 {% endif %}
+                                {% if not ENABLE_REVEAL %}
                                 <li role="separator" class="divider"></li>
                                 <li><a href="{% url 'mop-up' %}">IRS: Mop-up</a></li>
                                 <li role="separator" class="divider"></li>
+                                {% endif %}
                                 {% if view.request.session.show_csv %}
                                     <li ><a href="{% url 'logout' %}">Logout</a></li>
                                 {% else %}

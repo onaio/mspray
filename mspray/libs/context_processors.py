@@ -93,6 +93,13 @@ def enable_mda(request):
     }
 
 
+def reveal(request):
+    """Set Reveal context data"""
+    return {
+        "ENABLE_REVEAL": getattr(settings, "ENABLE_REVEAL", False),
+    }
+
+
 def labels(request):
     """Set COMMUNITY HEALTH WORKER value."""
     return {
@@ -120,4 +127,5 @@ def labels(request):
             settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"
         ),
         "MDA_ROUND_TWO_LABEL": "MDA Round 2",
+        "REVEAL_LABEL": getattr(settings, "REVEAL_LABEL", "Reveal"),
     }

@@ -48,8 +48,8 @@ router.register(r"targetareas", target_area.TargetAreaViewSet)
 performance_urls = (  # pylint: disable=C0103
     [
         path(
-            "", performance.DistrictPerfomanceView.as_view(), name="districts"
-        ),
+            "",
+            performance.DistrictPerfomanceView.as_view(), name="districts"),
         path(
             "team-leaders/<int:slug>",
             performance.TeamLeadersPerformanceView.as_view(),
@@ -103,27 +103,26 @@ urlpatterns = [  # pylint: disable=C0103
         name="detailed_sprayareas",
     ),
     path(
-        "weekly-report", home.WeeklyReportView.as_view(), name="weeklyreports"
-    ),
+        "weekly-report",
+        home.WeeklyReportView.as_view(), name="weeklyreports"),
     path(
         "indicators/number_of_households",
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
         name="number_of_housesholds",
     ),
     path("performance/", include(performance_urls, namespace="performance")),
+    path("reveal/", include("mspray.apps.reveal.urls", namespace="reveal")),
     path("admin/", admin.site.urls),
     path(
         "spray-operator-daily",
         spray_operator_daily.SprayOperatorDailyViewSet.as_view(
-            {"post": "create"}
-        ),
+            {"post": "create"}),
         name="spray-operator-daily",
     ),
     path(
         "directly-observed-spraying-form",
         dos_form.DirectlyObservedSprayingFormViewSet.as_view(
-            {"post": "create"}
-        ),
+            {"post": "create"}),
         name="directly-observed-spraying-form",
     ),
     path(
@@ -154,16 +153,12 @@ urlpatterns = [  # pylint: disable=C0103
     ),
     path(
         "mobilisation-visit",
-        MobilisationView.as_view(),
-        name="mobilisation-visit",
-    ),
+        MobilisationView.as_view(), name="mobilisation-visit"),
     path("decision-visit", DecisionView.as_view(), name="decision-visit"),
     path("mop-up", MopUpView.as_view(), name="mop-up"),
     path(
         "mop-up/<int:district>",
-        HealthFacilityMopUpView.as_view(),
-        name="mop-up",
-    ),
+        HealthFacilityMopUpView.as_view(), name="mop-up"),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
