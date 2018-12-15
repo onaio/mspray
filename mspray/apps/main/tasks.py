@@ -325,16 +325,27 @@ def task_set_sprayed_visited(location_id, week_number=None):
 
 
 def set_sprayed_visited(location, week_number=None):
-    """Set Sprayed Visited Function."""
+    """Persists visited and sprayed values for locations.
+
+    20% sprayed is a visit.
+    90% sprayed is sprayed.
+    """
     from mspray.apps.main.serializers.target_area import get_spray_area_stats
 
     if location.level == "ta":
         sprayed = 0
         visited = 0
-        context = {"week_number": week_number}
-        data, total_structures = get_spray_area_stats(location, context)
-        found = location.visited_found
-        visited_sprayed = location.visited_sprayed
+
+        if week_number:
+            context = {"week_number": week_number}
+            data, total_structures = get_spray_area_stats(location, context)
+            visited_sprayed = data.get("sprayed")
+            found = data.get("found")
+        else:
+            total_structures = location.structures_on_ground
+            found = location.visited_found
+            visited_sprayed = location.visited_sprayed
+
         if total_structures and found:
             ratio = round((found * 100) / total_structures)
             if ratio >= LOCATION_VISITED_PERCENTAGE:
