@@ -334,17 +334,16 @@ def set_sprayed_visited(location, week_number=None):
         context = {"week_number": week_number}
         data, total_structures = get_spray_area_stats(location, context)
         found = location.visited_found
-        visited_sprayed = data.get("sprayed")
-        if total_structures > 0:
-            if found:
-                ratio = round((found * 100) / total_structures)
-                if ratio >= LOCATION_VISITED_PERCENTAGE:
-                    visited = 1
+        visited_sprayed = location.visited_sprayed
+        if total_structures and found:
+            ratio = round((found * 100) / total_structures)
+            if ratio >= LOCATION_VISITED_PERCENTAGE:
+                visited = 1
 
-            if visited_sprayed:
-                ratio = round((visited_sprayed * 100) / total_structures)
-                if ratio >= LOCATION_SPRAYED_PERCENTAGE:
-                    sprayed = 1
+        if total_structures and visited_sprayed:
+            ratio = round((visited_sprayed * 100) / total_structures)
+            if ratio >= LOCATION_SPRAYED_PERCENTAGE:
+                sprayed = 1
 
         if week_number:
             # print(week_number, location, week_number, visited, sprayed)
