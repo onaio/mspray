@@ -1,31 +1,27 @@
 # -*- coding:utf-8 -*-
-"""
-Mobilisation model.
-"""
+"""Mobilisation model."""
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
-from django.conf import settings
 from django.db.models.signals import post_save
 
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.location import Location
-from mspray.apps.main.models.spray_day import (
-    NON_STRUCTURE_GPS_FIELD, STRUCTURE_GPS_FIELD)
+
 from mspray.libs.common_tags import (
     DATA_ID_FIELD,
     MOBILISATION_OSM_FIELD,
     MOBILISED_FIELD,
     SPRAY_AREA_FIELD,
+    MOBILISATION_LATITUDE_FIELD,
+    MOBILISATION_LONGITUDE_FIELD,
 )
 
 OSM_ID_FIELD = "{}:way:id".format(MOBILISATION_OSM_FIELD)
 
 
 class Mobilisation(models.Model):
-    """
-    Mobilisation model.
-    """
+    """Mobilisation model."""
 
     submission_id = models.PositiveIntegerField(unique=True)
     geom = models.PointField(srid=4326, null=True)
@@ -52,6 +48,8 @@ class Mobilisation(models.Model):
     modified_on = models.DateTimeField(auto_now=True)
 
     class Meta:
+        """Mobilisation model."""
+
         app_label = "main"
 
 
@@ -88,30 +86,32 @@ def create_mobilisation_visit(data):
         health_facility = household.location.parent
         spray_area = household.location
     else:
-        spray_area = data.get(SPRAY_AREA_FIELD)
-        if spray_area:
-            # get location by spray_area
-            try:
-                spray_area = Location.objects.get(name=spray_area, level="ta")
-            except Location.DoesNotExist:
-                pass
-                # get the gps field
-
-        gps_field = data.get(
-            STRUCTURE_GPS_FIELD, data.get(NON_STRUCTURE_GPS_FIELD))
+        # link mobilisation using geo spatial query
+        import pdb; pdb.set_trace()
+        gps_field = str(
+            data.get(MOBILISATION_LONGITUDE_FIELD)) + ' ' + str(
+            data.get(MOBILISATION_LATITUDE_FIELD))
         geom = (geojson_from_gps_string(gps_field)
                 if gps_field is not None else None)
         # check if the geom contains Point
         # if yes, save that as the spray area
+        import pdb; pdb.set_trace()
         if geom is not None:
             locations = Location.objects.filter(
-                geom__contains=geom,
-                level=settings.MSPRAY_TA_LEVEL)
+                geom__contains=geom)
             if locations:
                 spray_area = locations[0]
+                import pdb; pdb.set_trace()
             else:
-                district = spray_area.parent.parent
-                health_facility = spray_area.parent
+                spray_area = data.get(SPRAY_AREA_FIELD)
+                import pdb; pdb.set_trace()
+                # get location by spray_area
+                if spray_area:
+                        try:
+                            spray_area = Location.objects.get(
+                                name=spray_area, level="ta")
+                        except Location.DoesNotExist:
+                            pass
 
     return Mobilisation.objects.create(
         data=data,
