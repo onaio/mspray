@@ -5,10 +5,13 @@ Mobilisation model.
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.conf import settings
 from django.db.models.signals import post_save
 
 from mspray.apps.main.models.household import Household
 from mspray.apps.main.models.location import Location
+from mspray.apps.main.models.spray_day import (
+    NON_STRUCTURE_GPS_FIELD, STRUCTURE_GPS_FIELD)
 from mspray.libs.common_tags import (
     DATA_ID_FIELD,
     MOBILISATION_OSM_FIELD,
@@ -53,7 +56,7 @@ class Mobilisation(models.Model):
 
 
 def update_location_mobilisation(sender, instance=None, **kwargs):
-    """Update is_mobilised value on location objects"""
+    """Update is_mobilised value on location objects."""
     if kwargs.get("created") and instance and sender == Mobilisation:
         instance.spray_area.is_mobilised = instance.is_mobilised
         instance.spray_area.save()
@@ -67,8 +70,9 @@ post_save.connect(
 
 
 def create_mobilisation_visit(data):
-    """Creates a Mobilisation object from a Mobilisation Visit form.
-    """
+    """Create a Mobilisation object from a Mobilisation Visit form."""
+    from mspray.apps.main.utils import geojson_from_gps_string
+
     district = health_facility = household = spray_area = None
     is_mobilised = data.get(MOBILISED_FIELD) in ["Yes", "paper"]
     submission_id = data.get(DATA_ID_FIELD)
@@ -90,7 +94,21 @@ def create_mobilisation_visit(data):
             try:
                 spray_area = Location.objects.get(name=spray_area, level="ta")
             except Location.DoesNotExist:
-                spray_area = None
+                pass
+                # get the gps field
+
+        gps_field = data.get(
+            STRUCTURE_GPS_FIELD, data.get(NON_STRUCTURE_GPS_FIELD))
+        geom = (geojson_from_gps_string(gps_field)
+                if gps_field is not None else None)
+        # check if the geom contains Point
+        # if yes, save that as the spray area
+        if geom is not None:
+            locations = Location.objects.filter(
+                geom__contains=geom,
+                level=settings.MSPRAY_TA_LEVEL)
+            if locations:
+                spray_area = locations[0]
             else:
                 district = spray_area.parent.parent
                 health_facility = spray_area.parent
