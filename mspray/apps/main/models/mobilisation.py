@@ -3,6 +3,8 @@
 
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
+from django.conf import settings
+from django.contrib.gis.geos import Point
 from django.db.models.signals import post_save
 
 from mspray.apps.main.models.household import Household
@@ -69,8 +71,6 @@ post_save.connect(
 
 def create_mobilisation_visit(data):
     """Create a Mobilisation object from a Mobilisation Visit form."""
-    from mspray.apps.main.utils import geojson_from_gps_string
-
     district = health_facility = household = spray_area = None
     is_mobilised = data.get(MOBILISED_FIELD) in ["Yes", "paper"]
     submission_id = data.get(DATA_ID_FIELD)
@@ -87,24 +87,23 @@ def create_mobilisation_visit(data):
         spray_area = household.location
     else:
         # link mobilisation using geo spatial query
-        import pdb; pdb.set_trace()
-        gps_field = str(
-            data.get(MOBILISATION_LONGITUDE_FIELD)) + ' ' + str(
-            data.get(MOBILISATION_LATITUDE_FIELD))
-        geom = (geojson_from_gps_string(gps_field)
+        gps_field = (
+            data.get(MOBILISATION_LONGITUDE_FIELD), data.get(
+                MOBILISATION_LATITUDE_FIELD))
+        geom = (Point(gps_field)
                 if gps_field is not None else None)
         # check if the geom contains Point
         # if yes, save that as the spray area
-        import pdb; pdb.set_trace()
         if geom is not None:
             locations = Location.objects.filter(
-                geom__contains=geom)
+                geom__contains=geom,
+                level=settings.MSPRAY_TA_LEVEL)
             if locations:
                 spray_area = locations[0]
-                import pdb; pdb.set_trace()
+                health_facility = spray_area.parent
+                district = spray_area.parent.parent
             else:
                 spray_area = data.get(SPRAY_AREA_FIELD)
-                import pdb; pdb.set_trace()
                 # get location by spray_area
                 if spray_area:
                         try:
