@@ -1,20 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Test sensitization_visit module.
-"""
+"""Test sensitization_visit module."""
 from django.test import TestCase
-from django.contrib.gis.geos import Point
 
 from mspray.apps.main.models.mobilisation import (
     Mobilisation,
     create_mobilisation_visit,
 )
-from mspray.libs.common_tags import (
-    MOBILISATION_LATITUDE_FIELD,
-    MOBILISATION_LONGITUDE_FIELD,
-)
-from mspray.apps.main.models import Location
-from django.conf import settings
 from mspray.apps.main.tests.utils import MOBILISATION_VISIT_DATA, data_setup
 
 
