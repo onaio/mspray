@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 """Mobilisation model."""
 
+import logging
 from django.contrib.gis.db import models
 from django.contrib.postgres.fields import JSONField
 from django.conf import settings
@@ -20,6 +21,7 @@ from mspray.libs.common_tags import (
 )
 
 OSM_ID_FIELD = "{}:way:id".format(MOBILISATION_OSM_FIELD)
+logger = logging.getLogger(__name__)
 
 
 class Mobilisation(models.Model):
@@ -75,6 +77,7 @@ def create_mobilisation_visit(data):
     is_mobilised = data.get(MOBILISED_FIELD) in ["Yes", "paper"]
     submission_id = data.get(DATA_ID_FIELD)
     osmid = data.get(OSM_ID_FIELD)
+    # Get spray area by osmid
     if osmid:
         try:
             household = Household.objects.get(hh_id=osmid)
@@ -82,35 +85,39 @@ def create_mobilisation_visit(data):
             pass
 
     if household:
-        district = household.location.parent.parent
-        health_facility = household.location.parent
         spray_area = household.location
-    else:
+    # Get spray are by GPS
+    if not household:
         # link mobilisation using geo spatial query
-        gps_field = (
-            data.get(MOBILISATION_LONGITUDE_FIELD), data.get(
-                MOBILISATION_LATITUDE_FIELD))
-        geom = (Point(gps_field)
-                if gps_field is not None else None)
-        # check if the geom contains Point
-        # if yes, save that as the spray area
-        if geom is not None:
-            locations = Location.objects.filter(
-                geom__contains=geom,
-                level=settings.MSPRAY_TA_LEVEL)
-            if locations:
-                spray_area = locations[0]
-                health_facility = spray_area.parent
-                district = spray_area.parent.parent
-            else:
-                spray_area = data.get(SPRAY_AREA_FIELD)
-                # get location by spray_area
-                if spray_area:
-                        try:
-                            spray_area = Location.objects.get(
-                                name=spray_area, level="ta")
-                        except Location.DoesNotExist:
-                            pass
+        lon = data.get(MOBILISATION_LONGITUDE_FIELD)
+        lat = data.get(MOBILISATION_LATITUDE_FIELD)
+        if lat is not None and lon is not None:
+            geom = Point(lon, lat)
+            # check if the geom contains Point
+            # if yes, save that as the spray area
+            if geom is not None:
+                locations = Location.objects.filter(
+                    geom__contains=geom,
+                    level=settings.MSPRAY_TA_LEVEL)
+                if locations:
+                    spray_area = locations[0]
+                else:
+                    logger.info(
+                        "No GPS data found for {}".format(
+                            submission_id))
+    # get location by spray_area
+    if not spray_area:
+        spray_area = data.get(SPRAY_AREA_FIELD)
+        try:
+            spray_area = Location.objects.get(
+                name=spray_area, level="ta")
+        except Location.DoesNotExist:
+            logger.info("No spray area found for {}".format(
+                submission_id))
+
+    if spray_area:
+        health_facility = spray_area.parent
+        district = spray_area.parent.parent
 
     return Mobilisation.objects.create(
         data=data,
