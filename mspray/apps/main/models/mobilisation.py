@@ -107,10 +107,10 @@ def create_mobilisation_visit(data):
                             submission_id))
     # get location by spray_area
     if not spray_area:
-        spray_area = data.get(SPRAY_AREA_FIELD)
+        spray_area_name = data.get(SPRAY_AREA_FIELD)
         try:
             spray_area = Location.objects.get(
-                name=spray_area, level="ta")
+                name=spray_area_name, level="ta")
         except Location.DoesNotExist:
             logger.info("No spray area found for {}".format(
                 submission_id))
