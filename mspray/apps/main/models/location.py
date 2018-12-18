@@ -260,7 +260,7 @@ class Location(MPTTModel, models.Model):  # pylint: disable=R0904
                 pk__in=spraypoints, sprayable=True, household__isnull=True
             ).count()
             + self.sprayday_set.exclude(pk__in=spraypoints)
-            .filter(sprayable=True, household__isnull=True)
+            .filter(sprayable=True, household__isnull=True, was_sprayed=True)
             .count()
         )
         cache.set(key, val)
