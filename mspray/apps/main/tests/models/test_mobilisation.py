@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Test sensitization_visit module."""
+"""
+Test sensitization_visit module.
+"""
 from django.test import TestCase
 
 from mspray.apps.main.models.mobilisation import (
     Mobilisation,
     create_mobilisation_visit,
 )
+from django.conf import settings
 from mspray.apps.main.tests.utils import MOBILISATION_VISIT_DATA, data_setup
 
 
