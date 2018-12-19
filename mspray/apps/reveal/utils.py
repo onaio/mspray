@@ -10,7 +10,7 @@ from django.db.models.functions import Coalesce
 from dateutil import parser
 
 from mspray.apps.main.models import Household, Location, SprayDay, SprayPoint
-from mspray.apps.reveal.common_tags import NOT_PROVIDED
+from mspray.apps.reveal.common_tags import NOT_PROVIDED, POLYGON
 from mspray.libs.utils.geom_buffer import with_metric_buffer
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)
@@ -23,7 +23,7 @@ def add_spray_data(data: dict):
     Expects:
         submission_id: str => uuid of the submission
         date: str => date of submissions
-        location: str => geojson of a Point
+        location: str => geojson of a Point or Polygon
         spray_status: str => the spray status
     """
     submission_id = data.get(settings.REVEAL_DATA_ID_FIELD)
@@ -70,11 +70,17 @@ def add_spray_data(data: dict):
             # we need to convert back to geojson
             gps_field = json.dumps(gps_field)
 
-        geom = GEOSGeometry(gps_field)
+        geometry = GEOSGeometry(gps_field)
 
         # get the location object
-        location = Location.objects.filter(
-            geom__contains=geom, level=settings.MSPRAY_TA_LEVEL).first()
+        if geometry.geom_type == POLYGON:
+            location = Location.objects.filter(
+                geom__contains=geometry.centroid,
+                level=settings.MSPRAY_TA_LEVEL).first()
+        else:
+            location = Location.objects.filter(
+                geom__contains=geometry,
+                level=settings.MSPRAY_TA_LEVEL).first()
 
         sprayday, _ = SprayDay.objects.get_or_create(
             submission_id=submission_id, spray_date=spray_date)
@@ -82,9 +88,13 @@ def add_spray_data(data: dict):
         sprayday.data = data
         sprayday.save()
 
-        if geom is not None:
-            sprayday.geom = geom
-            sprayday.bgeom = with_metric_buffer(sprayday.geom, BUFFER_SIZE)
+        if geometry is not None:
+            if geometry.geom_type == POLYGON:
+                sprayday.geom = geometry.centroid
+                sprayday.bgeom = geometry
+            else:
+                sprayday.geom = geometry
+                sprayday.bgeom = with_metric_buffer(sprayday.geom, BUFFER_SIZE)
 
         if location is not None:
             sprayday.location = location
