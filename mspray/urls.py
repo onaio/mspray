@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Mspray urls module.
-"""
+"""Mspray urls module."""
 import sys
 
 from django.conf import settings
@@ -160,6 +158,8 @@ urlpatterns = [  # pylint: disable=C0103
         "mop-up/<int:district>",
         HealthFacilityMopUpView.as_view(), name="mop-up"),
 ] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler404 = 'mspray.apps.main.views.errors.error_404'
 
 
 if (settings.DEBUG or TESTING) and "debug_toolbar" in settings.INSTALLED_APPS:
