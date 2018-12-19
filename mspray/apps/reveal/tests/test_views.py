@@ -67,3 +67,46 @@ class TestViews(TestBase):
             Household.objects.filter(
                 geom__contains=sprayday.geom).first().location,
         )
+
+    def test_add_spray_data_view_polygon(self):
+        """
+        Test add_spray_data_view wiht polygons
+        """
+        SprayDay.objects.all().delete()
+        payload = """{
+            "id": "154147",
+            "parent_id": "3951",
+            "status": "Active",
+            "geometry": "{\\"type\\":\\"Polygon\\",\\"coordinates\\":[[[28.3552415, -15.418094], [28.3552963, -15.4182251], [28.3552069, -15.4182598], [28.3551895, -15.4182184], [28.3550886, -15.4182576], [28.3550511, -15.418168], [28.3552415, -15.418094]]]}",
+            "server_version": 1545204913897,
+            "task_id": "d6058db2-0364-11e9-8eb2-f2801f1b9fd1",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Visited",
+            "task_execution_start_date": "2018-11-10T2200",
+            "task_execution_end_date": "",
+            "task_server_version": 1545206825909
+        }"""  # noqa
+        request = self.factory.post(
+            "add-spray-data", data=payload, content_type="application/json")
+        res = add_spray_data_view(request)
+
+        # we got the right response
+        self.assertEqual(200, res.status_code)
+        self.assertEqual({"success": True}, res.data)
+
+        # we added the sprayday object
+        self.assertEqual(1, SprayDay.objects.all().count())
+        sprayday = SprayDay.objects.first()
+        self.assertEqual(1, sprayday.submission_id)
+        self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
+        self.assertEqual(
+            Point(float(28.35517894260948), float(-15.41818400162254)).coords,
+            sprayday.geom.coords,
+        )
+        self.assertTrue(sprayday.location is not None)
+        self.assertEqual(
+            sprayday.location,
+            Household.objects.filter(
+                geom__contains=sprayday.geom).first().location,
+        )

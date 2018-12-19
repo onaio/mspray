@@ -92,6 +92,65 @@ class TestUtils(TestBase):
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
 
+    def test_add_spray_data_polygon(self):
+        """
+        Test add_spray_data for reveal using polygons
+        """
+        SprayDay.objects.all().delete()
+        input_data = {
+            'id': '154147',
+            'parent_id': '3951',
+            'status': 'Active',
+            'geometry': """{
+                "type":"Polygon",
+                "coordinates":[
+                    [
+                        [28.3552415, -15.418094],
+                        [28.3552963, -15.4182251],
+                        [28.3552069, -15.4182598],
+                        [28.3551895, -15.4182184],
+                        [28.3550886, -15.4182576],
+                        [28.3550511, -15.418168],
+                        [28.3552415, -15.418094]
+                    ]
+                ]
+            }""",
+            'server_version': 1545204913897,
+            'task_id': 'd6058db2-0364-11e9-8eb2-f2801f1b9fd1',
+            'task_spray_operator': 'demoMTI',
+            'task_status': 'Ready',
+            "task_business_status": "Sprayed",
+            "task_execution_start_date": "2015-09-21T1000",
+            'task_execution_end_date': '',
+            'task_server_version': 1545206825909
+        }
+        add_spray_data(data=input_data)
+        self.assertEqual(1, SprayDay.objects.all().count())
+
+        sprayday = SprayDay.objects.first()
+        self.assertEqual(1, sprayday.submission_id)
+        self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
+        self.assertEqual(
+            Point(float(28.35517894260948), float(-15.41818400162254)).coords,
+            sprayday.geom.coords,
+        )
+        self.assertTrue(sprayday.location is not None)
+        self.assertEqual(
+            sprayday.location,
+            Household.objects.filter(
+                geom__contains=sprayday.geom).first().location,
+        )
+        self.assertTrue(sprayday.was_sprayed)
+        self.assertTrue(sprayday.sprayable)
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
+        self.assertTrue(sprayday.household.visited)
+        self.assertTrue(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
+
+        # try again to ensure we dont create duplicate records
+        add_spray_data(data=input_data)
+        self.assertEqual(1, SprayDay.objects.all().count())
+
     def test_add_new_point(self):
         """
         Test adding data with new point
