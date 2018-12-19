@@ -197,3 +197,31 @@ def debug_spray_area_indicators(spray_area_id):
         .exclude(id__in=unique_points)
         .count()
     )
+
+
+def debug_submission_lists(list_one, list_two):
+    """Print debug information from mspray submissions.
+
+    arguments:
+        list_one - primary keys of mspray submissions
+        list_two - primary keys of mspray submissions
+    """
+    print(
+        "Sprayable, Was Sprayed, data id, osmid, household, in l2, "
+        "submissions with same osm, same osm and was sprayed, unique records"
+    )
+    for data_id in list_one:
+        submission = SprayDay.objects.get(pk=data_id)
+        print(
+            submission.sprayable,
+            submission.was_sprayed,
+            submission.pk,
+            submission.osmid,
+            submission.household,
+            data_id in list_two,
+            SprayDay.objects.filter(osmid=submission.osmid).count(),
+            SprayDay.objects.filter(
+                osmid=submission.osmid, was_sprayed=True
+            ).count(),
+            submission.spraypoint_set.count(),
+        )
