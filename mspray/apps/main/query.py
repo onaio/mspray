@@ -15,7 +15,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Coalesce
 
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Household, Location, SprayPoint
 from mspray.apps.main.models.spray_day import (
     SprayDay,
     SprayDayHealthCenterLocation,
@@ -194,6 +194,175 @@ def debug_spray_area_indicators(spray_area_id):
     print("Not Sprayed duplicates")
     print(
         location.sprayday_set.filter(sprayable=True, was_sprayed=False)
+        .exclude(id__in=unique_points)
+        .count()
+    )
+
+
+def debug_spray_area_indicators_2(spray_area_id):
+    """Print spray area indicators for debugging purposes."""
+    location = Location.objects.get(pk=spray_area_id, level="ta")
+    print(location)
+
+    unique_points = list(
+        SprayPoint.objects.filter(location=location).values_list(
+            "sprayday", flat=True
+        )
+    )
+    print("Unique Points:", len(unique_points))
+
+    print("Households Sprayable, sprayed, not sprayed")
+    print(
+        Household.objects.filter(location=location)
+        .exclude(sprayable=False)
+        .count(),
+        (
+            SprayDay.objects.filter(location=location)
+            .filter(was_sprayed=True, sprayable=True, household__isnull=False)
+            .count(),
+            SprayDay.objects.filter(location=location)
+            .filter(was_sprayed=True, sprayable=True, household__isnull=False)
+            .values_list("household", flat=True)
+            .distinct()
+            .count(),
+        ),
+        (
+            SprayDay.objects.filter(location=location)
+            .filter(
+                id__in=unique_points,
+                sprayable=True,
+                household__isnull=False,
+                was_sprayed=False,
+            )
+            .count(),
+            SprayDay.objects.filter(location=location)
+            .filter(
+                id__in=unique_points,
+                sprayable=True,
+                household__isnull=False,
+                was_sprayed=False,
+            )
+            .values_list("household", flat=True)
+            .distinct()
+            .count(),
+        ),
+    )
+
+    print("New Structures, sprayed, not sprayed")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(id__in=unique_points, sprayable=True, household__isnull=True)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(
+            id__in=unique_points,
+            sprayable=True,
+            household__isnull=True,
+            was_sprayed=True,
+        )
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(
+            id__in=unique_points,
+            sprayable=True,
+            household__isnull=True,
+            was_sprayed=False,
+        )
+        .count(),
+    )
+    print(
+        SprayDay.objects.filter(location=location)
+        .exclude(id__in=unique_points)
+        .filter(sprayable=True, household__isnull=True)
+        .count()
+    )
+    print(
+        SprayDay.objects.filter(location=location)
+        .exclude(id__in=unique_points)
+        .filter(sprayable=True, household__isnull=True, was_sprayed=True)
+        .count()
+    )
+
+    print("# Total Sprayable, sprayed, not sprayed")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=True)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=False)
+        .count(),
+    )
+
+    print("# Total Sprayable Unique Set")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, id__in=unique_points)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, id__in=unique_points, was_sprayed=True)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, id__in=unique_points, was_sprayed=True)
+        .count(),
+    )
+
+    print("# Total Sprayed, sprayable sprayed")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(was_sprayed=True)
+        .count(),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=True)
+        .count(),
+    )
+
+    print("# Total Sprayed Not in Unique Set")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=True)
+        .exclude(id__in=unique_points)
+        .count()
+    )
+
+    print("# Total Sprayable Sprayed")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=True)
+        .count()
+    )
+
+    print("# Total Sprayable Not Sprayed")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=False)
+        .count()
+    )
+
+    queryset = SprayDay.objects.filter(location=location).filter(
+        sprayable=True, was_sprayed=False, id__in=unique_points
+    )
+    print("# Total Sprayable Unique Set Not Sprayed")
+    print(queryset.count())
+    print(queryset.values_list("id", flat=True))
+
+    print("Sprayed duplicates")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(was_sprayed=True)
+        .exclude(household__isnull=True)
+        .values("household")
+        .distinct()
+        .annotate(duplicates=Count("household") - 1)
+        .aggregate(total_duplicates=Sum("duplicates"))["total_duplicates"]
+    )
+
+    print("Not Sprayed duplicates")
+    print(
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, was_sprayed=False)
         .exclude(id__in=unique_points)
         .count()
     )
