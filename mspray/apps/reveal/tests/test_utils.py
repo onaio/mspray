@@ -12,6 +12,7 @@ from mspray.apps.reveal.utils import add_spray_data
 REVEAL_SPRAY_STATUS_FIELD = "task_business_status"
 REVEAL_NOT_SPRAYABLE_VALUE = "Not Sprayable"
 REVEAL_SPRAYED_VALUE = "Sprayed"
+REVEAL_NOT_SPRAYED_VALUE = "Not Sprayed"
 REVEAL_DATE_FIELD = "task_execution_start_date"
 
 
@@ -19,6 +20,7 @@ REVEAL_DATE_FIELD = "task_execution_start_date"
     REVEAL_SPRAY_STATUS_FIELD=REVEAL_SPRAY_STATUS_FIELD,
     REVEAL_NOT_SPRAYABLE_VALUE=REVEAL_NOT_SPRAYABLE_VALUE,
     REVEAL_SPRAYED_VALUE=REVEAL_SPRAYED_VALUE,
+    REVEAL_NOT_SPRAYED_VALUE=REVEAL_NOT_SPRAYED_VALUE,
     REVEAL_DATE_FIELD=REVEAL_DATE_FIELD,
     REVEAL_GPS_FIELD="geometry",
     MSPRAY_OSM_PRESENCE_FIELD=False,
@@ -281,6 +283,39 @@ class TestUtils(TestBase):
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
 
+    def test_add_spray_data_not_sprayed_refused(self):
+        """
+        Test add_spray_data REFUSED for reveal
+        """
+        SprayDay.objects.all().delete()
+        input_data = {
+            "id": "1337",
+            "parent_id": "3537",
+            "status": "Active",
+            "geometry": """{
+                "type": "Point",
+                "coordinates": [
+                    28.35517894260948,-15.41818400162254
+                ]}""",
+            "server_version": 1542970626309,
+            "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
+            "task_business_status": "Not Sprayed - Refused",
+            "task_execution_start_date": "2015-09-21T1000",
+            "task_execution_end_date": "2015-09-21T1100",
+            "task_server_version": 1543867945196,
+        }
+        add_spray_data(data=input_data)
+        self.assertEqual(1, SprayDay.objects.all().count())
+        sprayday = SprayDay.objects.first()
+        self.assertEqual(sprayday.osmid, sprayday.household.hh_id)
+        self.assertFalse(sprayday.was_sprayed)
+        self.assertTrue(sprayday.sprayable)
+        self.assertTrue(sprayday.household.visited)
+        self.assertTrue(sprayday.household.sprayable)
+        self.assertTrue(SprayPoint.objects.filter(sprayday=sprayday).exists())
+
     def test_add_spray_data_not_sprayed(self):
         """
         Test add_spray_data NOT SPRAYED for reveal
@@ -299,7 +334,7 @@ class TestUtils(TestBase):
             "task_id": "2caa810d-d4da-4e67-838b-badb9bd86e06",
             "task_spray_operator": "demoMTI",
             "task_status": "Ready",
-            "task_business_status": "Not Sprayed - Refused",
+            "task_business_status": "Not Sprayed",
             "task_execution_start_date": "2015-09-21T1000",
             "task_execution_end_date": "2015-09-21T1100",
             "task_server_version": 1543867945196,
