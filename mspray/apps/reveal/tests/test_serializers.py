@@ -1,6 +1,8 @@
 """module to test reveal Serializers"""
+import json
 from collections import OrderedDict
 
+from django.contrib.gis.geos import GEOSGeometry
 from django.test import override_settings
 
 from mspray.apps.main.models import Household, Location
@@ -38,12 +40,14 @@ class TestSerializers(TestBase):
         self.assertEqual("MultiPolygon", data["geometry"]["type"])
 
         self.assertDictEqual(
-            OrderedDict([
-                ("name", "Chadiza"),
-                ("status", "Active"),
-                ("parentId", None),
-                ("geographicLevel", 0),
-            ]),
+            OrderedDict(
+                [
+                    ("name", "Chadiza"),
+                    ("status", "Active"),
+                    ("parentId", None),
+                    ("geographicLevel", 0),
+                ]
+            ),
             data["properties"],
         )
 
@@ -60,14 +64,19 @@ class TestSerializers(TestBase):
 
         self.assertEqual(house.id, data["id"])
         self.assertEqual("Feature", data["type"])
-        self.assertEqual("Point", data["geometry"]["type"])
+        self.assertEqual("Polygon", data["geometry"]["type"])
+
+        self.assertEqual(
+            house.bgeom, GEOSGeometry(json.dumps(data["geometry"])))
 
         self.assertDictEqual(
-            OrderedDict([
-                ("name", None),
-                ("status", "Active"),
-                ("parentId", house.location.id),
-                ("geographicLevel", 4),
-            ]),
+            OrderedDict(
+                [
+                    ("name", None),
+                    ("status", "Active"),
+                    ("parentId", house.location.id),
+                    ("geographicLevel", 4),
+                ]
+            ),
             data["properties"],
         )

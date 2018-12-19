@@ -50,7 +50,7 @@ class HouseholdSerializer(LocationSerializer):
 
     class Meta:
         model = Household
-        geo_field = "geom"
+        geo_field = "bgeom"
         fields = ["id", "name", "status", "parentId", "geographicLevel"]
 
     def get_name(self, obj):  # pylint: disable=unused-argument
