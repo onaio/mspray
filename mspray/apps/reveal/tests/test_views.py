@@ -82,8 +82,8 @@ class TestViews(TestBase):
             "task_id": "d6058db2-0364-11e9-8eb2-f2801f1b9fd1",
             "task_spray_operator": "demoMTI",
             "task_status": "Ready",
-            "task_business_status": "Not Visited",
-            "task_execution_start_date": "2018-11-10T2200",
+            "task_business_status": "Sprayed",
+            "task_execution_start_date": "2015-09-21T1000",
             "task_execution_end_date": "",
             "task_server_version": 1545206825909
         }"""  # noqa
