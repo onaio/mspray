@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Mspray task module."""
 from __future__ import absolute_import
 
 import gc
-import os
 import logging
+import os
 from datetime import timedelta
 
 from django.conf import settings

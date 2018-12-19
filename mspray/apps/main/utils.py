@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+"""Mspray utils module."""
 import gc
 import json
 import logging
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
 from django.contrib.gis.measure import D
 from django.contrib.gis.utils import LayerMapping
@@ -15,7 +18,6 @@ from django.db.models.expressions import RawSQL
 from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_datetime
-from django.contrib.gis.db.models.functions import Distance
 
 from dateutil.parser import parse
 
@@ -41,12 +43,12 @@ from mspray.apps.main.models.target_area import TargetArea, namibia_mapping
 from mspray.apps.main.models.team_leader import TeamLeader
 from mspray.apps.main.models.team_leader_assistant import TeamLeaderAssistant
 from mspray.apps.main.tasks import (
+    add_unique_record,
     link_spraypoint_with_osm,
     run_tasks_after_spray_data,
 )
 from mspray.libs.ona import fetch_form_data
 from mspray.libs.utils.geom_buffer import with_metric_buffer
-from mspray.apps.main.tasks import add_unique_record
 
 BUFFER_SIZE = getattr(settings, "MSPRAY_NEW_BUFFER_WIDTH", 4)  # default to 4m
 HAS_SPRAYABLE_QUESTION = settings.HAS_SPRAYABLE_QUESTION
