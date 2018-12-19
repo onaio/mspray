@@ -47,7 +47,8 @@ def add_spray_data(data: dict):
         except SprayDay.DoesNotExist:
             # generate a new id by incrementing the last one we received
             last = SprayDay.objects.all().aggregate(
-                last_id=Coalesce(Max("submission_id"), 0))
+                last_id=Coalesce(Max("submission_id"), 0)
+            )
             submission_id = last["last_id"] + 1
         else:
             submission_id = existing.submission_id
@@ -76,14 +77,16 @@ def add_spray_data(data: dict):
         if geometry.geom_type == POLYGON:
             location = Location.objects.filter(
                 geom__contains=geometry.centroid,
-                level=settings.MSPRAY_TA_LEVEL).first()
+                level=settings.MSPRAY_TA_LEVEL
+            ).first()
         else:
             location = Location.objects.filter(
-                geom__contains=geometry,
-                level=settings.MSPRAY_TA_LEVEL).first()
+                geom__contains=geometry, level=settings.MSPRAY_TA_LEVEL
+            ).first()
 
         sprayday, _ = SprayDay.objects.get_or_create(
-            submission_id=submission_id, spray_date=spray_date)
+            submission_id=submission_id, spray_date=spray_date
+        )
 
         sprayday.data = data
         sprayday.save()

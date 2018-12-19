@@ -100,10 +100,10 @@ class TestUtils(TestBase):
         """
         SprayDay.objects.all().delete()
         input_data = {
-            'id': '154147',
-            'parent_id': '3951',
-            'status': 'Active',
-            'geometry': """{
+            "id": "154147",
+            "parent_id": "3951",
+            "status": "Active",
+            "geometry": """{
                 "type":"Polygon",
                 "coordinates":[
                     [
@@ -117,14 +117,14 @@ class TestUtils(TestBase):
                     ]
                 ]
             }""",
-            'server_version': 1545204913897,
-            'task_id': 'd6058db2-0364-11e9-8eb2-f2801f1b9fd1',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
+            "server_version": 1545204913897,
+            "task_id": "d6058db2-0364-11e9-8eb2-f2801f1b9fd1",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
             "task_business_status": "Sprayed",
             "task_execution_start_date": "2015-09-21T1000",
-            'task_execution_end_date': '',
-            'task_server_version': 1545206825909
+            "task_execution_end_date": "",
+            "task_server_version": 1545206825909,
         }
         add_spray_data(data=input_data)
         self.assertEqual(1, SprayDay.objects.all().count())
@@ -217,10 +217,10 @@ class TestUtils(TestBase):
         SprayDay.objects.all().delete()
 
         input_data = {
-            'id': '154147',
-            'parent_id': '3951',
-            'status': 'Active',
-            'geometry': """{
+            "id": "154147",
+            "parent_id": "3951",
+            "status": "Active",
+            "geometry": """{
                 "type":"Polygon",
                 "coordinates":[
                     [
@@ -240,21 +240,22 @@ class TestUtils(TestBase):
                     ]
                 ]
             }""",
-            'server_version': 1545204913897,
-            'task_id': 'd6058db2-0364-11e9-8eb2-f2801f1b9fd1',
-            'task_spray_operator': 'demoMTI',
-            'task_status': 'Ready',
+            "server_version": 1545204913897,
+            "task_id": "d6058db2-0364-11e9-8eb2-f2801f1b9fd1",
+            "task_spray_operator": "demoMTI",
+            "task_status": "Ready",
             "task_business_status": "Sprayed",
             "task_execution_start_date": "2015-09-21T1000",
-            'task_execution_end_date': '',
-            'task_server_version': 1545206825909
+            "task_execution_end_date": "",
+            "task_server_version": 1545206825909,
         }
 
         # we are deleting this household so that it is not found when
         # attempting to link the spray data to a structure
         Household.objects.filter(
             bgeom__contains=GEOSGeometry(
-                input_data.get(settings.REVEAL_GPS_FIELD)).centroid
+                input_data.get(settings.REVEAL_GPS_FIELD)
+            ).centroid
         ).first().delete()
 
         add_spray_data(data=input_data)
@@ -264,8 +265,8 @@ class TestUtils(TestBase):
         self.assertEqual(1, sprayday.submission_id)
         self.assertEqual(date(2015, 9, 21), sprayday.spray_date)
         self.assertEqual(
-            Point(float(28.352047248865144),
-                  float(-15.418157849354216)).coords,
+            Point(
+                float(28.352047248865144), float(-15.418157849354216)).coords,
             sprayday.geom.coords,
         )
         self.assertTrue(sprayday.bgeom is not None)

@@ -45,7 +45,8 @@ class TestViews(TestBase):
             "task_server_version": 1543867945196
         }"""  # noqa
         request = self.factory.post(
-            "add-spray-data", data=payload, content_type="application/json")
+            "add-spray-data", data=payload, content_type="application/json"
+        )
         res = add_spray_data_view(request)
 
         # we got the right response
@@ -88,7 +89,8 @@ class TestViews(TestBase):
             "task_server_version": 1545206825909
         }"""  # noqa
         request = self.factory.post(
-            "add-spray-data", data=payload, content_type="application/json")
+            "add-spray-data", data=payload, content_type="application/json"
+        )
         res = add_spray_data_view(request)
 
         # we got the right response
