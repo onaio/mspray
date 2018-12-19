@@ -7,7 +7,7 @@ REVEAL_SPRAY_STATUS_FIELD = getattr(settings, "REVEAL_SPRAY_STATUS_FIELD",
                                     "task_business_status")
 REVEAL_SPRAYED_VALUE = getattr(settings, "REVEAL_SPRAYED_VALUE", "Sprayed")
 REVEAL_NOT_SPRAYED_VALUE = getattr(settings, "REVEAL_NOT_SPRAYED_VALUE",
-                                   "Not Sprayed - Refused")
+                                   "Not Sprayed")
 REVEAL_NOT_VISITED_VALUE = getattr(settings, "REVEAL_NOT_VISITED_VALUE",
                                    "Not Visited")
 REVEAL_NOT_SPRAYABLE_VALUE = getattr(settings, "REVEAL_NOT_SPRAYABLE_VALUE",
