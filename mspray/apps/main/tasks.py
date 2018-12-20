@@ -235,7 +235,7 @@ def link_spraypoint_with_osm(spray_day_id):
         pass
     else:
         print(
-            "Before:",
+            "Before::",
             spray_day.pk,
             spray_day.spraypoint_set.values_list("id", flat=True),
             spray_day.was_sprayed,

@@ -211,7 +211,9 @@ def debug_spray_area_indicators_2(spray_area_id):
     )
     print("Unique Points:", len(unique_points))
 
-    print("Households Sprayable, sprayed, not sprayed")
+    print(
+        "Households Sprayable, sprayed, not sprayed", "not sprayed duplicate"
+    )
     print(
         Household.objects.filter(location=location)
         .exclude(sprayable=False)
@@ -246,6 +248,12 @@ def debug_spray_area_indicators_2(spray_area_id):
             .distinct()
             .count(),
         ),
+        SprayDay.objects.filter(location=location)
+        .filter(sprayable=True, household__isnull=False, was_sprayed=False)
+        .exclude(id__in=unique_points)
+        .values_list("household", flat=True)
+        .distinct()
+        .count(),
     )
 
     print("New Structures, sprayed, not sprayed")
