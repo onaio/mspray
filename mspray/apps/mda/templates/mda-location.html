@@ -18,7 +18,11 @@
 
             {% if mda_location %}
             {{ mda_location.name }}
-            <a href="{% url 'mda:location' mda_location.pk %}">
+            {% if mda_location.level == 'district' %}
+            <a href="{% url 'mda:spray-area' mda_location.pk mda_location.pk %}">
+            {% else %}
+            <a href="{% url 'mda:spray-area' mda_location.parent_id mda_location.pk %}">
+            {% endif %}
                 <i class="fa fa-map"></i>
             </a>
             {% else %}
@@ -62,7 +66,11 @@
                 {% for location in object_list %}
                     <tr>
                         <td>
-                            <a href="{% url 'mda:index' %}">
+                            {% if location.parent_id %}
+                            <a href="{% url 'mda:spray-area' location.parent_id location.pk %}">
+                            {% else %}
+                            <a href="{% url 'mda:spray-area' location.pk location.pk %}">
+                            {% endif %}
                                 <i class="fa fa-map"></i>
                             </a>
                             <a href="{% url 'mda:location' location.pk  %}">
