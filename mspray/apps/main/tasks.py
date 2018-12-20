@@ -178,6 +178,14 @@ def add_unique_record(sprayday_pk, location_pk):
     except (SprayDay.DoesNotExist, Location.DoesNotExist):
         pass
     else:
+        print(
+            "Before:",
+            sprayday.pk,
+            sprayday.spraypoint_set.values_list("id", flat=True),
+            sprayday.was_sprayed,
+            sprayday.sprayable,
+            sprayday.location,
+        )
         from mspray.apps.main.utils import add_unique_data
 
         osmid = (
@@ -208,6 +216,14 @@ def add_unique_record(sprayday_pk, location_pk):
                             sprayday.save()
                             sprayday.refresh_from_db()
             add_unique_data(sprayday, HAS_UNIQUE_FIELD, location, osmid)
+            print(
+                "After:",
+                sprayday.pk,
+                sprayday.spraypoint_set.values_list("id", flat=True),
+                sprayday.was_sprayed,
+                sprayday.sprayable,
+                sprayday.location,
+            )
 
 
 @app.task
@@ -218,6 +234,14 @@ def link_spraypoint_with_osm(spray_day_id):
     except SprayDay.DoesNotExist:
         pass
     else:
+        print(
+            "Before:",
+            spray_day.pk,
+            spray_day.spraypoint_set.values_list("id", flat=True),
+            spray_day.was_sprayed,
+            spray_day.sprayable,
+            spray_day.location,
+        )
         location, geom, is_node = get_location_from_osm(spray_day.data)
         if location is None:
             location, geom = get_new_structure_location(
