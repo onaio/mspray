@@ -3,12 +3,10 @@
 from django.shortcuts import render
 
 
-def error_404(request):
+def error_404(request, *args, **argv):
     """Render custom template."""
     data = {}
-    if request.path.startswith('/mda/'):
-        template_name = '/templates/404.html'
-    elif request.path.startswith('/reveal/'):
-        template_name = '/templates/404.html'
-    return render(
-        request, template_name, data)
+    template_name = '404.html'
+    response = render(request, template_name, data)
+    response.status_code = 404
+    return response
