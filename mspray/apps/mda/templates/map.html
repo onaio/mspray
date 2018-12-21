@@ -138,6 +138,7 @@
         var notSprayableValue = {% if not_sprayable_value %} '{{ not_sprayable_value }}' {% else %} null {% endif %};
         var app = new App(undefined, targetAreaData, hhData, notSprayableValue);
         app.fitBounds(bounds);
+        app.rootURIPath = '/{% if IS_MDA_2_LINK %}mda-round-2{% else %}mda{% endif %}';
 
         app.housesCount = {% if object.level != 'ta' %} {{object.num_of_spray_areas }} {% else %}{{ object.structures_on_ground }} {% endif %};
         app.visitedTotal = {{ object.mda_found }};
