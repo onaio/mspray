@@ -685,8 +685,10 @@ def add_unique_data(sprayday, unique_field, location, osmid=None):
         if updated_data_id:
             spraypoint.data_id = updated_data_id
 
-        if was_sprayed != WAS_SPRAYED_VALUE or updated_data_id:
+        if spraypoint.sprayday != sprayday and sprayday.sprayable:
             spraypoint.sprayday = sprayday
+
+        if was_sprayed != WAS_SPRAYED_VALUE or updated_data_id:
             spraypoint.save()
 
     if osmid:
