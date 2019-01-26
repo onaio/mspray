@@ -481,6 +481,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                     layer.on({
                         click: function(e) {
                             var uri = window.location.origin +
+                                app.rootURIPath +
                                 "/" + app.targetAreaData.properties.targetid +
                                 "/" + feature.properties.targetid;
                             window.location.href = uri;
@@ -534,7 +535,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                 }
                 content += '</tbody>';
                 content += '</table>';
-                content += `<div><a href="/${props.parent_id}/${props.spray_area_id}">Spray Effectiveness Map</a></div>`;
+                content += `<div><a href="${app.rootURIPath}/${props.parent_id}/${props.spray_area_id}">Spray Effectiveness Map</a></div>`;
                 layer.bindPopup(content, {closeButton: true, maxWidth: 460, minWidth: 320});
             }
         });

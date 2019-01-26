@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+"""Mspray task module."""
 from __future__ import absolute_import
 
 import gc
-import os
 import logging
+import os
 from datetime import timedelta
 
 from django.conf import settings
@@ -325,26 +327,36 @@ def task_set_sprayed_visited(location_id, week_number=None):
 
 
 def set_sprayed_visited(location, week_number=None):
-    """Set Sprayed Visited Function."""
+    """Persists visited and sprayed values for locations.
+
+    20% sprayed is a visit.
+    90% sprayed is sprayed.
+    """
     from mspray.apps.main.serializers.target_area import get_spray_area_stats
 
     if location.level == "ta":
         sprayed = 0
         visited = 0
-        context = {"week_number": week_number}
-        data, total_structures = get_spray_area_stats(location, context)
-        found = data.get("found")
-        visited_sprayed = data.get("sprayed")
-        if total_structures > 0:
-            if found:
-                ratio = round((found * 100) / total_structures)
-                if ratio >= LOCATION_VISITED_PERCENTAGE:
-                    visited = 1
 
-            if visited_sprayed:
-                ratio = round((visited_sprayed * 100) / total_structures)
-                if ratio >= LOCATION_SPRAYED_PERCENTAGE:
-                    sprayed = 1
+        if week_number:
+            context = {"week_number": week_number}
+            data, total_structures = get_spray_area_stats(location, context)
+            visited_sprayed = data.get("sprayed")
+            found = data.get("found")
+        else:
+            total_structures = location.structures_on_ground
+            found = location.visited_found
+            visited_sprayed = location.visited_sprayed
+
+        if total_structures and found:
+            ratio = round((found * 100) / total_structures)
+            if ratio >= LOCATION_VISITED_PERCENTAGE:
+                visited = 1
+
+        if total_structures and visited_sprayed:
+            ratio = round((visited_sprayed * 100) / total_structures)
+            if ratio >= LOCATION_SPRAYED_PERCENTAGE:
+                sprayed = 1
 
         if week_number:
             # print(week_number, location, week_number, visited, sprayed)
