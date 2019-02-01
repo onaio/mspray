@@ -10,7 +10,7 @@ from mspray.apps.main.models import Location, SprayDay
 from mspray.apps.main.views.sprayday import get_not_targeted_within_geom
 from mspray.apps.main.serializers.target_area import (
     RichQuerysetMixin,
-    SprayOperatorDailySummaryMixin,
+    NewSprayOperatorDailySummaryMixin,
     TargetAreaRichSerializer,
 )
 
@@ -21,6 +21,8 @@ def detailed_spray_area_data(queryset=None):
         queryset = Location.objects.filter(level="ta", target=True).order_by(
             "name"
         )
+
+    rhcs = Location.objects.filter(level="RHC").order_by("name")
 
     yield [
         "Target Area",
@@ -75,6 +77,9 @@ def detailed_spray_area_data(queryset=None):
             item["bottles_accounted"],
         ]
 
+    for rhc in rhcs:
+        yield [get_not_targeted_data(rhc)]
+
 
 def detailed_spray_area_to_file(filename="detailed_sprayareas.csv"):
     """Write the detailed spray area report to file."""
@@ -100,11 +105,11 @@ def get_not_targeted_data(rhc: object):
 
     spray_metrics = get_not_targeted_within_geom(rhc.geom)[0]
 
-    sop = SprayOperatorDailySummaryMixin()
-    sop.queryset = sprays
+    sop = NewSprayOperatorDailySummaryMixin()
+    sop.sprayday_qs = sprays
 
     rich_data = RichQuerysetMixin()
-    rich_data.queryset = sprays
+    rich_data.sprayday_qs = sprays
 
     return {
         "name": "Not in Target Area",
