@@ -132,6 +132,127 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
     return count
 
 
+def get_spray_metrics(queryset):
+    """
+    Get spray metrics
+
+    These are:
+        - structures found
+        - structures sprayed
+        - structures not sprayed
+        - structures not sprayable
+        - new structures
+        - refused structures
+        - other
+
+    :param queryset: queryset of SprayDay objects
+    :return: dict of srpay metrics
+    """
+    return queryset.aggregate(
+        found=Sum(
+            Case(
+                When(spraypoint__isnull=False, sprayable=True, then=1),
+                When(
+                    spraypoint__isnull=True,
+                    sprayable=True,
+                    was_sprayed=True,
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        sprayed=Sum(
+            Case(
+                When(
+                    was_sprayed=True,
+                    sprayable=True,
+                    spraypoint__isnull=False,
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        not_sprayed=Sum(
+            Case(
+                When(
+                    was_sprayed=False,
+                    spraypoint__isnull=False,
+                    sprayable=True,
+                    household__isnull=False,
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        not_sprayable=Sum(
+            Case(
+                When(
+                    sprayable=False,
+                    data__has_key="osmstructure:way:id",
+                    spraypoint__isnull=False,
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        new_structures=Sum(
+            Case(
+                When(
+                    sprayable=True,
+                    spraypoint__isnull=False,
+                    data__has_key="newstructure/gps",
+                    then=1,
+                ),
+                When(
+                    sprayable=True,
+                    spraypoint__isnull=False,
+                    data__has_key="osmstructure:node:id",
+                    then=1,
+                ),
+                When(
+                    sprayable=True,
+                    spraypoint__isnull=False,
+                    household__isnull=True,
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        refused=Sum(
+            Case(
+                When(
+                    sprayable=True,
+                    was_sprayed=False,
+                    spraypoint__isnull=False,
+                    data__contains={REASON_FIELD: REASON_REFUSED},
+                    then=1,
+                ),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ),
+        other=Sum(
+            Case(
+                When(
+                    sprayable=True,
+                    was_sprayed=False,
+                    spraypoint__isnull=False,
+                    data__contains={REASON_FIELD: REASON_REFUSED},
+                    then=0,
+                ),
+                When(sprayable=True, was_sprayed=True, then=0),
+                default=1,
+                output_field=IntegerField(),
+            )
+        ),
+    )
+
+
 def get_spray_data(obj, context):
     request = context.get("request")
     spray_date = parse_spray_date(request) if request else None
