@@ -275,8 +275,7 @@ class SprayAreaView(SiteNameMixin, ListView):
     def get_queryset(self):
 
         return get_location_qs(
-            super(SprayAreaView, self).get_queryset().filter(
-                level="ta", target=True))
+            super().get_queryset().filter(level="ta", target=True))
 
     def get_context_data(self, **kwargs):
         context = super(SprayAreaView, self).get_context_data(**kwargs)
@@ -421,7 +420,7 @@ class DetailedCSVView(SiteNameMixin, ListView):
     model = Location
 
     def get_queryset(self):
-        queryset = super(DetailedCSVView, self).get_queryset()
+        queryset = super().get_queryset()
         return queryset.filter(level="ta", target=True).order_by("name")
 
     def render_to_response(self, context, **response_kwargs):
