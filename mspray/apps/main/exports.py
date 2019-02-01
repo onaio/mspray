@@ -22,10 +22,9 @@ def detailed_spray_area_data(queryset=None):
             "name"
         )
 
-    rhcs = Location.objects.filter(level="RHC").order_by("name")
-
     yield [
         "Target Area",
+        "RHC",
         "District",
         "Structures Found",
         "Sprayed Structures",
@@ -53,6 +52,7 @@ def detailed_spray_area_data(queryset=None):
         item = TargetAreaRichSerializer(spray_area).data
         yield [
             item["name"],
+            item["rhc"],
             item["district"],
             item["found"],
             item["visited_sprayed"],
@@ -77,8 +77,35 @@ def detailed_spray_area_data(queryset=None):
             item["bottles_accounted"],
         ]
 
-    for rhc in rhcs:
-        yield [get_not_targeted_data(rhc)]
+    for rhc in Location.objects.filter(
+            level="RHC").order_by("name").iterator():
+        item = get_not_targeted_data(rhc)
+        yield [
+            item["name"],
+            item["rhc"],
+            item["district"],
+            item["found"],
+            item["visited_sprayed"],
+            item["sprayed_totalpop"],
+            item["sprayed_males"],
+            item["sprayed_females"],
+            item["sprayed_pregwomen"],
+            item["sprayed_childrenU5"],
+            item["visited_not_sprayed"],
+            item["unsprayed_totalpop"],
+            item["unsprayed_males"],
+            item["unsprayed_females"],
+            item["unsprayed_pregnant_women"],
+            item["unsprayed_children_u5"],
+            item["total_rooms"],
+            item["sprayed_rooms"],
+            item["total_nets"],
+            item["total_uNet"],
+            item["bottles_start"],
+            item["bottles_full"],
+            item["bottles_empty"],
+            item["bottles_accounted"],
+        ]
 
 
 def detailed_spray_area_to_file(filename="detailed_sprayareas.csv"):
