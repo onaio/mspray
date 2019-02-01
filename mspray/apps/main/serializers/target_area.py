@@ -34,9 +34,8 @@ REASONS = settings.MSPRAY_UNSPRAYED_REASON_OTHER.copy()
 REASONS.pop(REASON_REFUSED)
 REASON_OTHER = REASONS.keys()
 HAS_UNIQUE_FIELD = getattr(settings, "MSPRAY_UNIQUE_FIELD", None)
-LOCATION_SPRAYED_PERCENTAGE = getattr(
-    settings, "LOCATION_SPRAYED_PERCENTAGE", 90
-)
+LOCATION_SPRAYED_PERCENTAGE = getattr(settings, "LOCATION_SPRAYED_PERCENTAGE",
+                                      90)
 
 SPRAY_AREA_INDICATOR_SQL = """
 SELECT
@@ -132,127 +131,6 @@ def cached_queryset_count(key, queryset, query=None, params=[]):
     return count
 
 
-def get_spray_metrics(queryset):
-    """
-    Get spray metrics
-
-    These are:
-        - structures found
-        - structures sprayed
-        - structures not sprayed
-        - structures not sprayable
-        - new structures
-        - refused structures
-        - other
-
-    :param queryset: queryset of SprayDay objects
-    :return: dict of srpay metrics
-    """
-    return queryset.aggregate(
-        found=Sum(
-            Case(
-                When(spraypoint__isnull=False, sprayable=True, then=1),
-                When(
-                    spraypoint__isnull=True,
-                    sprayable=True,
-                    was_sprayed=True,
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        sprayed=Sum(
-            Case(
-                When(
-                    was_sprayed=True,
-                    sprayable=True,
-                    spraypoint__isnull=False,
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        not_sprayed=Sum(
-            Case(
-                When(
-                    was_sprayed=False,
-                    spraypoint__isnull=False,
-                    sprayable=True,
-                    household__isnull=False,
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        not_sprayable=Sum(
-            Case(
-                When(
-                    sprayable=False,
-                    data__has_key="osmstructure:way:id",
-                    spraypoint__isnull=False,
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        new_structures=Sum(
-            Case(
-                When(
-                    sprayable=True,
-                    spraypoint__isnull=False,
-                    data__has_key="newstructure/gps",
-                    then=1,
-                ),
-                When(
-                    sprayable=True,
-                    spraypoint__isnull=False,
-                    data__has_key="osmstructure:node:id",
-                    then=1,
-                ),
-                When(
-                    sprayable=True,
-                    spraypoint__isnull=False,
-                    household__isnull=True,
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        refused=Sum(
-            Case(
-                When(
-                    sprayable=True,
-                    was_sprayed=False,
-                    spraypoint__isnull=False,
-                    data__contains={REASON_FIELD: REASON_REFUSED},
-                    then=1,
-                ),
-                default=0,
-                output_field=IntegerField(),
-            )
-        ),
-        other=Sum(
-            Case(
-                When(
-                    sprayable=True,
-                    was_sprayed=False,
-                    spraypoint__isnull=False,
-                    data__contains={REASON_FIELD: REASON_REFUSED},
-                    then=0,
-                ),
-                When(sprayable=True, was_sprayed=True, then=0),
-                default=1,
-                output_field=IntegerField(),
-            )
-        ),
-    )
-
-
 def get_spray_data(obj, context):
     request = context.get("request")
     spray_date = parse_spray_date(request) if request else None
@@ -285,8 +163,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             sprayed=Sum(
                 Case(
                     When(
@@ -297,8 +174,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             not_sprayed=Sum(
                 Case(
                     When(
@@ -310,8 +186,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             not_sprayable=Sum(
                 Case(
                     When(
@@ -322,8 +197,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             new_structures=Sum(
                 Case(
                     When(
@@ -346,8 +220,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             refused=Sum(
                 Case(
                     When(
@@ -359,8 +232,7 @@ def get_spray_data(obj, context):
                     ),
                     default=0,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             other=Sum(
                 Case(
                     When(
@@ -373,8 +245,7 @@ def get_spray_data(obj, context):
                     When(sprayable=True, was_sprayed=True, then=0),
                     default=1,
                     output_field=IntegerField(),
-                )
-            ),
+                )),
             structures=F("location__structures"),
         )
 
@@ -412,25 +283,18 @@ def get_duplicates(obj, was_sprayed, spray_date=None):
         qs = loc.sprayday_set
         if spray_date:
             qs = qs.filter(spray_date__lte=spray_date)
-        return (
-            qs.filter(osmid__isnull=False, was_sprayed=spray_status)
-            .values("osmid")
-            .annotate(dupes=Count("osmid"))
-            .filter(dupes__gt=1)
-        )
+        return (qs.filter(osmid__isnull=False,
+                          was_sprayed=spray_status).values("osmid").annotate(
+                              dupes=Count("osmid")).filter(dupes__gt=1))
 
-    loc = (
-        Location.objects.get(pk=obj.get("pk") or obj.get("location"))
-        if type(obj) == dict
-        else obj
-    )
+    loc = (Location.objects.get(
+        pk=obj.get("pk") or obj.get("location")) if type(obj) == dict else obj)
     dupes = _duplicates(was_sprayed)
 
     if not was_sprayed:
         sprayed = _duplicates(True).values_list("osmid", flat=True)
         dupes = dupes.exclude(spraypoint__isnull=False).exclude(
-            osmid__in=sprayed
-        )
+            osmid__in=sprayed)
 
     return dupes
 
@@ -483,11 +347,8 @@ def get_spray_area_count(location, context=dict()):
     data = get_spray_data(location, context)
     sprayed = data.get("sprayed")
     structures = (
-        location.structures
-        + (data.get("new_structures") or 0)
-        + count_duplicates(location, True)
-        - (data.get("not_sprayable") or 0)
-    )
+        location.structures + (data.get("new_structures") or 0) +
+        count_duplicates(location, True) - (data.get("not_sprayable") or 0))
 
     return sprayed, structures
 
@@ -495,11 +356,8 @@ def get_spray_area_count(location, context=dict()):
 def get_spray_area_stats(location, context=dict()):
     data = get_spray_data(location, context)
     structures = (
-        location.structures
-        + (data.get("new_structures") or 0)
-        + count_duplicates(location, True)
-        - (data.get("not_sprayable") or 0)
-    )
+        location.structures + (data.get("new_structures") or 0) +
+        count_duplicates(location, True) - (data.get("not_sprayable") or 0))
 
     return data, structures
 
@@ -519,12 +377,10 @@ def count_key_if_percent(obj, key, percentage, context=dict()):
     if loc.level == "RHC":
         return count_for(loc)
 
-    return sum(
-        [
-            count_key_if_percent(i, key, percentage, context)
-            for i in loc.location_set.all()
-        ]
-    )
+    return sum([
+        count_key_if_percent(i, key, percentage, context)
+        for i in loc.location_set.all()
+    ])
 
 
 def get_rich_queryset(qs):
@@ -544,18 +400,13 @@ def get_rich_queryset(qs):
         ),
         sprayed_males=Cast(
             KeyTextTransform("sprayable/sprayed/sprayed_males", "data"),
-            IntegerField(),
-        ),
+            IntegerField()),
         sprayed_pregwomen=Cast(
-            KeyTextTransform(
-                "sprayable/sprayed/sprayed_pregwomen", "data"
-            ),
+            KeyTextTransform("sprayable/sprayed/sprayed_pregwomen", "data"),
             IntegerField(),
         ),
         sprayed_childrenU5=Cast(
-            KeyTextTransform(
-                "sprayable/sprayed/sprayed_childrenU5", "data"
-            ),
+            KeyTextTransform("sprayable/sprayed/sprayed_childrenU5", "data"),
             IntegerField(),
         ),
         sprayed_totalpop=Cast(
@@ -564,22 +415,16 @@ def get_rich_queryset(qs):
         ),
         sprayed_rooms=Cast(
             KeyTextTransform("sprayable/sprayed/sprayed_rooms", "data"),
-            IntegerField(),
-        ),
+            IntegerField()),
         sprayed_roomsfound=Cast(
-            KeyTextTransform(
-                "sprayable/sprayed/sprayed_roomsfound", "data"
-            ),
+            KeyTextTransform("sprayable/sprayed/sprayed_roomsfound", "data"),
             IntegerField(),
         ),
         sprayed_nets=Cast(
             KeyTextTransform("sprayable/sprayed/sprayed_nets", "data"),
-            IntegerField(),
-        ),
+            IntegerField()),
         sprayed_total_uNet=Cast(
-            KeyTextTransform(
-                "sprayable/sprayed/sprayed_total_uNet", "data"
-            ),
+            KeyTextTransform("sprayable/sprayed/sprayed_total_uNet", "data"),
             IntegerField(),
         ),
     )
@@ -589,26 +434,19 @@ def get_rich_queryset(qs):
         unsprayed_children_u5=Cast(
             KeyTextTransform(
                 "sprayable/unsprayed/population/unsprayed_children_u5",
-                "data",
-            ),
+                "data"),
             IntegerField(),
         ),
         unsprayed_females=Cast(
-            KeyTextTransform(
-                "sprayable/unsprayed/unsprayed_females", "data"
-            ),
+            KeyTextTransform("sprayable/unsprayed/unsprayed_females", "data"),
             IntegerField(),
         ),
         unsprayed_males=Cast(
-            KeyTextTransform(
-                "sprayable/unsprayed/unsprayed_males", "data"
-            ),
+            KeyTextTransform("sprayable/unsprayed/unsprayed_males", "data"),
             IntegerField(),
         ),
         unsprayed_totalpop=Cast(
-            KeyTextTransform(
-                "sprayable/unsprayed/unsprayed_totalpop", "data"
-            ),
+            KeyTextTransform("sprayable/unsprayed/unsprayed_totalpop", "data"),
             IntegerField(),
         ),
         unsprayed_pregnant_women=Cast(
@@ -620,22 +458,17 @@ def get_rich_queryset(qs):
         ),
         unsprayed_roomsfound=Cast(
             KeyTextTransform(
-                "sprayable/unsprayed/population/unsprayed_roomsfound",
-                "data",
-            ),
+                "sprayable/unsprayed/population/unsprayed_roomsfound", "data"),
             IntegerField(),
         ),
         unsprayed_nets=Cast(
-            KeyTextTransform(
-                "sprayable/unsprayed/population/unsprayed_nets", "data"
-            ),
+            KeyTextTransform("sprayable/unsprayed/population/unsprayed_nets",
+                             "data"),
             IntegerField(),
         ),
         unsprayed_total_uNet=Cast(
             KeyTextTransform(
-                "sprayable/unsprayed/population/unsprayed_total_uNet",
-                "data",
-            ),
+                "sprayable/unsprayed/population/unsprayed_total_uNet", "data"),
             IntegerField(),
         ),
     )
@@ -647,13 +480,14 @@ class SprayDayQuerysetMixin:
 
     def __init__(self, queryset=None):
         """Init method of SprayDayQuerysetMixin"""
-        self.queryset = queryset
+        if queryset is not None:
+            self.queryset = queryset
 
     def get_sprayday_qs(self, obj=None):
         """Get the sprayday queryset"""
         if obj:
             return self.get_queryset(obj)
-        return self.sprayday_qs
+        return self.queryset
 
 
 class RichQuerysetMixin(SprayDayQuerysetMixin):
@@ -664,17 +498,14 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             sprayed_total_uNet_sum=Coalesce(
-                Sum("sprayed_total_uNet"), Value(0)
-            )
-        )
+                Sum("sprayed_total_uNet"), Value(0)))
         return sum_dict["sprayed_total_uNet_sum"]
 
     def get_sprayed_nets(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_nets_sum=Coalesce(Sum("sprayed_nets"), Value(0))
-        )
+            sprayed_nets_sum=Coalesce(Sum("sprayed_nets"), Value(0)))
         return sum_dict["sprayed_nets_sum"]
 
     def get_sprayed_roomsfound(self, obj=None):
@@ -682,25 +513,21 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             sprayed_roomsfound_sum=Coalesce(
-                Sum("sprayed_roomsfound"), Value(0)
-            )
-        )
+                Sum("sprayed_roomsfound"), Value(0)))
         return sum_dict["sprayed_roomsfound_sum"]
 
     def get_sprayed_rooms(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_rooms_sum=Coalesce(Sum("sprayed_rooms"), Value(0))
-        )
+            sprayed_rooms_sum=Coalesce(Sum("sprayed_rooms"), Value(0)))
         return sum_dict["sprayed_rooms_sum"]
 
     def get_sprayed_totalpop(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_totalpop_sum=Coalesce(Sum("sprayed_totalpop"), Value(0))
-        )
+            sprayed_totalpop_sum=Coalesce(Sum("sprayed_totalpop"), Value(0)))
         return sum_dict["sprayed_totalpop_sum"]
 
     def get_sprayed_childrenU5(self, obj=None):
@@ -708,41 +535,35 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             sprayed_childrenU5_sum=Coalesce(
-                Sum("sprayed_childrenU5"), Value(0)
-            )
-        )
+                Sum("sprayed_childrenU5"), Value(0)))
         return sum_dict["sprayed_childrenU5_sum"]
 
     def get_sprayed_pregwomen(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_pregwomen_sum=Coalesce(Sum("sprayed_pregwomen"), Value(0))
-        )
+            sprayed_pregwomen_sum=Coalesce(Sum("sprayed_pregwomen"), Value(0)))
         return sum_dict["sprayed_pregwomen_sum"]
 
     def get_sprayed_males(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_males_sum=Coalesce(Sum("sprayed_males"), Value(0))
-        )
+            sprayed_males_sum=Coalesce(Sum("sprayed_males"), Value(0)))
         return sum_dict["sprayed_males_sum"]
 
     def get_sprayed_females(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            sprayed_females_sum=Coalesce(Sum("sprayed_females"), Value(0))
-        )
+            sprayed_females_sum=Coalesce(Sum("sprayed_females"), Value(0)))
         return sum_dict["sprayed_females_sum"]
 
     def get_unsprayed_nets(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            unsprayed_nets_sum=Coalesce(Sum("unsprayed_nets"), Value(0))
-        )
+            unsprayed_nets_sum=Coalesce(Sum("unsprayed_nets"), Value(0)))
         return sum_dict["unsprayed_nets_sum"]
 
     def get_unsprayed_total_uNet(self, obj=None):
@@ -750,9 +571,7 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             unsprayed_total_uNet_sum=Coalesce(
-                Sum("unsprayed_total_uNet"), Value(0)
-            )
-        )
+                Sum("unsprayed_total_uNet"), Value(0)))
         return sum_dict["unsprayed_total_uNet_sum"]
 
     def get_unsprayed_roomsfound(self, obj=None):
@@ -760,9 +579,7 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             unsprayed_roomsfound_sum=Coalesce(
-                Sum("unsprayed_roomsfound"), Value(0)
-            )
-        )
+                Sum("unsprayed_roomsfound"), Value(0)))
         return sum_dict["unsprayed_roomsfound_sum"]
 
     def get_unsprayed_pregnant_women(self, obj=None):
@@ -770,9 +587,7 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             unsprayed_pg_women_sum=Coalesce(
-                Sum("unsprayed_pregnant_women"), Value(0)
-            )
-        )
+                Sum("unsprayed_pregnant_women"), Value(0)))
         return sum_dict["unsprayed_pg_women_sum"]
 
     def get_unsprayed_totalpop(self, obj=None):
@@ -780,25 +595,21 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             unsprayed_totalpop_sum=Coalesce(
-                Sum("unsprayed_totalpop"), Value(0)
-            )
-        )
+                Sum("unsprayed_totalpop"), Value(0)))
         return sum_dict["unsprayed_totalpop_sum"]
 
     def get_unsprayed_males(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            unsprayed_males_sum=Coalesce(Sum("unsprayed_males"), Value(0))
-        )
+            unsprayed_males_sum=Coalesce(Sum("unsprayed_males"), Value(0)))
         return sum_dict["unsprayed_males_sum"]
 
     def get_unsprayed_females(self, obj=None):
         """something"""
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            unsprayed_females_sum=Coalesce(Sum("unsprayed_females"), Value(0))
-        )
+            unsprayed_females_sum=Coalesce(Sum("unsprayed_females"), Value(0)))
         return sum_dict["unsprayed_females_sum"]
 
     def get_unsprayed_children_u5(self, obj=None):
@@ -806,9 +617,7 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         qs = get_rich_queryset(qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
             unsprayed_children_u5_sum=Coalesce(
-                Sum("unsprayed_children_u5"), Value(0)
-            )
-        )
+                Sum("unsprayed_children_u5"), Value(0)))
         return sum_dict["unsprayed_children_u5_sum"]
 
     def get_total_nets(self, obj=None):
@@ -835,8 +644,7 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
 class TargetAreaMixin:
     def get_queryset(self, obj):
         qs = SprayDay.objects.filter(
-            location__pk__in=list(get_ta_in_location(obj))
-        )
+            location__pk__in=list(get_ta_in_location(obj)))
 
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values("sprayday"))
@@ -857,11 +665,8 @@ class TargetAreaMixin:
         if obj:
             queryset = self.get_spray_queryset(obj)
 
-            return (
-                queryset.values_list("spray_date", flat=True)
-                .order_by("spray_date")
-                .distinct()
-            )
+            return (queryset.values_list(
+                "spray_date", flat=True).order_by("spray_date").distinct())
 
     def get_visited_total(self, obj):
         if obj:
@@ -869,20 +674,16 @@ class TargetAreaMixin:
             if level == TA_LEVEL:
                 visited_found = self.get_found(obj)
             else:
-                visited_found = count_key_if_percent(
-                    obj, "sprayed", 20, self.context
-                )
+                visited_found = count_key_if_percent(obj, "sprayed", 20,
+                                                     self.context)
 
             return visited_found
 
     def get_found(self, obj):
         if obj:
             level = obj["level"] if isinstance(obj, dict) else obj.level
-            location = (
-                Location.objects.get(pk=obj.get("pk"))
-                if isinstance(obj, dict)
-                else obj
-            )
+            location = (Location.objects.get(
+                pk=obj.get("pk")) if isinstance(obj, dict) else obj)
             data = get_spray_data(obj, self.context)
             request = self.context.get("request")
             spray_date = parse_spray_date(request) if request else None
@@ -906,8 +707,7 @@ class TargetAreaMixin:
                 visited_sprayed = data.get("sprayed") or 0
             else:
                 visited_sprayed = count_key_if_percent(
-                    obj, "sprayed", LOCATION_SPRAYED_PERCENTAGE, self.context
-                )
+                    obj, "sprayed", LOCATION_SPRAYED_PERCENTAGE, self.context)
 
             return visited_sprayed
 
@@ -918,9 +718,8 @@ class TargetAreaMixin:
             if level == TA_LEVEL:
                 visited_not_sprayed = data.get("not_sprayed") or 0
             else:
-                visited_not_sprayed = (
-                    data.aggregate(r=Sum("not_sprayed")).get("r") or 0
-                )
+                visited_not_sprayed = data.aggregate(
+                    r=Sum("not_sprayed")).get("r") or 0
 
             return visited_not_sprayed
 
@@ -948,9 +747,8 @@ class TargetAreaMixin:
 
     def get_not_visited(self, obj):
         if obj:
-            structures = (
-                obj["structures"] if isinstance(obj, dict) else obj.structures
-            )
+            structures = obj["structures"] if isinstance(
+                obj, dict) else obj.structures
             data = get_spray_data(obj, self.context)
             level = obj["level"] if isinstance(obj, dict) else obj.level
             if level == TA_LEVEL:
@@ -960,12 +758,10 @@ class TargetAreaMixin:
                 structures += new_structures + count_duplicates(obj, True)
                 count = data.get("found") or 0
             else:
-                not_sprayable = (
-                    data.aggregate(r=Sum("not_sprayable")).get("r") or 0
-                )
-                new_structures = (
-                    data.aggregate(r=Sum("new_structures")).get("r") or 0
-                )
+                not_sprayable = data.aggregate(
+                    r=Sum("not_sprayable")).get("r") or 0
+                new_structures = data.aggregate(
+                    r=Sum("new_structures")).get("r") or 0
                 count = data.aggregate(r=Sum("found")).get("r") or 0
                 structures -= not_sprayable
                 structures += new_structures
@@ -1000,9 +796,8 @@ class TargetAreaMixin:
             if level == TA_LEVEL:
                 new_structures = data.get("new_structures") or 0
             else:
-                new_structures = (
-                    data.aggregate(r=Sum("new_structures")).get("r") or 0
-                )
+                new_structures = data.aggregate(
+                    r=Sum("new_structures")).get("r") or 0
 
             return new_structures
 
@@ -1010,15 +805,11 @@ class TargetAreaMixin:
 
     def get_structures(self, obj):
         """Return structures on ground in location."""
-        structures = (
-            obj.get("structures") if isinstance(obj, dict) else obj.structures
-        )
+        structures = obj.get("structures") if isinstance(
+            obj, dict) else obj.structures
         level = obj["level"] if isinstance(obj, dict) else obj.level
-        location = (
-            Location.objects.get(pk=obj.get("pk"))
-            if isinstance(obj, dict)
-            else obj
-        )
+        location = (Location.objects.get(
+            pk=obj.get("pk")) if isinstance(obj, dict) else obj)
         data = get_spray_data(obj, self.context)
         request = self.context.get("request")
         spray_date = parse_spray_date(request) if request else None
@@ -1029,15 +820,12 @@ class TargetAreaMixin:
                 new_structures = data.get("new_structures") or 0
                 structures -= not_sprayable
                 structures += new_structures + count_duplicates(
-                    obj, was_sprayed=True
-                )
+                    obj, was_sprayed=True)
             else:
-                not_sprayable = (
-                    data.aggregate(r=Sum("not_sprayable")).get("r") or 0
-                )
-                new_structures = (
-                    data.aggregate(r=Sum("new_structures")).get("r") or 0
-                )
+                not_sprayable = data.aggregate(
+                    r=Sum("not_sprayable")).get("r") or 0
+                new_structures = data.aggregate(
+                    r=Sum("new_structures")).get("r") or 0
                 structures -= not_sprayable
                 structures += new_structures
         else:
@@ -1054,9 +842,8 @@ class TargetAreaMixin:
         if level == TA_LEVEL:
             not_sprayable = data.get("not_sprayable") or 0
         else:
-            not_sprayable = (
-                data.aggregate(r=Sum("not_sprayable")).get("r") or 0
-            )
+            not_sprayable = data.aggregate(
+                r=Sum("not_sprayable")).get("r") or 0
 
         return not_sprayable
 
@@ -1067,10 +854,8 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             pk = obj["pk"] if isinstance(obj, dict) else obj.pk
             key = "%s_found" % pk
             queryset = self.get_spray_queryset(obj)
-            query = (
-                "SELECT SUM((data->>'number_sprayable')::int) as id "
-                "FROM main_sprayday WHERE location_id IN %s"
-            )
+            query = ("SELECT SUM((data->>'number_sprayable')::int) as id "
+                     "FROM main_sprayday WHERE location_id IN %s")
             location_pks = list(get_ta_in_location(obj))
             if len(location_pks) == 0:
                 return 0
@@ -1084,11 +869,9 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             key = "%s_visited_sprayed" % pk
             queryset = self.get_spray_queryset(obj)
 
-            query = (
-                "SELECT SUM((data->>'sprayed/sprayed_DDT')::int + "
-                "(data->>'sprayed/sprayed_Deltamethrin')::int) as id "
-                "FROM main_sprayday WHERE location_id IN %s"
-            )
+            query = ("SELECT SUM((data->>'sprayed/sprayed_DDT')::int + "
+                     "(data->>'sprayed/sprayed_Deltamethrin')::int) as id "
+                     "FROM main_sprayday WHERE location_id IN %s")
             location_pks = list(get_ta_in_location(obj))
             if len(location_pks) == 0:
                 return 0
@@ -1101,10 +884,8 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             pk = obj["pk"] if isinstance(obj, dict) else obj.pk
             key = "%s_visited_not_sprayed" % pk
             queryset = self.get_spray_queryset(obj)
-            query = (
-                "SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
-                " as id FROM main_sprayday WHERE location_id IN %s"
-            )
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s")
             location_pks = list(get_ta_in_location(obj))
             if len(location_pks) == 0:
                 return 0
@@ -1117,11 +898,9 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             pk = obj["pk"] if isinstance(obj, dict) else obj.pk
             key = "%s_visited_refused" % pk
             queryset = self.get_spray_queryset(obj)
-            query = (
-                "SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
-                " as id FROM main_sprayday WHERE location_id IN %s"
-                " AND data->>%s = %s"
-            )
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s"
+                     " AND data->>%s = %s")
             location_pks = list(get_ta_in_location(obj))
             if len(location_pks) == 0:
                 return 0
@@ -1135,11 +914,9 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             key = "%s_visited_other" % pk
             queryset = self.get_spray_queryset(obj)
 
-            query = (
-                "SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
-                " as id FROM main_sprayday WHERE location_id IN %s"
-                " AND data->>%s IN %s"
-            )
+            query = ("SELECT SUM((data->>'sprayed/sprayable_notsprayed')::int)"
+                     " as id FROM main_sprayday WHERE location_id IN %s"
+                     " AND data->>%s IN %s")
             location_pks = list(get_ta_in_location(obj))
             if len(location_pks) == 0:
                 return 0
@@ -1159,8 +936,7 @@ def get_sop_summary_queryset(sprayday_qs):
         sprayformid=KeyTextTransform("sprayformid", "data")).values_list(
             "sprayformid", flat=True)
     formids = list(set([x for x in formids if x is not None]))
-    qs = SprayOperatorDailySummary.objects.filter(
-        spray_form_id__in=formids)
+    qs = SprayOperatorDailySummary.objects.filter(spray_form_id__in=formids)
     qs = qs.annotate(
         bottles_accounted=Cast(
             KeyTextTransform("bottles_accounted", "data"), IntegerField()),
@@ -1183,8 +959,7 @@ class SprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
         """something"""
         qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            bottles_start_sum=Coalesce(Sum("bottles_start"), Value(0))
-        )
+            bottles_start_sum=Coalesce(Sum("bottles_start"), Value(0)))
         if sum_dict["bottles_start_sum"] is not None:
             return sum_dict["bottles_start_sum"]
         return 0
@@ -1193,8 +968,7 @@ class SprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
         """something"""
         qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            bottles_full_sum=Coalesce(Sum("bottles_full"), Value(0))
-        )
+            bottles_full_sum=Coalesce(Sum("bottles_full"), Value(0)))
         if sum_dict["bottles_full_sum"] is not None:
             return sum_dict["bottles_full_sum"]
         return 0
@@ -1203,8 +977,7 @@ class SprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
         """something"""
         qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            bottles_accounted_sum=Coalesce(Sum("bottles_accounted"), Value(0))
-        )
+            bottles_accounted_sum=Coalesce(Sum("bottles_accounted"), Value(0)))
         if sum_dict["bottles_accounted_sum"] is not None:
             return sum_dict["bottles_accounted_sum"]
         return 0
@@ -1213,8 +986,7 @@ class SprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
         """something"""
         qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
         sum_dict = qs.aggregate(
-            bottles_empty_sum=Coalesce(Sum("bottles_empty"), Value(0))
-        )
+            bottles_empty_sum=Coalesce(Sum("bottles_empty"), Value(0)))
         if sum_dict["bottles_empty_sum"] is not None:
             return sum_dict["bottles_empty_sum"]
         return 0
@@ -1278,44 +1050,32 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
     def get_district(self, obj):
         if obj:
             try:
-                return (
-                    obj.get("parent__parent__name")
-                    if isinstance(obj, dict)
-                    else obj.parent.parent.name
-                )
+                return (obj.get("parent__parent__name") if isinstance(
+                    obj, dict) else obj.parent.parent.name)
             except:  # noqa
                 pass
 
     def get_district_pk(self, obj):
         if obj:
             try:
-                return (
-                    obj.get("parent__parent__pk")
-                    if isinstance(obj, dict)
-                    else obj.parent.parent.pk
-                )
+                return (obj.get("parent__parent__pk")
+                        if isinstance(obj, dict) else obj.parent.parent.pk)
             except:  # noqa
                 pass
 
     def get_rhc(self, obj):
         if obj:
             try:
-                return (
-                    obj.get("parent__name")
-                    if isinstance(obj, dict)
-                    else obj.parent.name
-                )
+                return (obj.get("parent__name")
+                        if isinstance(obj, dict) else obj.parent.name)
             except:  # noqa
                 pass
 
     def get_rhc_pk(self, obj):
         if obj:
             try:
-                return (
-                    obj.get("parent__pk")
-                    if isinstance(obj, dict)
-                    else obj.parent.pk
-                )
+                return obj.get("parent__pk") if isinstance(
+                    obj, dict) else obj.parent.pk
             except:  # noqa
                 pass
 
@@ -1345,11 +1105,8 @@ class TargetAreaSerializer(TargetAreaMixin, serializers.ModelSerializer):
         return ""
 
 
-class TargetAreaRichSerializer(
-    TargetAreaMixin,
-    SprayOperatorDailySummaryMixin,
-    serializers.ModelSerializer,
-):
+class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
+                               serializers.ModelSerializer):
     """
     Detailed spray data for target area
     """
@@ -1420,18 +1177,14 @@ class TargetAreaRichSerializer(
     def get_district(self, obj):
         if obj:
             try:
-                return (
-                    obj.get("parent__parent__name")
-                    if isinstance(obj, dict)
-                    else obj.parent.parent.name
-                )
+                return (obj.get("parent__parent__name") if isinstance(
+                    obj, dict) else obj.parent.parent.name)
             except:  # noqa
                 pass
 
 
-class TargetAreaQuerySerializer(
-    TargetAreaQueryMixin, serializers.ModelSerializer
-):
+class TargetAreaQuerySerializer(TargetAreaQueryMixin,
+                                serializers.ModelSerializer):
     targetid = serializers.SerializerMethodField()
     district_name = serializers.SerializerMethodField()
     level = serializers.ReadOnlyField()
