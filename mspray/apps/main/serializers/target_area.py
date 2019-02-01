@@ -1396,6 +1396,7 @@ class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
     Detailed spray data for target area
     """
 
+    rhc = serializers.SerializerMethodField()
     district = serializers.SerializerMethodField()
     found = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -1428,6 +1429,7 @@ class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
     class Meta:
         fields = [
             "name",
+            "rhc",
             "district",
             "found",
             "visited_sprayed",
@@ -1458,6 +1460,14 @@ class TargetAreaRichSerializer(TargetAreaMixin, SprayOperatorDailySummaryMixin,
             "total_rooms",
         ]
         model = Location
+
+    def get_rhc(self, obj):
+        if obj:
+            try:
+                return (obj.get("parent__name") if isinstance(
+                    obj, dict) else obj.parent.name)
+            except:  # noqa
+                pass
 
     def get_district(self, obj):
         if obj:
