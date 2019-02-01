@@ -383,6 +383,31 @@ def count_key_if_percent(obj, key, percentage, context=dict()):
     ])
 
 
+def get_sop_summary_queryset(sprayday_qs):
+    """
+    Get SOP summary qieryset
+
+    :param sprayday_qs: SprayDay queryset
+    :return: annotated SprayOperatorDailySummary queryset
+    """
+    formids = sprayday_qs.annotate(
+        sprayformid=KeyTextTransform("sprayformid", "data")).values_list(
+            "sprayformid", flat=True)
+    formids = list(set([x for x in formids if x is not None]))
+    qs = SprayOperatorDailySummary.objects.filter(spray_form_id__in=formids)
+    qs = qs.annotate(
+        bottles_accounted=Cast(
+            KeyTextTransform("bottles_accounted", "data"), IntegerField()),
+        bottles_empty=Cast(
+            KeyTextTransform("bottles_empty", "data"), IntegerField()),
+        bottles_full=Cast(
+            KeyTextTransform("bottles_full", "data"), IntegerField()),
+        bottles_start=Cast(
+            KeyTextTransform("bottles_start", "data"), IntegerField()),
+    )
+    return qs
+
+
 def get_rich_queryset(qs):
     """
     Adds various annotations to the queryset
@@ -478,16 +503,16 @@ def get_rich_queryset(qs):
 class SprayDayQuerysetMixin:
     """Simple mixin that gets or sets a sprayday queryset"""
 
-    def __init__(self, queryset=None):
+    def __init__(self, sprayday_qs=None):
         """Init method of SprayDayQuerysetMixin"""
-        if queryset is not None:
-            self.queryset = queryset
+        if sprayday_qs is not None:
+            self.sprayday_qs = sprayday_qs
 
     def get_sprayday_qs(self, obj=None):
         """Get the sprayday queryset"""
         if obj:
             return self.get_queryset(obj)
-        return self.queryset
+        return self.sprayday_qs
 
 
 class RichQuerysetMixin(SprayDayQuerysetMixin):
@@ -641,13 +666,154 @@ class RichQuerysetMixin(SprayDayQuerysetMixin):
         return sprayed_rooms + unsprayed_rooms
 
 
-class TargetAreaMixin:
+class NewSprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
+    """
+    Adds data from SprayOperatorDailySummary
+    """
+
+    def get_bottles_start(self, obj=None):
+        """something"""
+        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+        sum_dict = qs.aggregate(
+            bottles_start_sum=Coalesce(Sum("bottles_start"), Value(0)))
+        if sum_dict["bottles_start_sum"] is not None:
+            return sum_dict["bottles_start_sum"]
+        return 0
+
+    def get_bottles_full(self, obj=None):
+        """something"""
+        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+        sum_dict = qs.aggregate(
+            bottles_full_sum=Coalesce(Sum("bottles_full"), Value(0)))
+        if sum_dict["bottles_full_sum"] is not None:
+            return sum_dict["bottles_full_sum"]
+        return 0
+
+    def get_bottles_accounted(self, obj=None):
+        """something"""
+        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+        sum_dict = qs.aggregate(
+            bottles_accounted_sum=Coalesce(Sum("bottles_accounted"), Value(0)))
+        if sum_dict["bottles_accounted_sum"] is not None:
+            return sum_dict["bottles_accounted_sum"]
+        return 0
+
+    def get_bottles_empty(self, obj=None):
+        """something"""
+        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+        sum_dict = qs.aggregate(
+            bottles_empty_sum=Coalesce(Sum("bottles_empty"), Value(0)))
+        if sum_dict["bottles_empty_sum"] is not None:
+            return sum_dict["bottles_empty_sum"]
+        return 0
+
+
+class TargetAreaMixin(object):
     def get_queryset(self, obj):
         qs = SprayDay.objects.filter(
             location__pk__in=list(get_ta_in_location(obj)))
 
         if HAS_UNIQUE_FIELD:
             qs = qs.filter(pk__in=SprayPoint.objects.values("sprayday"))
+        return qs
+
+    def get_rich_queryset(self, obj):
+        """
+        Adds various annotations to the queryset
+        """
+        qs = self.get_queryset(obj)
+        # sprayed
+        qs = qs.annotate(
+            sprayed_females=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_females", "data"),
+                IntegerField(),
+            ),
+            sprayed_males=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_males", "data"),
+                IntegerField(),
+            ),
+            sprayed_pregwomen=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_pregwomen",
+                                 "data"),
+                IntegerField(),
+            ),
+            sprayed_childrenU5=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_childrenU5",
+                                 "data"),
+                IntegerField(),
+            ),
+            sprayed_totalpop=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_totalpop", "data"),
+                IntegerField(),
+            ),
+            sprayed_rooms=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_rooms", "data"),
+                IntegerField(),
+            ),
+            sprayed_roomsfound=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_roomsfound",
+                                 "data"),
+                IntegerField(),
+            ),
+            sprayed_nets=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_nets", "data"),
+                IntegerField(),
+            ),
+            sprayed_total_uNet=Cast(
+                KeyTextTransform("sprayable/sprayed/sprayed_total_uNet",
+                                 "data"),
+                IntegerField(),
+            ),
+        )
+
+        # unsprayed
+        qs = qs.annotate(
+            unsprayed_children_u5=Cast(
+                KeyTextTransform(
+                    "sprayable/unsprayed/population/unsprayed_children_u5",
+                    "data"),
+                IntegerField(),
+            ),
+            unsprayed_females=Cast(
+                KeyTextTransform("sprayable/unsprayed/unsprayed_females",
+                                 "data"),
+                IntegerField(),
+            ),
+            unsprayed_males=Cast(
+                KeyTextTransform("sprayable/unsprayed/unsprayed_males",
+                                 "data"),
+                IntegerField(),
+            ),
+            unsprayed_totalpop=Cast(
+                KeyTextTransform("sprayable/unsprayed/unsprayed_totalpop",
+                                 "data"),
+                IntegerField(),
+            ),
+            unsprayed_pregnant_women=Cast(
+                KeyTextTransform(
+                    "sprayable/unsprayed/population/unsprayed_pregnant_women",  # noqa
+                    "data",
+                ),
+                IntegerField(),
+            ),
+            unsprayed_roomsfound=Cast(
+                KeyTextTransform(
+                    "sprayable/unsprayed/population/unsprayed_roomsfound",
+                    "data"),
+                IntegerField(),
+            ),
+            unsprayed_nets=Cast(
+                KeyTextTransform(
+                    "sprayable/unsprayed/population/unsprayed_nets", "data"),
+                IntegerField(),
+            ),
+            unsprayed_total_uNet=Cast(
+                KeyTextTransform(
+                    "sprayable/unsprayed/population/unsprayed_total_uNet",
+                    "data"),
+                IntegerField(),
+            ),
+        )
         return qs
 
     def get_spray_queryset(self, obj):
@@ -847,6 +1013,134 @@ class TargetAreaMixin:
 
         return not_sprayable
 
+    def get_sprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_total_uNet_sum=Coalesce(
+                Sum("sprayed_total_uNet"), Value(0)))
+        return sum_dict["sprayed_total_uNet_sum"]
+
+    def get_sprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_nets_sum=Coalesce(Sum("sprayed_nets"), Value(0)))
+        return sum_dict["sprayed_nets_sum"]
+
+    def get_sprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_roomsfound_sum=Coalesce(
+                Sum("sprayed_roomsfound"), Value(0)))
+        return sum_dict["sprayed_roomsfound_sum"]
+
+    def get_sprayed_rooms(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_rooms_sum=Coalesce(Sum("sprayed_rooms"), Value(0)))
+        return sum_dict["sprayed_rooms_sum"]
+
+    def get_sprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_totalpop_sum=Coalesce(Sum("sprayed_totalpop"), Value(0)))
+        return sum_dict["sprayed_totalpop_sum"]
+
+    def get_sprayed_childrenU5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_childrenU5_sum=Coalesce(
+                Sum("sprayed_childrenU5"), Value(0)))
+        return sum_dict["sprayed_childrenU5_sum"]
+
+    def get_sprayed_pregwomen(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_pregwomen_sum=Coalesce(Sum("sprayed_pregwomen"), Value(0)))
+        return sum_dict["sprayed_pregwomen_sum"]
+
+    def get_sprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_males_sum=Coalesce(Sum("sprayed_males"), Value(0)))
+        return sum_dict["sprayed_males_sum"]
+
+    def get_sprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            sprayed_females_sum=Coalesce(Sum("sprayed_females"), Value(0)))
+        return sum_dict["sprayed_females_sum"]
+
+    def get_unsprayed_nets(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_nets_sum=Coalesce(Sum("unsprayed_nets"), Value(0)))
+        return sum_dict["unsprayed_nets_sum"]
+
+    def get_unsprayed_total_uNet(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_total_uNet_sum=Coalesce(
+                Sum("unsprayed_total_uNet"), Value(0)))
+        return sum_dict["unsprayed_total_uNet_sum"]
+
+    def get_unsprayed_roomsfound(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_roomsfound_sum=Coalesce(
+                Sum("unsprayed_roomsfound"), Value(0)))
+        return sum_dict["unsprayed_roomsfound_sum"]
+
+    def get_unsprayed_pregnant_women(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_pg_women_sum=Coalesce(
+                Sum("unsprayed_pregnant_women"), Value(0)))
+        return sum_dict["unsprayed_pg_women_sum"]
+
+    def get_unsprayed_totalpop(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_totalpop_sum=Coalesce(
+                Sum("unsprayed_totalpop"), Value(0)))
+        return sum_dict["unsprayed_totalpop_sum"]
+
+    def get_unsprayed_males(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_males_sum=Coalesce(Sum("unsprayed_males"), Value(0)))
+        return sum_dict["unsprayed_males_sum"]
+
+    def get_unsprayed_females(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_females_sum=Coalesce(Sum("unsprayed_females"), Value(0)))
+        return sum_dict["unsprayed_females_sum"]
+
+    def get_unsprayed_children_u5(self, obj):
+        qs = self.get_rich_queryset(obj)
+        sum_dict = qs.aggregate(
+            unsprayed_children_u5_sum=Coalesce(
+                Sum("unsprayed_children_u5"), Value(0)))
+        return sum_dict["unsprayed_children_u5_sum"]
+
+    def get_total_nets(self, obj):
+        sprayed_nets = self.get_sprayed_nets(obj)
+        unsprayed_nets = self.get_unsprayed_nets(obj)
+        return sprayed_nets + unsprayed_nets
+
+    def get_total_uNet(self, obj):
+        """
+        Total people covered by nets
+        """
+        sprayed_uNet = self.get_sprayed_total_uNet(obj)
+        unsprayed_uNet = self.get_unsprayed_total_uNet(obj)
+        return sprayed_uNet + unsprayed_uNet
+
+    def get_total_rooms(self, obj):
+        sprayed_rooms = self.get_sprayed_roomsfound(obj)
+        unsprayed_rooms = self.get_unsprayed_roomsfound(obj)
+        return sprayed_rooms + unsprayed_rooms
+
 
 class TargetAreaQueryMixin(TargetAreaMixin):
     def get_found(self, obj):
@@ -925,66 +1219,57 @@ class TargetAreaQueryMixin(TargetAreaMixin):
             return cached_queryset_count(key, queryset, query, params)
 
 
-def get_sop_summary_queryset(sprayday_qs):
-    """
-    Get SOP summary qieryset
-
-    :param sprayday_qs: SprayDay queryset
-    :return: annotated SprayOperatorDailySummary queryset
-    """
-    formids = sprayday_qs.annotate(
-        sprayformid=KeyTextTransform("sprayformid", "data")).values_list(
-            "sprayformid", flat=True)
-    formids = list(set([x for x in formids if x is not None]))
-    qs = SprayOperatorDailySummary.objects.filter(spray_form_id__in=formids)
-    qs = qs.annotate(
-        bottles_accounted=Cast(
-            KeyTextTransform("bottles_accounted", "data"), IntegerField()),
-        bottles_empty=Cast(
-            KeyTextTransform("bottles_empty", "data"), IntegerField()),
-        bottles_full=Cast(
-            KeyTextTransform("bottles_full", "data"), IntegerField()),
-        bottles_start=Cast(
-            KeyTextTransform("bottles_start", "data"), IntegerField()),
-    )
-    return qs
-
-
-class SprayOperatorDailySummaryMixin(SprayDayQuerysetMixin):
+class SprayOperatorDailySummaryMixin(object):
     """
     Adds data from SprayOperatorDailySummary
     """
 
-    def get_bottles_start(self, obj=None):
-        """something"""
-        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+    def get_sop_summary_queryset(self, obj):
+        sprayday_qs = self.get_queryset(obj)
+        formids = sprayday_qs.annotate(
+            sprayformid=KeyTextTransform("sprayformid", "data")).values_list(
+                "sprayformid", flat=True)
+        formids = list(set([x for x in formids if x is not None]))
+        qs = SprayOperatorDailySummary.objects.filter(
+            spray_form_id__in=formids)
+        qs = qs.annotate(
+            bottles_accounted=Cast(
+                KeyTextTransform("bottles_accounted", "data"), IntegerField()),
+            bottles_empty=Cast(
+                KeyTextTransform("bottles_empty", "data"), IntegerField()),
+            bottles_full=Cast(
+                KeyTextTransform("bottles_full", "data"), IntegerField()),
+            bottles_start=Cast(
+                KeyTextTransform("bottles_start", "data"), IntegerField()),
+        )
+        return qs
+
+    def get_bottles_start(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_start_sum=Coalesce(Sum("bottles_start"), Value(0)))
         if sum_dict["bottles_start_sum"] is not None:
             return sum_dict["bottles_start_sum"]
         return 0
 
-    def get_bottles_full(self, obj=None):
-        """something"""
-        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+    def get_bottles_full(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_full_sum=Coalesce(Sum("bottles_full"), Value(0)))
         if sum_dict["bottles_full_sum"] is not None:
             return sum_dict["bottles_full_sum"]
         return 0
 
-    def get_bottles_accounted(self, obj=None):
-        """something"""
-        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+    def get_bottles_accounted(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_accounted_sum=Coalesce(Sum("bottles_accounted"), Value(0)))
         if sum_dict["bottles_accounted_sum"] is not None:
             return sum_dict["bottles_accounted_sum"]
         return 0
 
-    def get_bottles_empty(self, obj=None):
-        """something"""
-        qs = get_sop_summary_queryset(sprayday_qs=self.get_sprayday_qs(obj))
+    def get_bottles_empty(self, obj):
+        qs = self.get_sop_summary_queryset(obj)
         sum_dict = qs.aggregate(
             bottles_empty_sum=Coalesce(Sum("bottles_empty"), Value(0)))
         if sum_dict["bottles_empty_sum"] is not None:
