@@ -189,18 +189,24 @@ class Command(BaseCommand):
                     name = name.strip()
                     parent_name = parent_name.strip()
 
-                    if parent_code_field:
-                        parent_code = feature.get(parent_code_field)
-                        parent = get_parent_by_code(parent_code, parent_level)
+                    if skip_parent == "yes":
+                        self.stdout.write(f"No parent for {name}.")
+                        parent = None
                     else:
-                        parent = get_parent(geom, parent_level, parent_name)
+                        if parent_code_field:
+                            parent_code = feature.get(parent_code_field)
+                            parent = get_parent_by_code(
+                                parent_code, parent_level)
+                        else:
+                            parent = get_parent(
+                                geom, parent_level, parent_name)
 
-                    if skip_parent != "yes" and not parent:
-                        self.stdout.write(
-                            "Skipping %s - parent." % feature.get(name_field)
-                        )
-                        skipped += 1
-                        continue
+                        if not parent:
+                            self.stdout.write(
+                                f"Skipping {name_field} - parent.")
+                            skipped += 1
+                            continue
+
                     try:
                         target = feature.get("TARGET") in [1, 2]
                     except IndexError:
