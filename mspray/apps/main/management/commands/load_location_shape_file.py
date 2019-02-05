@@ -21,19 +21,15 @@ def get_parent(geom, parent_level, parent_name):
     In both cases the parent level is used to limit the results.
     """
     parent = Location.objects.filter(
-        geom__covers=geom.wkt, level=parent_level
-    ).first()
+        geom__covers=geom.wkt, level=parent_level).first()
 
     if parent is None:
         parent = Location.objects.filter(
-            geom__covers=geom.wkt, level=parent_level, name=parent_name
-        ).first()
+            geom__covers=geom.wkt, level=parent_level,
+            name=parent_name).first()
         if not parent:
             parent = Location.objects.filter(
-                level=parent_level, name=parent_name
-            ).first()
-    # else:
-    #     assert parent.name == parent_name
+                level=parent_level, name=parent_name).first()
 
     return parent
 
@@ -53,11 +49,12 @@ class Command(BaseCommand):
     help = _("Load locations")
 
     def add_arguments(self, parser):
-        parser.add_argument("shape_file", metavar="FILE",
-                            help="The file path to the shapefile")
         parser.add_argument(
-            "name_field", help="name field to use in the shapefile"
-        )
+            "shape_file",
+            metavar="FILE",
+            help="The file path to the shapefile")
+        parser.add_argument(
+            "name_field", help="name field to use in the shapefile")
         parser.add_argument("level")
         parser.add_argument(
             "--structures",
@@ -97,8 +94,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--skip",
             dest="skip_field",
-            help="skip field to use in the shape file",
-        )
+            help="skip field to use in the shape file")
         parser.add_argument(
             "--skipif",
             dest="skip_value",
@@ -127,9 +123,8 @@ class Command(BaseCommand):
                 skip_value = options.get("skip_value")
                 if skip_field and not skip_value:
                     raise CommandError(_("Error: please provide skip value"))
-                skip_value = (
-                    int(skip_value) if skip_value is not None else None
-                )
+                skip_value = int(
+                    skip_value) if skip_value is not None else None
 
                 count = exception_raised = failed = skipped = updated = 0
                 srs = SpatialReference("+proj=longlat +datum=WGS84 +no_defs")
@@ -141,15 +136,13 @@ class Command(BaseCommand):
                     if skip_field and skip_value is not None:
                         if feature.get(skip_field) == skip_value:
                             skipped += 1
-                            self.stdout.write(
-                                "Skipping %s - skip." % feature.get(name_field)
-                            )
+                            self.stdout.write("Skipping %s - skip." %
+                                              feature.get(name_field))
                             continue
 
                     try:
-                        is_polygon = isinstance(
-                            feature.geom, geometries.Polygon
-                        )
+                        is_polygon = isinstance(feature.geom,
+                                                geometries.Polygon)
                     except GDALException as error:
                         self.stderr.write("Error: %s" % error)
                         continue
@@ -166,21 +159,16 @@ class Command(BaseCommand):
                         code = int(feature.get(code_field))
                         if code == 0:
                             skipped += 1
-                            self.stdout.write(
-                                "Skipping %s - code." % feature.get(name_field)
-                            )
+                            self.stdout.write("Skipping %s - code." %
+                                              feature.get(name_field))
                             continue
-                    if (
-                        bytearray(structures_field.encode("utf8"))
-                        in feature.fields
-                    ):
+                    if bytearray(
+                            structures_field.encode("utf8")) in feature.fields:
                         structures = int(feature.get(structures_field))
                     else:
                         structures = 0
-                    if (
-                        bytearray(parent_field.encode("utf8"))
-                        in feature.fields
-                    ):
+                    if bytearray(
+                            parent_field.encode("utf8")) in feature.fields:
                         parent_name = feature.get(parent_field)
                     elif parent_field in feature.fields:
                         parent_name = feature.get(parent_field)
@@ -198,8 +186,8 @@ class Command(BaseCommand):
                             parent = get_parent_by_code(
                                 parent_code, parent_level)
                         else:
-                            parent = get_parent(
-                                geom, parent_level, parent_name)
+                            parent = get_parent(geom, parent_level,
+                                                parent_name)
 
                         if not parent:
                             self.stdout.write(
@@ -213,8 +201,7 @@ class Command(BaseCommand):
                         target = True
                     try:
                         location = Location.objects.get(
-                            name=name, level=level, parent=parent
-                        )
+                            name=name, level=level, parent=parent)
                     except Location.DoesNotExist:
                         try:
                             Location.objects.create(
@@ -246,6 +233,5 @@ class Command(BaseCommand):
 
                 self.stdout.write(
                     "Created %s locations, %s updated, failed %s, skipped %s, "
-                    "error %s"
-                    % (count, updated, failed, skipped, exception_raised)
-                )
+                    "error %s" % (count, updated, failed, skipped,
+                                  exception_raised))
