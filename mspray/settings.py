@@ -87,6 +87,7 @@ INSTALLED_APPS = (
     "mspray.apps.trials",
     "mspray.apps.mda",
     "mspray.apps.reveal",
+    "mspray.apps.reactive.irs",
 )
 
 MIDDLEWARE = (
