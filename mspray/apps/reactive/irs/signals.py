@@ -7,7 +7,10 @@ from django.dispatch import receiver
 from mspray.apps.reactive.irs.models import CommunityHealthWorker
 
 
-@receiver(pre_save, sender=CommunityHealthWorker)
+@receiver(
+    pre_save,
+    sender=CommunityHealthWorker,
+    dispath_uuid="populate_bgeom_field")
 def populate_bgeom_field(
         sender: object, instance: object,
         **kwargs):  # pylint: disable=unused-argument
