@@ -13,7 +13,8 @@ class CommunityHealthWorker(models.Model):
     geom = models.PointField(srid=4326, db_index=True, null=False)
     bgeom = models.GeometryField(srid=4326, db_index=True, null=True)
     location = models.ForeignKey(
-        "main.Location", db_index=True, null=False, on_delete=models.CASCADE)
+        "main.Location", related_name="chw", db_index=True, null=True,
+        on_delete=models.CASCADE)
 
     class Meta:
         """Meta definition for CommunityHealthWorker."""
