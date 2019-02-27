@@ -268,6 +268,7 @@ MSPRAY_TEAM_LEADER_CODE = "team_leader"
 MSPRAY_TEAM_LEADER_ASSISTANT_NAME = "team_leader_assistant"
 MSPRAY_TEAM_LEADER_ASSISTANT_CODE = "team_leader_assistant"
 MSPRAY_TA_LEVEL = "ta"
+MSPRAY_DISTRICT_LEVEL = "district"
 MSPRAY_IRS_NUM_FIELD = "irs_sticker_num"
 HIGHER_LEVEL_MAP = True
 HH_BUFFER = False
