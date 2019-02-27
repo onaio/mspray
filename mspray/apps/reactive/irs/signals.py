@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 from mspray.apps.reactive.irs.models import CommunityHealthWorker
 from mspray.apps.reactive.irs.utils import get_chw_location
+from mspray.libs.utils.geom_buffer import with_metric_buffer
 
 
 @receiver(
@@ -20,12 +21,12 @@ def populate_bgeom_field(
     try:
         obj = sender.objects.get(pk=instance.pk)
     except sender.DoesNotExist:
-        instance.bgeom = instance.geom.buffer(
-            settings.MSPRAY_REACTIVE_IRS_CHW_BUFFER, 1)
+        instance.bgeom = with_metric_buffer(
+            instance.geom, settings.MSPRAY_REACTIVE_IRS_CHW_BUFFER)
     else:
         if not obj.bgeom == instance.bgeom:  # Field has changed
-            instance.bgeom = instance.geom.buffer(
-                settings.MSPRAY_REACTIVE_IRS_CHW_BUFFER, 1)
+            instance.bgeom = with_metric_buffer(
+                instance.geom, settings.MSPRAY_REACTIVE_IRS_CHW_BUFFER)
 
 
 @receiver(

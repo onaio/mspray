@@ -1,8 +1,8 @@
 """Reactive IRS settings module"""
 from django.conf import settings
 
-# buffer radius for CommunityHealthWorker bgeom field
-MSPRAY_REACTIVE_IRS_CHW_BUFFER = 0.0005
+# buffer radius in metres for CommunityHealthWorker bgeom field
+MSPRAY_REACTIVE_IRS_CHW_BUFFER = 5000
 # code prefix for CommunityHealthWorker
 MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX = "CHW-"
 # Should we create a location object from a CommunityHealthWorker object?
