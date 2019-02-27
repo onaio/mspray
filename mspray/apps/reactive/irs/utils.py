@@ -24,7 +24,7 @@ def get_chw_location(chw: object):
         ).first()
 
     location, _ = Location.objects.update_or_create(
-        code=f"{settings.MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX}{chw.pk}",
+        code=f"{settings.MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX}{chw.code}",
         defaults={
             "name": chw.name,
             "level": level,

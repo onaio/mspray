@@ -33,12 +33,13 @@ class TestUtils(TestBase):
         expected_district = Location.objects.get(
             level="district", geom__contains=some_structure.geom)
 
-        chw = CommunityHealthWorker(name="Mosh", geom=some_structure.geom)
+        chw = CommunityHealthWorker(
+            code="97", name="Mosh", geom=some_structure.geom)
         chw.save()
 
         location = get_chw_location(chw=chw)
 
-        self.assertEqual(f"CHW-{chw.pk}", location.code)
+        self.assertEqual("CHW-97", location.code)
         self.assertEqual(chw.name, location.name)
         self.assertEqual(chw.bgeom, location.geom[0])
         self.assertEqual("ta", location.level)
