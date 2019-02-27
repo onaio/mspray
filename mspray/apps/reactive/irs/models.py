@@ -1,7 +1,10 @@
 """Reactive IRS model"""
 
+from django.conf import settings
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext as _
+
+SRID = settings.MSPRAY_DEFAULT_SRID
 
 
 class CommunityHealthWorker(models.Model):
@@ -9,11 +12,14 @@ class CommunityHealthWorker(models.Model):
 
     created_on = models.DateTimeField(auto_now_add=True)
     modified_on = models.DateTimeField(auto_now=True)
-    name = models.CharField(max_length=255, db_index=True)
-    geom = models.PointField(srid=4326, db_index=True, null=False)
-    bgeom = models.GeometryField(srid=4326, db_index=True, null=True)
+    code = models.CharField(max_length=50, unique=True, db_index=True)
+    name = models.CharField(max_length=255)
+    geom = models.PointField(srid=SRID)
+    bgeom = models.GeometryField(srid=SRID, null=True)
     location = models.ForeignKey(
-        "main.Location", related_name="chw", db_index=True, null=True,
+        "main.Location",
+        related_name="chw",
+        null=True,
         on_delete=models.CASCADE)
 
     class Meta:
