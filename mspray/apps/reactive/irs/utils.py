@@ -13,7 +13,8 @@ def get_chw_location(chw: object):
     :return: Location object linked to the Community Health Worker
     """
 
-    level = settings.MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL
+    level = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
+    code_pre = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX", "CHW-")
 
     if level == settings.MSPRAY_DISTRICT_LEVEL:
         parent = None
@@ -24,7 +25,7 @@ def get_chw_location(chw: object):
         ).first()
 
     location, _ = Location.objects.update_or_create(
-        code=f"{settings.MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX}{chw.code}",
+        code=f"{code_pre}{chw.code}",
         defaults={
             "name": chw.name,
             "level": level,
