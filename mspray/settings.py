@@ -276,6 +276,7 @@ HEALTH_FACILITY_CATCHMENT_THRESHOLD = 10
 ONA_URI = "https://api.ona.io"
 MSPRAY_WEEKLY_DASHBOARD_UPDATE_URL = "http://example.com"
 MSPRAY_AWS_PATH = "mspray"
+MSPRAY_DEFAULT_SRID = 4326
 
 BROKER_URL = "amqp://guest:guest@localhost//"
 OSM_SUBMISSIONS = False
