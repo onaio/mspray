@@ -1,4 +1,4 @@
-"""Module to test reacctivre irs models"""
+"""Module to test reactive irs models"""
 from django.test import override_settings
 
 from mspray.apps.main.models import Household
@@ -25,8 +25,7 @@ class TestModels(TestBase):
 
         chw = CommunityHealthWorker(
             name="Mosh",
-            geom=some_structure.geom,
-            location=some_structure.location)
+            geom=some_structure.geom)
         chw.save()
 
         self.assertEqual("Mosh", chw.__str__())
@@ -39,8 +38,7 @@ class TestModels(TestBase):
 
         chw = CommunityHealthWorker(
             name="Mosh",
-            geom=some_structure.geom,
-            location=some_structure.location)
+            geom=some_structure.geom)
         chw.save()
 
         self.assertFalse(chw.bgeom is None)
