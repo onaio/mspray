@@ -9,7 +9,7 @@ MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX = "CHW-"
 MSPRAY_REACTIVE_IRS_CREATE_CHW_LOCATION = True
 # Which level should the location object be, default is target area
 MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL = getattr(
-    settings, "MSPRAY_TA_LEVEL", "ta")
+    settings, "MSPRAY_TA_LEVEL", "chw")
 # Which level should the location parent object be, default is district
 MSPRAY_REACTIVE_IRS_CHW_LOCATION_PARENT_LEVEL = getattr(
     settings, "MSPRAY_DISTRICT_LEVEL", "district")

@@ -22,7 +22,7 @@ class TestUtils(TestBase):
     @override_settings(
         MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX="CHW-",
         MSPRAY_REACTIVE_IRS_CHW_BUFFER=0.0005,
-        MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL="ta",
+        MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL="chw",
         MSPRAY_REACTIVE_IRS_CHW_LOCATION_PARENT_LEVEL="district",
         MSPRAY_IRS_NUM_FIELD="district",
     )
@@ -42,6 +42,6 @@ class TestUtils(TestBase):
         self.assertEqual("CHW-97", location.code)
         self.assertEqual(chw.name, location.name)
         self.assertEqual(chw.bgeom, location.geom[0])
-        self.assertEqual("ta", location.level)
+        self.assertEqual("chw", location.level)
         self.assertEqual("district", location.parent.level)
         self.assertEqual(expected_district, location.parent)
