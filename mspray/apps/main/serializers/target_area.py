@@ -282,13 +282,17 @@ def get_spray_data(obj, context):
     return results[0]
 
 
-def get_duplicates(obj, was_sprayed, spray_date=None):
+def get_duplicates(obj, was_sprayed, spray_date=None, sprayday_qs=None):
     """
     Returns SprayDay queryset for structures visited more than once.
     """
 
     def _duplicates(spray_status):
-        qs = loc.sprayday_set
+        if sprayday_qs is None:
+            qs = loc.sprayday_set
+        else:
+            qs = sprayday_qs
+
         if spray_date:
             qs = qs.filter(spray_date__lte=spray_date)
         return (
@@ -314,11 +318,11 @@ def get_duplicates(obj, was_sprayed, spray_date=None):
     return dupes
 
 
-def count_duplicates(obj, was_sprayed, spray_date=None):
+def count_duplicates(obj, was_sprayed, spray_date=None, sprayday_qs=None):
     """
     Count duplicate structures, does not include the first time visit.
     """
-    dupes = get_duplicates(obj, was_sprayed, spray_date)
+    dupes = get_duplicates(obj, was_sprayed, spray_date, sprayday_qs)
 
     return sum([i.get("dupes") - 1 for i in dupes])
 
