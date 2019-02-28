@@ -141,7 +141,9 @@ class SprayDayViewSet(viewsets.ModelViewSet):
 
         if targetid:
             target = get_object_or_404(Location, pk=targetid)
-            if SPATIAL_QUERIES:  # settings.MSPRAY_SPATIAL_QUERIES:
+
+            # SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
+            if SPATIAL_QUERIES or target.level == "chw":
                 queryset = queryset.filter(geom__coveredby=target.geom)
             else:
                 if target.parent is None:
