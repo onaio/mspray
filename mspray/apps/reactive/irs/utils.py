@@ -14,7 +14,7 @@ def get_chw_location(chw: object):
     """
 
     level = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
-    code_pre = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX", "CHW-")
+    code_pre = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX", "CHW_")
 
     if level == settings.MSPRAY_DISTRICT_LEVEL:
         parent = None

@@ -43,7 +43,7 @@ class TestModels(TestBase):
         # TODO: we need to check the area of the bgeom
 
     @override_settings(
-        MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX="CHW-",
+        MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX="CHW_",
         MSPRAY_REACTIVE_IRS_CHW_BUFFER=0.0005,
         MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL="chw",
         MSPRAY_REACTIVE_IRS_CHW_LOCATION_PARENT_LEVEL="district",
@@ -64,7 +64,7 @@ class TestModels(TestBase):
         location = chw.location
 
         # pylint: disable=no-member
-        self.assertEqual("CHW-2", location.code)
+        self.assertEqual("CHW_2", location.code)
         self.assertEqual(chw.name, location.name)
         self.assertEqual(chw.bgeom, location.geom[0])
         self.assertEqual("chw", location.level)

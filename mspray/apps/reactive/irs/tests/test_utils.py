@@ -20,7 +20,7 @@ class TestUtils(TestBase):
         self._load_fixtures()
 
     @override_settings(
-        MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX="CHW-",
+        MSPRAY_REACTIVE_IRS_CHW_CODE_PREFIX="CHW_",
         MSPRAY_REACTIVE_IRS_CHW_BUFFER=0.0005,
         MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL="chw",
         MSPRAY_REACTIVE_IRS_CHW_LOCATION_PARENT_LEVEL="district",
@@ -39,7 +39,7 @@ class TestUtils(TestBase):
 
         location = get_chw_location(chw=chw)
 
-        self.assertEqual("CHW-97", location.code)
+        self.assertEqual("CHW_97", location.code)
         self.assertEqual(chw.name, location.name)
         self.assertEqual(chw.bgeom, location.geom[0])
         self.assertEqual("chw", location.level)
