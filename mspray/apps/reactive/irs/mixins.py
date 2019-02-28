@@ -1,5 +1,7 @@
 """mixins module for Reactive IRS"""
 from mspray.apps.main.models import Household, SprayDay
+from mspray.apps.main.serializers.target_area import count_duplicates
+from mspray.apps.reactive.irs.queries import get_spray_data_using_geoquery
 
 
 class CHWLocationMixin:
@@ -9,21 +11,29 @@ class CHWLocationMixin:
         """Get queryset for spray days"""
         return SprayDay.objects.filter(geom__coveredby=obj.geom)
 
-    def get_structures(self, obj):
-        """Get structures"""
+    def get_structures_in_location(self, obj):
+        """Get location structures"""
         return Household.objects.filter(geom__coveredby=obj.geom).count()
 
-    def get_total_structures(self, obj):
-        """Get total_structures"""
-        return self.get_structures(obj) + self.get_not_visited(obj)
+    def get_duplicates(self, obj, was_sprayed=True):
+        """Get duplicates"""
+        qs = self.get_sprayday_qs(obj)
+        return count_duplicates(
+            obj=obj, was_sprayed=was_sprayed, sprayday_qs=qs)
+
+    def get_spray_data(self, obj):
+        """Get spray data"""
+        return get_spray_data_using_geoquery(location=obj)
 
     def get_num_new_structures(self, obj):
         """Get num_new_structures"""
-        return 0
+        data = self.get_spray_data(obj)
+        return data.get("new_structures") or 0
 
     def get_found(self, obj):
         """Get found"""
-        return self.get_visited_sprayed(obj)
+        data = self.get_spray_data(obj)
+        return data.get("found") or 0
 
     def get_visited_total(self, obj):
         """Get visited_total"""
@@ -31,27 +41,51 @@ class CHWLocationMixin:
 
     def get_visited_sprayed(self, obj):
         """Get visited_sprayed"""
-        qs = self.get_sprayday_qs(obj)
-        return qs.filter(was_sprayed=True, sprayable=True).count()
+        data = self.get_spray_data(obj)
+        return data.get("sprayed")
 
     def get_visited_not_sprayed(self, obj):
         """Get visited_not_sprayed"""
-        qs = self.get_sprayday_qs(obj)
-        return qs.filter(was_sprayed=False, sprayable=True).count()
+        data = self.get_spray_data(obj)
+        return data.get("not_sprayed") or 0
 
     def get_visited_refused(self, obj):
         """Get visited_refused"""
-        qs = self.get_sprayday_qs(obj)
-        return qs.filter(was_sprayed=False, sprayable=True).count()
+        data = self.get_spray_data(obj)
+        return data.get("refused") or 0
 
     def get_visited_other(self, obj):
-        """Get visited_other"""
-        return 0
+        data = self.get_spray_data(obj)
+        return data.get("other") or 0
 
     def get_not_visited(self, obj):
         """Get not_visited"""
-        qs = self.get_sprayday_qs(obj)
-        return qs.filter(sprayable=False).count()
+        data = self.get_spray_data(obj)
+        structures = self.get_structures_in_location(obj)
+        duplicates = self.get_duplicates(obj=obj, was_sprayed=True)
+
+        not_sprayable = data.get("not_sprayable") or 0
+        new_structures = data.get("new_structures") or 0
+        structures = structures - not_sprayable
+        structures = structures + new_structures + duplicates
+        count = data.get("found") or 0
+
+        return structures - count
+
+    def get_structures(self, obj):
+        """Get structures"""
+        data = self.get_spray_data(obj)
+        structures = self.get_structures_in_location(obj)
+        duplicates = self.get_duplicates(obj=obj, was_sprayed=True)
+        not_sprayable = data.get("not_sprayable") or 0
+        new_structures = data.get("new_structures") or 0
+        structures = structures - not_sprayable
+        structures = structures + new_structures + duplicates
+        return structures
+
+    def get_total_structures(self, obj):
+        """Get total_structures"""
+        return self.get_structures(obj)
 
     def get_district_name(self, obj):
         """Get district_name"""
