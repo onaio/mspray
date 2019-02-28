@@ -14,24 +14,16 @@ from rest_framework import routers
 from mspray.apps.alerts import urls as alerts_urls
 from mspray.apps.main.views import directly_observed_spraying_form as dos_form
 from mspray.apps.main.views import (
-    districts,
-    home,
-    household,
-    household_buffer,
-    indicators,
-    performance,
-    spray_operator_daily,
-    sprayday,
-    target_area,
-    user,
-)
+    districts, home, household, household_buffer, indicators, performance,
+    spray_operator_daily, sprayday, target_area, user)
 from mspray.apps.main.views.decision import DecisionView
 from mspray.apps.main.views.mobilisation import MobilisationView
 from mspray.apps.main.views.mopup import HealthFacilityMopUpView, MopUpView
 from mspray.apps.main.views.sensitization_visit import SensitizationVisitView
 from mspray.apps.main.views.sprayday import NoLocationSprayDayView
-from mspray.apps.warehouse import urls as warehouse_urls
 from mspray.apps.mda import urls as mda_urls
+from mspray.apps.reactive.irs import urls as reactive_irs_urls
+from mspray.apps.warehouse import urls as warehouse_urls
 
 TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 
@@ -48,8 +40,8 @@ router.register(r"targetareas", target_area.TargetAreaViewSet)
 performance_urls = (  # pylint: disable=C0103
     [
         path(
-            "",
-            performance.DistrictPerfomanceView.as_view(), name="districts"),
+            "", performance.DistrictPerfomanceView.as_view(),
+            name="districts"),
         path(
             "team-leaders/<int:slug>",
             performance.TeamLeadersPerformanceView.as_view(),
@@ -75,7 +67,9 @@ performance_urls = (  # pylint: disable=C0103
     "mspray",
 )
 
-urlpatterns = [  # pylint: disable=C0103
+urlpatterns = [  # pylint: disable=invalid-name
+    path("reactive/irs/", include(reactive_irs_urls,
+                                  namespace="reactive_irs")),
     path("mda/", include(mda_urls, namespace="mda")),
     path("mda-round-2/", include(mda_urls, namespace="mda-2")),
     path("trials/", include("mspray.apps.trials.urls", namespace="trials")),
@@ -103,8 +97,8 @@ urlpatterns = [  # pylint: disable=C0103
         name="detailed_sprayareas",
     ),
     path(
-        "weekly-report",
-        home.WeeklyReportView.as_view(), name="weeklyreports"),
+        "weekly-report", home.WeeklyReportView.as_view(),
+        name="weeklyreports"),
     path(
         "indicators/number_of_households",
         indicators.NumberOfHouseholdsIndicatorView.as_view(),
@@ -115,14 +109,16 @@ urlpatterns = [  # pylint: disable=C0103
     path("admin/", admin.site.urls),
     path(
         "spray-operator-daily",
-        spray_operator_daily.SprayOperatorDailyViewSet.as_view(
-            {"post": "create"}),
+        spray_operator_daily.SprayOperatorDailyViewSet.as_view({
+            "post": "create"
+        }),
         name="spray-operator-daily",
     ),
     path(
         "directly-observed-spraying-form",
-        dos_form.DirectlyObservedSprayingFormViewSet.as_view(
-            {"post": "create"}),
+        dos_form.DirectlyObservedSprayingFormViewSet.as_view({
+            "post": "create"
+        }),
         name="directly-observed-spraying-form",
     ),
     path(
@@ -153,14 +149,16 @@ urlpatterns = [  # pylint: disable=C0103
     ),
     path(
         "mobilisation-visit",
-        MobilisationView.as_view(), name="mobilisation-visit"),
+        MobilisationView.as_view(),
+        name="mobilisation-visit"),
     path("decision-visit", DecisionView.as_view(), name="decision-visit"),
     path("mop-up", MopUpView.as_view(), name="mop-up"),
     path(
         "mop-up/<int:district>",
-        HealthFacilityMopUpView.as_view(), name="mop-up"),
-] + static.static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
+        HealthFacilityMopUpView.as_view(),
+        name="mop-up"),
+] + static.static(
+    settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if (settings.DEBUG or TESTING) and "debug_toolbar" in settings.INSTALLED_APPS:
     try:
