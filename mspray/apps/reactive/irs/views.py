@@ -2,10 +2,12 @@
 import json
 
 from django.conf import settings
-from django.views.generic import DetailView
+from django.http import Http404
+from django.views.generic import DetailView, ListView
 
 from rest_framework import mixins, viewsets
 
+from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
@@ -73,3 +75,41 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             settings.MSPRAY_UNSPRAYED_REASON_OTHER)
 
         return context
+
+
+class CHWListView(SiteNameMixin, ListView):
+    """
+    View for listing CHW locations grouped by their parents
+    """
+
+    template_name = "reactive_irs/list.html"
+    model = Location
+    slug_field = "pk"
+
+    def get_queryset(self):
+        """Get queryset"""
+        return (super().get_queryset().filter(
+            level="chw", target=True, parent__pk=self.location_id))
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+
+        object_list = context["object_list"]
+        serializer = CHWLocationSerializer(object_list, many=True)
+
+        context.update(DEFINITIONS["ta"])
+        context["item_list"] = serializer.data
+        context["location"] = self.location
+
+        return context
+
+    def dispatch(self, *args, **kwargs):
+        """ Custom dispatch method """
+        self.location_id = self.kwargs.get(self.slug_field)
+        try:
+            self.location = Location.objects.get(pk=self.location_id)
+        except Location.DoesNotExist:
+            raise Http404
+        else:
+            return super().dispatch(*args, **kwargs)
