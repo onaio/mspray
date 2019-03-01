@@ -11,18 +11,20 @@ from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
-from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.utils import parse_spray_date
-from mspray.apps.main.views.target_area import (CHWHouseholdsViewSet,
-                                                TargetAreaViewSet)
-from mspray.apps.reactive.irs.serializers import (CHWLocationSerializer,
-                                                  GeoCHWLocationSerializer)
+from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
+from mspray.apps.reactive.irs.serializers import (
+    CHWinTargetAreaSerializer, CHWLocationSerializer,
+    GeoCHWinTargetAreaSerializer, GeoCHWLocationSerializer)
+
+TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
+CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
 
 
 class CHWLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     """Community Health Worker (CHW) location viewset class"""
 
-    queryset = get_location_qs(Location.objects.filter(level="chw"))
+    queryset = get_location_qs(Location.objects.filter(level=CHW_LEVEL))
     serializer_class = CHWLocationSerializer
 
     def get_serializer_class(self):
@@ -51,9 +53,9 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         spray_date = parse_spray_date(self.request)
         loc = context["object"]
 
-        if self.object.level == "chw":
+        if self.object.level == CHW_LEVEL:
             serializer_class = CHWLocationSerializer
-            viewset_class = CHWLocationViewSet
+            geo_serializer_class = GeoCHWLocationSerializer
 
             hhview = CHWHouseholdsViewSet.as_view({"get": "retrieve"})
             response = hhview(
@@ -66,21 +68,20 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             response.render()
             hh_geojson = response.content.decode()
         else:
-            serializer_class = TargetAreaSerializer
-            viewset_class = TargetAreaViewSet
+            serializer_class = CHWinTargetAreaSerializer
+            geo_serializer_class = GeoCHWinTargetAreaSerializer
 
             loc = get_location_qs(Location.objects.filter(pk=loc.pk)).first()
-            chw_objects = Location.objects.filter(parent=loc, level="chw")
+            chw_objects = Location.objects.filter(parent=loc, level=CHW_LEVEL)
             hh_geojson = json.dumps(
                 GeoCHWLocationSerializer(chw_objects, many=True).data)
 
         serializer = serializer_class(loc, context={"request": self.request})
-        context["target_data"] = serializer.data
+        geo_serializer = geo_serializer_class(
+            loc, context={"request": self.request})
 
-        view = viewset_class.as_view({"get": "retrieve"})
-        response = view(self.request, pk=loc.pk, format="geojson")
-        response.render()
-        context["ta_geojson"] = response.content.decode()
+        context["target_data"] = serializer.data
+        context["ta_geojson"] = json.dumps(geo_serializer.data)
 
         context["hh_geojson"] = hh_geojson
 
@@ -105,7 +106,7 @@ class CHWListView(SiteNameMixin, ListView):
     def get_queryset(self):
         """Get queryset"""
         return (super().get_queryset().filter(
-            level="chw", target=True, parent__pk=self.location_id))
+            level=CHW_LEVEL, target=True, parent__pk=self.location_id))
 
     def get_context_data(self, **kwargs):
         """Get context data"""
@@ -118,7 +119,7 @@ class CHWListView(SiteNameMixin, ListView):
         context["location"] = self.location
 
         # we are using the same definitions as target areas
-        context.update(DEFINITIONS["ta"])
+        context.update(DEFINITIONS[TA_LEVEL])
 
         return context
 
