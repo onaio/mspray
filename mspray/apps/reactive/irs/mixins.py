@@ -126,12 +126,7 @@ class CHWLocationMixin:
 
     def get_district_name(self, obj):
         """Get district_name"""
-        if obj.parent is None:
-            return obj.name
-
-        district = obj.get_root()
-
-        return district.name
+        return obj.name
 
 
 class CHWinLocationMixin(CHWLocationMixin):
