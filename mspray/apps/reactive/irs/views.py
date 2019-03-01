@@ -118,6 +118,7 @@ class CHWListView(SiteNameMixin, ListView):
 
         return context
 
+    # pylint: disable=attribute-defined-outside-init
     def dispatch(self, *args, **kwargs):
         """ Custom dispatch method """
         self.location_id = self.kwargs.get(self.slug_field)
