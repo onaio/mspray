@@ -10,10 +10,14 @@
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
         <h1 id="district-name">
-            Community Health Workers: {{location.name}}
-            <a href="{% url 'reactive_irs:chw_list_map' location.id %}">
-                <i class="fa fa-map"></i>
-            </a>
+            {% if location %}
+                Community Health Workers: {{location.name}}
+                <a href="{% url 'reactive_irs:chw_list_map' location.id %}">
+                    <i class="fa fa-map"></i>
+                </a>
+            {% else %}
+                Reactive IRS
+            {% endif %}
         </h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
@@ -31,8 +35,12 @@
                 {% for chw in item_list %}
                     <tr>
                         <td>
-                            <a href="{% url 'reactive_irs:chw_map' chw.id %}">
+                            {% if location %}
+                                <a href="{% url 'reactive_irs:chw_map' chw.id %}">
                                 <i class="fa fa-map"></i>
+                            {% else %}
+                                <a href="{% url 'reactive_irs:chw_list' chw.id %}">
+                            {% endif %}
                                 {{ chw.name }}
                             </a>
                         </td>
