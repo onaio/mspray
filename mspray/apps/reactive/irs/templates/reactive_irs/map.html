@@ -7,84 +7,88 @@
         <link href='{% static "css/L.Control.Locate.min.css" %}' rel='stylesheet' />
 {% endblock %}
 
+{% block main_menu %}
+    {% include 'reactive_irs/menu_list.html' %}
+{% endblock %}
 
 {% block spray_dates  %}
-                        <li class="dropdown" id="spray_date_picker">
-                            <a href="#" class="dropdown-toggle"
-                               data-toggle="dropdown">
-                                <span class="sprayday_label">Date: {{ spray_date }}</span>
-                                <b class="caret"></b>
-                            </a>
-                            <ul class="dropdown-menu" id="spraydays_list">
-                            {% for day in target_data.spray_dates %}
-                                <li>
-                                    {% if object.parent %}
-                                    <a href="{% url 'reactive_irs:chw_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
-                                    {% else %}
-                                    <a href="{% url 'reactive_irs:chw_list_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                            </ul>
-                        </li>
+    <li class="dropdown" id="spray_date_picker">
+        <a href="#" class="dropdown-toggle"
+            data-toggle="dropdown">
+            <span class="sprayday_label">Date: {{ spray_date }}</span>
+            <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu" id="spraydays_list">
+        {% for day in target_data.spray_dates %}
+            <li>
+                {% if object.parent %}
+                <a href="{% url 'reactive_irs:chw_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                {% else %}
+                <a href="{% url 'reactive_irs:chw_list_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    </li>
 {% endblock %}
-{% block target_area_stats  %}
 
-                        <li class="active" id="target-area-stats-item"><a>Target Area Stats</a></li>
+{% block target_area_stats  %}
+{% if object.parent %}
+    <li class="active" id="target-area-stats-item"><a>Target Area Stats</a></li>
+{% endif %}
 {% endblock %}
 
 {% block content %}
+    <section class="info-panel">
+        <div class="info-holder">
+            <h4><span class="dist_label" id="target-area-label"> </span></h4>
 
-        <section class="info-panel">
-            <div class="info-holder">
-                <h4><span class="dist_label" id="target-area-label"> </span></h4>
-
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats-structures">
-                    </dl>
-                </div>
-                <hr>
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats">
-                    </dl>
-                </div>
-                <hr>
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats">
-                    {% if sprayed_duplicates or not_sprayed_duplicates  %}
-                    <p>Some structures were selected more than once.<br />
-                        <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
-                    </p>
-                    {% endif %}
-                    {% if sprayed_duplicates %}
-                        <dt>{{ sprayed_duplicates }}</dt>
-                        <dd>Sprayed Duplicates</dd>
-                    {% endif %}
-                    {% if not_sprayed_duplicates %}
-                        <dt>{{ not_sprayed_duplicates }}</dt>
-                        <dd>Not Sprayed Duplicates</dd>
-                    {% endif %}
-                    {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
-                    <p>No structures were selected more than once.</p>
-                    {% endif %}
-                    </dl>
-                </div>
-                <hr>
-                <div id="not-sprayed-reasons">
-                    <p>Not Sprayed Reasons</p>
-                    <dl class="dl-horizontal" id="target-area-stats-not-sprayed"></dl>
-                </div>
-                <hr>
-                <div>
-                    <dl class="dl-horizontal" id="target-area-stats">
-                        <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-previous-structure' value='Previous Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data"/>
-                        <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data" />
-                    </dl>
-                </div>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats-structures">
+                </dl>
             </div>
-        </section>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                </dl>
+            </div>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                {% if sprayed_duplicates or not_sprayed_duplicates  %}
+                <p>Some structures were selected more than once.<br />
+                    <a id="sprayed-duplicates" style="color: white; font-weight: 600" href="#">Show duplicates</a>
+                </p>
+                {% endif %}
+                {% if sprayed_duplicates %}
+                    <dt>{{ sprayed_duplicates }}</dt>
+                    <dd>Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not_sprayed_duplicates %}
+                    <dt>{{ not_sprayed_duplicates }}</dt>
+                    <dd>Not Sprayed Duplicates</dd>
+                {% endif %}
+                {% if not sprayed_duplicates and not not_sprayed_duplicates  %}
+                <p>No structures were selected more than once.</p>
+                {% endif %}
+                </dl>
+            </div>
+            <hr>
+            <div id="not-sprayed-reasons">
+                <p>Not Sprayed Reasons</p>
+                <dl class="dl-horizontal" id="target-area-stats-not-sprayed"></dl>
+            </div>
+            <hr>
+            <div>
+                <dl class="dl-horizontal" id="target-area-stats">
+                    <input type='button' class="btn btn-default btn-xs" onClick='previousStructure();' id='show-previous-structure' value='Previous Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data"/>
+                    <input type='button' class="btn btn-default btn-xs" onClick='nextStructure();' id='show-next-structure' value='Next Structure' data-toggle="tooltip" data-placement="bottom" title="No Spray Data" />
+                </dl>
+            </div>
+        </div>
+    </section>
 
-        <div id="map"></div>
+    <div id="map"></div>
 
     <div id="map-legend">
 
@@ -114,7 +118,6 @@
         </div>
 
     </div>
-
 {% endblock %}
 
 {% block scripts %}
