@@ -56,7 +56,7 @@ class CHWLocationMixin:
     def get_visited_sprayed(self, obj):
         """Get visited_sprayed"""
         data = self.get_spray_data(obj)
-        return data.get("sprayed")
+        return data.get("sprayed") or 0
 
     def get_visited_not_sprayed(self, obj):
         """Get visited_not_sprayed"""
