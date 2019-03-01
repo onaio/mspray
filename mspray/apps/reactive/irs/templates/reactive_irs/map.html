@@ -19,9 +19,9 @@
                             {% for day in target_data.spray_dates %}
                                 <li>
                                     {% if object.parent %}
-                                    <a href="{% url 'target_area' object.parent.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                                    <a href="{% url 'reactive_irs:chw_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
                                     {% else %}
-                                    <a href="{% url 'target_area' object.pk object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
+                                    <a href="{% url 'reactive_irs:chw_list_map' object.pk  %}?spray_date={{ day|date:'Y-m-d' }}">{{ day }}</a>
                                     {% endif %}
                                 </li>
                             {% endfor %}
@@ -74,20 +74,6 @@
                     <p>Not Sprayed Reasons</p>
                     <dl class="dl-horizontal" id="target-area-stats-not-sprayed"></dl>
                 </div>
-                {% if not ENABLE_REVEAL %}
-                <hr>
-                <div>
-                <dl>
-                <p>
-                    Community Ready? {%if object.is_sensitized %}<i class="fa fa-check-circle" style="color: green"></i>{% else %} <i class="fa fa-times" style="color: red"></i>{% endif %}
-                    </p>
-                    <p>
-                    Mobilised? {%if object.is_mobilised %}<i class="fa fa-check-circle" style="color: green"></i>{% else %}<i class="fa fa-times" style="color: red"></i>{% endif %}
-                </p>
-                </dl>
-                </div>
-                {% endif %}
-
                 <hr>
                 <div>
                     <dl class="dl-horizontal" id="target-area-stats">
