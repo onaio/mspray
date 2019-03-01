@@ -153,3 +153,28 @@ class CHWListView(SiteNameMixin, ListView):
             raise Http404
         else:
             return super().dispatch(*args, **kwargs)
+
+
+class CHWDistrictsView(SiteNameMixin, ListView):
+    """
+    View for listing CHW locations grouped by their parents
+    """
+
+    template_name = "reactive_irs/list.html"
+    model = Location
+
+    def get_queryset(self):
+        """Get queryset"""
+        return super().get_queryset().filter(target=True, parent=None)
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+
+        object_list = context["object_list"]
+        serializer = CHWinTargetAreaSerializer(object_list, many=True)
+
+        context["item_list"] = serializer.data
+        context.update(DEFINITIONS[TA_LEVEL])
+
+        return context
