@@ -83,7 +83,8 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             response.render()
             hh_geojson = response.content.decode()
 
-            context["chw_list"] = Location.objects.filter(parent=loc.parent)
+            context["chw_list"] = Location.objects.filter(
+                parent=loc.parent, level=CHW_LEVEL)
         else:
             serializer_class = CHWinTargetAreaSerializer
             viewset_class = CHWinLocationViewSet
