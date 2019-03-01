@@ -38,6 +38,7 @@ from mspray.apps.main.utils import (
 )
 
 SPATIAL_QUERIES = False
+CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
 
 SPRAY_AREA_INDICATOR_SQL = """
 SELECT
@@ -143,7 +144,7 @@ class SprayDayViewSet(viewsets.ModelViewSet):
             target = get_object_or_404(Location, pk=targetid)
 
             # SPATIAL_QUERIES = settings.MSPRAY_SPATIAL_QUERIES
-            if SPATIAL_QUERIES or target.level == "chw":
+            if SPATIAL_QUERIES or target.level == CHW_LEVEL:
                 queryset = queryset.filter(geom__coveredby=target.geom)
             else:
                 if target.parent is None:
