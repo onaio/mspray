@@ -9,7 +9,12 @@
 {% block content %}
 <div class="container" id="district_table">
     <div "col-sm-12" id="table-container">
-        <h1 id="district-name">Community Health Workers: {{location.name}}</h1>
+        <h1 id="district-name">
+            Community Health Workers: {{location.name}}
+            <a href="{% url 'reactive_irs:chw_list_map' location.id %}">
+                <i class="fa fa-map"></i>
+            </a>
+        </h1>
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
