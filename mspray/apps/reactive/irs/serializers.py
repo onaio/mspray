@@ -10,10 +10,12 @@ class CHWLocationSerializer(CHWLocationMixin, serializers.ModelSerializer):
     """Community Health Worker (CHW) location serializer class"""
 
     level = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+    code = serializers.ReadOnlyField()
     district_name = serializers.SerializerMethodField()
     structures = serializers.SerializerMethodField()
-    total_structures = serializers.IntegerField()
-    num_new_structures = serializers.IntegerField()
+    total_structures = serializers.SerializerMethodField()
+    num_new_structures = serializers.SerializerMethodField()
     found = serializers.SerializerMethodField()
     visited_total = serializers.SerializerMethodField()
     visited_sprayed = serializers.SerializerMethodField()
@@ -26,6 +28,8 @@ class CHWLocationSerializer(CHWLocationMixin, serializers.ModelSerializer):
     class Meta:
         fields = [
             "id",
+            "code",
+            "name",
             "district_name",
             "level",
             "found",
@@ -47,6 +51,8 @@ class GeoCHWLocationSerializer(CHWLocationMixin, GeoFeatureModelSerializer):
     """Geo-aware Community Health Worker (CHW) location serializer class"""
 
     level = serializers.ReadOnlyField()
+    name = serializers.ReadOnlyField()
+    code = serializers.ReadOnlyField()
     district_name = serializers.SerializerMethodField()
     structures = serializers.SerializerMethodField()
     total_structures = serializers.IntegerField()
@@ -63,6 +69,8 @@ class GeoCHWLocationSerializer(CHWLocationMixin, GeoFeatureModelSerializer):
     class Meta:
         fields = [
             "id",
+            "code",
+            "name",
             "district_name",
             "level",
             "found",
