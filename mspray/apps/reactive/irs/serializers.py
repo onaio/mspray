@@ -24,6 +24,7 @@ class CHWLocationSerializer(CHWLocationMixin, serializers.ModelSerializer):
     visited_refused = serializers.SerializerMethodField()
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
 
     class Meta:
@@ -43,6 +44,7 @@ class CHWLocationSerializer(CHWLocationMixin, serializers.ModelSerializer):
             "not_visited",
             "total_structures",
             "num_new_structures",
+            "spray_dates",
             "bounds",
         ]
         model = Location
@@ -111,6 +113,7 @@ class CHWinTargetAreaSerializer(CHWinLocationMixin,
     visited_refused = serializers.SerializerMethodField()
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
 
     class Meta:
@@ -130,11 +133,10 @@ class CHWinTargetAreaSerializer(CHWinLocationMixin,
             "not_visited",
             "total_structures",
             "num_new_structures",
+            "spray_dates",
             "bounds",
-            "geom",
         ]
         model = Location
-        geo_field = "geom"
 
 
 class GeoCHWinTargetAreaSerializer(CHWinLocationMixin,
@@ -158,6 +160,7 @@ class GeoCHWinTargetAreaSerializer(CHWinLocationMixin,
     visited_refused = serializers.SerializerMethodField()
     visited_other = serializers.SerializerMethodField()
     not_visited = serializers.SerializerMethodField()
+    spray_dates = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
 
     class Meta:
@@ -177,6 +180,7 @@ class GeoCHWinTargetAreaSerializer(CHWinLocationMixin,
             "not_visited",
             "total_structures",
             "num_new_structures",
+            "spray_dates",
             "bounds",
             "geom",
         ]
