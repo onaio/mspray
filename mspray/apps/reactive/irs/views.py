@@ -66,6 +66,8 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         spray_date = parse_spray_date(self.request)
         loc = context["object"]
 
+        context["district_list"] = Location.objects.filter(parent=None)
+
         if self.object.level == CHW_LEVEL:
             serializer_class = CHWLocationSerializer
             viewset_class = CHWLocationViewSet
@@ -80,14 +82,17 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             )
             response.render()
             hh_geojson = response.content.decode()
+
+            context["chw_list"] = Location.objects.filter(parent=loc.parent)
         else:
             serializer_class = CHWinTargetAreaSerializer
             viewset_class = CHWinLocationViewSet
 
             loc = get_location_qs(Location.objects.filter(pk=loc.pk)).first()
             chw_objects = Location.objects.filter(parent=loc, level=CHW_LEVEL)
-            hh_geojson = json.dumps(
-                GeoCHWLocationSerializer(chw_objects, many=True).data)
+            hh_data = GeoCHWLocationSerializer(chw_objects, many=True).data
+            context["chw_list"] = chw_objects
+            hh_geojson = json.dumps(hh_data)
 
         serializer = serializer_class(loc, context={"request": self.request})
         context["target_data"] = serializer.data
@@ -104,6 +109,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         context["not_sprayed_reasons"] = json.dumps(
             settings.MSPRAY_UNSPRAYED_REASON_OTHER)
         context["spray_date"] = spray_date
+        context.update({"map_menu": True})
 
         return context
 
