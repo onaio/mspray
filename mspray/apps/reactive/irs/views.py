@@ -34,6 +34,19 @@ class CHWLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
         return super().get_serializer_class()
 
 
+class CHWinLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Community Health Worker (CHW) location viewset class"""
+
+    queryset = get_location_qs(Location.objects.filter(level="district"))
+    serializer_class = CHWinTargetAreaSerializer
+
+    def get_serializer_class(self):
+        if self.format_kwarg == "geojson":
+            return GeoCHWinTargetAreaSerializer
+
+        return super().get_serializer_class()
+
+
 class CHWLocationMapView(SiteNameMixin, DetailView):
     """Map view for Community Health Worker (CHW) locations"""
 
@@ -55,7 +68,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
 
         if self.object.level == CHW_LEVEL:
             serializer_class = CHWLocationSerializer
-            geo_serializer_class = GeoCHWLocationSerializer
+            viewset_class = CHWLocationViewSet
 
             hhview = CHWHouseholdsViewSet.as_view({"get": "retrieve"})
             response = hhview(
@@ -69,7 +82,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             hh_geojson = response.content.decode()
         else:
             serializer_class = CHWinTargetAreaSerializer
-            geo_serializer_class = GeoCHWinTargetAreaSerializer
+            viewset_class = CHWinLocationViewSet
 
             loc = get_location_qs(Location.objects.filter(pk=loc.pk)).first()
             chw_objects = Location.objects.filter(parent=loc, level=CHW_LEVEL)
@@ -77,11 +90,12 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
                 GeoCHWLocationSerializer(chw_objects, many=True).data)
 
         serializer = serializer_class(loc, context={"request": self.request})
-        geo_serializer = geo_serializer_class(
-            loc, context={"request": self.request})
-
         context["target_data"] = serializer.data
-        context["ta_geojson"] = json.dumps(geo_serializer.data)
+
+        view = viewset_class.as_view({"get": "retrieve"})
+        response = view(self.request, pk=loc.pk, format="geojson")
+        response.render()
+        context["ta_geojson"] = response.content.decode()
 
         context["hh_geojson"] = hh_geojson
 
