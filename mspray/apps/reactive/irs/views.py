@@ -20,6 +20,8 @@ from mspray.apps.reactive.irs.serializers import (CHWLocationSerializer,
 
 
 class CHWLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    """Community Health Worker (CHW) location viewset class"""
+
     queryset = get_location_qs(Location.objects.filter(level="chw"))
     serializer_class = CHWLocationSerializer
 
@@ -112,9 +114,11 @@ class CHWListView(SiteNameMixin, ListView):
         object_list = context["object_list"]
         serializer = CHWLocationSerializer(object_list, many=True)
 
-        context.update(DEFINITIONS["ta"])
         context["item_list"] = serializer.data
         context["location"] = self.location
+
+        # we are using the same definitions as target areas
+        context.update(DEFINITIONS["ta"])
 
         return context
 
