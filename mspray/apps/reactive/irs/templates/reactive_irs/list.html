@@ -1,0 +1,64 @@
+{% extends 'home/base.html' %}
+
+{% load humanize %}
+{% load staticfiles %}
+{% load performance_extras %}
+{% load progress_extras %}
+{% load i18n %}
+
+{% block content %}
+<div class="container" id="district_table">
+    <div "col-sm-12" id="table-container">
+        <h1 id="district-name">Community Health Workers: {{location.name}}</h1>
+        <table id="target_areas" class="table table-stripe">
+            <thead>
+                <tr>
+                    <th>Community Health Worther</th>
+                    <th>Structures on ground</th>
+                    <th>Found</th>
+                    <th>Sprayed</th>
+                    <th>Spray Effectiveness</th>
+                    <th>Found coverage</th>
+                    <th>Spray coverage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for chw in item_list %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'reactive_irs:chw_map' chw.id %}">
+                                <i class="fa fa-map"></i>
+                                {{ chw.name }}
+                            </a>
+                        </td>
+                        <td class='numbers'>{{ chw.structures|intcomma }}</td>
+                        <td class='numbers'>{{ chw.found|intcomma }}</td>
+                        <td class='numbers'>{{ chw.visited_sprayed|intcomma }}</td>
+                        {% calc_percentage chw.visited_sprayed chw.structures as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                        {% calc_percentage chw.found chw.structures as found_coverage_percentage %}
+                        <td class='numbers'>{{ found_coverage_percentage }}</td>
+                        {% calc_percentage chw.visited_sprayed chw.found as spray_coverage_percentage %}
+                        <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <p>* To sort a column, click on the column name</p>
+
+        {% include 'definitions-and-conditions.html' %}
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ block.super }}
+    <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table').DataTable({
+                "paging": false,
+            });
+        } );
+    </script>
+{% endblock %}
