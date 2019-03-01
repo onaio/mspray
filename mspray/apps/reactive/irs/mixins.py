@@ -2,7 +2,7 @@
 from collections import Counter
 
 from django.conf import settings
-
+from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.main.models import Household, Location, SprayDay
 from mspray.apps.main.serializers.target_area import count_duplicates
 from mspray.apps.reactive.irs.queries import get_spray_data_using_geoquery
@@ -23,13 +23,21 @@ class CHWLocationMixin:
 
     def get_spray_data(self, obj):
         """Get spray data"""
-        return get_spray_data_using_geoquery(location=obj)
+        context = self.context
+        return get_spray_data_using_geoquery(location=obj, context=context)
 
     def get_duplicates(self, obj, was_sprayed=True):
         """Get duplicates"""
+        spray_date = None
+        request = self.context.get("request")
+        if request:
+            spray_date = parse_spray_date(request)
         qs = self.get_sprayday_qs(obj)
         return count_duplicates(
-            obj=obj, was_sprayed=was_sprayed, sprayday_qs=qs)
+            obj=obj,
+            was_sprayed=was_sprayed,
+            spray_date=spray_date,
+            sprayday_qs=qs)
 
     def get_num_new_structures(self, obj):
         """Get num_new_structures"""
@@ -92,6 +100,13 @@ class CHWLocationMixin:
     def get_total_structures(self, obj):
         """Get total_structures"""
         return self.get_structures(obj)
+
+    def get_spray_dates(self, obj):
+        """ Get spray dates """
+        queryset = self.get_sprayday_qs(obj)
+
+        return (queryset.values_list(
+            "spray_date", flat=True).order_by("spray_date").distinct())
 
     def get_bounds(self, obj):
         """Get bounds"""
