@@ -53,6 +53,7 @@ def enable_mda(request):
     url_path = request.get_full_path()
     is_mda_one = "mda" in url_path and "mda-round-2" not in url_path
     is_mda_two = "mda-round-2" in url_path
+    is_reactive_irs = "reactive/irs" in url_path
     spray_area_url = "target_area"
     performance_district_url = "performance:districts"
     performance_team_leader_url = "performance:team-leaders"
@@ -80,10 +81,12 @@ def enable_mda(request):
 
     return {
         "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
+        "ENABLE_REACTIVE_IRS": getattr(settings, "ENABLE_REACTIVE_IRS", False),
         "MDA_STATIC_PREFIX": mda_static_prefix,
         "MSPRAY_STATIC_URL_PREFIX": static_url_prefix,
         "IS_MDA_LINK": is_mda_one,
         "IS_MDA_2_LINK": is_mda_two,
+        "IS_REACTIVE_IRS_LINK": is_reactive_irs,
         "SPRAY_AREA_URL": spray_area_url,
         "PERFORMANCE_DISTRICT_URL": performance_district_url,
         "PERFORMANCE_TL_URL": performance_team_leader_url,
@@ -125,6 +128,9 @@ def labels(request):
         ),
         "MDA_ROUND_ONE_LABEL": getattr(
             settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"
+        ),
+        "MSPRAY_REACTIVE_IRS_LABEL": getattr(
+            settings, "MSPRAY_REACTIVE_IRS", "Reactive IRS"
         ),
         "MDA_ROUND_TWO_LABEL": "MDA Round 2",
         "REVEAL_LABEL": getattr(settings, "REVEAL_LABEL", "Reveal"),
