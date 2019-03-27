@@ -1,0 +1,13 @@
+{% if ENABLE_REACTIVE_IRS %}
+<li class="dropdown">
+    <a href="#" class="dropdown-toggle" {% if IS_REACTIVE_IRS_LINK %} style="background-color: green"
+        {% endif %} data-toggle="dropdown">
+        <span>{{ MSPRAY_REACTIVE_IRS_LABEL }}</span>
+        <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'reactive_irs:district_list' %}">Spray Effectiveness</a></li>
+        <li role="separator" class="divider"></li>
+    </ul>
+</li>
+{% endif %}
