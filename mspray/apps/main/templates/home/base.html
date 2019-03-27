@@ -33,7 +33,7 @@
                 <div class="collapse navbar-collapse" id="msp-collapse">
                     <ul class="nav navbar-nav navbar-left">
                         <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if not IS_MDA_LINK and not IS_MDA_2_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
+                            <a href="#" class="dropdown-toggle" {% if not IS_MDA_LINK and not IS_MDA_2_LINK and not IS_REACTIVE_IRS_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
                                 <span>
                                     {% if not IS_MDA_LINK and not IS_MDA_2_LINK and performance_tables %}
                                         IRS: Performance
@@ -79,58 +79,8 @@
                                 {% endif %}
                             </ul>
                         </li>
-                        {% if ENABLE_MDA %}
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if IS_MDA_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
-                                <span>
-                                {% if IS_MDA_LINK and performance_tables %}
-                                    MDA: Performance
-                                {% else %}
-                                    {{ MDA_ROUND_ONE_LABEL }}
-                                {% endif %}
-                                </span>
-                                <b class="caret"></b>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/mda/">MDA: Effectiveness</a></li>
-                                {% if view.request.session.show_csv %}
-                                <li role="separator" class="divider"></li>
-                                <li class="dropdown-header"><a href="/mda/sprayareas">MDA: All Spray Areas</a></li>
-                                <li class="dropdown-header"><a href="/mda/sprayareas?format=csv"> MDA: CSV: All Spray Areas</a></li>
-                                {% endif %}
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/mda/performance/">MDA: Performance</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/mda/mop-up">MDA: Mop-up</a></li>
-                                <li role="separator" class="divider"></li>
-                            </ul>
-                        </li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" {% if IS_MDA_2_LINK %} style="background-color: green" {% endif %} data-toggle="dropdown">
-                                <span>
-                                {% if IS_MDA_2_LINK and performance_tables %}
-                                    MDA: Performance
-                                {% else %}
-                                    {{ MDA_ROUND_TWO_LABEL }}
-                                {% endif %}
-                                </span>
-                                <b class="caret"></b>
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a href="/mda-round-2/">MDA: Effectiveness</a></li>
-                                {% if view.request.session.show_csv %}
-                                <li role="separator" class="divider"></li>
-                                <li class="dropdown-header"><a href="/mda-round-2/sprayareas">MDA: All Spray Areas</a></li>
-                                <li class="dropdown-header"><a href="/mda-round-2/sprayareas?format=csv"> MDA: CSV: All Spray Areas</a></li>
-                                {% endif %}
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/mda-round-2/performance/">MDA: Performance</a></li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="/mda-round-2/mop-up">MDA: Mop-up</a></li>
-                                <li role="separator" class="divider"></li>
-                            </ul>
-                        </li>
-                        {% endif %}
+                        {% include 'snippets/mda_menu.html' %}
+                        {% include 'reactive_irs/snippets/reactive_irs_menu.html' %}
                     </ul>
 
                     <ul class="nav navbar-nav navbar-right">
