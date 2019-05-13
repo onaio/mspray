@@ -12,7 +12,8 @@ from mspray.apps.main.views import (
     target_area,
 )
 from mspray.apps.reactive.irs.views import (CHWListView, CHWLocationMapView,
-                                            CHWTargetAreaView, HomeView)
+                                            CHWTargetAreaView,
+                                            CHWTargetAreaMapView, HomeView)
 
 router = routers.DefaultRouter(trailing_slash=False)  # pylint: disable=C0103
 
@@ -32,4 +33,9 @@ urlpatterns = [
     path("map/<int:pk>", CHWLocationMapView.as_view(), name="chw_list_map"),
     path("chw/map/<int:pk>", CHWLocationMapView.as_view(), name="chw_map"),
     path("api/", include(router.urls)),
+    path(
+        "chw/<int:district_pk>/<int:slug>",
+        CHWTargetAreaMapView.as_view(),
+        name="target_area_map",
+    ),
 ]

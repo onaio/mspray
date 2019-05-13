@@ -12,7 +12,7 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
-from mspray.apps.main.views.home import DistrictView
+from mspray.apps.main.views.home import DistrictView, TargetAreaView
 from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
 from mspray.apps.reactive.irs.serializers import (CHWinTargetAreaSerializer,
                                                   CHWLocationSerializer,
@@ -253,3 +253,9 @@ class CHWTargetAreaView(DistrictView):
         context = super().get_context_data(**kwargs)
         context.update(DEFINITIONS[IRS])
         return context
+
+
+class CHWTargetAreaMapView(TargetAreaView):
+    """Display map of a single target area"""
+
+    template_name = "reactive_irs/map.html"
