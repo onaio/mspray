@@ -20,6 +20,7 @@ from mspray.apps.reactive.irs.serializers import (
 TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
 HOME_PARENT_ID = getattr(settings, "MSPRAY_REACTIVE_IRS_HOME_PARENT")
+IRS = getattr(settings, "MSPRAY_REACTIVE_IRS_DEFINITIONS", "irs")
 
 
 class CHWContextMixin(ListView):
@@ -37,9 +38,10 @@ class CHWContextMixin(ListView):
 
         context["item_list"] = serializer.data
         context["location"] = self.location
+        context["is_home_page"] = self.is_home_page
 
         # we are using the same definitions as target areas
-        context.update(DEFINITIONS[TA_LEVEL])
+        context.update(DEFINITIONS[IRS])
 
         return context
 
@@ -81,6 +83,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         """Get queryset method"""
         return get_location_qs(super().get_queryset().filter(target=True))
 
+    # pylint: disable=too-many-locals
     def get_context_data(self, **kwargs):
         """Get context data"""
         context = super().get_context_data(**kwargs)
@@ -155,6 +158,7 @@ class CHWListView(SiteNameMixin, CHWContextMixin):
     # pylint: disable=attribute-defined-outside-init
     def dispatch(self, *args, **kwargs):
         """ Custom dispatch method """
+        self.is_home_page = False
         self.location_id = self.kwargs.get(self.slug_field)
         try:
             self.location = Location.objects.get(pk=self.location_id)
@@ -182,9 +186,10 @@ class HomeView(SiteNameMixin, CHWContextMixin):
     def dispatch(self, *args, **kwargs):
         """ Custom dispatch method """
         self.location = None
+        self.is_home_page = True
         if HOME_PARENT_ID is not None:
             try:
-                Location.objects.get(pk=HOME_PARENT_ID)
+                self.location = Location.objects.get(pk=HOME_PARENT_ID)
             except Location.DoesNotExist:
                 raise Http404
         return super().dispatch(*args, **kwargs)
