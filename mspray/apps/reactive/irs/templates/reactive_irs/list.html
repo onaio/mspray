@@ -11,7 +11,11 @@
     <div "col-sm-12" id="table-container">
         <h1 id="district-name">
             {% if location %}
+                {% if is_home_page %}
+                Reactive IRS: {{location.name}}
+                {% else %}
                 Community Health Workers: {{location.name}}
+                {% endif %}
                 <a href="{% url 'reactive_irs:chw_list_map' location.id %}">
                     <i class="fa fa-map"></i>
                 </a>
@@ -22,13 +26,13 @@
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
-                    <th>Community Health Worther</th>
+                    <th>Health Facilities</th>
                     <th>Structures on ground</th>
                     <th>Found</th>
                     <th>Sprayed</th>
-                    <th>Spray Effectiveness</th>
+                    <th>Spray Coverage</th>
                     <th>Found coverage</th>
-                    <th>Spray coverage</th>
+                    <th>Spray Success Rate</th>
                 </tr>
             </thead>
             <tbody>
