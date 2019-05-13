@@ -19,6 +19,29 @@ from mspray.apps.reactive.irs.serializers import (
 
 TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
+HOME_PARENT_ID = getattr(settings, "MSPRAY_REACTIVE_IRS_HOME_PARENT")
+
+
+class CHWContextMixin(ListView):
+    """
+    Processes the context data to include objects from the
+    CHWLocationSerializer
+    """
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+
+        object_list = context["object_list"]
+        serializer = CHWLocationSerializer(object_list, many=True)
+
+        context["item_list"] = serializer.data
+        context["location"] = self.location
+
+        # we are using the same definitions as target areas
+        context.update(DEFINITIONS[TA_LEVEL])
+
+        return context
 
 
 class CHWLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -115,7 +138,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         return context
 
 
-class CHWListView(SiteNameMixin, ListView):
+class CHWListView(SiteNameMixin, CHWContextMixin):
     """
     View for listing CHW locations grouped by their parents
     """
@@ -129,21 +152,6 @@ class CHWListView(SiteNameMixin, ListView):
         return (super().get_queryset().filter(
             level=CHW_LEVEL, target=True, parent__pk=self.location_id))
 
-    def get_context_data(self, **kwargs):
-        """Get context data"""
-        context = super().get_context_data(**kwargs)
-
-        object_list = context["object_list"]
-        serializer = CHWLocationSerializer(object_list, many=True)
-
-        context["item_list"] = serializer.data
-        context["location"] = self.location
-
-        # we are using the same definitions as target areas
-        context.update(DEFINITIONS[TA_LEVEL])
-
-        return context
-
     # pylint: disable=attribute-defined-outside-init
     def dispatch(self, *args, **kwargs):
         """ Custom dispatch method """
@@ -154,6 +162,32 @@ class CHWListView(SiteNameMixin, ListView):
             raise Http404
         else:
             return super().dispatch(*args, **kwargs)
+
+
+class HomeView(SiteNameMixin, CHWContextMixin):
+    """
+    Displays the home page
+    """
+
+    template_name = "reactive_irs/list.html"
+    model = Location
+    slug_field = "pk"
+
+    def get_queryset(self):
+        """Get queryset"""
+        return (super().get_queryset().filter(
+            level=CHW_LEVEL, target=True, parent=HOME_PARENT_ID))
+
+    # pylint: disable=attribute-defined-outside-init
+    def dispatch(self, *args, **kwargs):
+        """ Custom dispatch method """
+        self.location = None
+        if HOME_PARENT_ID is not None:
+            try:
+                Location.objects.get(pk=HOME_PARENT_ID)
+            except Location.DoesNotExist:
+                raise Http404
+        return super().dispatch(*args, **kwargs)
 
 
 class LocationCHWView(SiteNameMixin, ListView):
