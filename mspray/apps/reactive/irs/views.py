@@ -156,9 +156,9 @@ class CHWListView(SiteNameMixin, ListView):
             return super().dispatch(*args, **kwargs)
 
 
-class CHWDistrictsView(SiteNameMixin, ListView):
+class LocationCHWView(SiteNameMixin, ListView):
     """
-    View for listing CHW locations grouped by their parents
+    Display a list of locations with data pulled from CHWs inside the locations
     """
 
     template_name = "reactive_irs/list.html"

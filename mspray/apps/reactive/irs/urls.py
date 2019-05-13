@@ -25,7 +25,7 @@ router.register(r"targetareas", target_area.TargetAreaViewSet)
 # pylint: disable=invalid-name
 app_name = "reactive_irs"
 urlpatterns = [
-    path("", CHWDistrictsView.as_view(), name="district_list"),
+    path("", LocationCHWView.as_view(), name="location_chw_list"),
     path("<int:pk>", CHWListView.as_view(), name="chw_list"),
     path("map/<int:pk>", CHWLocationMapView.as_view(), name="chw_list_map"),
     path("chw/map/<int:pk>", CHWLocationMapView.as_view(), name="chw_map"),
