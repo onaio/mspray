@@ -2,9 +2,10 @@
 from collections import Counter
 
 from django.conf import settings
-from mspray.apps.main.utils import parse_spray_date
+
 from mspray.apps.main.models import Household, Location, SprayDay
 from mspray.apps.main.serializers.target_area import count_duplicates
+from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.reactive.irs.queries import get_spray_data_using_geoquery
 
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
