@@ -1,6 +1,7 @@
 """Reactive IRS settings module"""
 from django.conf import settings
 
+MSPRAY_REACTIVE_IRS_DEFINITIONS = "irs"
 # buffer radius in metres for CommunityHealthWorker bgeom field
 MSPRAY_REACTIVE_IRS_CHW_BUFFER = 5000
 # code prefix for CommunityHealthWorker

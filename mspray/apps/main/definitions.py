@@ -91,6 +91,23 @@ DEFINITIONS = {
             ],
         },
     },
+    "irs": {
+        "definitions": [
+            "Spray Coverage: Structures sprayed / structures on the ground",  # noqa
+            "Found Coverage: Structures found / structures on the ground",
+            "Spray Success Rate: Structures sprayed / structures found",
+        ],
+        "colors": {
+            "title":
+            "Spray Coverage colors:",
+            "colors": [
+                ("Green", ">=", "90%"),
+                ("Orange", "90%", "75%"),
+                ("Red", "75%", "20%"),
+                ("Yellow", "<", "20%"),
+            ],
+        },
+    },
     "performance:district": {
         "definitions": [START_TIME, FINISH_TIME],
         "performance_conditions": True,
