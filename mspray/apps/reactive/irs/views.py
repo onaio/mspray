@@ -12,10 +12,12 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.views.home import DistrictView
 from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
-from mspray.apps.reactive.irs.serializers import (
-    CHWinTargetAreaSerializer, CHWLocationSerializer,
-    GeoCHWinTargetAreaSerializer, GeoCHWLocationSerializer)
+from mspray.apps.reactive.irs.serializers import (CHWinTargetAreaSerializer,
+                                                  CHWLocationSerializer,
+                                                  GeoCHWinTargetAreaSerializer,
+                                                  GeoCHWLocationSerializer)
 
 TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
@@ -40,7 +42,6 @@ class CHWContextMixin(ListView):
         context["location"] = self.location
         context["is_home_page"] = self.is_home_page
 
-        # we are using the same definitions as target areas
         context.update(DEFINITIONS[IRS])
 
         return context
@@ -217,4 +218,16 @@ class LocationCHWView(SiteNameMixin, ListView):
         context["item_list"] = serializer.data
         context.update(DEFINITIONS[TA_LEVEL])
 
+        return context
+
+
+class CHWTargetAreaView(DistrictView):
+    """Display target areas inside a CHW location"""
+
+    template_name = "reactive_irs/ta.html"
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+        context.update(DEFINITIONS[IRS])
         return context
