@@ -13,3 +13,5 @@ MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL = getattr(
 # Which level should the location parent object be, default is district
 MSPRAY_REACTIVE_IRS_CHW_LOCATION_PARENT_LEVEL = getattr(
     settings, "MSPRAY_DISTRICT_LEVEL", "district")
+# Set the parent id of CHW locations to be shown on the home page
+MSPRAY_REACTIVE_IRS_HOME_PARENT = None
