@@ -62,6 +62,21 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'>{{ chw_totals.structures|intcomma }}</td>
+                    <td class='numbers'>{{ chw_totals.visited_total|intcomma }}</td>
+                    <td class='numbers'>{{ chw_totals.visited_sprayed|intcomma }} </td>
+                    {% calc_percentage chw_totals.visited_sprayed chw_totals.structures as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                        {{ spray_effectiveness_percentage }}</td>
+                    {% calc_percentage chw_totals.visited_total chw_totals.structures as found_coverage_percentage %}
+                    <td class='numbers'>{{ found_coverage_percentage }}</td>
+                    {% calc_percentage chw_totals.visited_sprayed chw_totals.found as spray_coverage_percentage %}
+                    <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                </tr>
+            </tfoot>
         </table>
         <p>* To sort a column, click on the column name</p>
 

@@ -39,6 +39,28 @@ class CHWContextMixin(ListView):
         serializer = CHWLocationSerializer(object_list, many=True)
 
         context["item_list"] = serializer.data
+
+        fields = [
+            "structures",
+            "visited_total",
+            "visited_sprayed",
+            "visited_not_sprayed",
+            "visited_refused",
+            "visited_other",
+            "not_visited",
+            "found",
+            "num_of_spray_areas",
+        ]
+        totals = {}
+        for rec in serializer.data:
+            for field in fields:
+                try:
+                    totals[field] = rec[field] + (totals[field]
+                                                  if field in totals else 0)
+                except KeyError:
+                    pass
+
+        context["chw_totals"] = totals
         context["location"] = self.location
         context["is_home_page"] = self.is_home_page
 
