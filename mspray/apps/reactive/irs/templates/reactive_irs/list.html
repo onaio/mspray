@@ -11,7 +11,11 @@
     <div "col-sm-12" id="table-container">
         <h1 id="district-name">
             {% if location %}
+                {% if is_home_page %}
+                Reactive IRS: {{location.name}}
+                {% else %}
                 Community Health Workers: {{location.name}}
+                {% endif %}
                 <a href="{% url 'reactive_irs:chw_list_map' location.id %}">
                     <i class="fa fa-map"></i>
                 </a>
@@ -22,13 +26,13 @@
         <table id="target_areas" class="table table-stripe">
             <thead>
                 <tr>
-                    <th>Community Health Worther</th>
+                    <th>Health Facilities</th>
                     <th>Structures on ground</th>
                     <th>Found</th>
                     <th>Sprayed</th>
-                    <th>Spray Effectiveness</th>
+                    <th>Spray Coverage</th>
                     <th>Found coverage</th>
-                    <th>Spray coverage</th>
+                    <th>Spray Success Rate</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,6 +42,8 @@
                             {% if location %}
                                 <a href="{% url 'reactive_irs:chw_map' chw.id %}">
                                 <i class="fa fa-map"></i>
+                                </a>
+                                <a href="{% url 'reactive_irs:ta_list' chw.id %}">
                             {% else %}
                                 <a href="{% url 'reactive_irs:chw_list' chw.id %}">
                             {% endif %}
@@ -56,6 +62,21 @@
                     </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <td>Total</a></td>
+                    <td class='numbers'>{{ chw_totals.structures|intcomma }}</td>
+                    <td class='numbers'>{{ chw_totals.visited_total|intcomma }}</td>
+                    <td class='numbers'>{{ chw_totals.visited_sprayed|intcomma }} </td>
+                    {% calc_percentage chw_totals.visited_sprayed chw_totals.structures as spray_effectiveness_percentage %}
+                    <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>
+                        {{ spray_effectiveness_percentage }}</td>
+                    {% calc_percentage chw_totals.visited_total chw_totals.structures as found_coverage_percentage %}
+                    <td class='numbers'>{{ found_coverage_percentage }}</td>
+                    {% calc_percentage chw_totals.visited_sprayed chw_totals.found as spray_coverage_percentage %}
+                    <td class='numbers'>{{ spray_coverage_percentage }}</td>
+                </tr>
+            </tfoot>
         </table>
         <p>* To sort a column, click on the column name</p>
 

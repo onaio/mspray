@@ -12,13 +12,61 @@ from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
+from mspray.apps.main.views.home import DistrictView, TargetAreaView
 from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
-from mspray.apps.reactive.irs.serializers import (
-    CHWinTargetAreaSerializer, CHWLocationSerializer,
-    GeoCHWinTargetAreaSerializer, GeoCHWLocationSerializer)
+from mspray.apps.reactive.irs.serializers import (CHWinTargetAreaSerializer,
+                                                  CHWLocationSerializer,
+                                                  GeoCHWinTargetAreaSerializer,
+                                                  GeoCHWLocationSerializer)
 
 TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
+HOME_PARENT_ID = getattr(settings, "MSPRAY_REACTIVE_IRS_HOME_PARENT")
+IRS = getattr(settings, "MSPRAY_REACTIVE_IRS_DEFINITIONS", "irs")
+
+
+class CHWContextMixin(ListView):
+    """
+    Processes the context data to include objects from the
+    CHWLocationSerializer
+    """
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+
+        object_list = context["object_list"]
+        serializer = CHWLocationSerializer(object_list, many=True)
+
+        context["item_list"] = serializer.data
+
+        fields = [
+            "structures",
+            "visited_total",
+            "visited_sprayed",
+            "visited_not_sprayed",
+            "visited_refused",
+            "visited_other",
+            "not_visited",
+            "found",
+            "num_of_spray_areas",
+        ]
+        totals = {}
+        for rec in serializer.data:
+            for field in fields:
+                try:
+                    totals[field] = rec[field] + (totals[field]
+                                                  if field in totals else 0)
+                except KeyError:
+                    pass
+
+        context["chw_totals"] = totals
+        context["location"] = self.location
+        context["is_home_page"] = self.is_home_page
+
+        context.update(DEFINITIONS[IRS])
+
+        return context
 
 
 class CHWLocationViewSet(mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -58,6 +106,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         """Get queryset method"""
         return get_location_qs(super().get_queryset().filter(target=True))
 
+    # pylint: disable=too-many-locals
     def get_context_data(self, **kwargs):
         """Get context data"""
         context = super().get_context_data(**kwargs)
@@ -115,7 +164,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         return context
 
 
-class CHWListView(SiteNameMixin, ListView):
+class CHWListView(SiteNameMixin, CHWContextMixin):
     """
     View for listing CHW locations grouped by their parents
     """
@@ -129,24 +178,10 @@ class CHWListView(SiteNameMixin, ListView):
         return (super().get_queryset().filter(
             level=CHW_LEVEL, target=True, parent__pk=self.location_id))
 
-    def get_context_data(self, **kwargs):
-        """Get context data"""
-        context = super().get_context_data(**kwargs)
-
-        object_list = context["object_list"]
-        serializer = CHWLocationSerializer(object_list, many=True)
-
-        context["item_list"] = serializer.data
-        context["location"] = self.location
-
-        # we are using the same definitions as target areas
-        context.update(DEFINITIONS[TA_LEVEL])
-
-        return context
-
     # pylint: disable=attribute-defined-outside-init
     def dispatch(self, *args, **kwargs):
         """ Custom dispatch method """
+        self.is_home_page = False
         self.location_id = self.kwargs.get(self.slug_field)
         try:
             self.location = Location.objects.get(pk=self.location_id)
@@ -156,9 +191,36 @@ class CHWListView(SiteNameMixin, ListView):
             return super().dispatch(*args, **kwargs)
 
 
-class CHWDistrictsView(SiteNameMixin, ListView):
+class HomeView(SiteNameMixin, CHWContextMixin):
     """
-    View for listing CHW locations grouped by their parents
+    Displays the home page
+    """
+
+    template_name = "reactive_irs/list.html"
+    model = Location
+    slug_field = "pk"
+
+    def get_queryset(self):
+        """Get queryset"""
+        return (super().get_queryset().filter(
+            level=CHW_LEVEL, target=True, parent=HOME_PARENT_ID))
+
+    # pylint: disable=attribute-defined-outside-init
+    def dispatch(self, *args, **kwargs):
+        """ Custom dispatch method """
+        self.location = None
+        self.is_home_page = True
+        if HOME_PARENT_ID is not None:
+            try:
+                self.location = Location.objects.get(pk=HOME_PARENT_ID)
+            except Location.DoesNotExist:
+                raise Http404
+        return super().dispatch(*args, **kwargs)
+
+
+class LocationCHWView(SiteNameMixin, ListView):
+    """
+    Display a list of locations with data pulled from CHWs inside the locations
     """
 
     template_name = "reactive_irs/list.html"
@@ -179,3 +241,21 @@ class CHWDistrictsView(SiteNameMixin, ListView):
         context.update(DEFINITIONS[TA_LEVEL])
 
         return context
+
+
+class CHWTargetAreaView(DistrictView):
+    """Display target areas inside a CHW location"""
+
+    template_name = "reactive_irs/ta.html"
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+        context.update(DEFINITIONS[IRS])
+        return context
+
+
+class CHWTargetAreaMapView(TargetAreaView):
+    """Display map of a single target area"""
+
+    template_name = "reactive_irs/map.html"
