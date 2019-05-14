@@ -174,8 +174,16 @@ class Command(BaseCommand):
                         parent_name = feature.get(parent_field)
                     else:
                         parent_name = name
-                    name = name.strip()
-                    parent_name = parent_name.strip()
+
+                    try:
+                        name = name.strip()
+                    except AttributeError:
+                        name = str(name).strip()
+
+                    try:
+                        parent_name = parent_name.strip()
+                    except AttributeError:
+                        parent_name = str(parent_name).strip()
 
                     if skip_parent == "yes":
                         self.stdout.write(f"No parent for {name}.")
