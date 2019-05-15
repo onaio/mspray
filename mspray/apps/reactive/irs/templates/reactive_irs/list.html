@@ -39,13 +39,15 @@
                 {% for chw in item_list %}
                     <tr>
                         <td>
-                            {% if location %}
-                                <a href="{% url 'reactive_irs:chw_map' chw.id %}">
-                                <i class="fa fa-map"></i>
-                                </a>
-                                <a href="{% url 'reactive_irs:ta_list' chw.id %}">
-                            {% else %}
-                                <a href="{% url 'reactive_irs:chw_list' chw.id %}">
+                            {% if chw.structures > 0 %}
+                                {% if location %}
+                                    <a href="{% url 'reactive_irs:chw_map' chw.id %}">
+                                    <i class="fa fa-map"></i>
+                                    </a>
+                                    <a href="{% url 'reactive_irs:ta_list' chw.id %}">
+                                {% else %}
+                                    <a href="{% url 'reactive_irs:chw_list' chw.id %}">
+                                {% endif %}
                             {% endif %}
                                 {{ chw.name }}
                             </a>
