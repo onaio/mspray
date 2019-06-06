@@ -52,7 +52,7 @@ class CHWLocationMixin:
 
     def get_visited_total(self, obj):
         """Get visited_total"""
-        return self.get_visited_sprayed(obj)
+        return self.get_found(obj)
 
     def get_visited_sprayed(self, obj):
         """Get visited_sprayed"""
@@ -83,7 +83,7 @@ class CHWLocationMixin:
         new_structures = data.get("new_structures") or 0
         structures = structures - not_sprayable
         structures = structures + new_structures + duplicates
-        count = data.get("found") or 0
+        count = data.get("found") or 1
 
         return structures - count
 
