@@ -14,10 +14,12 @@ from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.main.views.home import DistrictView, TargetAreaView
 from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
-from mspray.apps.reactive.irs.serializers import (CHWinTargetAreaSerializer,
-                                                  CHWLocationSerializer,
-                                                  GeoCHWinTargetAreaSerializer,
-                                                  GeoCHWLocationSerializer)
+from mspray.apps.reactive.irs.serializers import (
+    CHWinTargetAreaSerializer,
+    CHWLocationSerializer,
+    GeoCHWinTargetAreaSerializer,
+    GeoCHWLocationSerializer,
+)
 
 TA_LEVEL = getattr(settings, "MSPRAY_TA_LEVEL", "ta")
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
@@ -31,9 +33,9 @@ class CHWContextMixin(ListView):
     CHWLocationSerializer
     """
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs):
         """Get context data"""
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(object_list=object_list, **kwargs)
 
         object_list = context["object_list"]
         serializer = CHWLocationSerializer(object_list, many=True)
@@ -55,8 +57,9 @@ class CHWContextMixin(ListView):
         for rec in serializer.data:
             for field in fields:
                 try:
-                    totals[field] = rec[field] + (totals[field]
-                                                  if field in totals else 0)
+                    totals[field] = rec[field] + (
+                        totals[field] if field in totals else 0
+                    )
                 except KeyError:
                     pass
 
@@ -133,7 +136,8 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             hh_geojson = response.content.decode()
 
             context["chw_list"] = Location.objects.filter(
-                parent=loc.parent, level=CHW_LEVEL)
+                parent=loc.parent, level=CHW_LEVEL
+            )
         else:
             serializer_class = CHWinTargetAreaSerializer
             viewset_class = CHWinLocationViewSet
@@ -143,6 +147,7 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
             hh_data = GeoCHWLocationSerializer(chw_objects, many=True).data
             context["chw_list"] = chw_objects
             hh_geojson = json.dumps(hh_data)
+        context["tas"] = Location.objects.filter(parent=loc, level="ta").only("pk")
 
         serializer = serializer_class(loc, context={"request": self.request})
         context["target_data"] = serializer.data
@@ -155,9 +160,11 @@ class CHWLocationMapView(SiteNameMixin, DetailView):
         context["hh_geojson"] = hh_geojson
 
         context["not_sprayable_value"] = getattr(
-            settings, "NOT_SPRAYABLE_VALUE", "noteligible")
+            settings, "NOT_SPRAYABLE_VALUE", "noteligible"
+        )
         context["not_sprayed_reasons"] = json.dumps(
-            settings.MSPRAY_UNSPRAYED_REASON_OTHER)
+            settings.MSPRAY_UNSPRAYED_REASON_OTHER
+        )
         context["spray_date"] = spray_date
         context.update({"map_menu": True})
 
@@ -175,11 +182,14 @@ class CHWListView(SiteNameMixin, CHWContextMixin):
 
     def get_queryset(self):
         """Get queryset"""
-        return (super().get_queryset().filter(
-            level=CHW_LEVEL, target=True, parent__pk=self.location_id))
+        return (
+            super()
+            .get_queryset()
+            .filter(level=CHW_LEVEL, target=True, parent__pk=self.location_id)
+        )
 
     # pylint: disable=attribute-defined-outside-init
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         """ Custom dispatch method """
         self.is_home_page = False
         self.location_id = self.kwargs.get(self.slug_field)
@@ -188,7 +198,7 @@ class CHWListView(SiteNameMixin, CHWContextMixin):
         except Location.DoesNotExist:
             raise Http404
         else:
-            return super().dispatch(*args, **kwargs)
+            return super().dispatch(request, *args, **kwargs)
 
 
 class HomeView(SiteNameMixin, CHWContextMixin):
@@ -202,11 +212,14 @@ class HomeView(SiteNameMixin, CHWContextMixin):
 
     def get_queryset(self):
         """Get queryset"""
-        return (super().get_queryset().filter(
-            level=CHW_LEVEL, target=True, parent=HOME_PARENT_ID))
+        return (
+            super()
+            .get_queryset()
+            .filter(level=CHW_LEVEL, target=True, parent=HOME_PARENT_ID)
+        )
 
     # pylint: disable=attribute-defined-outside-init
-    def dispatch(self, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         """ Custom dispatch method """
         self.location = None
         self.is_home_page = True
@@ -215,7 +228,7 @@ class HomeView(SiteNameMixin, CHWContextMixin):
                 self.location = Location.objects.get(pk=HOME_PARENT_ID)
             except Location.DoesNotExist:
                 raise Http404
-        return super().dispatch(*args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class LocationCHWView(SiteNameMixin, ListView):

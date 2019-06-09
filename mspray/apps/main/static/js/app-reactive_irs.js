@@ -8,6 +8,13 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
         fillOpacity: 0.1,
         opacity: 1
     };
+    this.tasOptions = {
+        fillColor: "#999999",
+        color: "#D3D3D3",
+        weight: 2,
+        fillOpacity: 0.1,
+        opacity: 1
+    };
     this.hhOptions = {
         radius: 4,
         fillColor: "#FFDC00",
@@ -317,7 +324,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
                 other_percentage = app.calculatePercentage(app.visitedOther, app.visitedTotal),
                 found_percentage = app.calculatePercentage(app.visitedTotal, app.housesCount, false),
                 progress_percentage = app.calculatePercentage(app.visitedSprayed, app.housesCount, false);
-            
+
             app.drawCircle(sprayed_percentage, "spray-coverage", 40);
             app.drawCircle(found_percentage, "found-coverage", 40);
             app.drawCircle(progress_percentage, "circle-progress", 50);
@@ -410,7 +417,7 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
         $("#sprayed-ratio").text("(" + props.visited_sprayed + "/" + props.visited_total + ")");
         $("#found-ratio").text("(" + props.visited_total + "/" + structures + ")");
         $("#progress-ratio").text("(" + props.visited_sprayed + "/" + structures + ")");
-        
+
     };
 
     this.loadTargetArea = function(data) {
@@ -435,6 +442,35 @@ var App = function(buffer, targetAreaData, hhData, notSpraybleValue, samplesData
         app.targetLayer.setStyle(app.targetOptions);
         app.targetLayer.addTo(app.map);
         app.map.fitBounds(app.targetLayer.getBounds());
+    };
+
+    this.loadTargetAreas = function(urls) {
+        var app = this;
+        app.tas = [];
+        urls.forEach(function (url, position){
+            console.log("TAs", url);
+            var taFeature = L.mapbox.featureLayer().loadURL(url);
+            taFeature.on("ready", function() {
+                var geojson = taFeature.getGeoJSON();
+                app.tas[position] = L.geoJson(geojson, {
+                    onEachFeature: function(feature, layer){
+                        var props = feature.properties;
+                        var content = "<h4>Target Area: " + props.district_name + "</h4>" +
+                            "Structures: " + props.structures;
+                        layer.bindPopup(content, {closeButton: true});
+                        var label = new L.Label({className: "ta-label"});
+                        label.setContent("" + props.district_name);
+                        label.setLatLng(layer.getBounds().getCenter());
+                        app.map.showLabel(label);
+                        if (props.level != 'ta') {
+                            app.drawCircles(props);
+                        }
+                    }
+                });
+                app.tas[position].setStyle(app.tasOptions);
+                app.tas[position].addTo(app.map);
+            });
+        });
     };
 
     this.loadHouseholds = function(data) {

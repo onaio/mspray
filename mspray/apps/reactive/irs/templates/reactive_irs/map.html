@@ -160,6 +160,7 @@
 
         var spraypoints_url = "{{ request.scheme }}://{{ request.get_host }}{% url 'reactive_irs:sprayday-list' format='json' %}?target_area={{ object.pk}}&spray_date__lte={{ spray_date|date:'Y-m-d' }}";
         app.loadSprayPoints(spraypoints_url);
+        app.loadTargetAreas([{% for ta in tas %}"{{ request.scheme }}://{{ request.get_host }}{% url 'reactive_irs:location-detail' pk=ta.pk format='geojson' %}"{% if not forloop.last %}, {% endif %}{% endfor %}]);
 
         var count = 0;
         function nextStructure() {
