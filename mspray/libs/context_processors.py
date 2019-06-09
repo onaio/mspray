@@ -74,7 +74,7 @@ def enable_mda(request):
         spray_operator_daily_url = "mda-2:performance:spray-operator-daily"
         mopup_url = "mda-2:mop-up"
     if is_reactive_irs:
-        spray_area_url = "reactive_irs:spray-area"
+        spray_area_url = "reactive_irs:target_area_map"
         spray_operator_daily_url = "reactive_irs:performance:spray-operator-daily"
         performance_district_url = "reactive_irs:performance:districts"
         performance_team_leader_url = "reactive_irs:performance:team-leaders"
