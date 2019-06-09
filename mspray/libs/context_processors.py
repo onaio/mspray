@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""context processors.
+"""
+The mspray context processors.
 """
 from django.conf import settings
 
@@ -12,9 +13,7 @@ def google_settings(request):
 def mspray_settings(request):
     """Set WAS_SPRAYED_VALUE and WAS_NOT_SPRAYED_VALUE"""
     return {
-        "WAS_SPRAYED_VALUE": getattr(
-            settings, "MSPRAY_WAS_SPRAYED_VALUE", "yes"
-        ),
+        "WAS_SPRAYED_VALUE": getattr(settings, "MSPRAY_WAS_SPRAYED_VALUE", "yes"),
         "WAS_NOT_SPRAYED_VALUE": getattr(
             settings, "MSPRAY_WAS_NOT_SPRAYED_VALUE", "no"
         ),
@@ -31,9 +30,7 @@ def show_directly_observed(request):
     If true the Directly Observed Spraying link will be displayed.
     """
     return {
-        "SHOW_DIRECTLY_OBSERVED": getattr(
-            settings, "SHOW_DIRECTLY_OBSERVED", False
-        )
+        "SHOW_DIRECTLY_OBSERVED": getattr(settings, "SHOW_DIRECTLY_OBSERVED", False)
     }
 
 
@@ -72,12 +69,15 @@ def enable_mda(request):
     if is_mda_two:
         spray_area_url = "mda-2:spray-area"
         performance_district_url = "mda-2:performance:districts"
-        performance_team_leader_url = (
-            "mda-2:performance:spray-operator-summary"
-        )
+        performance_team_leader_url = "mda-2:performance:spray-operator-summary"
         performance_rhc_url = "mda-2:performance:rhcs"
         spray_operator_daily_url = "mda-2:performance:spray-operator-daily"
         mopup_url = "mda-2:mop-up"
+    if is_reactive_irs:
+        spray_area_url = "reactive_irs:spray-area"
+        spray_operator_daily_url = "reactive_irs:performance:spray-operator-daily"
+        performance_district_url = "reactive_irs:performance:districts"
+        performance_team_leader_url = "reactive_irs:performance:team-leaders"
 
     return {
         "ENABLE_MDA": getattr(settings, "ENABLE_MDA", False),
@@ -98,9 +98,7 @@ def enable_mda(request):
 
 def reveal(request):
     """Set Reveal context data"""
-    return {
-        "ENABLE_REVEAL": getattr(settings, "ENABLE_REVEAL", False),
-    }
+    return {"ENABLE_REVEAL": getattr(settings, "ENABLE_REVEAL", False)}
 
 
 def labels(request):
@@ -110,25 +108,17 @@ def labels(request):
             settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL", "Spray Operator"
         ),
         "COMMUNITY_HEALTH_WORKER_LABEL_PLURAL": getattr(
-            settings,
-            "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL_PLURAL",
-            "Spray Operators",
+            settings, "MSPRAY_COMMUNITY_HEALTH_WORKER_LABEL_PLURAL", "Spray Operators"
         ),
         "SUPERVISOR_LABEL": getattr(
             settings, "MSPRAY_SUPERVISOR_LABEL", "Team Leader Assistant (TLA)"
         ),
         "SUPERVISOR_LABEL_PLURAL": getattr(
-            settings,
-            "MSPRAY_SUPERVISOR_LABEL_PLURAL",
-            "Team Leader Assistants (TLA)",
+            settings, "MSPRAY_SUPERVISOR_LABEL_PLURAL", "Team Leader Assistants (TLA)"
         ),
         "RHC_LABEL": getattr(settings, "MSPRAY_RHC_LABEL", "RHC"),
-        "RHC_LABEL_PLURAL": getattr(
-            settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"
-        ),
-        "MDA_ROUND_ONE_LABEL": getattr(
-            settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"
-        ),
+        "RHC_LABEL_PLURAL": getattr(settings, "MSPRAY_RHC_LABEL_PLURAL", "RHCs"),
+        "MDA_ROUND_ONE_LABEL": getattr(settings, "MSPRAY_MDA_ROUND_ONE", "MDA Round 1"),
         "MSPRAY_REACTIVE_IRS_LABEL": getattr(
             settings, "MSPRAY_REACTIVE_IRS", "Reactive IRS"
         ),

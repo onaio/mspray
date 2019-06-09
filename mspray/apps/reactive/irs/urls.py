@@ -11,9 +11,14 @@ from mspray.apps.main.views import (
     sprayday,
     target_area,
 )
-from mspray.apps.reactive.irs.views import (CHWListView, CHWLocationMapView,
-                                            CHWTargetAreaView,
-                                            CHWTargetAreaMapView, HomeView)
+from mspray.apps.reactive.irs import performance
+from mspray.apps.reactive.irs.views import (
+    CHWListView,
+    CHWLocationMapView,
+    CHWTargetAreaMapView,
+    CHWTargetAreaView,
+    HomeView,
+)
 
 router = routers.DefaultRouter(trailing_slash=False)  # pylint: disable=C0103
 
@@ -23,6 +28,28 @@ router.register(r"households", household.HouseholdViewSet)
 router.register(r"spraydays", sprayday.SprayDayViewSet)
 router.register(r"targetareas", target_area.TargetAreaViewSet)
 
+performance_urls = (  # pylint: disable=C0103
+    [
+        path("", performance.DistrictPerfomanceView.as_view(), name="districts"),
+        path(
+            "team-leaders/<int:slug>",
+            performance.TeamLeadersPerformanceView.as_view(),
+            name="team-leaders",
+        ),
+        path(
+            "spray-operators/<int:slug>/<int:team_leader>/summary",
+            performance.SprayOperatorSummaryView.as_view(),
+            name="spray-operator-summary",
+        ),
+        path(
+            "spray-operators/<int:slug>/<int:team_leader>/"
+            "<int:spray_operator>/daily",
+            performance.SprayOperatorDailyView.as_view(),
+            name="spray-operator-daily",
+        ),
+    ],
+    "mspray",
+)
 
 # pylint: disable=invalid-name
 app_name = "reactive_irs"
@@ -38,4 +65,5 @@ urlpatterns = [
         CHWTargetAreaMapView.as_view(),
         name="target_area_map",
     ),
+    path("performance/", include(performance_urls, namespace="performance")),
 ]
