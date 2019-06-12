@@ -11,6 +11,7 @@ from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
 from mspray.apps.main.models import Location
 from mspray.apps.main.query import get_location_qs
+from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.main.views.home import DistrictView, TargetAreaView
 from mspray.apps.main.views.target_area import CHWHouseholdsViewSet
@@ -265,6 +266,29 @@ class CHWTargetAreaView(DistrictView):
         """Get context data"""
         context = super().get_context_data(**kwargs)
         context.update(DEFINITIONS[IRS])
+        return context
+
+
+class CHWTargetAreaListView(SiteNameMixin, ListView):
+    """Display target areas of all CHW locations"""
+
+    template_name = "reactive_irs/tas.html"
+    model = Location
+
+    def get_queryset(self):
+        """Get all CHW target areas queryset"""
+        return get_location_qs(
+            super().get_queryset().filter(level="ta", target=True).order_by("pk")
+        )
+
+    def get_context_data(self, **kwargs):
+        """Get context data"""
+        context = super().get_context_data(**kwargs)
+        context.update(DEFINITIONS[IRS])
+        context["object_list"] = TargetAreaSerializer(
+            context["object_list"], many=True
+        ).data
+        print(context["object_list"][0])
         return context
 
 

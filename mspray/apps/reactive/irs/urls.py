@@ -15,6 +15,7 @@ from mspray.apps.reactive.irs import performance
 from mspray.apps.reactive.irs.views import (
     CHWListView,
     CHWLocationMapView,
+    CHWTargetAreaListView,
     CHWTargetAreaMapView,
     CHWTargetAreaView,
     HomeView,
@@ -56,6 +57,7 @@ app_name = "reactive_irs"
 urlpatterns = [
     path("", HomeView.as_view(), name="reactive_irs_home"),
     path("<int:pk>", CHWListView.as_view(), name="chw_list"),
+    path("chw", CHWTargetAreaListView.as_view(), name="ta_list"),
     path("chw/<int:pk>", CHWTargetAreaView.as_view(), name="ta_list"),
     path("map/<int:pk>", CHWLocationMapView.as_view(), name="chw_list_map"),
     path("chw/map/<int:pk>", CHWLocationMapView.as_view(), name="chw_map"),
