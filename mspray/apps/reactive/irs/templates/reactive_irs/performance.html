@@ -16,8 +16,8 @@
                         <th colspan="8">Number of Structures</th>
                         <th rowspan="3">Spray Progress</th>
                         <th rowspan="3">Average structures <br />found per SOP per day</th>
-                        <th rowspan="3">Average start time</th>
-                        <th rowspan="3">Average end time</th>
+                        <!-- <th rowspan="3">Average start time</th> -->
+                        <!-- <th rowspan="3">Average end time</th> -->
                     </tr>
                     <tr>
                         <th rowspan="2">Pre Season Target</th>
@@ -49,8 +49,8 @@
                     <td class='numbers'>{{ row.success_rate|floatformat:"0" }}%</td>
                     <td class='numbers {{ row.avg_structures_per_so|sprayed_color }}'>
                         {{ row.avg_structures_per_so|floatformat:"0" }}</td>
-                    <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td>
-                    <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td>
+                    <!-- <td class='numbers {{ row.avg_start_time|avg_start_time_color }}'>{{ row.avg_start_time|format_avg_time }}</td> -->
+                    <!-- <td class='numbers {{ row.avg_end_time|avg_end_time_color }}'>{{ row.avg_end_time|format_avg_time }}</td> -->
                 </tr>
             {% endfor %}
             </tbody>
@@ -68,8 +68,8 @@
                     <td class='numbers'>{{ totals.success_rate|floatformat:"0" }}%</td>
                     <td class='numbers {{ totals.avg_structures_per_so|sprayed_color }}'>
                         {{ totals.avg_structures_per_so|floatformat:"0" }}</td>
-                    <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td>
-                    <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td>
+                    <!-- <td class='numbers {{ totals.avg_start_time|avg_start_time_color }}'>{{ totals.avg_start_time|format_avg_time }}</td> -->
+                    <!-- <td class='numbers {{ totals.avg_end_time|avg_end_time_color }}'>{{ totals.avg_end_time|format_avg_time }}</td> -->
                 </tr>
             </tfoot>
         </table>
