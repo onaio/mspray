@@ -33,13 +33,18 @@ class CHWLocationMixin:
         result = {}
         for location in obj.get_descendants().filter(target=True):
             record = get_spray_data(location, self.context)
+            result["structures"] = (
+                location.structures_on_ground + result["structures"]
+                if "structures" in result
+                else location.structures_on_ground
+            )
             result["found"] = (
                 location.visited_found + result["found"]
                 if "found" in result
                 else location.visited_found
             )
             for key, value in record.items():
-                if value is not None and key != "found":
+                if value is not None and key not in ["found", "structures"]:
                     result[key] = result[key] + value if key in result else value
         cache.set(cache_key, result)
 
@@ -107,13 +112,7 @@ class CHWLocationMixin:
     def get_structures(self, obj):
         """Get structures"""
         data = self.get_spray_data(obj)
-        structures = self.get_structures_in_location(obj)
-        duplicates = self.get_duplicates(obj=obj, was_sprayed=True)
-        not_sprayable = data.get("not_sprayable") or 0
-        new_structures = data.get("new_structures") or 0
-        structures = structures - not_sprayable
-        structures = structures + new_structures + duplicates
-        return structures
+        return data.get("structures")
 
     def get_total_structures(self, obj):
         """Get total_structures"""
