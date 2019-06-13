@@ -64,7 +64,7 @@ class CHWContextMixin(ListView):
                 except KeyError:
                     pass
 
-        context["chw_totals"] = totals
+        context["cmhw_totals"] = totals
         context["location"] = self.location
         context["is_home_page"] = self.is_home_page
 
@@ -288,7 +288,6 @@ class CHWTargetAreaListView(SiteNameMixin, ListView):
         context["object_list"] = TargetAreaSerializer(
             context["object_list"], many=True
         ).data
-        print(context["object_list"][0])
         return context
 
 

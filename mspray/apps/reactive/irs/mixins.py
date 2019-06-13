@@ -2,15 +2,17 @@
 from collections import Counter
 
 from django.conf import settings
+from django.core.cache import cache
 
 from mspray.apps.main.models import Household, Location, SprayDay
-from mspray.apps.main.serializers.target_area import count_duplicates
+from mspray.apps.main.serializers.target_area import count_duplicates, get_spray_data
 from mspray.apps.main.utils import parse_spray_date
 from mspray.apps.reactive.irs.queries import get_spray_data_using_geoquery
 
 CHW_LEVEL = getattr(settings, "MSPRAY_REACTIVE_IRS_CHW_LOCATION_LEVEL", "chw")
 
 
+# pylint: disable=no-self-use
 class CHWLocationMixin:
     """Mixin for CHW location serializers"""
 
@@ -24,8 +26,24 @@ class CHWLocationMixin:
 
     def get_spray_data(self, obj):
         """Get spray data"""
-        context = self.context
-        return get_spray_data_using_geoquery(location=obj, context=context)
+        cache_key = "spray-data-irs-%s" % obj.pk
+        val = cache.get(cache_key)
+        if val:
+            return val
+        result = {}
+        for location in obj.get_descendants().filter(target=True):
+            record = get_spray_data(location, self.context)
+            result["found"] = (
+                location.visited_found + result["found"]
+                if "found" in result
+                else location.visited_found
+            )
+            for key, value in record.items():
+                if value is not None and key != "found":
+                    result[key] = result[key] + value if key in result else value
+        cache.set(cache_key, result)
+
+        return result
 
     def get_duplicates(self, obj, was_sprayed=True):
         """Get duplicates"""
@@ -35,10 +53,8 @@ class CHWLocationMixin:
             spray_date = parse_spray_date(request)
         qs = self.get_sprayday_qs(obj)
         return count_duplicates(
-            obj=obj,
-            was_sprayed=was_sprayed,
-            spray_date=spray_date,
-            sprayday_qs=qs)
+            obj=obj, was_sprayed=was_sprayed, spray_date=spray_date, sprayday_qs=qs
+        )
 
     def get_num_new_structures(self, obj):
         """Get num_new_structures"""
@@ -70,6 +86,7 @@ class CHWLocationMixin:
         return data.get("refused") or 0
 
     def get_visited_other(self, obj):
+        """Get visited other"""
         data = self.get_spray_data(obj)
         return data.get("other") or 0
 
@@ -106,8 +123,11 @@ class CHWLocationMixin:
         """ Get spray dates """
         queryset = self.get_sprayday_qs(obj)
 
-        return (queryset.values_list(
-            "spray_date", flat=True).order_by("spray_date").distinct())
+        return (
+            queryset.values_list("spray_date", flat=True)
+            .order_by("spray_date")
+            .distinct()
+        )
 
     def get_bounds(self, obj):
         """Get bounds"""
