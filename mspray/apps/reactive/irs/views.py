@@ -64,7 +64,7 @@ class CHWContextMixin(ListView):
                 except KeyError:
                     pass
 
-        context["cmhw_totals"] = totals
+        context["chw_totals"] = totals
         context["location"] = self.location
         context["is_home_page"] = self.is_home_page
 
