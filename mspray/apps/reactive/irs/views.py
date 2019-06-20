@@ -3,13 +3,14 @@ import json
 
 from django.conf import settings
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
 from rest_framework import mixins, viewsets
 
 from mspray.apps.main.definitions import DEFINITIONS
 from mspray.apps.main.mixins import SiteNameMixin
-from mspray.apps.main.models import Location
+from mspray.apps.main.models import Location, SprayDay
 from mspray.apps.main.query import get_location_qs
 from mspray.apps.main.serializers.target_area import TargetAreaSerializer
 from mspray.apps.main.utils import parse_spray_date
@@ -69,6 +70,15 @@ class CHWContextMixin(ListView):
         context["is_home_page"] = self.is_home_page
 
         context.update(DEFINITIONS[IRS])
+
+        loc = get_object_or_404(Location, pk=HOME_PARENT_ID)
+        sprayable = SprayDay.objects.filter(was_sprayed=True).exclude(
+            geom__within=loc.geom, sprayable=True
+        )
+        context["no_location"] = {
+            "found": sprayable.count(),
+            "sprayed": sprayable.filter(was_sprayed=True).count(),
+        }
 
         return context
 

@@ -63,6 +63,20 @@
                         <td class='numbers'>{{ spray_coverage_percentage }}</td>
                     </tr>
                 {% endfor %}
+                <tr>
+                    <td>{% trans "Not in Health Facility" %}</td>
+                    <td></td>
+                    <td class='numbers'>{{ no_location.found|default_if_none:"0"|intcomma }}</td>
+                    <td class='numbers'>{{ no_location.sprayed|default_if_none:"0"|intcomma }}</td>
+                    {% if no_location.sprayed and no_location.found %}
+                        {% calc_percentage no_location.sprayed no_location.found as spray_effectiveness_percentage %}
+                        <td class='numbers {{ spray_effectiveness_percentage|sprayed_effectively_color }}'>{{ spray_effectiveness_percentage }}</td>
+                    {% else %}
+                        <td class='numbers'></td>
+                    {% endif %}
+                    <td class='numbers'></td>
+                    <td class='numbers'></td>
+                </tr>
             </tbody>
             <tfoot>
                 <tr>
